@@ -1,0 +1,7 @@
+{
+  "mongodb_url": "mongodb://localhost:27017/test",
+  "gsxt": {
+    "url": "http://www.gsxt.gov.cn/corp-query-homepage.html",
+    "desc": "国家企业信用信息公示系统"
+  }
+}

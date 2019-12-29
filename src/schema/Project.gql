@@ -1,0 +1,6 @@
+type Project {
+  _id: ID!
+  name: String
+  tagline: String
+  contributors: [User]
+}

@@ -1,0 +1,5 @@
+# data subscription
+type Subscription {
+  _id: ID!
+  commentAdded(repoFullName: String!): Comment
+}

@@ -1,0 +1,50 @@
+/**
+ * SCSS styles.
+ */
+
+@import "functions";
+@import "variables";
+@import "mixins";
+
+// basic style 
+@import "root";
+@import "reboot";
+
+// component styles
+@import "footer";
+@import "header";
+@import "headings";
+@import "alert";
+@import "badge";
+@import "blockquote";
+@import "breadcrumb";
+@import "buttons";
+@import "images";
+@import "close";
+@import "forms";
+@import "transitions";
+@import "dropdown";
+@import "input-group";
+@import "custom-forms";
+@import "nav";
+@import "card";
+@import "pagination";
+@import "progress";
+@import "media";
+@import "lists";
+@import "tables";
+@import "toasts";
+@import "modal";
+@import "tooltip";
+@import "popover";
+@import "carousel";
+@import "spinners";
+
+// layout style
+@import "print";
+@import "grid";
+
+// utilities
+@import "animations";
+@import "code";
+@import "utilities";

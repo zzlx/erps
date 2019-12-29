@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# 获取程序目录位置
+APP_ROOT=$(dirname $(cd $(dirname $0); pwd))
+
+# 传递参数列表并执行
+$APP_ROOT/bin/start.mjs $@

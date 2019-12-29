@@ -1,0 +1,8 @@
+# Post
+type Post {
+  _id: ID!
+  title: String
+  content: String
+  author: Author
+  comments: [Comment] 
+}

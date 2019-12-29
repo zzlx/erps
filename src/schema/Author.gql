@@ -1,0 +1,15 @@
+"""
+Author
+"""
+type Author {
+  _id: ID!
+  # 名称
+  name: String
+  firstName: String
+  lastName: String
+
+  """
+  The list of posts by this author
+  """
+  posts: [Post]
+}

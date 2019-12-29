@@ -1,0 +1,156 @@
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  font-family: sans-serif;
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba($black, 0);
+}
+
+article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
+  display: block;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: $font-family-base;
+  @include font-size($font-size-base);
+  font-weight: $font-weight-base;
+  line-height: $line-height-base;
+
+	//页面字体颜色使用系统默认配置
+  //color: $body-color;
+  //background-color: $body-bg;
+}
+
+[tabindex="-1"]:focus {
+  outline: 0 !important;
+}
+
+// Horizontal rules
+hr {
+  box-sizing: content-box;
+  height: 0;
+  overflow: visible;
+  margin-top: $hr-margin-y;
+  margin-bottom: $hr-margin-y;
+  border: 0;
+  border-top: $hr-border-width solid $hr-border-color;
+}
+
+h1, h2, h3, h4, h5, h6 { 
+  margin-top: $headings-margin-bottom;
+  margin-bottom: $headings-margin-bottom; 
+  page-break-after: avoid;
+}
+
+p { 
+  margin-top: 0; margin-bottom: $paragraph-margin-bottom; orphans: 3; widows: 3; 
+}
+
+abbr[title],
+abbr[data-original-title] { // 1
+  text-decoration: underline; // 2
+  text-decoration: underline dotted; // 2
+  cursor: help; // 3
+  border-bottom: 0; // 4
+  text-decoration-skip-ink: none; // 5
+}
+
+address {
+  font-style: normal;
+  line-height: inherit;
+  margin-bottom: 1rem;
+}
+
+ul, ol, dl { 
+  margin-top: 0; 
+  margin-bottom: 1rem; 
+  padding-left: 1.25rem;
+}
+
+// 嵌套列表不应有margin-bottom
+ol ol, 
+ol ul, 
+ul ul, 
+ul ol { margin-bottom: 0; }
+dt { font-weight: $dt-font-weight; }
+dd { 
+  margin-bottom: .5rem; 
+  margin-left: 0; 
+}
+
+//border-left-color: gray;
+b, strong { font-weight: $font-weight-bolder; }
+small { @include font-size(80%); }
+
+sub,
+sup {
+  position: relative;
+  @include font-size(75%);
+  line-height: 0;
+  vertical-align: baseline;
+}
+
+sub { bottom: -.25em; }
+sup { top: -.5em; }
+
+a {
+  color: inherit;
+  text-decoration: $link-decoration;
+	// Remove the gray background on active links in IE 10.
+  background-color: transparent; 
+
+  @include hover {
+    color: inherit;
+    text-decoration: $link-hover-decoration;
+  }
+}
+
+a:not([href]):not([tabindex]) {
+  color: inherit;
+  text-decoration: none;
+
+  @include hover-focus {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  &:focus { outline: 0; }
+}
+
+@media print {
+  a {
+    &:not(.btn) { 
+      text-decoration: underline;
+    }
+  }
+}
+
+// Code
+pre,
+code,
+kbd,
+samp { 
+  font-family: $font-family-monospace; 
+  @include font-size(1em); 
+  white-space: pre-wrap !important;
+}
+pre { margin-top: 0; margin-bottom: 1rem; overflow: auto; }
+figure { margin: 0 0 1rem; }
+img { vertical-align: middle; border-style: none; }
+svg { overflow: hidden; vertical-align: middle; }
+output { display: inline-block; }
+
+// details/summary are supported by chrome and safari
+summary { 
+  display: list-item; 
+  cursor: pointer; 
+}
+
+template { display: none; } // Add the correct display in IE
+[hidden] { display: none !important; }
+mark { padding: $mark-padding; background-color: $mark-bg; }

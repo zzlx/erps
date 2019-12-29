@@ -1,0 +1,49 @@
+// 
+
+.img-fluid { @include img-fluid; }
+.img-thumbnail {
+  padding: $thumbnail-padding;
+  background-color: $thumbnail-bg;
+  border: $thumbnail-border-width solid $thumbnail-border-color;
+  @include border-radius($thumbnail-border-radius);
+  @include box-shadow($thumbnail-box-shadow);
+  @include img-fluid;
+}
+
+// Figures
+.figure { display: inline-block; }
+
+.figure > img {
+  margin-bottom: $spacer / 2;
+  line-height: 1;
+}
+
+.figure > figcaption {
+  width: 100%;
+  @include font-size($figure-caption-font-size);
+  color: $figure-caption-color;
+  text-align: center;
+}
+
+// 定义icon尺寸
+.icon { 
+  width: 1.25em;
+  height: 1.25em;
+  vertical-align: middle;
+  display: inline-block;
+  content: "";
+  background: no-repeat center center;
+  background-size: 100% 100%;
+}
+
+//
+.filter-contrast:hover {filter: contrast(100%) }                     // 调整图像的对比度
+.filter-drop-shadow:hover {filter: drop-shadow(5px 5px 0 0 #607080)} // 给图像设置一个阴影效果
+.filter-grayscale:hover { filter: grayscale(100%); }                 // 将图像转换为灰度图像
+.filter-blur:hover { filter: blur(10px); }                           // 高斯模糊
+.filter-invert:hover { filter: invert(100%); }                       // 反转输入
+.filter-saturate:hover { filter: saturate(100%);}                    // 色相饱和度
+.filter-sepia:hover { filter: sepia(100%);}                          // 图像转换为深褐色
+.filter-opacity:hover { filter: opacity(80%);}                       // 转化图像的透明程度
+.filter-hue-rotate:hover { filter: hue-rotate(90deg);}               // 给图像应用色相旋转
+.filter-brightness:hover { filter: brightness(100%);}                // 给图片应用一种线性乘法

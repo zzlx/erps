@@ -1,0 +1,6 @@
+starter.mjs [--Options]
+Options:
+  --devel              <启动开发服务器模式>
+  --help               <显示帮助文档>
+  --port=3000          <以制定端口启动>
+  --version            <显示版本号>

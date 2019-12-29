@@ -1,0 +1,232 @@
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" filename:vimrc配置文件
+" author:wangxuemin@zzlx.org
+" mtime:2019-12-27
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+set nocompatible  " Use Vim defaults instead of 100% vi compatibility
+set backspace=2   " more powerful backspacing
+     
+""""""""""""""""
+" 文件类型设置 "
+""""""""""""""""
+filetype on
+filetype plugin on
+filetype indent on
+filetype plugin indent on
+
+""""""""""""""""
+" 字符编码设置 "
+""""""""""""""""
+set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
+set termencoding=utf-8
+set encoding=utf-8
+set fileencoding=utf-8
+
+"""""""""""
+" GUI配置 "
+"""""""""""
+set wildmenu
+set guioptions-=T
+set guioptions-=m
+set shortmess=atI
+set title 
+
+""""""""""""""""
+" 编辑模式配置 "
+""""""""""""""""
+set backupcopy=yes
+set viewdir=$HOME/.vim/view
+"set clipboard=umapamed
+set number
+set showcmd
+set showmode
+"set cursorline   " highlight current line
+set mouse=a
+set selection=exclusive
+set selectmode=mouse,key
+set textwidth=80
+set wrap
+set linebreak
+set formatoptions+=mM
+"set scrolloff=5
+set magic
+set backspace=indent,eol,start
+set foldenable
+set foldlevelstart=99
+set foldnestmax=1
+set foldmethod=manual
+"set spell spelllang=en_us
+
+set noswapfile
+set nobackup
+set undofile
+set undodir=$HOME/.vim/undo
+set autochdir
+set history=1000
+set autoread
+set confirm
+set modeline
+
+" 缩进设置
+set shiftwidth=2  " 格式化代码缩进
+set tabstop=2     " tab缩进空格,默认是8个
+set softtabstop=2 " 编辑模式退格缩回长度
+set expandtab     " tab键转为空格
+"set autoindent    " 自动缩进 set noautoindent 取消自动缩进
+set smartindent   " 智能缩进
+
+" 查找搜索
+set showmatch
+set matchtime=1
+set hlsearch 
+set incsearch    " 实时搜索功能
+set ignorecase   " 搜索时大小写不敏感
+
+" 状态显示
+set ruler
+set statusline=%F[:b%n]%m%r%h%w%y\ %=\ %-8.(%l,%c%V%)\ %p%%
+set laststatus=2
+
+" 语法高亮
+syntax on
+syntax enable
+
+"""""""""""""""""""
+" 自定义Theme配置 "
+"""""""""""""""""""
+function! SetTheme()
+let timeNow=strftime("%H") 
+if timeNow > 8 && timeNow < 18
+  " @todo: 定时任务,当每天8点、18点时自动执行SetTheme()
+  colorscheme default
+else
+  colorscheme evening
+endif
+
+hi StatusLine cterm=reverse,bold ctermbg=3 " 设置背景色,前景色取反色
+
+if &background == "light"
+  hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey guibg=None
+else
+  hi Comment ctermfg=3 ctermbg=None guifg=3 guibg=None
+endif
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Targets
+" 
+" 执行关键字查找:
+" 1. 如果是链接关键字, 使用浏览器打开链接
+" 2. 如果是目录，使用open命令打开
+" 3. 如果是字符串，首先查找字符串对应的函数定义,否则使用grep查找关键字
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! Targets()
+python << EOM
+# coding=utf-8
+
+import re
+import vim
+import webbrowser
+
+re_url = re.compile(r'https?://[a-zA-Z0-9-./"#$%&\':?=_]+')
+re_path = re.compile('\.{1,2}/[a-zA-Z0-9._/]+')
+line = vim.current.line
+match_url = re_url.search(line)
+match_path = re_path.search(line)
+
+if match_url:
+    url = match_url.group()
+    webbrowser.open(url)
+    print 'open URL : %s' % url
+elif match_path:
+    path = match_path.group()
+    vim.command('open ' + path)
+    print 'open path : %s' % path
+else:
+    print 'fialed! : open URL'
+
+EOM
+endfunction
+
+"""""""""
+" 设置头
+"""""""""
+func! SetHeader()
+  if expand("%:e") == 'sh' 
+    call setline(1,"#!/bin/sh")
+    call setline(2,"#")
+    call setline(3,"#********************************************************************")
+    call setline(4,"#Date:         ".strftime("%Y-%m-%d"))
+    call setline(5,"#FileName：      ".expand("%"))
+    call setline(6,"#********************************************************************")
+    call setline(7,"")
+  endif
+endfunc
+
+""""""""""""""""""""""""""""""""""""""""""""""""""
+" NERDTree
+" Plugin 'https://github.com/scrooloose/nerdtree'
+""""""""""""""""""""""""""""""""""""""""""""""""""
+let NERDTreeWinPos="left"
+let NERDTreeCaseSensitiveSort=1
+let NERDTreeWinSize=30
+let NERDTreeShowLineNumbers=1
+let NERDTreeAutoCenter=1
+let NERDTreeShowHidden=0
+let NERDTreeHighlightCursorline=0
+autocmd vimenter * if !argc()|NERDTree|endif
+
+"""""""""""
+" 自动识别
+"""""""""""
+" c脚本配置
+autocmd BufRead *.c set cindent             "C/C++缩进方式
+
+" markdown脚本配置
+autocmd BufRead,BufNewFile *.md setfiletype markdown
+
+" shell脚本配置
+autocmd BufNewFile *.sh exec ":call SetHeader()"
+autocmd BufRead,BufNewFile *.sh setfiletype shell
+autocmd FileType shell noremap <buffer> <F12> :!sh % <CR>
+
+" js脚本配置
+"autocmd BufWinLeave *.mjs,*.cjs mkview
+"autocmd BufWinEnter *.mjs,*.cjs silent loadview
+autocmd BufRead,BufNewFile *.mjs,*.cjs,*.js setfiletype javascript
+autocmd FileType javascript noremap <buffer> <F12> :!node --no-warnings --experimental-json-modules %<CR>
+
+" python脚本配置
+autocmd Filetype python set fileformat=unix
+autocmd Filetype python set foldmethod=indent
+autocmd Filetype python set foldlevel=99
+autocmd FileType python noremap <buffer> <F12> :!python % <CR>
+
+" html配置
+autocmd BufRead *.html,<&faf;HTML>  runtime! syntax/html.vim
+
+" 对所有文件
+autocmd BufEnter * exec ":call SetTheme()"
+
+""""""""""""""""""
+" 映射键盘快捷键 "
+""""""""""""""""""
+nmap <C-s> :w<CR>             " 保存修改
+"vmap <C-v> "+gp
+vmap <C-c> "+y
+map <C-A> ggVGY
+map! <C-A> <Esc>ggVGY
+"nmap <c-v> "+gp
+"nmap <c-c> "+y
+"nmap <silent> <leader>fe :Sexplore!<CR> 
+map <Tab> :tabnext<CR>  " gt
+map <S-Tab> :tabpre<CR> " gT
+map <F5> :NERDTreeToggle<CR> 
+map <F6> :call Targets()<CR> 
+map <F12> :!./%<CR> 
+
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>

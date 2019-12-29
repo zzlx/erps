@@ -1,0 +1,6 @@
+type Comment {
+  _id: ID!
+  postId: String 
+  content: String 
+  post: Post
+}

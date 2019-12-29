@@ -1,0 +1,4 @@
+{
+  "api_address": "https://localhost:3000/api/graphql",
+  "description": "部署前段时，需要配置响应的后端API地址"
+}

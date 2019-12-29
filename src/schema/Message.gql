@@ -1,0 +1,10 @@
+type Message {
+  _id: ID!
+  content: String
+  author: String
+}
+
+input MessageInput {
+  content: String
+  author: String
+}

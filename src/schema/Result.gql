@@ -1,0 +1,5 @@
+type Result {
+  n: Int
+  ok: Int 
+  id: String
+}

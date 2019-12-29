@@ -1,0 +1,10 @@
+# 组织
+type Organization {
+  _id: ID!
+  name: String
+  """ 统一社会信用代码  """
+  USCC: String
+  contact: [Person]
+  address: [Address]
+  email: String
+}

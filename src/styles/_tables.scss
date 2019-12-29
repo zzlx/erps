@@ -1,0 +1,129 @@
+// Tables
+table {
+  border-collapse: collapse; // Prevent double borders
+  page-break-after: auto;
+  page-break-inside: auto;
+  page-break-before: auto;
+}
+
+caption {
+  padding-top: $table-cell-padding;
+  padding-bottom: $table-cell-padding;
+  color: $table-caption-color;
+  text-align: left;
+  caption-side: bottom;
+}
+
+thead { display: table-header-group; }
+
+th { text-align: inherit; }
+
+.table {
+  width: 100%;
+  margin-bottom: $spacer;
+  color: $table-color;
+  background-color: $table-bg;
+  table-layout:fixed;
+
+  th,
+  td {
+    //padding: $table-cell-padding; 
+    vertical-align: inherit;
+    //border-top: $table-border-width solid $table-border-color;
+  }
+
+  thead th {
+    border-top: (2 * $table-border-width) solid $table-border-color;
+    border-bottom: (2 * $table-border-width) solid $table-border-color;
+    @include resizable('horizontal');
+  }
+
+  tbody { overflow-y: scroll; }
+
+  tbody + tbody {
+    border-top: (2 * $table-border-width) solid $table-border-color;
+  }
+}
+
+// Condensed table w/ half padding
+.table-sm {
+  th,
+  td {
+    padding: $table-cell-padding-sm;
+  }
+}
+
+
+// Add or remove borders all around the table and between all the columns.
+.table-bordered {
+  border: $table-border-width solid $table-border-color;
+
+  th,
+  td {
+    border: $table-border-width solid $table-border-color;
+  }
+
+  thead {
+    th,
+    td {
+      border-bottom-width: 2 * $table-border-width;
+    }
+  }
+}
+
+.table-borderless {
+  th,
+  td,
+  thead th,
+  tbody + tbody { border: 0; }
+}
+
+// Zebra-striping
+// Default zebra-stripe styles (alternating gray and transparent backgrounds)
+.table-striped {
+  tbody tr:nth-of-type(#{$table-striped-order}) {
+    background-color: $table-accent-bg;
+  }
+}
+
+
+// Hover effect
+// Placed here since it has to come after the potential zebra striping
+.table-hover {
+  tbody tr {
+    @include hover {
+      color: $table-hover-color;
+      background-color: $table-hover-bg;
+    }
+  }
+}
+
+
+// Table backgrounds
+@each $color, $value in $theme-colors {
+  @include table-row-variant(
+    $color, 
+    theme-color-level($color, $table-bg-level), 
+    theme-color-level($color, $table-border-level)
+  );
+}
+
+@include table-row-variant(active, $table-active-bg);
+
+// Responsive tables
+.table-responsive {
+  @each $breakpoint in map-keys($grid-breakpoints) {
+    $next: breakpoint-next($breakpoint, $grid-breakpoints);
+    $infix: breakpoint-infix($next, $grid-breakpoints);
+
+    &#{$infix} {
+      @include media-breakpoint-down($breakpoint) {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        > .table-bordered { border: 0; }
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+type RandomDie {
+  numSides: Int!
+  rollOnce: Int!
+  roll(numRolls: Int!): [Int]
+}
