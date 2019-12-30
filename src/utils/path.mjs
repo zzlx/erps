@@ -1,21 +1,26 @@
 /* path组件字符 */
-const CHAR_DOT = 46;            // .
-const CHAR_FORWARD_SLASH = 47;  // 斜杠/
-const CHAR_COLON = 58;          // :
-const CHAR_UPPERCASE_A = 65;    // A
-const CHAR_UPPERCASE_Z = 90;    // Z
-const CHAR_BACKWARD_SLASH = 92; // 反斜杠\
-const CHAR_LOWERCASE_A = 97;    // a
-const CHAR_LOWERCASE_Z = 122;   // z
+import {
+  CHAR_DOT,
+  CHAR_FORWARD_SLASH,
+  CHAR_COLON,
+  CHAR_UPPERCASE_A,
+  CHAR_UPPERCASE_Z,
+  CHAR_BACKWARD_SLASH,
+  CHAR_LOWERCASE_A,
+  CHAR_LOWERCASE_Z,
+} from './constants.mjs';
 
 /**
  * path路径处理工具
+ * 兼容posix、window样式目录
  */
 
 export default new (class Path {
+
   /**
    * resolve
    */
+
   resolve(...args) {
     let resolvedPath = '';
     let resolvedAbsolute = false;
@@ -35,19 +40,21 @@ export default new (class Path {
   /**
    * 
    */
+
   normalize(path) {
     if (path.length === 0) return '.';
-    const isAbsolte = path.charCodeAt(0) === CHAR_FORWARD_SLASH;
+    const isAbsolute = this.isAbsolute(path);
+
     const trailingSeparator = path.charCodeAt(path.length - 1) === CHAR_FORWARD_SLASH;
-    path = normalizeString(path, !isAbsote, '/', isPosixPathSeparator);
+
+    path = normalizeString(path, !isAbsolute, '/', isPosixPathSeparator);
+
     if (path.length === 0) {
       if (isAbsolute) return '/';
-      return trainlingSeparator ? './' : '.';
+      return trailingSeparator ? './' : '.';
     }
 
-    if (trailingSeparator) {
-      path += '/';
-    }
+    if (trailingSeparator) path += '/';
 
     return isAbsolute ? `/${path}` : path;
 
@@ -58,13 +65,11 @@ export default new (class Path {
    */
 
   isAbsolute(path) {
-    const len = path.length;
-
-    if (len === 0) return false;
+    if (path.length === 0) return false;
     
     const code = path.charCodeAt(0);
     return isPathSeparator(code) ||
-      (len > 2 &&
+      (path.length > 2 &&
         isWindowsDeviceRoot(code) &&
         path.charCodeAt(1) === CHAR_COLON &&
         isPathSeparator(path.charCodeAt(2)));
@@ -78,26 +83,23 @@ export default new (class Path {
    */
 
   dirname(path) {
-    let length = path.length;
-    if (len === 0) return '.';
+    if (path.length === 0) return '.';
 
-    const hasRoot = path.charCodeAt(0) === CHAR_FORWARD_SLASH;
+    const isAbsolute = this.isAbsolute(path);
 
     let end = -1;
     let matchedSlash = true;
 
     for (let i = path.length -1; i >= 1; --i) {
-      if ( path.charCodeAt(i) === CHAR_FORWARD_SLASH ||
-           path.charCodeAt(i) === CHAR_BACKWARD_SLASH
-      ) {
+      if (isPathSeparator(path.charCodeAt(i))) {
         if (!matchedSlash) { end = i; break; }
       } else {
         matchedSlash = false;
       }
     }
 
-    if (end === -1) return hasRoot ? '/' : '.';
-    if (hasRoot && end === 1) return '//';
+    if (end === -1) return isAbsolute ? '/' : '.';
+
     return path.slice(0, end);
 
     //return pathname.substr(0, pathname.lastIndexOf('\/'));
@@ -190,16 +192,87 @@ export default new (class Path {
   }
 
   /**
-   *
-   *
-   *
+   * 解析path
    */
 
   parse (path) {
-    const ret = {root: '', dir: '', base: '', ext: '', name: ''};
+    const ret = { root: '', dir: '', base: '', ext: '', name: '' };
+    if (path.length === 0) return ret;
+    const isAbsolute = this.isAbsolute(path);
 
+    let start;
+    if (isAbsolute) {
+      ret.root = '/';
+      start = 1;
+    } else {
+      start = 0;
+    }
+    let startDot = -1;
+    let startPart = 0;
+    let end = -1;
+    let matchedSlash = true;
+    let i = path.length - 1;
 
-  }
+    // Track the state of characters (if any) we see before our first dot and
+    // after any path separator we find
+    let preDotState = 0;
+
+    // Get non-dir info
+    for (; i >= start; --i) {
+      const code = path.charCodeAt(i);
+      if (code === CHAR_FORWARD_SLASH) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+      if (end === -1) {
+        // We saw the first non-path separator, mark this as the end of our
+        // extension
+        matchedSlash = false;
+        end = i + 1;
+      }
+      if (code === CHAR_DOT) {
+        // If this is our first dot, mark it as the start of our extension
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+      } else if (startDot !== -1) {
+        // We saw a non-dot and non-path separator before our dot, so we should
+        // have a good chance at having a non-empty extension
+        preDotState = -1;
+      }
+    }
+
+    if (end !== -1) {
+      const start = startPart === 0 && isAbsolute ? 1 : startPart;
+      if (startDot === -1 ||
+          // We saw a non-dot character immediately before the dot
+          preDotState === 0 ||
+          // The (right-most) trimmed path component is exactly '..'
+          (preDotState === 1 &&
+          startDot === end - 1 &&
+          startDot === startPart + 1)) {
+        ret.base = ret.name = path.slice(start, end);
+      } else {
+        ret.name = path.slice(start, startDot);
+        ret.base = path.slice(start, end);
+        ret.ext = path.slice(startDot, end);
+      }
+    }
+
+    if (startPart > 0)
+      ret.dir = path.slice(0, startPart - 1);
+    else if (isAbsolute)
+      ret.dir = '/';
+
+    return ret;
+
+  } // end of parse
 
   /**
    * 解析url路径
@@ -406,6 +479,9 @@ export default new (class Path {
   }
 })();
 
+/******************************************************************************/
+/* 以下为工具函数 */
+
 /**
  * 判断是否为目录分隔符
  */
@@ -429,6 +505,23 @@ function isPosixPathSeparator (code) {
 function isWindowsDeviceRoot(code) {
   return (code >= CHAR_UPPERCASE_A && code <= CHAR_UPPERCASE_Z) || 
          (code >= CHAR_LOWERCASE_A && code <= CHAR_LOWERCASE_Z); 
+}
+
+/**
+ *
+ *
+ */
+
+function _format (sep, pathObject) {
+  if (pathObject === null || typeof pathObject !== 'object') {
+    throw new TypeError('pathObject must be objtct.');
+  }
+
+  const dir = pathObject.dir || pathObject.root;
+  const base = pathObject.base || `${pathObject.name || ''}${pathObject.ext || ''}`;
+
+  if (!dir) return base;
+  return dir === pathObject.root ? `${dir}${base}` : `${dir}${sep}${base}`;
 }
 
 /**

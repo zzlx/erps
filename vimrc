@@ -1,7 +1,6 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" filename:vimrc配置文件
+" vimrc配置文件
 " author:wangxuemin@zzlx.org
-" mtime:2019-12-27
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 set nocompatible  " Use Vim defaults instead of 100% vi compatibility
@@ -108,7 +107,7 @@ hi StatusLine cterm=reverse,bold ctermbg=3 " 设置背景色,前景色取反色
 if &background == "light"
   hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey guibg=None
 else
-  hi Comment ctermfg=3 ctermbg=None guifg=3 guibg=None
+  hi Comment ctermfg=LightGrey ctermbg=None guifg=DarkGrey guibg=None
 endif
 endfunction
 

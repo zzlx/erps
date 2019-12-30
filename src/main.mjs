@@ -5,13 +5,13 @@
 
 // node内置模块
 import fs from 'fs';
+import path from 'path';
 import readline from 'readline';
 import { spawn, execSync, } from 'child_process'; 
 
 // webpack模块
 import webpack from 'webpack';
 
-import path from './utils/path.mjs';
 import dotenv from './utils/dotenv.mjs';
 import ISODate from './utils/date.mjs';
 import DBA from '../src/databases/MongoDBA.mjs';
@@ -56,7 +56,14 @@ process.on('beforeExit', (code) => {
 });
 
 process.on('exit', (code) => {
-  //console.log('Process exit event with code: ', code);
+  if (process.env.NODE_ENV !== 'development') return; // 仅在开发模式下显示退出状态
+
+  const status = {
+    'exitCode': code,
+    uptime: process.uptime(),
+  };
+
+  console.log('Process status: %o', status);
 });
 
 /**
@@ -67,7 +74,6 @@ function showHelp() {
   const helpFile = path.join(ROOT, 'src', 'help.txt');
   const help = fs.readFileSync(helpFile, 'utf8');
   process.stdout.write(help);
-  process.exit();
 }
 
 /**
@@ -87,7 +93,6 @@ function commit() {
   execSync(`git -C ${ROOT} commit -m "自动提交"`, {encoding: 'utf8'});
 
   console.log('同步远程仓库...');
-  process.exit();
 }
 
 /**
@@ -99,13 +104,11 @@ function showVersion() {
   const gitVersion = fs.readFileSync(path.join(ROOT, '.git/refs/heads/devel'));
 
   process.stdout.write(`version: ${version}\ncommit-hash: ${gitVersion}`);
-
-  process.exit();
 }
 
 /**
- * build前端
- *
+ * build
+ * 构建并打包前端应用程序
  */
 
 function build () { 
@@ -318,20 +321,22 @@ async function dba(Params) {
 (async function main () {
   const Params = argvParser(process.argv.slice(2)); // 获取脚本启动参数
 
-  // 设置port
-  process.env.PORT = Params.port || 3000;
-  if (Params.devel) { process.env.DEVEL = true; }
-
   // set environment
   process.env.NODE_ENV = /^devel(opment)?/.test(Params.env) 
     ? 'development' 
     : 'production';
 
-  if (Params.help || Params.h) showHelp();
-  if (Params.version || Params.v) showVersion();
-  if (Params.commit) commit();
+  // 设置port
+  process.env.PORT = Params.port || 3000;
+  if (Params.devel) { process.env.DEVEL = true; }
 
-  await readyDir(); // 检测并准备必要的目录
+  if (Params.help || Params.h) return showHelp();
+  if (Params.version || Params.v) return showVersion();
+  if (Params.commit) return commit();
+
+  // 以下任务需要读取本地配置文件,需先检测必要的目录
+  // 检测并准备必要的目录
+  await readyDir(); 
 
   if (Params.build) return await build();
   if (Params.dba) return await dba(Params); 
