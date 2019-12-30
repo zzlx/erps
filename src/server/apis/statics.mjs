@@ -5,6 +5,8 @@
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
+import util from 'util';
+const debug = util.debuglog('debug:static');
 
 export default (options = {}) => {
   const opts = {};
@@ -77,8 +79,9 @@ export default (options = {}) => {
       ctx.set('last-modified', new Date(stats.mtimeMs).toUTCString());
       ctx.body = fs.createReadStream(url);
     } catch (err) {
+      ctx.status = 500;
       ctx.body = err;
-      console.log('static middleware error: ', err);
+      debug('static middleware error: ', err);
     } finally {
     }
   }

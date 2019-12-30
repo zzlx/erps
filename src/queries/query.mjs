@@ -38,60 +38,6 @@ export default async function () {
 	// 清空暂存表
 	DL.push(dropCollection(t_out));
 
-    const cursor_jjd = this.db.collection(t_jjdjj_xdq).find();
-
-    let totalCount = await cursor_jjd.count();
-    let count = 0;
-    let doc = null;
-    const ops = [];
-    while((doc = await cursor_jjd.next()) !== null) {
-        console.progressBar(count++, totalCount);
-        ops.push({ updateOne: {
-            filter: {_id: doc._id},
-            update: { $set: {
-                '借条金额': Number(doc['借条金额']),
-                '应还金额': Number(doc['应还金额']),
-                '已还金额': Number(doc['已还金额']),
-                '起借时间': new Date(doc['起借时间']),
-                '应还时间': new Date(doc['应还时间']),
-                '借条生成时间': new Date(doc['借条生成时间']),
-                '还清日期': doc['还清日期'] === '未还清'
-                    ? '未还清'
-                    : new Date(doc['还清日期']),
-            } }
-        }});
-    }
-
-    await this.db.collection(t_jjdjj_xdq).bulkWrite(ops).then(res => {
-        console.log(res);
-    });
-
-    return;
-	const abc = await this.db.collection(t_jjdjj_xdq).aggregate([
-        { $match: {
-            "借款人姓名": "张群亮"
-        }},
-		{ $group: {
-			_id: {
-				name: "$出借人姓名",
-				id: "$出借人身份证号",
-			},
-			root: {
-				$first: "$$ROOT"
-			}
-		}},
-		{ $replaceRoot: {
-			newRoot: "$root"
-		} },
-		{ $project: {
-				"姓名": "$出借人姓名",
-				"ID": "$出借人身份证号",
-				_id: 0,
-		}},
-	], {allowDiskUse: true}).toArray();
-
-	fs.writeFileSync('test.csv', array(abc).toCSV());
-
 	return;
 
 		// 可信度高的支付宝账户

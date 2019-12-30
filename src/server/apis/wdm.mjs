@@ -7,10 +7,7 @@ import path from 'path';
 import webpack from 'webpack';
 import MemoryFs from 'memory-fs';
 
-import webpackConfig from '../../config.webpack.cjs';
-
-export default () => {
-  const config = webpackConfig();
+export default (config) => {
   const compiler = webpack(config);
   const memFs = new MemoryFs();
   compiler.outputFileSystem = memFs;

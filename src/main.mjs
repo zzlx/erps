@@ -1,9 +1,17 @@
+/**
+ * 主程序
+ *
+ */
+
+// node内置模块
 import fs from 'fs';
-import path from 'path';
 import readline from 'readline';
 import { spawn, execSync, } from 'child_process'; 
+
+// webpack模块
 import webpack from 'webpack';
 
+import path from './utils/path.mjs';
 import dotenv from './utils/dotenv.mjs';
 import ISODate from './utils/date.mjs';
 import DBA from '../src/databases/MongoDBA.mjs';
@@ -101,7 +109,7 @@ function showVersion() {
  */
 
 function build () { 
-  const configFile = path.join(ROOT, 'src', 'webpack.config.cjs');
+  const configFile = path.join(ROOT, 'src', 'config.webpack.cjs');
   return import(configFile).then(module => {
     const webpackConfig = module.default;
     const compiler = webpack(webpackConfig());
@@ -269,16 +277,37 @@ function readyDir () {
  *
  */
 async function dba(Params) {
+  const user = Params.user || '';
+  const pwd = Params.user && Params.pwd ? Params.pwd : '';
+  const auth = Params.user 
+    ? `${user}:${pwd}@`
+    : '';
+  const db = Params.db || 'test';
+  const url = `mongodb://${auth}localhost:27017/${db}`;
 
-  const url = `mongodb://${Params.user || ''}${Params.pwd ? ':' + Params.pwd: ''}${Params.user ?'@': ''}localhost:27017/yc`;
-  const dba = new DBA(url);
+  try {
+    const dba = new DBA(url);
 
-  // 关闭数据库链接 
-  process.nextTick(() => { dba.client.close(); });
-  const db = await dba.client.connect().then(client => client.db());
+    process.nextTick(() => { 
+      // 进程结束前关闭数据库链接
+      dba.client.close(); 
+      console.log('数据链接已关闭');
+    });
 
-  if (Fns[Params.run]) { 
-    await Fns[Params.run].apply({db, Params});
+    const db = await dba.client.connect().then(client => client.db());
+
+    if (Params.import) {
+      const isAbsolute = String(Params.import).charAt(0) === '/' ? true : false;
+    }
+
+    if (Fns[Params.query]) { 
+      await Fns[Params.query].apply({db, Params});
+    }
+
+    // 关闭数据链接
+    dba.client.close(); 
+  } catch (err) {
+    console.log(err);
   }
 }
 
@@ -305,7 +334,7 @@ async function dba(Params) {
   await readyDir(); // 检测并准备必要的目录
 
   if (Params.build) return await build();
-  if (Params.run) return await dba(Params); 
+  if (Params.dba) return await dba(Params); 
 
   startHttpd(Params);
 

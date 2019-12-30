@@ -9,6 +9,5 @@ export { default as log } from './log.mjs';
 export { default as mongodb } from './mongodb.mjs';
 export { default as proxy } from './proxy.mjs';
 export { default as router } from './router.mjs';
-export { default as statics } from './statics.mjs';
 export { default as vhost } from './vhost.mjs';
 export { default as xResponse } from './xResponse.mjs';

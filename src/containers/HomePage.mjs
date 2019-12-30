@@ -88,4 +88,6 @@ HomePage.prototype.componentDidMount = function () {
 				empty
 			}
 		}`;
+
+  store.dispatch(graphql({query}));
 }

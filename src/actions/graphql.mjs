@@ -15,7 +15,7 @@ export default (opts) => store => {
   return fetch(opts.url, {
     method: opts.method || 'POST',
     mode: opts.mode || 'cors',
-    cache: 'default',
+    //cache: 'default',
     credentials: opts.credentials || 'omit', // include/same-origin/omit 
     headers: {
       'Accept': 'application/json',

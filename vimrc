@@ -96,9 +96,8 @@ syntax enable
 " 自定义Theme配置 "
 """""""""""""""""""
 function! SetTheme()
-let timeNow=strftime("%H") 
-if timeNow > 8 && timeNow < 18
-  " @todo: 定时任务,当每天8点、18点时自动执行SetTheme()
+let Now=strftime("%H") 
+if Now > 8 && Now < 18
   colorscheme default
 else
   colorscheme evening

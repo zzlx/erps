@@ -10,13 +10,14 @@
 import fs from 'fs';
 import path from 'path';
 
-import { application as App, } from './core/index.mjs';
+import { application as App, } from './common/index.mjs';
 import * as m from './middlewares/index.mjs';
 import server from './http2.mjs';
 import reactApp from '../client/serverRender.mjs';
+import webpackConfig from '../config.webpack.cjs';
 
 // apis
-import { graphql, reactDOM, wdm, } from './apis/index.mjs';
+import { graphql, reactDOM, statics, wdm, } from './apis/index.mjs';
 
 
 // 优先使用production模式
@@ -27,6 +28,7 @@ const __dirname = path.dirname(import.meta.url).substr(7);
 const APP_PATH = path.dirname(path.dirname(__dirname));
 const PackageJSON = JSON.parse(fs.readFileSync(path.join(APP_PATH, 'package.json')));
 const isDevel = process.env.NODE_ENV === 'development';
+const webpackConf = webpackConfig();
 
 // 实例化服务程序
 const app = new App();
@@ -63,11 +65,11 @@ routes.push({
 });
 
 if (process.env.DEVEL) {
-  routes.push({ path: /^\//, api: wdm(), method: 'GET' });
+  routes.push({ path: /^\//, api: wdm(webpackConf), method: 'GET' });
 } else {
   routes.push({ 
     path: /^\//, 
-    api: m.statics(path.join(process.env.HOME, 'public_html', 'dist')), 
+    api: statics(webpackConf.output.path), 
     method: 'GET' 
   });
 }
