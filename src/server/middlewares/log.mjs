@@ -13,15 +13,10 @@ import ISODate from '../../utils/date.mjs';
 const debug = util.debuglog('debug:log');
 
 export default function accessLog (logPath) {
-
-  if (null == logPath) {
-    logPath = path.join(process.env.HOME, '.log');
-  }
+  if (null == logPath) throw new ERROR('You must provide a valid logPath.'); 
 
   // if logPath already exists, that can be no side effect
-  fs.promises.mkdir(logPath, {recursive: true}).catch(err => {
-    debug(err);
-  });
+  fs.promises.mkdir(logPath, {recursive: true}).catch(err => { debug(err); });
 
   return function logMiddleware (ctx, next) {
     const log = ''

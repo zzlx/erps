@@ -1,6 +1,5 @@
 /**
  * webpack development middleware
- *
  */
 
 import path from 'path';
@@ -16,9 +15,7 @@ export default (config) => {
   compiler.watch(config.watchOptions, callback);
 
   return async function webpackDevMiddleware(ctx, next) {
-    if ('development' !== ctx.app.env) {
-      return await next();
-    }
+    if ('development' !== ctx.app.env) { return await next(); } // 仅在开发环境下
 
     const root = config.output.path;
     const relativePath = path.relative('/', ctx.pathname);

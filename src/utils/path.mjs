@@ -1,14 +1,12 @@
 /* path组件字符 */
-import {
-  CHAR_DOT,
-  CHAR_FORWARD_SLASH,
-  CHAR_COLON,
-  CHAR_UPPERCASE_A,
-  CHAR_UPPERCASE_Z,
-  CHAR_BACKWARD_SLASH,
-  CHAR_LOWERCASE_A,
-  CHAR_LOWERCASE_Z,
-} from './constants.mjs';
+const CHAR_DOT = 46;            // .
+const CHAR_FORWARD_SLASH = 47;  // 斜杠/
+const CHAR_COLON = 58;          //  =
+const CHAR_UPPERCASE_A = 65;    // A
+const CHAR_UPPERCASE_Z = 90;    // Z
+const CHAR_BACKWARD_SLASH = 92; // 反斜杠\
+const CHAR_LOWERCASE_A = 97;    // a
+const CHAR_LOWERCASE_Z = 122;   // z
 
 /**
  * path路径处理工具
@@ -61,6 +59,18 @@ export default new (class Path {
   }
 
   /**
+   *
+   *
+   */
+
+  isPosix (path) {
+    const firstCode = path.charCodeAt(0);
+    return (isWindowsDeviceRoot(path.charCodeAt(0)) &&
+            path.charCodeAt(1) === CHAR_COLON &&
+            isPathSeparator(path.charCodeAt(2))); 
+  }
+
+  /**
    * 判断是否为绝对路径
    */
 
@@ -86,23 +96,17 @@ export default new (class Path {
     if (path.length === 0) return '.';
 
     const isAbsolute = this.isAbsolute(path);
-
     let end = -1;
-    let matchedSlash = true;
-
     for (let i = path.length -1; i >= 1; --i) {
       if (isPathSeparator(path.charCodeAt(i))) {
-        if (!matchedSlash) { end = i; break; }
-      } else {
-        matchedSlash = false;
+        end = i; 
+        break;
       }
     }
 
-    if (end === -1) return isAbsolute ? '/' : '.';
+    if (end === -1) return isAbsolute ? path.charAt(end) : '.';
 
     return path.slice(0, end);
-
-    //return pathname.substr(0, pathname.lastIndexOf('\/'));
   }
 
   /**
@@ -115,7 +119,7 @@ export default new (class Path {
     let joined = null;
     for (let i = 0; i < args.length; i++) {
       const part = args[i];
-      if (arg.length > 0) {
+      if (part.length > 0) {
         if (joined == null) joined = part;
         else joined += `/${part}`;
       }
@@ -197,6 +201,7 @@ export default new (class Path {
 
   parse (path) {
     const ret = { root: '', dir: '', base: '', ext: '', name: '' };
+
     if (path.length === 0) return ret;
     const isAbsolute = this.isAbsolute(path);
 

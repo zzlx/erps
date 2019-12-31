@@ -1,7 +1,5 @@
 /**
  * http2 server
- *
- *
  */
 
 import fs from 'fs'; 
@@ -51,36 +49,6 @@ server.on('listening', function () {
   };
 
   console.log('Server is running...\nprocess_info: %o', sys_info);
-});
-
-/**
- * @todo: 端口号被占用时处理逻辑: 
- * 1. 询问是否关闭被占用的进程,重新启动服务；
- * 2. 或使用其他的端口（提供两种选择，一是用户键入端口号，二是使用+1的端口号） 
- */
-
-server.on('error', function (err) {
-
-		if (process.env.NODE_ENV === 'development') {
-			console.log(JSON.stringify(err));
-		}
-
-		if (err.errno === 'EADDRINUSE') {
-			// set api port
-			process.env.API_PORT = err.port;
-			console.log('Port %s was be used. try %s ...', err.port, err.port + 1);
-		}
-
-		if (err.errno === 'ENOENT') {
-			console.log('ENOENT');
-		}
-
-		// try restart server listing.
-		/*
-		setTimeout(() => {
-			this.listen({port: err.port + 1});
-		}, 500)
-		*/
 });
 
 server.on('keylog', function (line, socket) {

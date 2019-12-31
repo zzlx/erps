@@ -1,5 +1,9 @@
+/******************************************************************************/
+
 /**
- * 主程序
+ * 项目管理程序
+ *
+ * 用于初始化系统环境及系统服务启动
  *
  */
 
@@ -8,23 +12,25 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { spawn, execSync, } from 'child_process'; 
-
-// webpack模块
-import webpack from 'webpack';
-
+import webpack from 'webpack'; // webpack模块
 import dotenv from './utils/dotenv.mjs';
 import ISODate from './utils/date.mjs';
 import DBA from '../src/databases/MongoDBA.mjs';
 import console from './utils/console.mjs';
 import argvParser from './utils/argvParser.mjs';
-import PackageJSON from '../package.json';
 import * as Fns from '../src/queries/index.mjs';
+import { 
+  APP_ROOT as ROOT, 
+  APP_NAME,
+  APP_HOME,
+  APP_VERSION,
+  APP_BRANCH,
+  APP_BRANCH_VERSION,
+  DOT_ENV_FILE,
+} from './config.common.mjs';
 
 const dsn = () => ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
-const __dirname = path.dirname(import.meta.url.substr(7));  // 获取当前所在目录
-const ROOT = path.dirname(__dirname); // 定位程序根目录
-const envFile = path.join(ROOT, '.env');
-const dotEnvConfig = dotenv(envFile);
+const dotEnvConfig = dotenv(DOT_ENV_FILE);
 for (let key of Object.keys(dotEnvConfig)) {
   if (process.env[key]) continue;
   process.env[key] = dotEnvConfig[key];
@@ -33,7 +39,7 @@ for (let key of Object.keys(dotEnvConfig)) {
 // 设置变量
 let httpd = null;
 
-process.title = String(PackageJSON.name); // 设置进程名称
+process.title = APP_NAME; // 设置进程名称
 process.chdir(ROOT); // 定位进程工作目录
 
 // 捕获unhandled rejection
@@ -100,10 +106,7 @@ function commit() {
  */
 
 function showVersion() {
-  const version = PackageJSON.version; 
-  const gitVersion = fs.readFileSync(path.join(ROOT, '.git/refs/heads/devel'));
-
-  process.stdout.write(`version: ${version}\ncommit-hash: ${gitVersion}`);
+  process.stdout.write(`version: ${APP_VERSION}\n${APP_BRANCH}: ${APP_BRANCH_VERSION}`);
 }
 
 /**
@@ -214,23 +217,17 @@ function watcher (folders, cb) {
  */
 
 function startHttpd (opts) {
-
-  const log_file = path.join(
-    process.env.HOME, 
-    `.${PackageJSON.name}`, 
-    `${dsn()}_process.log`
-  ); 
-
+  const log_file = path.join(APP_HOME, `${dsn()}_process.log`); 
   const log = fs.openSync(log_file, 'a+');
 
   // args
   const args = [
     //'--experimental-modules',
     '--experimental-json-modules',
-    //'--no-warnings',
+    process.env.NODE_ENV !== 'development' && '--no-warnings', // 仅在开发模式下显示warning
     `--title=${process.title}.httpd`,
-    path.join(ROOT, 'src', 'server', 'http-server.mjs'),
-  ];
+    path.join(ROOT, 'src', 'server', 'httpd.mjs'),
+  ].filter(Boolean);
 
   // options
   const options = {
@@ -257,7 +254,7 @@ function restartHttpd(Params) {
  */
 function readyDir () {
   // 执行准备工作
-  const profilePath = path.join(process.env.HOME, `.${PackageJSON.name}`);
+  const profilePath = path.join(process.env.HOME, `.${APP_NAME}`);
   const configFile = path.join(profilePath, 'conf.json');
   const defaultConf = path.join(ROOT, 'src', 'default.config.json');
 
@@ -319,17 +316,18 @@ async function dba(Params) {
  */
 
 (async function main () {
-  const Params = argvParser(process.argv.slice(2)); // 获取脚本启动参数
+  const Params = argvParser(process.argv.slice(2)); // 获取并解析脚本启动参数
 
-  // set environment
-  process.env.NODE_ENV = /^devel(opment)?/.test(Params.env) 
-    ? 'development' 
-    : 'production';
+  // 设置环境变量
+  if (Params.env) process.env.NODE_ENV = /^devel(opment)?/.test(Params.env) 
+    ? 'development' : 'production';
+  if (Params.devel) { 
+    process.env.NODE_ENV = 'development'; 
+    process.env.DEVEL = true; 
+  }
+  if (Params.port) process.env.PORT = Number.parseInt(Params.port);
 
-  // 设置port
-  process.env.PORT = Params.port || 3000;
-  if (Params.devel) { process.env.DEVEL = true; }
-
+  // 执行解析的参数命令
   if (Params.help || Params.h) return showHelp();
   if (Params.version || Params.v) return showVersion();
   if (Params.commit) return commit();
@@ -356,3 +354,5 @@ async function dba(Params) {
 
   if (Params.fork) httpd.unref();
 })();
+
+/******************************************************************************/

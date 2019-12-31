@@ -6,6 +6,7 @@ import util from 'util';
 import compose from './compose.mjs';
 import Context from './context.mjs';
 import respond from './respond.mjs';
+import server from './http2-server.mjs';
 
 /**
  * Server application. 
@@ -15,12 +16,13 @@ export default class Application extends EventEmitter {
   constructor(props) {
     super();
     this.props = props || Object.create(null);
+    // 制定配置 -> 环境变量 -> 默认配置
     this.env = this.props.env || process.env.NODE_ENV || 'production';
     this.protocol = this.props.protocol ? props.protocol : 'http2';
     this.proxy = this.props.proxy || false;
     this.subdomainOffset = this.props.subdomainOffset || 2;;
     this.keys = this.props.keys || ['services'];
-    this.server = this.props.server;
+    this.server = server;
     // configured middlewares
     this.middlewares = [];
 
@@ -40,6 +42,12 @@ export default class Application extends EventEmitter {
     }
 
     this.server.on('stream', this.callback());
+    this.server.on('error', (err) => {
+      if (err.errno === 'EADDRINUSE') {
+			  console.log('Port %s was be used.', err.port);
+        process.exit();
+      }
+    });
 
     // listen
     return this.server.listen(...args);
