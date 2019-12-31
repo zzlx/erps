@@ -4,4 +4,5 @@ Options:
   --help               <显示帮助文档>
   --version            <显示版本号>
   --devel              <启动开发服务器模式>
+  --devel=ui           <启动前端UI开发服务器模式>
   --port=3000          <配置服务端口>

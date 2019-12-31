@@ -1,4 +1,3 @@
-/******************************************************************************/
 /**
  * 通用配置
  *
@@ -27,12 +26,15 @@ export const VIMRC_FILE = path.join(APP_ROOT, 'vimrc');
 export const README_FILE = path.join(APP_ROOT, 'README.md');
 export const HELP_FILE = path.join(APP_ROOT, 'src', 'help.txt');
 
-// 获取git branch 及版本信息
+// 从HEAD文件中读取git branch当前分支ref
 const GIT_HEAD_FILE = path.join(APP_ROOT, '.git/HEAD');
 const GIT_HEAD_REF = String(fs.readFileSync(GIT_HEAD_FILE)).slice(5).trim();
+
 const GIT_COMMIT_FILE = path.join(APP_ROOT, `.git/${GIT_HEAD_REF}`);
 
 export const APP_BRANCH = path.basename(GIT_HEAD_REF);
+
+// 从REF文件中读取版本信息
 export const APP_BRANCH_VERSION = fs.readFileSync(GIT_COMMIT_FILE);
 
 /******************************************************************************/

@@ -36,8 +36,12 @@ import {
 
 const dsn = () => ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
 
-// 设置变量
+// 设置主程序模块全局变量
 let httpd = null;
+let mongodb = null;
+let Config = {};
+const Params = argvParser(process.argv.slice(2)); // 获取并解析脚本启动参数
+const rl = readLine();
 
 process.title = APP_NAME; // 设置进程名称
 
@@ -58,6 +62,7 @@ process.on('uncaughtException', (err, origin) => {
 // 进程退出前执行的任务
 process.on('beforeExit', (code) => {
   //console.log('Process beforeExit event with code: ', code);
+  if (mongodb) mongodb.close(); // 关闭数据链接
 });
 
 process.on('exit', (code) => {
@@ -138,40 +143,12 @@ function build () {
  *
  */
 
-function interactiveMode () {
-
+function readLine () {
   // Interactive mode.
-  const rl = readline.createInterface({
+  return readline.createInterface({
     input: process.stdin,
     output: process.stdout,
     prompt: '> ',
-  });
-  rl.prompt();
-  rl.on('line', (line) => {
-    switch (line.trim()) {
-      case 'version':
-        emit('showVersion');
-        break;
-      case 'help':
-        emit('showHelp');
-        break;
-      case 'devel':
-        emit('start');
-        break;
-      case 'start':
-        emit('start');
-        break;
-      case 'exit':
-        rl.emit('close'); // emit close event.
-        break;
-      default:
-        console.log(`Command '${line.trim()}' is not supported.`);
-        break;
-    }
-    rl.prompt();
-  }).on('close', () => {
-    console.log('交互模式已退出!');
-    process.exit(0);
   });
 }
 
@@ -246,23 +223,14 @@ function restartHttpd(Params) {
 }
 
 /**
- * readyDir
+ * 准备工作
  *
  */
 function readyDir () {
   // 执行准备工作
-  const profilePath = path.join(process.env.HOME, `.${APP_NAME}`);
-  const configFile = path.join(profilePath, 'conf.json');
-  const defaultConf = path.join(ROOT, 'src', 'default.config.json');
-
   const asyncTasks = [
-    fs.promises.mkdir(profilePath, {recursive: true}), // 确保文件夹存在
-    new Promise((resolve, reject) => {
-				if (!fs.existsSync(configFile)) {
-						fs.copyFileSync(defaultConf, configFile);
-				}
-				resolve(true);
-    }),
+    fs.promises.mkdir(APP_HOME, {recursive: true}),
+    fs.promises.mkdir(path.join(APP_HOME, 'log'), {recursive: true}),
   ];
 
   // 等待准备工作完成后再进行下一步工作
@@ -273,39 +241,55 @@ function readyDir () {
  *
  *
  */
-async function dba(Params) {
+
+async function getDB() {
   const user = Params.user || '';
   const pwd = Params.user && Params.pwd ? Params.pwd : '';
-  const auth = Params.user 
-    ? `${user}:${pwd}@`
-    : '';
   const db = Params.db || 'test';
-  const url = `mongodb://${auth}localhost:27017/${db}`;
+
+  const url = new URL(Config.mongodb);
+  if (user) url.username = user;
+  if (pwd) url.username = pwd;
+  if (db) url.pathname = db;
 
   try {
-    const dba = new DBA(url);
+    const dba = new DBA(url.href);
+    let DB = null;
 
-    process.nextTick(() => { 
-      // 进程结束前关闭数据库链接
-      dba.client.close(); 
-      console.log('数据链接已关闭');
-    });
+    await dba.client.connect()
+      .then(client => DB = client.db())
+      .catch(err => { 
+        console.log('error: %o', err);
+      });
 
-    const db = await dba.client.connect().then(client => client.db());
-
-    if (Params.import) {
-      const isAbsolute = String(Params.import).charAt(0) === '/' ? true : false;
-    }
-
-    if (Fns[Params.query]) { 
-      await Fns[Params.query].apply({db, Params});
-    }
-
-    // 关闭数据链接
-    dba.client.close(); 
+    return DB;
   } catch (err) {
     console.log(err);
   }
+}
+
+/**
+ *
+ *
+ */
+
+async function setupConfig () {
+  // 从配置文件中读取配置项目
+  const config_file = path.join(APP_HOME, 'config.json');
+  const config = await fs.promises.readFile(config_file).catch(e => '{}');
+  Config = JSON.parse(config);
+  
+  if (!Config.mongodb) {
+    await new Promise((resolve, reject) => {
+      rl.question('未配置数据库，请提供数据库url:', answer => {
+        Config.mongodb = new URL(answer).href;
+        resolve();
+      });
+    });
+  }
+
+  // 写入配置文件
+  await fs.promises.writeFile(config_file, JSON.stringify(Config)).catch(e=>null);
 }
 
 /**
@@ -314,7 +298,6 @@ async function dba(Params) {
  * 管理执行顺序及控制逻辑
  */
 (async function main () {
-  const Params = argvParser(process.argv.slice(2)); // 获取并解析脚本启动参数
 
   // 设置环境变量
   if (Params.devel || Params.development) process.env.NODE_ENV = 'development'; 
@@ -332,10 +315,14 @@ async function dba(Params) {
   // 以下任务需要读取本地配置文件,需先检测必要的目录
   // 检测并准备必要的目录
   await readyDir(); 
+  await setupConfig();
 
+  // 不需要数据连接的任务
   if (Params.build) return await build();
-  if (Params.dba) return await dba(Params); 
 
+  await getDB();
+
+  // 需要数据连接的任务
   startHttpd(Params);
 
   if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
@@ -351,5 +338,3 @@ async function dba(Params) {
 
   if (Params.fork) httpd.unref();
 })(); // 立即执行main主程序
-
-/******************************************************************************/

@@ -1,22 +1,30 @@
 /**
  * 参数解析器
  *
- * 接收命令列表数组,解析后返回参数对象
+ * 解析命令行参数，返回参数对象
  *
- * @params {array} argvs
+ * @params {array|string} argvs
  * @return {object} state
+ *
+ * @file: argvParser.mjs
  */
 
 export default function argvParser (argvs) {
-  const params = {};
+  // 如果提供的参数列表为字符,则先转为数组后再解析
+  if ('string' === typeof argvs) argvs = argvs.split(/\s+/);
 
+  const params = {};
 	const it = argvs[Symbol.iterator]();
+
 	let argv = null;
 	let i = -1;
 
 	while ((argv = it.next().value) != null) {
 		i++; 
+
+    // @todo: 是否有必要改正则匹配逻辑为字串匹配? 对性能影响极小,暂时不作修改.
     const matcher = argv => /^(?:--(\w+)(?:=(.+))?)|(?:-(\w+))/g.exec(argv);
+
 		const match = matcher(argv);
 		if (null == match) continue; // bypass if no match
 
@@ -27,11 +35,12 @@ export default function argvParser (argvs) {
     if (key) params[key] = value ? value : true;
 
 		if (commands) {
-			for (let v of commands ) params[v] = true;
-
-			if (commands.length === 1 && null == matcher(argvs[i+1])) {
+      // 单参数情况时, eg. -o /home/test.txt
+			if (commands.length === 1 && argvs[i+1] && null == matcher(argvs[i+1])) {
 				params[commands] = argvs[i+1];
-			}
+			} else {
+        for (let v of commands ) params[v] = true; // 多参数情况时，eg. -abc
+      }
 		}
   }
 

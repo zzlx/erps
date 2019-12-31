@@ -6,9 +6,9 @@
   "license": "MIT",
   "homepage": ".",
   "scripts": {
-    "editor": "vim -u .vimrc",
     "build": "webpack --config src/config.webpack.cjs",
-    "start": "./bin/start.mjs"
+    "edit": "vim -u .vimrc",
+    "start": "./bin/start.mjs --help"
   },
   "devDependencies": {
     "@babel/core": "7.1.6",
