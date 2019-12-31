@@ -13,7 +13,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import getRawBody from '../getRawBody.mjs';
+import getRawBody from '../common/getRawBody.mjs';
 import { 
 	graphql, buildASTSchema, parse, Source 
 } from '../../graphql/index.mjs';

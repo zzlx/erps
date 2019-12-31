@@ -1,10 +1,11 @@
 /**
  * Inspect
  * 用于在error messsage中打印value
- *
  */
 
-import nodejsCustomInspectSymbol from './nodejsCustomInspectSymbol.mjs';
+const nodejsCustomInspectSymbol = typeof Symbol === 'function' 
+  ? Symbol.for('nodejs.util.inspect.custom') 
+  : undefined;
 
 export default function inspect(value) {
   switch (typeof(value)) {

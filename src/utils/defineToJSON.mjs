@@ -8,7 +8,9 @@
  *
  */
 
-import nodejsCustomInspectSymbol from './nodejsCustomInspectSymbol.mjs';
+const nodejsCustomInspectSymbol = typeof Symbol === 'function' 
+  ? Symbol.for('nodejs.util.inspect.custom') 
+  : undefined;
 
 // eslint-disable-next-line flowtype/no-weak-types
 export default function defineToJSON(classObject) {

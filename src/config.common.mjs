@@ -1,25 +1,38 @@
+/******************************************************************************/
 /**
- * Common configuration
+ * 通用配置
  *
+ * 为代码库提供配置项目
+ *
+ * @file: config.common.mjs
  */
 
 import fs from 'fs';
 import path from 'path';
 
-
 // 配置项目
-export const APP_PATH = path.dirname(path.dirname(import.meta.url).substr(7));
-export const APP_ROOT = APP_PATH;
-const PackageJSON = JSON.parse(fs.readFileSync(path.join(APP_ROOT, 'package.json')));
+export const APP_ROOT = path.dirname(path.dirname(import.meta.url).substr(7));
+export const APP_PATH = APP_ROOT;
+
+// 获取package配置
+const packageJSON_file = path.join(APP_ROOT, 'package.json');
+const PackageJSON = JSON.parse(fs.readFileSync(packageJSON_file));
+
 export const APP_NAME = PackageJSON.name;
-export const APP_HOME = path.join(process.env.HOME, `.${APP_NAME}`); // APP_HOME目录
+export const APP_HOME = path.join(process.env.HOME, `.${APP_NAME}`);//APP本地目录
 export const APP_LICENSE = PackageJSON.license;
 export const APP_VERSION = PackageJSON.version;
 export const DOT_ENV_FILE = path.join(APP_ROOT, '.env');
+export const VIMRC_FILE = path.join(APP_ROOT, 'vimrc');
+export const README_FILE = path.join(APP_ROOT, 'README.md');
+export const HELP_FILE = path.join(APP_ROOT, 'src', 'help.txt');
 
-// git information 
+// 获取git branch 及版本信息
 const GIT_HEAD_FILE = path.join(APP_ROOT, '.git/HEAD');
-const GIT_HEAD_REF = String(fs.readFileSync(GIT_HEAD_FILE, 'utf8')).slice(5).trim();
+const GIT_HEAD_REF = String(fs.readFileSync(GIT_HEAD_FILE)).slice(5).trim();
 const GIT_COMMIT_FILE = path.join(APP_ROOT, `.git/${GIT_HEAD_REF}`);
+
 export const APP_BRANCH = path.basename(GIT_HEAD_REF);
 export const APP_BRANCH_VERSION = fs.readFileSync(GIT_COMMIT_FILE);
+
+/******************************************************************************/

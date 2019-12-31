@@ -1,4 +1,8 @@
 {
-  "api_address": "https://localhost:3000/api/graphql",
-  "description": "部署前段时，需要配置响应的后端API地址"
+  "api": {
+    "graphql": {
+      "address": "https://192.168.1.3:3000/api/graphql",
+      "description": "graphqlAPI服务地址"
+    }
+  }
 }

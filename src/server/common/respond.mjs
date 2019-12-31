@@ -103,5 +103,4 @@ export default function respond (ctx) {
 
   ctx.stream.respond(ctx._headers);
   ctx.stream.end(body);
-
 }

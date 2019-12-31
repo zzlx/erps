@@ -26,6 +26,19 @@ export default class HomePage extends React.Component {
     };
     this.needQuery = false;
   }
+
+  componentDidMount() {
+    let needQuery = true
+    const store = this.context.store;
+    const footer = store.getState('profiles', 'footer');
+    if (null == footer) {
+    }
+
+    // 查询字符串
+    const query = `{ random }`;
+
+    store.dispatch(graphql({query}));
+  }
 }
 
 HomePage.contextType = Context;
@@ -69,25 +82,4 @@ HomePage.prototype.render = function () {
 			</Layout.Footer>
 		</React.Fragment>
 	);
-}
-
-// 
-HomePage.prototype.componentDidMount = function () {
-		let needQuery = true
-		const store = this.context.store;
-		const footer = store.getState('profiles', 'footer');
-		if (null == footer) {
-		}
-
-		// 查询字符串
-		const query = `{ 
-			random 
-			dbs {
-				Name: name
-				Size: sizeOnDisk
-				empty
-			}
-		}`;
-
-  store.dispatch(graphql({query}));
 }

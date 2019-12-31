@@ -3,7 +3,6 @@
  */
 
 import inspect from '../../utils/inspect.mjs';
-
 import { GraphQLScalarType, isNamedType } from './definition.mjs';
 import { Kind } from '../language/kinds.mjs'; 
 
@@ -13,8 +12,9 @@ import { Kind } from '../language/kinds.mjs';
 // n.b. JavaScript's integers are safe between -(2^53 - 1) and 2^53 - 1 
 // because they are internally represented as IEEE 754 doubles.
 
-const MAX_INT = 2147483647;
-const MIN_INT = -2147483648;
+// 32-bit有符号数字所能表示的最大和最小值
+const MAX_INT = ~(1 << 31);
+const MIN_INT = 1 << 31;
 
 function serializeInt(value) {
   if (typeof value === 'boolean') {

@@ -1,10 +1,10 @@
 /******************************************************************************/
-
 /**
- * 项目管理程序
+ * 主程序
  *
  * 用于初始化系统环境及系统服务启动
  *
+ * @file: main.mjs
  */
 
 // node内置模块
@@ -12,13 +12,17 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { spawn, execSync, } from 'child_process'; 
+
+// 第三方模块
 import webpack from 'webpack'; // webpack模块
-import dotenv from './utils/dotenv.mjs';
+
+// 代码库模块
 import ISODate from './utils/date.mjs';
 import DBA from '../src/databases/MongoDBA.mjs';
 import console from './utils/console.mjs';
 import argvParser from './utils/argvParser.mjs';
 import * as Fns from '../src/queries/index.mjs';
+import './config.env.mjs';
 import { 
   APP_ROOT as ROOT, 
   APP_NAME,
@@ -26,21 +30,16 @@ import {
   APP_VERSION,
   APP_BRANCH,
   APP_BRANCH_VERSION,
+  HELP_FILE,
   DOT_ENV_FILE,
 } from './config.common.mjs';
 
 const dsn = () => ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
-const dotEnvConfig = dotenv(DOT_ENV_FILE);
-for (let key of Object.keys(dotEnvConfig)) {
-  if (process.env[key]) continue;
-  process.env[key] = dotEnvConfig[key];
-}
 
 // 设置变量
 let httpd = null;
 
 process.title = APP_NAME; // 设置进程名称
-process.chdir(ROOT); // 定位进程工作目录
 
 // 捕获unhandled rejection
 process.on('unhandledRejection', (reason, promise) => {
@@ -77,9 +76,7 @@ process.on('exit', (code) => {
  */
 
 function showHelp() {
-  const helpFile = path.join(ROOT, 'src', 'help.txt');
-  const help = fs.readFileSync(helpFile, 'utf8');
-  process.stdout.write(help);
+  fs.createReadStream(HELP_FILE).pipe(process.stdout);
 }
 
 /**
@@ -312,18 +309,18 @@ async function dba(Params) {
 }
 
 /**
- * 主程序
+ * 主控制程序 
+ *
+ * 管理执行顺序及控制逻辑
  */
-
 (async function main () {
   const Params = argvParser(process.argv.slice(2)); // 获取并解析脚本启动参数
 
   // 设置环境变量
-  if (Params.env) process.env.NODE_ENV = /^devel(opment)?/.test(Params.env) 
-    ? 'development' : 'production';
-  if (Params.devel) { 
-    process.env.NODE_ENV = 'development'; 
-    process.env.DEVEL = true; 
+  if (Params.devel || Params.development) process.env.NODE_ENV = 'development'; 
+  if (Params.devel && Params.devel === 'ui') {
+    process.env.DEVEL_UI = true; 
+    process.env.PORT=3001;
   }
   if (Params.port) process.env.PORT = Number.parseInt(Params.port);
 
@@ -341,7 +338,7 @@ async function dba(Params) {
 
   startHttpd(Params);
 
-  if (process.env.NODE_ENV === 'development' && !process.env.DEVEL) {
+  if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
     watcher([
       path.join(ROOT, 'src', 'server'), 
       path.join(ROOT, 'src', 'schema'), 
@@ -353,6 +350,6 @@ async function dba(Params) {
   }
 
   if (Params.fork) httpd.unref();
-})();
+})(); // 立即执行main主程序
 
 /******************************************************************************/

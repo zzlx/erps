@@ -1,7 +1,10 @@
+/******************************************************************************/
 /**
-* webpack配置文件
+ * webpack配置文件
  *
  * 用于生成前端代码
+ *
+ * @file: config.webpack.cjs
  */
 
 const fs = require('fs');
@@ -13,6 +16,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
+
 const webpackConfig = module.exports = (env = {}) => {
   process.env.NODE_ENV = env.env || process.env.NODE_ENV || 'production';
 	const APP_PATH = path.dirname(__dirname);
@@ -26,6 +30,8 @@ const webpackConfig = module.exports = (env = {}) => {
     publicPath: '/',
     publicUrl: '/',
   };
+
+  process.chdir(paths.appPath);
 
   // 确保public_html目录存在
   fs.promises.mkdir(paths.appDist, {recursive: true}).catch(err => {
@@ -62,14 +68,14 @@ const webpackConfig = module.exports = (env = {}) => {
           oneOf: [
             { test: /\.(mjs|js)$/, 
 							exclude: /node_modules/,
-							loader: 'babel-loader', 
+							loader: require.resolve('babel-loader'), 
 							options: {
 								presets: [ "react-app" ]
 							}
 						},
-            { test: /\.gql$/, loader: 'raw-loader', },
+            { test: /\.gql$/, loader: require.resolve('raw-loader'), },
             { test: /\.(md|txt)$/, 
-              loader: 'file-loader', 
+              loader: require.resolve('file-loader'), 
               options: {
                 name: 'doc/[name].[contenthash:8].[ext]',
               }
@@ -83,27 +89,27 @@ const webpackConfig = module.exports = (env = {}) => {
                     reloadAll: true,
                   },
                 } :
-                { loader: 'style-loader' },
-                { loader: 'css-loader' },
-                { loader: 'postcss-loader',
+                { loader: require.resolve('style-loader') },
+                { loader: require.resolve('css-loader') },
+                { loader: require.resolve('postcss-loader'),
                   options: {
                     plugins: function () {
                       return [ require('autoprefixer') ];
                     }
                   }
                 },
-                { loader: 'sass-loader' },
+                { loader: require.resolve('sass-loader') },
               ],
             },
             { test: /\.(png|svg|jpg|gif|jpeg|bmp)$/, 
-              loader: 'url-loader',
+              loader: require.resolve('url-loader'),
               options: {
                 limit: 1024 * 10, // 10kb
                 name: 'static/media/[name].[contenthash:8].[ext]',
                 mimetype: 'image/[ext]',
               },
             },
-            { loader: 'file-loader',
+            { loader: require.resolve('file-loader'),
               exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
               options: {
                 name: 'static/other/[name].[contenthash:8].[ext]',
@@ -115,7 +121,7 @@ const webpackConfig = module.exports = (env = {}) => {
     },
 
     plugins: [
-      isDevel && new webpack.ProgressPlugin(),
+      new webpack.ProgressPlugin(), // 显示打包进度
       new CleanWebpackPlugin({
         dry: isDevel ? true : false,
         verbose: isDevel ? true : false,
@@ -266,3 +272,4 @@ const webpackConfig = module.exports = (env = {}) => {
     },
   };
 }
+/******************************************************************************/

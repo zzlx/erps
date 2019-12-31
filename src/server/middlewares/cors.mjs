@@ -14,6 +14,7 @@
  */
 
 export default function (options) {
+
   options = options || {};
   options.allowMethods = options.allowMethods || 'GET,POST,HEAD,OPTIONS';
   options.credentials = options.credentials || true;
@@ -39,7 +40,8 @@ export default function (options) {
 
   options.keepHeadersOnError = options.keepHeadersOnError === undefined || !!options.keepHeadersOnError;
 
-  return function cors(ctx, next) {
+  return function corsMiddleware(ctx, next) {
+
     // get origin
     const requestOrigin = ctx.get('Origin');
 

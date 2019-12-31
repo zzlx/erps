@@ -1,18 +1,24 @@
 /**
- * 执行一次graphql查询
+ * GraphQL查询
+ *
+ * @param {object} opts 
  *
  */
 
 import { types } from './index.mjs';
 
 export default (opts) => store => {
-  const api_address = store.getState('profiles', 'api_address');
 
-  if (api_address) opts.url = api_address;
+  // 如果没有提供opts.url,则使用同域名下3000端口 
+  const url = opts.url 
+    ? new URL(opts.url)
+    : new URL(window.location.href);
 
-  store.dispatch({ type: types.GRAPHQL_QUERY, payload: opts });
+  // 统一配置api端口
+  url.port = 3000;
+  url.pathname = '/api/graphql';
 
-  return fetch(opts.url, {
+  const graphql = (opts) => fetch(url.href, {
     method: opts.method || 'POST',
     mode: opts.mode || 'cors',
     //cache: 'default',
@@ -23,17 +29,16 @@ export default (opts) => store => {
       'Content-Type': 'application/json',
     }, 
     body: JSON.stringify({ 
-      query: opts.query,
-      variables: opts.variables,
-      operationName: opts.operationName,
+      query: opts.query || null,
+      variables: opts.variables || null,
+      operationName: opts.operationName || null,
     }),
   }).then(response => {
-    if (!response.ok) {
-      throw new Error('status = ' + response.status);
-    }
+    if (response.ok) return response.json();
 
-    const result = response.json();
-    store.dispatch({ type: types.GRAPHQL_QUERY_RESULT, payload: result });
-    return result;
-  }).catch(err => { console.log(err); });
+    // 错误响应信息
+    console.log(response);
+  });
+
+  return store.dispatch({ type: types.GRAPHQL_QUERY, payload: graphql(opts) });
 }

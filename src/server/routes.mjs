@@ -1,10 +1,8 @@
+/******************************************************************************/
 /**
- * Http service application.
+ * 服务器端路由
  *
- * 服务列表:
- * 1. graphql服务;
- * 2. statics静态资源服务；
- *
+ * @file: routes.mjs
  */
 
 import fs from 'fs';
@@ -21,7 +19,6 @@ const APP_PATH = path.dirname(path.dirname(__dirname));
 const isDevel = process.env.NODE_ENV === 'development';
 const webpackConf = webpackConfig();
 
-
 // 配置路由
 const routes = [];
 
@@ -31,10 +28,10 @@ routes.push({
 				schemaPath: path.join(APP_PATH, 'src', 'schema'),
 				resolversPath: path.join(APP_PATH, 'src', 'resolvers'),
 		}), 
-		method: ['POST', isDevel && 'GET'].filter(Boolean) // 仅在开发模式下支持GET请求
+		method: ['POST', isDevel && 'GET'].filter(Boolean) // 开发模式下仅支持GET
 });
 
-if (process.env.DEVEL) {
+if (process.env.DEVEL_UI) {
   routes.push({ path: /^\//, api: wdm(webpackConf), method: 'GET' });
 } else {
   routes.push({ 
@@ -45,3 +42,5 @@ if (process.env.DEVEL) {
 }
 
 export default routes;
+
+/******************************************************************************/
