@@ -15,7 +15,6 @@ export default async function () {
 	while ((doc = await cursor.next()) !== null) {
 		let hasZFB = doc['借款人支付宝账号']
 
-
 	}
 
 }

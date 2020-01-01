@@ -9,6 +9,8 @@
  *
  */
 
+import date from './date.mjs';
+
 export default function (value) {
     if (!Array.isArray(value)) throw new TypeError('The value is not an array');
     return new Proxy(value, {
@@ -173,8 +175,14 @@ function toCSV () {
 		const values = [];
 
 		for (let key of title.values()) {
-			if (null == item[key]) values.push('');
-			values.push(item[key]);
+			if (null == item[key]) {
+        values.push('');
+      } else if ('object' === typeof item[key] && item[key] instanceof Date) {
+        values.push(date.toString(item[key]));
+      } else {
+			  values.push(item[key]);
+      }
+
 		}
 
 		csv += values.join(separator) + '\n';

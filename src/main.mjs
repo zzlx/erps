@@ -21,6 +21,8 @@ import webpack from 'webpack'; // webpack模块
 import ISODate from './utils/date.mjs';
 import DBA from '../src/databases/MongoDBA.mjs';
 import console from './utils/console.mjs';
+import array from './utils/array.mjs';
+import date from './utils/date.mjs';
 import argvParser from './utils/argvParser.mjs';
 import strings from './utils/strings.mjs';
 import * as Fns from '../src/queries/index.mjs';
@@ -44,13 +46,14 @@ let mongodb = null;
 let dba = null;
 let Config = {};
 const Params = argvParser(process.argv.slice(2)); // 获取并解析命令行参数
-const rl = readLine();
 
 process.title = APP_NAME; // 设置进程名称
 
 // 捕获unhandled rejection
 process.on('unhandledRejection', (reason, promise) => {
-  console.log('Unhandled Rejection at:', promise, 'reason:', reason);
+  console.log('捕获到Rejection:', promise, '\nReason:', reason);
+  if (mongodb) mongodb.close(); // 关闭数据链接
+  process.exit();
 });
 
 // 捕获exception
@@ -60,6 +63,9 @@ process.on('uncaughtException', (err, origin) => {
     `Caught exception: ${err}\n` +
     `Exception origin: ${origin}`
   );
+
+  if (mongodb) mongodb.close(); // 关闭数据链接
+  process.exit();
 });
 
 // 进程退出前执行的任务
@@ -84,7 +90,7 @@ process.on('exit', (code) => {
  */
 
 function showHelp() {
-  fs.createReadStream(HELP_FILE).pipe(process.stdout);
+  return fs.createReadStream(HELP_FILE).pipe(process.stdout);
 }
 
 /**
@@ -147,6 +153,7 @@ function build () {
  */
 
 function readLine () {
+  const rl = readLine();
   // Interactive mode.
   return readline.createInterface({
     input: process.stdin,
@@ -285,11 +292,39 @@ async function setupConfig () {
 }
 
 /**
+ *
+ *
+ */
+
+async function exportCSV (csvFile) {
+
+  if ('string' !== typeof csvFile) return;
+  if (!path.isAbsolute(csvFile)) csvFile = path.join(process.cwd(), csvFile);
+
+  const collection = Params.collection;
+  if (null == collection || '' === collection) return;
+
+  const cursor = mongodb.collection(collection).find({});
+
+  const data = await cursor.toArray();
+  const csv = array(data).toCSV();
+
+  return fs.promises.writeFile(csvFile, csv);
+}
+
+/**
  * 导入数据
  */
 
-function importCSV (csvFile) {
-  const csv = fs.readFileSync(csvFile);
+async function importCSV (csvFile) {
+  if ('string' !== typeof csvFile) return;
+  if (!path.isAbsolute(csvFile)) csvFile = path.join(process.cwd(), csvFile);
+
+  const csv = await fs.promises.readFile(csvFile).catch(err => {
+    console.log(err);
+    process.exit(); // 读取文件出错时退出进程
+  });
+
   const data = strings.csvToJSON(csv);
   const collection = Params.collection;
   if (null == collection || '' === collection) return;
@@ -300,62 +335,104 @@ function importCSV (csvFile) {
 }
 
 /**
- * 主控制程序 
- *
- * 管理执行顺序及控制逻辑
+ * 设置环境变量
  */
-(async function main () {
 
-  // 设置环境变量
+function setEnvironment () {
   if (Params.devel || Params.development) process.env.NODE_ENV = 'development'; 
   if (Params.devel && Params.devel === 'ui') {
     process.env.DEVEL_UI = true; 
     process.env.PORT=3001;
   }
+
   if (Params.port) process.env.PORT = Number.parseInt(Params.port);
 
+}
+
+/**
+ * 从标准输入读取内容
+ */
+
+function readFromInput (question) {
+  process.stdout.write(String(question));
+
+  return new Promise((resolve, reject) => {
+    if (process.stdin.isPaused()) process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    process.stdin.on('data', (chunk) => {
+      const input = String(chunk).trim();
+      resolve(input);
+      process.stdin.pause();
+    });
+  });
+}
+
+/**
+ * 主控制程序 
+ *
+ * 管理执行顺序及控制逻辑
+ */
+(async function main () {
+  // 设置环境变量
+  setEnvironment();
+  
   // 执行解析的参数命令
-  if (Params.help || Params.h) return showHelp();
-  if (Params.version || Params.v) return showVersion();
-  if (Params.commit) return commit();
+  if (Params.help || Params.h) return await showHelp();       // 显示帮助文件
+  if (Params.version || Params.v) return await showVersion(); // 显示版本号
+  if (Params.commit) return await commit();                   // 提交代码变更
 
   // 以下任务需要读取本地配置文件,需先检测必要的目录
   // 检测并准备必要的目录
-  await readyDir(); 
-  await setupConfig();
+  await readyDir();    // 准备目录
+  await setupConfig(); // 准备配置文件
 
   // 不需要数据连接的任务
   if (Params.build) return await build();
 
+
   // 建立数据连接
   await getDB('mongodb://localhost:27017/yc');
 
-  if (Params.import) {
-    if (Params.import && Params.import === true) {
-      console.log('请提供导入文件路径');
-      process.exit();
-    }
-    const importFile = path.join(process.cwd(), Params.import);
+  const user = await readFromInput('请输入用户名:');
+  const pwd = await readFromInput('请输入密码:');
 
-    importCSV(importFile);
+
+  if (Params.import) {
+    await importCSV(Params.import);
   }
 
-  dba.client.close();
-  return;
+  if (Params.export) {
+    await exportCSV(Params.export);
+    await dba.client.close();
+  }
 
-  // 需要数据连接的任务
-  startHttpd(Params);
+  if (Params.query) {
+    const fn = Fns[Params.query] 
+      ? Fns[Params.query]
+      : () => {}; 
 
-  if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
-    watcher([
-      path.join(ROOT, 'src', 'server'), 
-      path.join(ROOT, 'src', 'schema'), 
-      path.join(ROOT, 'src', 'graphql'), 
-      path.join(ROOT, 'src', 'resolvers'), 
-    ], () => {
-      restartHttpd(Params);
-    });
+    await fn.apply({ db: mongodb, params: Params, });
+    await dba.client.close();
+  }
+
+  if (Params.httpd) {
+    // 需要数据连接的任务
+    startHttpd(Params);
+
+    if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
+      watcher([
+        path.join(ROOT, 'src', 'server'), 
+        path.join(ROOT, 'src', 'schema'), 
+        path.join(ROOT, 'src', 'graphql'), 
+        path.join(ROOT, 'src', 'resolvers'), 
+      ], () => {
+        restartHttpd(Params);
+      });
+    }
   }
 
   if (Params.fork) httpd.unref();
+
+  process.exit(); // 退出进程
 })(); // 立即执行main主程序
