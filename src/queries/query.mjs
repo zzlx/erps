@@ -4,7 +4,7 @@
 
 import console from '../utils/console.mjs';
 import array from '../utils/array.mjs';
-import string from '../utils/string.mjs';
+import string from '../utils/strings.mjs';
 import path from 'path';
 import fs from 'fs';
 

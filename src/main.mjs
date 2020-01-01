@@ -1,4 +1,3 @@
-/******************************************************************************/
 /**
  * 主程序
  *
@@ -6,6 +5,8 @@
  *
  * @file: main.mjs
  */
+
+/******************************************************************************/
 
 // node内置模块
 import fs from 'fs';
@@ -21,6 +22,7 @@ import ISODate from './utils/date.mjs';
 import DBA from '../src/databases/MongoDBA.mjs';
 import console from './utils/console.mjs';
 import argvParser from './utils/argvParser.mjs';
+import strings from './utils/strings.mjs';
 import * as Fns from '../src/queries/index.mjs';
 import './config.env.mjs';
 import { 
@@ -39,8 +41,9 @@ const dsn = () => ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '')
 // 设置主程序模块全局变量
 let httpd = null;
 let mongodb = null;
+let dba = null;
 let Config = {};
-const Params = argvParser(process.argv.slice(2)); // 获取并解析脚本启动参数
+const Params = argvParser(process.argv.slice(2)); // 获取并解析命令行参数
 const rl = readLine();
 
 process.title = APP_NAME; // 设置进程名称
@@ -191,7 +194,7 @@ function watcher (folders, cb) {
  */
 
 function startHttpd (opts) {
-  const log_file = path.join(APP_HOME, `${dsn()}_process.log`); 
+  const log_file = path.join(APP_HOME, 'log', `${dsn()}_process.log`); 
   const log = fs.openSync(log_file, 'a+');
 
   // args
@@ -242,30 +245,19 @@ function readyDir () {
  *
  */
 
-async function getDB() {
-  const user = Params.user || '';
-  const pwd = Params.user && Params.pwd ? Params.pwd : '';
-  const db = Params.db || 'test';
+function getDB(dbURL) {
+  //  
+  const url = dbURL 
+    ? new URL(dbURL)
+    : new URL(Config.mongodb);
 
-  const url = new URL(Config.mongodb);
-  if (user) url.username = user;
-  if (pwd) url.username = pwd;
-  if (db) url.pathname = db;
+  if (Params.user) url.username = Params.user;
+  if (Params.pwd) url.password = Params.pwd;
+  if (Params.db) url.pathname = Params.db;
+  if (null == Params.pwd || null == Params.pwd) { url.password = ''; url.username = ''; }
 
-  try {
-    const dba = new DBA(url.href);
-    let DB = null;
-
-    await dba.client.connect()
-      .then(client => DB = client.db())
-      .catch(err => { 
-        console.log('error: %o', err);
-      });
-
-    return DB;
-  } catch (err) {
-    console.log(err);
-  }
+  dba = new DBA(url.href);
+  return dba.client.connect().then(client => { mongodb = client.db(); });
 }
 
 /**
@@ -290,6 +282,21 @@ async function setupConfig () {
 
   // 写入配置文件
   await fs.promises.writeFile(config_file, JSON.stringify(Config)).catch(e=>null);
+}
+
+/**
+ * 导入数据
+ */
+
+function importCSV (csvFile) {
+  const csv = fs.readFileSync(csvFile);
+  const data = strings.csvToJSON(csv);
+  const collection = Params.collection;
+  if (null == collection || '' === collection) return;
+
+  return mongodb.collection(collection).insertMany(data).then(res => {
+    console.log(res);
+  });
 }
 
 /**
@@ -320,7 +327,21 @@ async function setupConfig () {
   // 不需要数据连接的任务
   if (Params.build) return await build();
 
-  await getDB();
+  // 建立数据连接
+  await getDB('mongodb://localhost:27017/yc');
+
+  if (Params.import) {
+    if (Params.import && Params.import === true) {
+      console.log('请提供导入文件路径');
+      process.exit();
+    }
+    const importFile = path.join(process.cwd(), Params.import);
+
+    importCSV(importFile);
+  }
+
+  dba.client.close();
+  return;
 
   // 需要数据连接的任务
   startHttpd(Params);

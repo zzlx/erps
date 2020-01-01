@@ -115,7 +115,9 @@ function isInteger (value) {
  */
 
 function csvToJSON(csv) {
+  csv = String(csv);
   if ('string' !== typeof csv) throw new TypeError('Must be csv string.');
+
   const retval = [];
   const lines = csv.split(/\r\n|\n/);
   let i = 0, keys;
