@@ -10,14 +10,14 @@ import mongodb from 'mongodb';
 export default new Proxy(mongodb, {
 		apply: function (target, thisArg, argumentsList) {
 				const MongoClient = target['MongoClient'];
-        return new MongoClient(...argumentList);
+        return new MongoClient(...argumentsList);
 		},
 		construct: function (target, argumentsList, newTarget) {
 				newTarget.client = this.apply(target, null, argumentsList);
 				return newTarget; 
 		},
 		get: function (target, property, receiver) {
-				if (name === 'prototype') {
+				if (property === 'prototype') {
 						return target.prototype;
 				}
 

@@ -58,9 +58,9 @@ function progressBar (counter, total, length = 100) {
 
 	barString += '进度:' 
 		+ '['
-		+ String(total) 
-		+ '/'
 		+ String(counter) 
+		+ '/'
+		+ String(total) 
 		+ ']'
 		+ String(percent) + "%";
 

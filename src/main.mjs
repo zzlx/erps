@@ -52,7 +52,7 @@ process.title = APP_NAME; // 设置进程名称
 // 捕获unhandled rejection
 process.on('unhandledRejection', (reason, promise) => {
   console.log('捕获到Rejection:', promise, '\nReason:', reason);
-  if (mongodb) mongodb.close(); // 关闭数据链接
+  //if (mongodb) mongodb.close(); // 关闭数据链接
   process.exit();
 });
 
@@ -64,14 +64,14 @@ process.on('uncaughtException', (err, origin) => {
     `Exception origin: ${origin}`
   );
 
-  if (mongodb) mongodb.close(); // 关闭数据链接
+  //if (null !== mongodb) mongodb.client.close(); // 关闭数据链接
   process.exit();
 });
 
 // 进程退出前执行的任务
 process.on('beforeExit', (code) => {
   //console.log('Process beforeExit event with code: ', code);
-  if (mongodb) mongodb.close(); // 关闭数据链接
+  //if (mongodb) mongodb.close(); // 关闭数据链接
 });
 
 process.on('exit', (code) => {
@@ -390,12 +390,11 @@ function readFromInput (question) {
   // 不需要数据连接的任务
   if (Params.build) return await build();
 
-
   // 建立数据连接
   await getDB('mongodb://localhost:27017/yc');
 
-  const user = await readFromInput('请输入用户名:');
-  const pwd = await readFromInput('请输入密码:');
+  //const user = await readFromInput('请输入用户名:');
+  //const pwd = await readFromInput('请输入密码:');
 
 
   if (Params.import) {
@@ -413,7 +412,7 @@ function readFromInput (question) {
       : () => {}; 
 
     await fn.apply({ db: mongodb, params: Params, });
-    await dba.client.close();
+    //await dba.client.close();
   }
 
   if (Params.httpd) {

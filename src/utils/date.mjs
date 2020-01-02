@@ -65,7 +65,7 @@ function print(date) {
       ? this.date 
       : new Date(); 
 
-	return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${weekday(d)}`;
+	return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
 }
 
 

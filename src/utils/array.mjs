@@ -13,6 +13,7 @@ import date from './date.mjs';
 
 export default function (value) {
     if (!Array.isArray(value)) throw new TypeError('The value is not an array');
+
     return new Proxy(value, {
         get: function (target, prop, receiver) {
             if (prop === 'sort') receiver.sort = sort;
