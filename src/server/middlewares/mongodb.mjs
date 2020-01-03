@@ -9,9 +9,7 @@
  */
 
 import assert from 'assert';
-import { 
-	MongoDBA 
-} from '../../databases/index.mjs';
+import MongoDBA from '../../utils/mongodb.mjs';
 
 export default function (opts = null) {
   // 参数配置

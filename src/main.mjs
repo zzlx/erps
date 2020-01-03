@@ -19,7 +19,7 @@ import webpack from 'webpack'; // webpack模块
 
 // 代码库模块
 import ISODate from './utils/date.mjs';
-import DBA from '../src/databases/MongoDBA.mjs';
+import mongodb from './utils/mongodb.mjs';
 import console from './utils/console.mjs';
 import array from './utils/array.mjs';
 import date from './utils/date.mjs';
@@ -42,7 +42,6 @@ const dsn = () => ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '')
 
 // 设置主程序模块全局变量
 let httpd = null;
-let mongodb = null;
 let dba = null;
 let Config = {};
 const Params = argvParser(process.argv.slice(2)); // 获取并解析命令行参数
@@ -252,26 +251,6 @@ function readyDir () {
  *
  */
 
-function getDB(dbURL) {
-  //  
-  const url = dbURL 
-    ? new URL(dbURL)
-    : new URL(Config.mongodb);
-
-  if (Params.user) url.username = Params.user;
-  if (Params.pwd) url.password = Params.pwd;
-  if (Params.db) url.pathname = Params.db;
-  if (null == Params.pwd || null == Params.pwd) { url.password = ''; url.username = ''; }
-
-  dba = new DBA(url.href);
-  return dba.client.connect().then(client => { mongodb = client.db(); });
-}
-
-/**
- *
- *
- */
-
 async function setupConfig () {
   // 从配置文件中读取配置项目
   const config_file = path.join(APP_HOME, 'config.json');
@@ -391,7 +370,16 @@ function readFromInput (question) {
   if (Params.build) return await build();
 
   // 建立数据连接
-  await getDB('mongodb://localhost:27017/yc');
+  const url = new URL('mongodb://localhost:27017/yc');
+  const client = await mongodb.connect(url.href).catch(err => {
+    if(err.name === 'MongoNetworkError') {
+      process.stdout.write('mongodb服务器网络错误\n'); 
+      process.stdout.write('请确认mongod服务已启动'); 
+      process.exit();
+    }
+  });
+  console.log(client);
+  return;
 
   //const user = await readFromInput('请输入用户名:');
   //const pwd = await readFromInput('请输入密码:');
