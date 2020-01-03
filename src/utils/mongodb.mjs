@@ -15,30 +15,34 @@ import mongodb from 'mongodb';
 export default new Proxy(mongodb, {
 	apply: function (target, thisArg, argumentsList) {
     const MongoClient = target['MongoClient'];
+
+    // 返回client
     return new MongoClient(...argumentsList);
 	},
 
 	construct: function (target, argumentsList, newTarget) {
-    newTarget.MongoClient = this.apply(target, null, argumentsList);
-    return newTarget; 
+    //newTarget.MongoClient = this.apply(target, null, argumentsList);
+    return newTarget; // 返回proxy实例
 	},
 
 	get: function (target, property, receiver) {
 		if (property === 'prototype') return target.prototype;
     if (property === 'connect') {
-      return target['MongoClient'].connect;
-    }
-
-    if (property === 'client') {
-      if (receiver._client) receiver._client;
-      return receiver.MongoClient.connect().then(client => {
+      const MongoClient = target['MongoClient'];
+      return (url) => MongoClient.connect(url).then(client => {
         receiver._client = client;
         return client;
       });
     }
 
+    if (property === 'client') {
+      if (receiver._client) return receiver._client;
+      return null;
+    }
+
     if (property === 'db') {
-      return reveiver._client.db();
+      if (null !== receiver._client) return receiver._client.db();
+      return null;
     }
 
 		return Reflect.get(target, property, receiver);

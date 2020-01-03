@@ -19,7 +19,7 @@ import webpack from 'webpack'; // webpack模块
 
 // 代码库模块
 import ISODate from './utils/date.mjs';
-import mongodb from './utils/mongodb.mjs';
+import MongoDB from './utils/mongodb.mjs';
 import console from './utils/console.mjs';
 import array from './utils/array.mjs';
 import date from './utils/date.mjs';
@@ -41,18 +41,42 @@ import {
 const dsn = () => ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
 
 // 设置主程序模块全局变量
+const dba = new MongoDB();
 let httpd = null;
-let dba = null;
-let Config = {};
+const config_file = path.join(APP_HOME, 'config.json');
+let Config = null;
 const Params = argvParser(process.argv.slice(2)); // 获取并解析命令行参数
+
+/**
+ *
+ */
+
+function readConfig () {
+  return fs.promises.readFile(config_file)
+    .then(config => Config = JSON.parse(config))
+    .catch(e => console.log(e));
+}
+
+//测试argvParser
+//console.log(Params);
+//process.exit(); 
 
 process.title = APP_NAME; // 设置进程名称
 
 // 捕获unhandled rejection
-process.on('unhandledRejection', (reason, promise) => {
-  console.log('捕获到Rejection:', promise, '\nReason:', reason);
-  //if (mongodb) mongodb.close(); // 关闭数据链接
+process.on('unhandledRejection', async (reason, promise) => {
+
+  //console.log('捕获到Rejection:', promise, '\nReason:', reason);
+
+  if (reason.codeName === 'Unauthorized' && reason.code === 13) {
+    Params.user = await readFromInput('请输入数据库用户名:');
+    Params.pwd = await readFromInput('请输入密码:'); 
+    await saveConfig(); // 保存一下配置文件
+    await main();
+  }
+
   process.exit();
+  //if (mongodb) mongodb.close(); // 关闭数据链接
 });
 
 // 捕获exception
@@ -251,23 +275,10 @@ function readyDir () {
  *
  */
 
-async function setupConfig () {
-  // 从配置文件中读取配置项目
-  const config_file = path.join(APP_HOME, 'config.json');
-  const config = await fs.promises.readFile(config_file).catch(e => '{}');
-  Config = JSON.parse(config);
-  
-  if (!Config.mongodb) {
-    await new Promise((resolve, reject) => {
-      rl.question('未配置数据库，请提供数据库url:', answer => {
-        Config.mongodb = new URL(answer).href;
-        resolve();
-      });
-    });
-  }
-
+function saveConfig () {
   // 写入配置文件
-  await fs.promises.writeFile(config_file, JSON.stringify(Config)).catch(e=>null);
+  return fs.promises.writeFile(config_file, JSON.stringify(Config))
+    .catch(e => console.log(e));
 }
 
 /**
@@ -352,7 +363,11 @@ function readFromInput (question) {
  *
  * 管理执行顺序及控制逻辑
  */
-(async function main () {
+async function main () {
+
+  // 读入配置项目 
+  await readConfig();
+
   // 设置环境变量
   setEnvironment();
   
@@ -364,26 +379,29 @@ function readFromInput (question) {
   // 以下任务需要读取本地配置文件,需先检测必要的目录
   // 检测并准备必要的目录
   await readyDir();    // 准备目录
-  await setupConfig(); // 准备配置文件
 
   // 不需要数据连接的任务
   if (Params.build) return await build();
 
   // 建立数据连接
-  const url = new URL('mongodb://localhost:27017/yc');
-  const client = await mongodb.connect(url.href).catch(err => {
+  const url = new URL(Config.mongodb);
+  if (Params.user && Params.pwd) {
+    url.username = Params.user;
+    url.password = Params.pwd;
+    Config.mongodb = url.href;
+    await saveConfig();
+  } 
+
+  await dba.connect(url.href).catch(err => {
     if(err.name === 'MongoNetworkError') {
       process.stdout.write('mongodb服务器网络错误\n'); 
       process.stdout.write('请确认mongod服务已启动'); 
       process.exit();
     }
   });
-  console.log(client);
-  return;
 
   //const user = await readFromInput('请输入用户名:');
   //const pwd = await readFromInput('请输入密码:');
-
 
   if (Params.import) {
     await importCSV(Params.import);
@@ -399,8 +417,8 @@ function readFromInput (question) {
       ? Fns[Params.query]
       : () => {}; 
 
-    await fn.apply({ db: mongodb, params: Params, });
-    //await dba.client.close();
+    await fn.apply({ db: dba.db, params: Params, });
+    await dba.client.close();
   }
 
   if (Params.httpd) {
@@ -422,4 +440,6 @@ function readFromInput (question) {
   if (Params.fork) httpd.unref();
 
   process.exit(); // 退出进程
-})(); // 立即执行main主程序
+}
+
+main(); // 立即执行main主程序

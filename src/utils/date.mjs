@@ -30,12 +30,30 @@ export default new Proxy(Date, {
 
   get: function (target, property, receiver) {
     if (property === 'print') receiver.print = print;
+    if (property === 'format') receiver.format = format;
     if (property === 'toString') receiver.toString = toString;
+    if (property === 'toDateString') receiver.toDateString = toDateString;
     if (property === 'toLocaleISOString') receiver.toLocaleISOString = toLocaleISOString;
 
     return Reflect.get(target, property, receiver);
   },
 });
+
+/**
+ *
+ *
+ */
+
+function toDateString(date) {
+  const d = date 
+    ? new Date(date) 
+    : this && this.date 
+      ? this.date 
+      : new Date(); 
+
+	return toLocaleISOString(d).slice(0,10);
+}
+
 
 /**
  *
@@ -96,18 +114,19 @@ function weekday(date) {
  * @return {string}
  */
 
-function format () {
+function format (date, fmt) {
+  if (fmt == null) {
+    fmt = date;
+    date = null;
+  }
+
   const d = date 
     ? new Date(date) 
     : this && this.date 
       ? this.date 
       : new Date(); 
 
-	// get variables
-  const value = null == this ? arguments[0] : this._value;
-	let fmt = null == this ? arguments[1] : arguments[0];
-
-  const obj = {
+  const o = {
     "M+": this.getMonth() + 1, //月份
     "d+": this.getDate(), //日
     "h+": this.getHours(), //小时
@@ -134,6 +153,7 @@ function format () {
       );
     }
   }
+
   return fmt;
 }
 

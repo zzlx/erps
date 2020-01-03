@@ -32,7 +32,12 @@ export default function argvParser (argvs) {
     const value = match[2];
 		const commands = match[3];
 		
-    if (key) params[key] = value ? value : true;
+    if (key) {
+      params[key] = value ? value : true;
+      if (true === params[key] && argvs[i+1] && null == matcher(argvs[i+1])) {
+        params[key] = argvs[i+1];
+      }
+    }
 
 		if (commands) {
       // 单参数情况时, eg. -o /home/test.txt
