@@ -68,9 +68,7 @@ export default async function () {
       { $group: { 
         _id: null, 
         js: {
-          $sum: {
-            $cond: { if: { $eq: ["$是否还清", '是']}, then: "$借条金额", else: 0, }
-          }
+          $sum: { $cond: { if: { $eq: ["$是否还清", '是']}, then: "$借条金额", else: 0, } }
         }, 
         ws: {
           $sum: {

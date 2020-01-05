@@ -1,8 +1,5 @@
 /**
  *
- *
- *
- *
  */
 
 import console from '../utils/console.mjs';
@@ -14,249 +11,232 @@ import fs from 'fs';
 
 export default async function () {
   //
+  let t_xyr_ll = 'INFO.放贷利率'; 
   let t_xyr_md = 'INFO.嫌疑人_名单_20191218';
   let t_jjdjj_xdq = 't.今借到借据_新调取';
   let t_jdbjj = 'Output.借贷宝借据_1576452725938';
 
+  const ll = await this.db.collection(t_xyr_ll).find().toArray();
+  const llKeyMap = array(ll).keyMap(ll, v => v['放贷主体']);
+
+  /*
+  let jkrtj = new Set();
+  let czcy = '常州存誉';
+  let qdyjh = '启东袁健辉';
+
+  const jjd_jkr = this.db.collection(t_jjdjj_xdq).find({ "业务归属": czcy, });
+
+  let dd = null;
+  while ((dd = await jjd_jkr.next()) !== null) {
+    const jkr = dd['借款人身份证号'];
+    jkrtj.add(jkr);
+  }
+
+  const jdb_jkr = this.db.collection(t_jdbjj).find({ "业务归属": czcy, });
+  dd = null;
+  while ((dd = await jdb_jkr.next()) !== null) {
+    const jkr = dd['发标方身份证号'];
+    jkrtj.add(jkr);
+  }
+
+  console.log(jkrtj.size);
+
+  return;
+  */
+
+  const sum_jjd_je = await this.db.collection(t_jjdjj_xdq).aggregate([
+    {$match: { 
+      "业务归属": {$ne: ""}
+    }},
+    {$group: {
+      _id: '$业务归属',
+      // 既遂金额
+      total_js_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }]}, then: "$借条金额", else: 0, } } },
+      // 未遂金额
+      total_ws_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }]}, then: "$借条金额", else: 0, } } },
+    }}
+  ]).toArray();
+
+  const sum_jdb_je = await this.db.collection(t_jdbjj).aggregate([
+    {$match: { 
+      "业务归属": {$ne: ""}
+    }},
+    {$group: {
+      _id: '$业务归属',
+      // 既遂金额
+      total_js_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }]}, then: "$本金", else: 0, } } },
+      // 未遂金额
+      total_ws_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }]}, then: "$本金", else: 0, } } },
+    }}
+  ]).toArray();
+
+  console.log(sum_jjd_je);
+  console.log(sum_jdb_je);
+  return;
+
+
   const cursor = this.db.collection(t_xyr_md).find({}, {
+    sort: { "所属公司": 1, "序号": 1 },
     projection: { _id: 0},
-    sort: { "所属公司": 1 },
   });
 
+  // 
   let d = null;
-  let number = 0;
-
-  let md = ''
   let counter = 0;
+  let md = ''
 
   while ((d = await cursor.next()) !== null) {
     console.progressBar(counter++, 158);
-
     const xyr_id = d['身份证号'];
-
-    // 统计今借到
-    const jjd_count = await this.db.collection(t_jjdjj_xdq).aggregate([
-      { $match: { '出借人身份证号': xyr_id }},
-      { $group: { _id: null, count: {$sum: 1} }},
-    ]).next();
-
-    const jjd_count_rzqj = await this.db.collection(t_jjdjj_xdq).aggregate([
-      { $match: { 
-        '出借人身份证号': xyr_id, 
-        '起借时间': {
-          $gte: new Date(d['入职时间'] ? d['入职时间'] : '2015-1-1'),
-          $lte: new Date(d['离职时间'] ? d['离职时间'] : '2019-12-31'),
-        }
-      }},
-      { $group: { _id: null, count: {$sum: 1} }},
-    ]).next();
-
-
-    // 最早时间
-    const jjd_count_time_zz = await this.db.collection(t_jjdjj_xdq).findOne( 
-      { '出借人身份证号': xyr_id },
-      { sort: { '借条生成时间': 1}}, 
-    );
-
-    // 最晚时间
-    const jjd_count_time_zw = await this.db.collection(t_jjdjj_xdq).findOne( 
-      { '出借人身份证号': xyr_id },
-      { sort: { '借条生成时间': -1}}, 
-    );
-
-    const jjd_count_jkr = await this.db.collection(t_jjdjj_xdq).aggregate([
-      { $match: { '出借人身份证号': xyr_id }},
-      { $group: { _id: "$借款人姓名" }},
-      { $group: { _id: null, count: {$sum: 1} }},
-    ]).next();
-
-    const jjd_count_jkr_rzqj = await this.db.collection(t_jjdjj_xdq).aggregate([
-      { $match: { 
-        '出借人身份证号': xyr_id,
-        '起借时间': {
-          $gte: new Date(d['入职时间'] ? d['入职时间'] : '2015-1-1'),
-          $lte: new Date(d['离职时间'] ? d['离职时间'] : '2019-12-31'),
-        }
-      }},
-      { $group: { _id: "$借款人姓名" }},
-      { $group: { _id: null, count: {$sum: 1} }},
-    ]).next();
-
-
-    // 今借到金额统计
-    const jjd_count_je = await this.db.collection(t_jjdjj_xdq).aggregate([
-      { $match: { '出借人身份证号': xyr_id }},
-      { $group: { 
-        _id: null, 
-        js: { $sum: { $cond: { if: { $eq: ["$是否还清", '是']}, then: "$借条金额", else: 0, } } }, 
-        ws: { $sum: { $cond: { if: { $eq: ["$是否还清", '是']}, then: 0, else: "$借条金额", } } } 
-      }},
-    ]).next();
-
-    // 今借到金额统计-按入职间
-    const jjd_count_je_rzqj = await this.db.collection(t_jjdjj_xdq).aggregate([
-      { $match: { 
-        '出借人身份证号': xyr_id, 
-        '起借时间': {
-            $gte: new Date(d['入职时间'] ? d['入职时间'] : '2015-1-1'),
-            $lte: new Date(d['离职时间'] ? d['离职时间'] : '2019-12-31'),
-        }
-      }},
-      { $group: { 
-        _id: null, 
-        js: { $sum: { $cond: { if: { $eq: ["$是否还清", '是']}, then: "$借条金额", else: 0, } } }, 
-        ws: { $sum: { $cond: { if: { $eq: ["$是否还清", '是']}, then: 0, else: "$借条金额", } } } 
-      }},
-    ]).next();
-
-    // 统计借贷宝
-    const jdb_count = await this.db.collection(t_jdbjj).aggregate([
-      { $match: { '债权人证件号': xyr_id }},
-      { $group: { _id: null, count: {$sum: 1} }},
-    ]).next();
-
-    const jdb_count_rzqj = await this.db.collection(t_jdbjj).aggregate([
-      { $match: { 
-        '债权人证件号': xyr_id,
-        '借出时间': {
-            $gte: new Date(d['入职时间'] ? d['入职时间'] : '2015-1-1'),
-            $lte: new Date(d['离职时间'] ? d['离职时间'] : '2019-12-31'),
-        }
-      }},
-      { $group: { _id: null, count: {$sum: 1} }},
-    ]).next();
-
-
-    // 最早时间
-    const jdb_count_time_zz = await this.db.collection(t_jdbjj).findOne( 
-      { '债权人证件号': xyr_id },
-      { sort: { '借出时间': 1}}, 
-    );
-
-    // 最晚时间
-    const jdb_count_time_zw = await this.db.collection(t_jdbjj).findOne( 
-      { '债权人证件号': xyr_id },
-      { sort: { '借出时间': -1}}, 
-    );
-
-    const jdb_count_jkr = await this.db.collection(t_jdbjj).aggregate([
-      { $match: { '债权人证件号': xyr_id }},
-      { $group: { _id: "$发标方身份证号" }},
-      { $group: { _id: null, count: {$sum: 1} }},
-    ]).next();
-    
-    const jdb_count_jkr_rzqj = await this.db.collection(t_jdbjj).aggregate([
-      { $match: { 
-        '债权人证件号': xyr_id,
-        '借出时间': {
-            $gte: new Date(d['入职时间'] ? d['入职时间'] : '2015-1-1'),
-            $lte: new Date(d['离职时间'] ? d['离职时间'] : '2019-12-31'),
-        }
-      }},
-      { $group: { _id: "$发标方身份证号" }},
-      { $group: { _id: null, count: {$sum: 1} }},
-    ]).next();
-    
-    // 统计借贷宝金额
-    const jdb_count_je = await this.db.collection(t_jdbjj).aggregate([
-      { $match: { '债权人证件号': xyr_id }},
-      { $group: { 
-        _id: null, 
-        js: { $sum: { $cond: { if: { $eq: ["$是否还清", '是']}, then: "$本金", else: 0, } } }, 
-        ws: { $sum: { $cond: { if: { $eq: ["$是否还清", '是']}, then: 0, else: "$本金", } }
-        } 
-      }},
-    ]).next();
-
-    const jdb_count_je_rzqj = await this.db.collection(t_jdbjj).aggregate([
-      { $match: { 
-        '债权人证件号': xyr_id,
-        '借出时间': {
-          $gte: new Date(d['入职时间'] ? d['入职时间'] : '2015-1-1'),
-          $lte: new Date(d['离职时间'] ? d['离职时间'] : '2019-12-31'),
-        }
-      }},
-      { $group: { 
-        _id: null, 
-        js: { $sum: { $cond: { if: { $eq: ["$是否还清", '是']}, then: "$本金", else: 0, } } }, 
-        ws: { $sum: { $cond: { if: { $eq: ["$是否还清", '是']}, then: 0, else: "$本金", } }
-        } 
-      }},
-    ]).next();
-    
-    
-    const t = {
-      'jdb_jkrs': jdb_count_jkr ? jdb_count_jkr.count : 0,
-      'jdb_jybs': jdb_count ? jdb_count.count : 0,
-
-      'jdb_jkrs_rzqj': jdb_count_jkr_rzqj ? jdb_count_jkr.count_rzqj : 0,
-      'jdb_jybs_rzqj': jdb_count_rzqj ? jdb_count.count_rzqj : 0,
-
-      'jdb_js_jtje': jdb_count_je ? jdb_count_je.js : 0,
-      'jdb_ws_jtje': jdb_count_je ? jdb_count_je.ws : 0,
-
-      'jdb_js_jtje_rzqj': jdb_count_je_rzqj ? jdb_count_je_rzqj.js : 0,
-      'jdb_ws_jtje_rzqj': jdb_count_je_rzqj ? jdb_count_je_rzqj.ws : 0,
-
-      'jjd_jkrs': jjd_count_jkr ? jjd_count_jkr.count : 0,
-      'jjd_jybs': jjd_count ? jjd_count.count : 0,
-
-      'jjd_jkrs_rzqj': jjd_count_jkr_rzqj ? jjd_count_jkr.count_rzqj : 0,
-      'jjd_jybs_rzqj': jjd_count_rzqj ? jjd_count.count_rzqj : 0,
-
-      'jjd_js_jtje': jjd_count_je ? jjd_count_je.js : 0,
-      'jjd_ws_jtje': jjd_count_je ? jjd_count_je.ws : 0,
-
-      'jjd_js_jtje_rzqj': jjd_count_je_rzqj ? jjd_count_je_rzqj.js : 0,
-      'jjd_ws_jtje_rzqj': jjd_count_je_rzqj ? jjd_count_je_rzqj.ws : 0,
-
-      'jdb_zzjyrq': jdb_count_time_zz ? date.print(jdb_count_time_zz['借出时间']) : '暂未获取',
-      'jdb_zwjyrq': jdb_count_time_zw ? date.print(jdb_count_time_zw['借出时间']) : '至今', 
-      'jjd_zzjyrq': jjd_count_time_zz ? date.print(jjd_count_time_zz['借条生成时间']) : '暂未获取',
-      'jjd_zwjyrq': jjd_count_time_zw ? date.print(jjd_count_time_zw['借条生成时间']) : '至今', 
-
-      'rzsj': d['入职时间'] ? date.print(d['入职时间']) : '暂未获取',
-      'lzsj': d['离职时间'] ? date.print(d['离职时间']) : '至今',
-    }
+    const xyr_corp = d['公司'];
+    const xyr_name = d['姓名'];
+    const rate_gr = llKeyMap[xyr_name] ? llKeyMap[xyr_name]['利率'] : 0;
+    const rate_gs = llKeyMap[xyr_corp] ? llKeyMap[xyr_corp]['利率'] : 0;
+    const isPrivate = xyr_corp === xyr_name;
+    let temp = null;
 
     md += `
-##### ${++number}.${d['姓名']}
+##### ${counter}.${d['姓名']}
 
-姓名: ${d['姓名']} (证件编号: ${d['身份证号']}) 
+证件号码: ${xyr_id}
 `;
 
-    if (d['姓名'] !== d['所属公司']) {
-      md += `所属公司: ${d['所属公司']}`;
-    } else {
-      md += `业务分类: 个人放贷业务`;
-    }
+    md += isPrivate ?  `放贷业务分类: 个人放贷业务` : 
+`所属公司: ${d['公司']}
+任职期间: ${d['入职时间'] ? date.print(d['入职时间']) : ''}~${d['离职时间'] ? date.print(d['离职时间']) : '无'}
+`;
 
-    if (t['jdb_jybs'] > 0) {
-      md += `
-* 借贷宝平台
+    const jdb_sum = await this.db.collection(t_jdbjj).aggregate([
+      { $match: { '债权人证件号': xyr_id, '业务归属': {$ne: ""} }},
+      { $group: {
+        _id: null,
+        // 个人既遂金额
+        total_gr_js_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$ne: ['$业务归属', xyr_corp]}]}, then: "$本金", else: 0, } } },
+        // 个人既遂数量
+        total_gr_js_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$ne: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+        // 个人未遂金额
+        total_gr_ws_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$ne: ['$业务归属', xyr_corp]}]}, then: "$本金", else: 0, } } },
+        // 个人未遂数量
+        total_gr_ws_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$ne: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
 
-| 项目 | 日期范围    | 既遂借据金额 | 未遂借据金额 | 借据总金额 | 借据笔数 | 借款人数 | 备注 |
-| :--: | :------      | :------: | :----------: | :----------: | :---: | :------: | :--: |
-| 全部交易 | ${t['jdb_zzjyrq']}~${t['jdb_zwjyrq']}| ${t['jdb_js_jtje']} | ${t['jdb_ws_jtje']} | ${t['jdb_js_jtje'] + t['jdb_ws_jtje']} | ${t['jdb_jybs']} | ${t['jdb_jkrs']} | . |
-| 任职期间 | ${t['rzsj']}~${t['lzsj']} | ${t['jdb_js_jtje_rzqj']} | ${t['jdb_ws_jtje_rzqj']} | ${t['jdb_js_jtje_rzqj'] + t['jdb_ws_jtje_rzqj']} | ${t['jdb_jybs_rzqj']} | ${t['jdb_jkrs_rzqj']} | . |
-      `; 
-    }
+        // 公司既遂金额
+        total_gs_js_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: "$本金", else: 0, } } },
+        // 公司既遂数量
+        total_gs_js_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+        // 公司未遂金额
+        total_gs_ws_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: "$本金", else: 0, } } },
+        // 公司未遂数量
+        total_gs_ws_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+      }},
+    ]).next();
 
-    if (t['jjd_jybs'] > 0) {
-      md += `
-* 今借到平台
+    const jjd_sum = await this.db.collection(t_jjdjj_xdq).aggregate([
+      { $match: { '出借人身份证号': xyr_id, '业务归属': {$ne: ""} }},
+      { $group: {
+        _id: null,
+        // 个人既遂金额
+        total_gr_js_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$ne: ['$业务归属', xyr_corp]}]}, then: "$借条金额", else: 0, } } },
+        // 个人既遂数量
+        total_gr_js_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$ne: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+        // 个人未遂金额
+        total_gr_ws_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$ne: ['$业务归属', xyr_corp]}]}, then: "$借条金额", else: 0, } } },
+        // 个人未遂数量
+        total_gr_ws_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$ne: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
 
-| 项目 | 日期范围    | 既遂借据金额 | 未遂借据金额 | 借据总金额 | 借据笔数 | 借款人数 | 备注 |
-| :--: | :------      | :------: | :----------: | :----------: | :---: | :------: | :--: |
-| 全部交易 | ${t['jjd_zzjyrq']}~${t['jjd_zwjyrq']}| ${t['jjd_js_jtje']} | ${t['jjd_ws_jtje']} | ${t['jjd_js_jtje'] + t['jjd_ws_jtje']} | ${t['jjd_jybs']} | ${t['jjd_jkrs']} | . |
-| 任职期间 | ${t['rzsj']}~${t['lzsj']} | ${t['jjd_js_jtje_rzqj']} | ${t['jjd_ws_jtje_rzqj']} | ${t['jjd_js_jtje_rzqj'] + t['jjd_ws_jtje_rzqj']} | ${t['jjd_jybs_rzqj']} | ${t['jjd_jkrs_rzqj']} | . |
-      `; 
-    }
+        // 公司既遂金额
+        total_gs_js_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: "$借条金额", else: 0, } } },
+        // 公司既遂数量
+        total_gs_js_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+        // 公司未遂金额
+        total_gs_ws_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: "$借条金额", else: 0, } } },
+        // 公司未遂数量
+        total_gs_ws_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+      }}
+    ]).next();
 
-    if (!t['jdb_jybs'] && !t['jjd_jybs']) {
-      md += `**无借贷平台(今借到、借贷宝)交易记录.**`;
-    }
+    md += jjd_sum || jdb_sum ? `
+* 借贷平台账户记录
 
+| 借据分类 | 既遂借据笔数 | 未遂借据笔数 | 既遂借据金额 | 未遂借据金额 | 既遂金额 | 未遂金额 | 诈骗总金额 | 适用利率 |
+| :--: | :----------: | :----------: | ----------: | ----------: | ------: | ------: | --------: | :--: |` : '';
+
+    md += jdb_sum && (jdb_sum.total_gr_js_sl || jdb_sum.total_gr_ws_sl) ?  `
+| 借贷宝账户用于个人放贷 | ${jdb_sum.total_gr_js_sl} | ${jdb_sum.total_gr_ws_sl} | ${jdb_sum.total_gr_js_je} | ${jdb_sum.total_gr_ws_je} | ${Number(jdb_sum.total_gr_js_je * rate_gr).toFixed()}  | ${Number(jdb_sum.total_gr_ws_je * rate_gr).toFixed()} | ${Number((jdb_sum.total_gr_js_je + jdb_sum.total_gr_ws_je) * rate_gr).toFixed()} | ${rate_gr ? rate_gr : '--'} | ` : ''; 
+
+    md += jdb_sum && (jdb_sum.total_gs_js_sl || jdb_sum.total_gs_ws_sl) ? `
+| 借贷宝账户用于公司放贷 | ${jdb_sum.total_gs_js_sl} | ${jdb_sum.total_gs_ws_sl} | ${jdb_sum.total_gs_js_je} | ${jdb_sum.total_gs_ws_je} | ${Number(jdb_sum.total_gs_js_je * rate_gs).toFixed()}  | ${Number(jdb_sum.total_gs_ws_je * rate_gs).toFixed()} | ${Number((jdb_sum.total_gs_js_je + jdb_sum.total_gs_ws_je) * rate_gs).toFixed()} | ${rate_gs ? rate_gs : '--'} | ` : ''; 
+
+    md += jjd_sum && (jjd_sum.total_gr_js_sl || jjd_sum.total_gr_ws_sl) ?  `
+| 今借到账户用于个人放贷 | ${jjd_sum.total_gr_js_sl} | ${jjd_sum.total_gr_ws_sl} | ${jjd_sum.total_gr_js_je} | ${jjd_sum.total_gr_ws_je} | ${Number(jjd_sum.total_gr_js_je * rate_gr).toFixed()}  | ${Number(jjd_sum.total_gr_ws_je * rate_gr).toFixed()} | ${Number((jjd_sum.total_gr_js_je + jjd_sum.total_gr_ws_je) * rate_gr).toFixed()} | ${rate_gr ? rate_gr : '--'} | ` : ''; 
+
+    md += jjd_sum && (jjd_sum.total_gs_js_sl || jjd_sum.total_gs_ws_sl) ?  `
+| 今借到账户用于公司放贷 | ${jjd_sum.total_gs_js_sl} | ${jjd_sum.total_gs_ws_sl} | ${jjd_sum.total_gs_js_je} | ${jjd_sum.total_gs_ws_je} | ${Number(jjd_sum.total_gs_js_je * rate_gs).toFixed()}  | ${Number(jjd_sum.total_gs_ws_je * rate_gs).toFixed()} | ${Number((jjd_sum.total_gs_js_je + jjd_sum.total_gs_ws_je) * rate_gs).toFixed()} | ${rate_gs ? rate_gs : '--'} | ` : ''; 
+
+    // 无个人账户情况
+    md += jjd_sum || jdb_sum ? '' : `无借贷宝、今借到网贷平台账户。`;
+
+    if (isPrivate) continue;
+
+    // 任职期间情况统计
+    const jdb_sum_rzqj = await this.db.collection(t_jdbjj).aggregate([
+      { $match: { 
+        '业务归属': xyr_corp,
+        '借出时间': {
+          $gte: new Date(d['入职时间'] || '2010-01-01'),
+          $lte: new Date(d['离职时间'] || '2019-12-01'),
+        }
+      }},
+      { $group: {
+        _id: null,
+        // 既遂金额
+        total_js_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: "$本金", else: 0, } } },
+        // 既遂数量
+        total_js_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+        // 未遂金额
+        total_ws_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: "$本金", else: 0, } } },
+        // 未遂数量
+        total_ws_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+
+      }},
+    ]).next();
+
+    // 任职期间情况统计
+    const jjd_sum_rzqj = await this.db.collection(t_jjdjj_xdq).aggregate([
+      { $match: { 
+        '业务归属': xyr_corp,
+        '起借时间': {
+          $gte: new Date(d['入职时间'] ? d['入职时间'] : '2010-01-01'),
+          $lte: new Date(d['离职时间'] ? d['离职时间'] : '2019-12-01'),
+        }
+      }},
+      { $group: {
+        _id: null,
+        // 既遂金额
+        total_js_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: "$借条金额", else: 0, } } },
+        // 既遂数量
+        total_js_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '是'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+        // 未遂金额
+        total_ws_je: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: "$借条金额", else: 0, } } },
+        // 未遂数量
+        total_ws_sl: { $sum: { $cond: { if: { $and: [{ $eq: ["$是否还清", '否'] }, {$eq: ['$业务归属', xyr_corp]}]}, then: 1, else: 0, } } },
+
+      }},
+    ]).next();
+
+    md += jdb_sum_rzqj || jjd_sum_rzqj ? `
+* 任职期间所属公司诈骗数额统计
+
+| 借贷平台 | 既遂借据笔数 | 未遂借据笔数 | 既遂借据金额 | 未遂借据金额 | 既遂金额 | 未遂金额 | 诈骗总金额 | 适用利率 |
+| :--: | :----------: | :----------: | ----------: | ----------: | ------: | ------: | --------: | :--: | ` : '';
+
+    md += jdb_sum_rzqj ?  `
+| 借贷宝 | ${jdb_sum_rzqj.total_js_sl} | ${jdb_sum_rzqj.total_ws_sl} | ${jdb_sum_rzqj.total_js_je} | ${jdb_sum_rzqj.total_ws_je} | ${Number(jdb_sum_rzqj.total_js_je * rate_gs).toFixed()}  | ${Number(jdb_sum_rzqj.total_ws_je * rate_gs).toFixed()} | ${Number((jdb_sum_rzqj.total_js_je + jdb_sum_rzqj.total_ws_je) * rate_gs).toFixed()} | ${rate_gs ? rate_gs : '--'} | ` : "";
+    md += jjd_sum_rzqj ?  `
+| 今借到 | ${jjd_sum_rzqj.total_js_sl} | ${jjd_sum_rzqj.total_ws_sl} | ${jjd_sum_rzqj.total_js_je} | ${jjd_sum_rzqj.total_ws_je} | ${Number(jjd_sum_rzqj.total_js_je * rate_gs).toFixed()}  | ${Number(jjd_sum_rzqj.total_ws_je * rate_gs).toFixed()} | ${Number((jjd_sum_rzqj.total_js_je + jjd_sum_rzqj.total_ws_je) * rate_gs).toFixed()} | ${rate_gs ? rate_gs : '--'} | ` : ""; 
+
+    md += jjd_sum_rzqj && jdb_sum_rzqj ?  `
+| 合计 | ${jjd_sum_rzqj.total_js_sl + jdb_sum_rzqj.total_js_sl} | ${jjd_sum_rzqj.total_ws_sl + jdb_sum_rzqj.total_ws_sl} | ${jjd_sum_rzqj.total_js_je + jdb_sum_rzqj.total_js_je} | ${jjd_sum_rzqj.total_ws_je + jdb_sum_rzqj.total_ws_je} | ${
+  Number(jjd_sum_rzqj.total_js_je * rate_gs + jdb_sum_rzqj.total_js_je * rate_gs).toFixed() }  | ${ Number(jjd_sum_rzqj.total_ws_je * rate_gs + jdb_sum_rzqj.total_ws_je * rate_gs).toFixed() } | ${ Number((jjd_sum_rzqj.total_js_je + jjd_sum_rzqj.total_ws_je) * rate_gs + (jdb_sum_rzqj.total_js_je + jdb_sum_rzqj.total_ws_je) * rate_gs).toFixed() } | ${rate_gs ? rate_gs : '--'} | ` : ""; 
   }
 
   const mdFile = path.join(process.cwd(), '统计汇总表_' + Date.now() + '.md');

@@ -66,7 +66,7 @@ process.title = APP_NAME; // 设置进程名称
 // 捕获unhandled rejection
 process.on('unhandledRejection', async (reason, promise) => {
 
-  //console.log('捕获到Rejection:', promise, '\nReason:', reason);
+  console.log('捕获到Rejection:', promise, '\nReason:', reason);
 
   if (reason.codeName === 'Unauthorized' && reason.code === 13) {
     Params.user = await readFromInput('请输入数据库用户名:');
