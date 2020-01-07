@@ -11,21 +11,17 @@
 
 import date from './date.mjs';
 
-export default function (value) {
-    if (!Array.isArray(value)) throw new TypeError('The value is not an array');
+export default new Proxy(Array, {
+  get: function (target, prop, receiver) {
+    if (prop === 'sort') receiver.sort = sort;
+    if (prop === 'toCSV') receiver.toCSV = toCSV;
+    if (prop === 'keyMap') receiver.keyMap = keyMap;
+    if (prop === 'groupBy') receiver.groupBy = groupBy;
+    if (prop === 'sum') receiver.sum = sum;
 
-    return new Proxy(value, {
-        get: function (target, prop, receiver) {
-            if (prop === 'sort') receiver.sort = sort;
-            if (prop === 'toCSV') receiver.toCSV = toCSV;
-            if (prop === 'keyMap') receiver.keyMap = keyMap;
-            if (prop === 'groupBy') receiver.groupBy = groupBy;
-            if (prop === 'sum') receiver.sum = sum;
-
-            return Reflect.get(target, prop, receiver);
-        }
-    });
-}
+    return Reflect.get(target, prop, receiver);
+  }
+});
 
 function sort (types) {
   types.sort((a, b) => {
@@ -202,4 +198,24 @@ function makeIterator (array) {
 		hasNext: () => nextIndex < array.length,
 		next: () => nextIndex < array.length ? array[nextIndex++] : null,
 	}
+}
+
+/**
+ *
+ *
+ */
+
+function getMaxOne(map) {
+	let maxKey = null;
+	let maxValue = 0;
+
+	for (let key of map.keys()) {
+		const value = map.get(key);
+		if (value > maxValue) {
+			maxKey = key;
+			maxValue = value;
+		}
+	}
+
+	return maxKey;
 }

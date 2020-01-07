@@ -24,7 +24,7 @@ export default new Proxy(Date, {
    */
 
   construct: function (target, argumentsList, newTarget) {
-    newTarget.date = this.apply(target, null, argumentsList); 
+    newTarget._date = this.apply(target, null, argumentsList); 
     return newTarget; 
   },
 
@@ -45,11 +45,7 @@ export default new Proxy(Date, {
  */
 
 function toDateString(date) {
-  const d = date 
-    ? new Date(date) 
-    : this && this.date 
-      ? this.date 
-      : new Date(); 
+  const d = date ? new Date(date) : this && this._date ? this._date : new Date();
 
 	return toLocaleISOString(d).slice(0,10);
 }
@@ -61,11 +57,7 @@ function toDateString(date) {
  */
 
 function toString(date) {
-  const d = date 
-    ? new Date(date) 
-    : this && this.date 
-      ? this.date 
-      : new Date(); 
+  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
 
 	return toLocaleISOString(d).slice(0,19).replace('T', ' ');
 }
@@ -77,11 +69,7 @@ function toString(date) {
  */
 
 function print(date) {
-  const d = date 
-    ? new Date(date) 
-    : this && this.date 
-      ? this.date 
-      : new Date(); 
+  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
 
 	return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
 }
@@ -96,11 +84,7 @@ function print(date) {
  */
 
 function weekday(date) {
-  const d = date 
-    ? new Date(date) 
-    : this && this.date 
-      ? this.date 
-      : new Date(); 
+  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
 
 	const day = ['日', '一', '二', '三', '四', '五', '六'];
 	return '星期' + day[d.getDay()];
@@ -166,11 +150,7 @@ function format (date, fmt) {
  */
 
 function toLocaleISOString (date) {
-  const d = date 
-    ? new Date(date) 
-    : this && this.date 
-      ? this.date 
-      : new Date(); 
+  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
 
 	const tzOffset = (d.getTimezoneOffset())/60;
 	const timestamp = d.valueOf() - tzOffset * 3600000;
@@ -179,15 +159,14 @@ function toLocaleISOString (date) {
 }
 
 /**
- * 计算t+n日期
+ * 计算t+n
+ *
+ * @param: {} date
+ *
  */
 
 function tPlusN (date, n) {
-  const d = date 
-    ? new Date(date) 
-    : this && this.date 
-      ? this.date 
-      : new Date(); 
+  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
 
 	n = n ? n : 1;
 	const date_today = d.toLocaleString().replace(/\s.*/, '');

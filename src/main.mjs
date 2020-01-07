@@ -1,7 +1,7 @@
 /**
  * 主程序
  *
- * 用于初始化系统环境及系统服务启动
+ * 用于初始化系统环境及启动系统服务
  *
  * @file: main.mjs
  */
@@ -24,6 +24,7 @@ import console from './utils/console.mjs';
 import array from './utils/array.mjs';
 import date from './utils/date.mjs';
 import argvParser from './utils/argvParser.mjs';
+import envParser from './utils/envParser.mjs';
 import strings from './utils/strings.mjs';
 import * as Fns from '../src/queries/index.mjs';
 import './config.env.mjs';
@@ -39,6 +40,13 @@ import {
 } from './config.common.mjs';
 
 const dsn = () => ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
+
+// 
+const envObj = envParser(fs.readFileSync(DOT_ENV_FILE));
+for (let k of Object.keys(envObj)) {
+  if (process.env[k]) continue;
+  process.env[k] = envObj[k];
+}
 
 // 设置主程序模块全局变量
 const dba = new MongoDB();
@@ -57,56 +65,60 @@ function readConfig () {
     .catch(e => console.log(e));
 }
 
-//测试argvParser
-//console.log(Params);
-//process.exit(); 
+function processConfig () {
 
-process.title = APP_NAME; // 设置进程名称
+  //测试argvParser
+  //console.log(Params);
+  //process.exit(); 
 
-// 捕获unhandled rejection
-process.on('unhandledRejection', async (reason, promise) => {
+  process.title = APP_NAME; // 设置进程名称
 
-  console.log('捕获到Rejection:', promise, '\nReason:', reason);
+  // 捕获unhandled rejection
+  process.on('unhandledRejection', async (reason, promise) => {
 
-  if (reason.codeName === 'Unauthorized' && reason.code === 13) {
-    Params.user = await readFromInput('请输入数据库用户名:');
-    Params.pwd = await readFromInput('请输入密码:'); 
-    await saveConfig(); // 保存一下配置文件
-    await main();
-  }
+    console.log('捕获到Rejection:', promise, '\nReason:', reason);
 
-  process.exit();
-  //if (mongodb) mongodb.close(); // 关闭数据链接
-});
+    if (reason.codeName === 'Unauthorized' && reason.code === 13) {
+      Params.user = await readFromInput('请输入数据库用户名:');
+      Params.pwd = await readFromInput('请输入密码:'); 
+      await saveConfig(); // 保存一下配置文件
+      await main();
+    }
 
-// 捕获exception
-process.on('uncaughtException', (err, origin) => {
-  fs.writeSync(
-    process.stderr.fd,
-    `Caught exception: ${err}\n` +
-    `Exception origin: ${origin}`
-  );
+    process.exit();
+    //if (mongodb) mongodb.close(); // 关闭数据链接
+  });
 
-  //if (null !== mongodb) mongodb.client.close(); // 关闭数据链接
-  process.exit();
-});
+  // 捕获exception
+  process.on('uncaughtException', (err, origin) => {
+    fs.writeSync(
+      process.stderr.fd,
+      `Caught exception: ${err}\n` +
+      `Exception origin: ${origin}`
+    );
 
-// 进程退出前执行的任务
-process.on('beforeExit', (code) => {
-  //console.log('Process beforeExit event with code: ', code);
-  //if (mongodb) mongodb.close(); // 关闭数据链接
-});
+    //if (null !== mongodb) mongodb.client.close(); // 关闭数据链接
+    process.exit();
+  });
 
-process.on('exit', (code) => {
-  if (process.env.NODE_ENV !== 'development') return; // 仅在开发模式下显示退出状态
+  // 进程退出前执行的任务
+  process.on('beforeExit', (code) => {
+    //console.log('Process beforeExit event with code: ', code);
+    //if (mongodb) mongodb.close(); // 关闭数据链接
+  });
 
-  const status = {
-    'exitCode': code,
-    uptime: process.uptime(),
-  };
+  process.on('exit', (code) => {
+    if (process.env.NODE_ENV !== 'development') return; // 仅在开发模式下显示退出状态
 
-  console.log('Process status: %o', status);
-});
+    const status = {
+      'exitCode': code,
+      uptime: process.uptime(),
+    };
+
+    console.log('Process status: %o', status);
+  });
+
+}
 
 /**
  * show help
@@ -341,14 +353,29 @@ function setEnvironment () {
 
 /**
  * 从标准输入读取内容
+ *
+ * @param: {string} question
+ * @param: {bool} password 是否显示*号代替输入字符 
+ *
  */
 
-function readFromInput (question) {
+function readFromInput (question, password = false) {
   process.stdout.write(String(question));
 
+  // 开始从标准输入读入数据
   return new Promise((resolve, reject) => {
     if (process.stdin.isPaused()) process.stdin.resume();
     process.stdin.setEncoding('utf8');
+
+    /*
+    process.stdin.on('readable', () => {
+      let chunk = null;
+      while((chunk = process.stdin.read()) !== null) {
+         process.stdout.write(`data: ${chunk}`);
+      }
+
+    });
+    */
 
     process.stdin.on('data', (chunk) => {
       const input = String(chunk).trim();
@@ -364,6 +391,9 @@ function readFromInput (question) {
  * 管理执行顺序及控制逻辑
  */
 async function main () {
+
+  // 配置进程
+  processConfig();
 
   // 读入配置项目 
   await readConfig();
@@ -439,7 +469,6 @@ async function main () {
 
   if (Params.fork) httpd.unref();
 
-  process.exit(); // 退出进程
 }
 
 main(); // 立即执行main主程序
