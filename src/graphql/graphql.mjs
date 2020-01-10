@@ -1,5 +1,6 @@
 /**
  * GraphQL
+ *
  */
 
 import { validateSchema } from './type/validate.mjs';
@@ -8,15 +9,16 @@ import { validate } from './validation/validate.mjs';
 import { execute } from './execution/execute.mjs';
 
 export function graphql(opts) {
+
   if (arguments.length > 1) {
     opts = Object.create(null);
-    opts.schema = _arguments[0];
-    opts.source = _arguments[1];
-    opts.rootValue = _arguments[2];
-    opts.contextValue = _arguments[3];
-    opts.variableValues = _arguments[4];
-    opts.operationName = _arguments[5];
-    opts.fieldResolver = _arguments[6];
+    opts.schema = arguments[0];
+    opts.source = arguments[1];
+    opts.rootValue = arguments[2];
+    opts.contextValue = arguments[3];
+    opts.variableValues = arguments[4];
+    opts.operationName = arguments[5];
+    opts.fieldResolver = arguments[6];
   }
 
   // Always return a Promise for a consistent API.
@@ -32,25 +34,27 @@ export function graphql(opts) {
 }
 
 function graphqlImpl(
-  schema, source, rootValue, contextValue, variableValues, operationName, fieldResolver 
+  schema, 
+  source, 
+  rootValue, 
+  contextValue, 
+  variableValues, 
+  operationName, 
+  fieldResolver 
 ) {
+  let document = null;
+
   // Validate Schema
   const schemaValidationErrors = validateSchema(schema);
 
   if (schemaValidationErrors.length > 0) {
-    return {
-      errors: schemaValidationErrors
-    };
+    return { errors: schemaValidationErrors };
   } 
 
-  let document;
   try {
-    // Parse 
     document = parse(source);
   } catch (syntaxError) {
-    return {
-      errors: [syntaxError]
-    };
+    return { errors: [syntaxError] };
   } 
 
   // Validate

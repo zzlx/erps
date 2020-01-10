@@ -1,14 +1,10 @@
 /**
- *
- *
- *
- *
- *
+ * 
  *
  *
  */
 
-export default function only (obj, keys){
+export default function only (obj, keys) {
   obj = obj || {};
   if ('string' == typeof keys) keys = keys.split(/ +/);
 
@@ -17,4 +13,4 @@ export default function only (obj, keys){
     ret[key] = obj[key];
     return ret;
   }, {});
-};
+}

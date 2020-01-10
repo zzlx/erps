@@ -1,9 +1,24 @@
 /**
- * PDF解析器
+ *
+ * PDF解析生成器
+ *
  */
 
-export default new Proxy({}, {
-});
+export default class PDF {
 
-function () {
+  /**
+   * 读取pdf文件,并解析
+   */
+
+  read () {
+  }
+
+  /**
+   *
+   *
+   */
+
+  export () {
+  }
+
 }

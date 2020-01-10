@@ -56,6 +56,97 @@ let Config = null;
 const Params = argvParser(process.argv.slice(2)); // 获取并解析命令行参数
 
 /**
+ * 主控制程序 
+ *
+ * 管理执行顺序及控制逻辑
+ */
+
+async function main () {
+
+  // 配置进程
+  processConfig();
+
+  // 读入配置项目 
+  await readConfig();
+
+  // 设置环境变量
+  setEnvironment();
+  
+  // 执行解析的参数命令
+  if (Params.help || Params.h) return await showHelp();       // 显示帮助文件
+  if (Params.version || Params.v) return await showVersion(); // 显示版本号
+  if (Params.commit) return await commit();                   // 提交代码变更
+
+  // 以下任务需要读取本地配置文件,需先检测必要的目录
+  // 检测并准备必要的目录
+  await readyDir();    // 准备目录
+
+  // 不需要数据连接的任务
+  if (Params.build) return await build();
+
+  // 建立数据连接
+  const url = new URL(Config.mongodb);
+
+  if (Params.user && Params.pwd) {
+    url.username = Params.user;
+    url.password = Params.pwd;
+    Config.mongodb = url.href;
+    await saveConfig();
+  } 
+
+  await dba.connect(url.href).catch(err => {
+    if(err.name === 'MongoNetworkError') {
+      process.stdout.write('mongodb服务器网络错误\n'); 
+      process.stdout.write('请确认mongod服务已启动'); 
+      process.exit();
+    }
+  });
+
+  //const user = await readFromInput('请输入用户名:');
+  //const pwd = await readFromInput('请输入密码:');
+
+  if (Params.import) {
+    await importCSV(Params.import);
+  }
+
+  if (Params.export) {
+    await exportCSV(Params.export);
+    await dba.client.close();
+  }
+
+  if (Params.query) {
+    const fn = Fns[Params.query] 
+      ? Fns[Params.query]
+      : () => {}; 
+
+    await fn.apply({ db: dba.db, params: Params, });
+    await dba.client.close();
+  }
+
+  if (Params.httpd) {
+    // 需要数据连接的任务
+    startHttpd(Params);
+
+    if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
+      watcher([
+        path.join(ROOT, 'src', 'backend'), 
+        path.join(ROOT, 'src', 'schema'), 
+        path.join(ROOT, 'src', 'graphql'), 
+        path.join(ROOT, 'src', 'resolvers'), 
+      ], () => {
+        restartHttpd(Params);
+      });
+    }
+  }
+
+  if (Params.fork) httpd.unref();
+
+}
+
+main(); // 立即执行main主程序
+
+
+/**
  *
  */
 
@@ -66,11 +157,6 @@ function readConfig () {
 }
 
 function processConfig () {
-
-  //测试argvParser
-  //console.log(Params);
-  //process.exit(); 
-
   process.title = APP_NAME; // 设置进程名称
 
   // 捕获unhandled rejection
@@ -245,7 +331,7 @@ function startHttpd (opts) {
     '--experimental-json-modules',
     process.env.NODE_ENV !== 'development' && '--no-warnings', // 仅在开发模式下显示warning
     `--title=${process.title}.httpd`,
-    path.join(ROOT, 'src', 'server', 'httpd.mjs'),
+    path.join(ROOT, 'src', 'backend', 'httpd.mjs'),
   ].filter(Boolean);
 
   // options
@@ -384,91 +470,3 @@ function readFromInput (question, password = false) {
     });
   });
 }
-
-/**
- * 主控制程序 
- *
- * 管理执行顺序及控制逻辑
- */
-async function main () {
-
-  // 配置进程
-  processConfig();
-
-  // 读入配置项目 
-  await readConfig();
-
-  // 设置环境变量
-  setEnvironment();
-  
-  // 执行解析的参数命令
-  if (Params.help || Params.h) return await showHelp();       // 显示帮助文件
-  if (Params.version || Params.v) return await showVersion(); // 显示版本号
-  if (Params.commit) return await commit();                   // 提交代码变更
-
-  // 以下任务需要读取本地配置文件,需先检测必要的目录
-  // 检测并准备必要的目录
-  await readyDir();    // 准备目录
-
-  // 不需要数据连接的任务
-  if (Params.build) return await build();
-
-  // 建立数据连接
-  const url = new URL(Config.mongodb);
-  if (Params.user && Params.pwd) {
-    url.username = Params.user;
-    url.password = Params.pwd;
-    Config.mongodb = url.href;
-    await saveConfig();
-  } 
-
-  await dba.connect(url.href).catch(err => {
-    if(err.name === 'MongoNetworkError') {
-      process.stdout.write('mongodb服务器网络错误\n'); 
-      process.stdout.write('请确认mongod服务已启动'); 
-      process.exit();
-    }
-  });
-
-  //const user = await readFromInput('请输入用户名:');
-  //const pwd = await readFromInput('请输入密码:');
-
-  if (Params.import) {
-    await importCSV(Params.import);
-  }
-
-  if (Params.export) {
-    await exportCSV(Params.export);
-    await dba.client.close();
-  }
-
-  if (Params.query) {
-    const fn = Fns[Params.query] 
-      ? Fns[Params.query]
-      : () => {}; 
-
-    await fn.apply({ db: dba.db, params: Params, });
-    await dba.client.close();
-  }
-
-  if (Params.httpd) {
-    // 需要数据连接的任务
-    startHttpd(Params);
-
-    if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
-      watcher([
-        path.join(ROOT, 'src', 'server'), 
-        path.join(ROOT, 'src', 'schema'), 
-        path.join(ROOT, 'src', 'graphql'), 
-        path.join(ROOT, 'src', 'resolvers'), 
-      ], () => {
-        restartHttpd(Params);
-      });
-    }
-  }
-
-  if (Params.fork) httpd.unref();
-
-}
-
-main(); // 立即执行main主程序

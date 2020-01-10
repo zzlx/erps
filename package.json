@@ -1,6 +1,6 @@
 {
-  "name": "cios",
-  "description": "CIO services.",
+  "name": "erps",
+  "description": "ERP services system.",
   "version": "0.20.1",
   "private": true,
   "license": "MIT",

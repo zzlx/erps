@@ -3,6 +3,32 @@
 " author:wangxuemin@zzlx.org
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+"""""""""""""""""
+" Theme配置项目 "
+"""""""""""""""""
+function! SetTheme()
+
+let Now=strftime("%H") " 获取当前时间
+if Now > 8 && Now < 18
+  set background=light
+else
+  set background=dark
+endif
+
+if &background == "light"
+  "hi Normal  ctermfg=Black ctermbg=LightYellow
+  hi Comment ctermfg=DarkBlue ctermbg=None guifg=DarkGrey guibg=None
+  hi StatusLine cterm=reverse,bold ctermbg=3
+endif
+
+if &background == "dark"
+  hi Normal  ctermfg=LightCyan ctermbg=DarkGrey
+  hi Comment ctermfg=white ctermbg=None
+  hi StatusLine ctermfg=white ctermbg=DarkRed
+endif
+
+endfunction
+
 set nocompatible  " Use Vim defaults instead of 100% vi compatibility
 set backspace=2   " more powerful backspacing
      
@@ -90,26 +116,6 @@ set laststatus=2
 " 语法高亮
 syntax on
 syntax enable
-
-"""""""""""""""""""
-" 自定义Theme配置 "
-"""""""""""""""""""
-function! SetTheme()
-let Now=strftime("%H") 
-if Now > 8 && Now < 18
-  colorscheme default
-else
-  colorscheme evening
-endif
-
-hi StatusLine cterm=reverse,bold ctermbg=3 " 设置背景色,前景色取反色
-
-if &background == "light"
-  hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey guibg=None
-else
-  hi Comment ctermfg=LightGrey ctermbg=None guifg=DarkGrey guibg=None
-endif
-endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Targets

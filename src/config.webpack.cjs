@@ -47,7 +47,7 @@ const webpackConfig = module.exports = (env = {}) => {
     target: 'web',
 
     entry: {
-      main: path.join(paths.appPath, 'src', 'client', 'dom.mjs'),
+      main: path.join(paths.appPath, 'src', 'front-end', 'dom.mjs'),
       styles: path.join(paths.appPath, 'src', 'styles', 'index.scss'),
     },
 
