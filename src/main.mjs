@@ -85,6 +85,10 @@ async function main () {
   if (Params.build) return await build();
 
   // 建立数据连接
+  if (Config.mongodb == null) {
+    Config.mongodb = 'mongodb://localhost:27017/test';
+  }
+
   const url = new URL(Config.mongodb);
 
   if (Params.user && Params.pwd) {
@@ -150,10 +154,17 @@ main(); // 立即执行main主程序
  *
  */
 
-function readConfig () {
-  return fs.promises.readFile(config_file)
-    .then(config => Config = JSON.parse(config))
-    .catch(e => console.log(e));
+function getConfig () {
+  return fs.promises.readFile(config_file, {flag: 'r+'}).then(config => {
+      Config = JSON.parse(config)
+      return Config;
+    }).catch(e => {
+      if (e.code === 'ENOENT') {
+        const file = e.path;
+        Config = {};
+        return Config;
+      }
+    });
 }
 
 function processConfig () {
@@ -375,8 +386,9 @@ function readyDir () {
 
 function saveConfig () {
   // 写入配置文件
-  return fs.promises.writeFile(config_file, JSON.stringify(Config))
-    .catch(e => console.log(e));
+  return fs.promises.writeFile(config_file, JSON.stringify(Config)).catch(e => {
+    console.log(e)
+  });
 }
 
 /**

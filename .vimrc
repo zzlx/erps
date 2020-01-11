@@ -18,7 +18,7 @@ endif
 if &background == "light"
   "hi Normal  ctermfg=Black ctermbg=LightYellow
   hi Comment ctermfg=DarkBlue ctermbg=None guifg=DarkGrey guibg=None
-  hi StatusLine cterm=reverse,bold ctermbg=3
+  hi StatusLine ctermfg=Black ctermbg=LightGray
 endif
 
 if &background == "dark"
