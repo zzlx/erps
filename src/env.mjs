@@ -1,13 +1,15 @@
 /**
+ *
  * 配置系统环境变量
  *
- * @file: config.env.mjs
+ * @file: env.mjs
  */
 
 /******************************************************************************/
 import fs from 'fs';
 import path from 'path';
-import { APP_ROOT } from './config.common.mjs';
+import { APP_ROOT } from './config.mjs';
+import envParser from './utils/envParser.mjs';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 默认使用生产环境
 process.env.PORT = process.env.PORT || 3000; // 默认使用3000端口号

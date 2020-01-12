@@ -15,9 +15,7 @@ import mongodb from 'mongodb';
 export default new Proxy(mongodb, {
 	apply: function (target, thisArg, argumentsList) {
     const MongoClient = target['MongoClient'];
-
-    // 返回client
-    return new MongoClient(...argumentsList);
+    return new MongoClient(...argumentsList); // 返回client
 	},
 
 	construct: function (target, argumentsList, newTarget) {

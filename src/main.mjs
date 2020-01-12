@@ -14,9 +14,6 @@ import path from 'path';
 import readline from 'readline';
 import { spawn, execSync, } from 'child_process'; 
 
-// 第三方模块
-import webpack from 'webpack'; // webpack模块
-
 // 代码库模块
 import ISODate from './utils/date.mjs';
 import MongoDB from './utils/mongodb.mjs';
@@ -24,10 +21,9 @@ import console from './utils/console.mjs';
 import array from './utils/array.mjs';
 import date from './utils/date.mjs';
 import argvParser from './utils/argvParser.mjs';
-import envParser from './utils/envParser.mjs';
 import strings from './utils/strings.mjs';
 import * as Fns from '../src/queries/index.mjs';
-import './config.env.mjs';
+import './env.mjs';
 import { 
   APP_ROOT as ROOT, 
   APP_NAME,
@@ -37,21 +33,14 @@ import {
   APP_BRANCH_VERSION,
   HELP_FILE,
   DOT_ENV_FILE,
-} from './config.common.mjs';
+  CONFIG_FILE,
+} from './config.mjs';
 
 const dsn = () => ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
-
-// 
-const envObj = envParser(fs.readFileSync(DOT_ENV_FILE));
-for (let k of Object.keys(envObj)) {
-  if (process.env[k]) continue;
-  process.env[k] = envObj[k];
-}
 
 // 设置主程序模块全局变量
 const dba = new MongoDB();
 let httpd = null;
-const config_file = path.join(APP_HOME, 'config.json');
 let Config = null;
 const Params = argvParser(process.argv.slice(2)); // 获取并解析命令行参数
 
@@ -67,7 +56,7 @@ async function main () {
   processConfig();
 
   // 读入配置项目 
-  await readConfig();
+  await getConfig();
 
   // 设置环境变量
   setEnvironment();
@@ -119,10 +108,7 @@ async function main () {
   }
 
   if (Params.query) {
-    const fn = Fns[Params.query] 
-      ? Fns[Params.query]
-      : () => {}; 
-
+    const fn = Fns[Params.query] ? Fns[Params.query] : () => {}; 
     await fn.apply({ db: dba.db, params: Params, });
     await dba.client.close();
   }
@@ -144,18 +130,16 @@ async function main () {
   }
 
   if (Params.fork) httpd.unref();
-
 }
 
 main(); // 立即执行main主程序
-
 
 /**
  *
  */
 
 function getConfig () {
-  return fs.promises.readFile(config_file, {flag: 'r+'}).then(config => {
+  return fs.promises.readFile(CONFIG_FILE, {flag: 'r+'}).then(config => {
       Config = JSON.parse(config)
       return Config;
     }).catch(e => {
@@ -250,33 +234,6 @@ function commit() {
 
 function showVersion() {
   process.stdout.write(`version: ${APP_VERSION}\n${APP_BRANCH}: ${APP_BRANCH_VERSION}`);
-}
-
-/**
- * build
- * 构建并打包前端应用程序
- */
-
-function build () { 
-  const configFile = path.join(ROOT, 'src', 'config.webpack.cjs');
-  return import(configFile).then(module => {
-    const webpackConfig = module.default;
-    const compiler = webpack(webpackConfig());
-
-    compiler.run((err, stats) => {
-      if (err) {
-        console.error(err.stack || err);
-        if (err.details) {
-          console.error(err.details);
-        }
-      }
-
-      console.log(stats.toString({
-        chunks: false,
-        colors: true,
-      }));
-    });
-  });
 }
 
 /**
@@ -386,7 +343,7 @@ function readyDir () {
 
 function saveConfig () {
   // 写入配置文件
-  return fs.promises.writeFile(config_file, JSON.stringify(Config)).catch(e => {
+  return fs.promises.writeFile(CONFIG_FILE, JSON.stringify(Config)).catch(e => {
     console.log(e)
   });
 }
