@@ -7,7 +7,6 @@
  */
 
 /******************************************************************************/
-
 // node内置模块
 import fs from 'fs';
 import path from 'path';
@@ -15,7 +14,6 @@ import readline from 'readline';
 import { spawn, execSync, } from 'child_process'; 
 
 // 代码库模块
-import ISODate from './utils/date.mjs';
 import MongoDB from './utils/mongodb.mjs';
 import console from './utils/console.mjs';
 import array from './utils/array.mjs';
@@ -36,7 +34,7 @@ import {
   CONFIG_FILE,
 } from './config.mjs';
 
-const dsn = () => ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
+const dsn = () => date.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
 
 // 设置主程序模块全局变量
 const dba = new MongoDB();
@@ -51,15 +49,14 @@ const Params = argvParser(process.argv.slice(2)); // 获取并解析命令行参
  */
 
 async function main () {
-
   // 配置进程
-  processConfig();
+  processSetting();
 
   // 读入配置项目 
   await getConfig();
 
   // 设置环境变量
-  setEnvironment();
+  setEnvironment(Params);
   
   // 执行解析的参数命令
   if (Params.help || Params.h) return await showHelp();       // 显示帮助文件
@@ -151,7 +148,12 @@ function getConfig () {
     });
 }
 
-function processConfig () {
+/**
+ * 设置进程管理
+ *
+ */
+
+function processSetting () {
   process.title = APP_NAME; // 设置进程名称
 
   // 捕获unhandled rejection
@@ -233,7 +235,11 @@ function commit() {
  */
 
 function showVersion() {
-  process.stdout.write(`version: ${APP_VERSION}\n${APP_BRANCH}: ${APP_BRANCH_VERSION}`);
+  process.stdout.write(
+    `version: ${APP_VERSION}` + '\n' +
+    `branch: ${APP_BRANCH}` + '\n' +
+    `commit: ${APP_BRANCH_VERSION}`
+  );
 }
 
 /**
@@ -395,14 +401,16 @@ async function importCSV (csvFile) {
  * 设置环境变量
  */
 
-function setEnvironment () {
-  if (Params.devel || Params.development) process.env.NODE_ENV = 'development'; 
-  if (Params.devel && Params.devel === 'ui') {
+function setEnvironment (params) {
+
+  if (params.devel || params.development) process.env.NODE_ENV = 'development'; 
+
+  if (params.devel && params.devel === 'ui') {
     process.env.DEVEL_UI = true; 
     process.env.PORT=3001;
   }
 
-  if (Params.port) process.env.PORT = Number.parseInt(Params.port);
+  if (params.port) process.env.PORT = Number.parseInt(params.port);
 
 }
 

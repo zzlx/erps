@@ -1,37 +1,52 @@
 /**
  * 控制台工具
  *
+ * @file console.mjs
  */
+
+/*****************************************************************************/
+import global from 'global';
+
+const isBackend = Boolean(global && global.process);
+const isWin = isBackend && process.platform === 'win32';
 
 const MOVE_LEFT  = '\u001b[1000D';
 const MOVE_UP    = '\u001b[1A';
 const CLEAR_LINE = '\u001b[0K';
-const CLEAR_PAGE = process.platform === 'win32' 
-  ? '\x1B[2J\x1B[0f' 
-  : '\x1B[2J\x1B[3J\x1B[H';
+const CLEAR_PAGE = isWin ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H';
 
 export default new Proxy(console, {
-	get: function (target, prop, receiver) {
+	get: function (target, property, receiver) {
 		if (prop === 'print') {
       return (str) => process.stdout.write(MOVE_LEFT + CLEAR_LINE+String(str));
 		}
 
-		if (prop === 'progressBar') {
-			receiver.progressBar = progressBar;
-		}
-
+		if (prop === 'progressBar') receiver.progressBar = progressBar;
+		if (prop === 'debug') receiver.debug = debug;
 		if (prop === 'clear') {
 			return () => process.stdout.write(CLEAR_PAGE);
 		}
 
-		if (prop === 'debug') {
-			return console.log;
-		}
-
-		return prop in target ? target[prop] : undefined;
-	},
-
+		return Reflect.get(target, property, receiver);
+	}
 });
+
+/**
+ * debug
+ */
+
+function debug (...args) {
+  console.log(args);
+}
+
+/**
+ *
+ */
+
+function print(string) {
+  if (isBackend) return process.stdout.write(String(string));
+  console.log(string);
+}
 
 /**
  * 进度条
@@ -48,22 +63,13 @@ function progressBar (counter, total, length = 100) {
 		bold  : '█', 
 	};
 
-	const percent = Number(counter/total*100).toFixed();
 	let barString = '';
 
-	for (let i = 0; i < length; i++) {
-		if (i < percent) barString += blocks.cell;
-		else barString += blocks.empty;
-	}
+	const percent = Number(counter/total*100).toFixed();
 
-	barString += '进度:' 
-		+ '['
-		+ String(counter) 
-		+ '/'
-		+ String(total) 
-		+ ']'
-		+ String(percent) + "%";
+  barString += Array(Number.parseInt(percent)).join(blocks.cell);
+  barString += Array(Number.parseInt(length - percent)).join(blocks.empty);
+	barString += `进度:[${counter}/${total}]${percent}%`;
 
-	process.stdout.write(MOVE_LEFT + CLEAR_LINE);
-	process.stdout.write(barString);
+	print(MOVE_LEFT + CLEAR_LINE + barString);
 }

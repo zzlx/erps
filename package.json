@@ -6,7 +6,7 @@
   "license": "MIT",
   "homepage": ".",
   "scripts": {
-    "build": "webpack --config src/config.webpack.cjs",
+    "build": "webpack --config src/webpack.config.cjs",
     "edit": "vim -u .vimrc",
     "start": "./bin/start.mjs --help"
   },

@@ -1,27 +1,27 @@
 /**
  * Numerical data 
+ *
  */
 
 const formatDecimalsRegExp = /(?:\.0*|(\.[^0]+)0+)$/;
 const formatThousandsRegExp = /\B(?=(\d{3})+(?!\d))/g;
 const parseRegExp = /^((-|\+)?(\d+(?:\.\d+)?)) *(kb|mb|gb|tb)$/i;
 const map = {
-  g: 1,
-  kg: 1 * 1000,
   b:  1,
   kb: 1 << 10, 
   mb: 1 << 20,
   gb: 1 << 30,
-  tb: ((1 << 30) * 1024),
+  tb: Math.pow(1024, 4),
+  pb: Math.pow(1024, 5),
 }
 
 export default function Numerical (opts) {
   // 参数处理
-  const decimalPlaces = opts.decimalPlaces || 2;
-  const fixedDecimals = opts.fixedDecimals || true; 
-  const thousandsSeparator = opts.thousandsSeparator;
-  const unitSeparator = opts.unitSeparator || '';
-  const unit = opts.unit;
+  const decimalPlaces = (opts && opts.decimalPlaces !== undefined) ? opts.decimalPlaces : 2;
+  const fixedDecimals = Boolean(opts && opts.fixedDecimals);
+  const thousandsSeparator = (opts && opts.thousandsSeparator) || '';
+  const unitSeparator = (opts && opts.unitSeparator) || '';
+  const unit = opts && opts.unit;
   const symbol = opts.symbol || false;
   let value = opts.children || opts.value || '';  
 
