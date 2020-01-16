@@ -1,11 +1,6 @@
 /**
  * The set of allowed kind values for AST nodes.
  *
- *
- *
- *
- *
- *
  */
 
 import kinds from './kinds.json';

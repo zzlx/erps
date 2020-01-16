@@ -1,7 +1,3 @@
-/**
- *
- */
-
 import inspect from '../../utils/inspect.mjs';
 import defineToJSON from '../../utils/defineToJSON.mjs';
 

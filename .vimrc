@@ -10,6 +10,7 @@ function! SetTheme()
 
 let Now=strftime("%H") " 获取当前时间
 if Now > 8 && Now < 18
+  "colorscheme desert
   set background=light
 else
   set background=dark
@@ -35,8 +36,8 @@ set backspace=2   " more powerful backspacing
 """"""""""""""""
 " 文件类型设置 "
 """"""""""""""""
-filetype on
-filetype plugin on
+filetype on               " 文件类型检测
+filetype plugin on        " 根据不同类型的文件加载插件
 filetype indent on
 filetype plugin indent on
 
@@ -82,6 +83,8 @@ set foldlevelstart=99
 set foldnestmax=1
 set foldmethod=manual
 "set spell spelllang=en_us
+"
+set wildmenu   " vim命令补全
 
 set noswapfile
 set nobackup
@@ -213,9 +216,14 @@ autocmd BufRead *.html,<&faf;HTML>  runtime! syntax/html.vim
 " 对所有文件
 autocmd BufEnter * exec ":call SetTheme()"
 
+" 自动生效配置文件
+autocmd BufWritePost $MYVIMRC source $MYVIMRC
+
 """"""""""""""""""
 " 映射键盘快捷键 "
 """"""""""""""""""
+nmap LB 0
+nmap LE $
 nmap <C-s> :w<CR>             " 保存修改
 "vmap <C-v> "+gp
 vmap <C-c> "+y

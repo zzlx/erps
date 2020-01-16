@@ -1,11 +1,6 @@
 /**
  *
  *
- *
- *
- *
- *
- *
  */
 
 export default function printCharCode(code) {
@@ -19,3 +14,6 @@ export default function printCharCode(code) {
         : "\"\\u".concat(('00' + code.toString(16).toUpperCase()).slice(-4), "\"")
   );
 }
+
+// test
+//console.log(printCharCode(900));

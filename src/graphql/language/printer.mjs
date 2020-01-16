@@ -1,5 +1,6 @@
 /**
  * Converts an AST into a string, using one set of reasonable formatting rules.
+ *
  */
 
 import { visit } from './visitor.mjs';
@@ -29,7 +30,9 @@ const printDocASTReducer = {
     var selectionSet = node.selectionSet; // Anonymous queries with no directives or variable definitions can use
     // the query short form.
 
-    return !name && !directives && !varDefs && op === 'query' ? selectionSet : join([op, join([name, varDefs]), directives, selectionSet], ' ');
+    return !name && !directives && !varDefs && op === 'query' 
+      ? selectionSet 
+      : join([op, join([name, varDefs]), directives, selectionSet], ' ');
   },
   VariableDefinition: function VariableDefinition(_ref) {
     var variable = _ref.variable,

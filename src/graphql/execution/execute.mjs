@@ -2,10 +2,6 @@
  * execute
  * 执行graphql查询
  *
- *
- *
- *
- *
  */
 
 import inspect from '../../utils/inspect.mjs';
@@ -13,7 +9,6 @@ import invariant from '../../utils/invariant.mjs';
 import isInvalid from '../../utils/isInvalid.mjs';
 import isNullish from '../../utils/isNullish.mjs';
 import isPromise from '../../utils/isPromise.mjs';
-import _typeof from '../../utils/typeof.mjs';
 import memoize3 from '../../utils/memoize3.mjs';
 import { forEach, isCollection } from '../../utils/iterall.mjs';
 import promiseForObject from '../../utils/promiseForObject.mjs';
@@ -23,11 +18,7 @@ import { GraphQLError, locatedError, } from '../error/index.mjs';
 import { getOperationRootType } from '../utilities/getOperationRootType.mjs';
 import { typeFromAST } from '../utilities/typeFromAST.mjs';
 import { Kind } from '../language/kinds.mjs';
-import { 
-  getVariableValues, 
-	getArgumentValues, 
-	getDirectiveValues 
-} from './values.mjs';
+import { getVariableValues, getArgumentValues, getDirectiveValues } from './values.mjs';
 
 import { 
   isObjectType, 
@@ -143,7 +134,7 @@ export function assertValidExecutionArguments(schema, document, rawVariableValue
 
   // Variables, if provided, must be an object.
   invariant(
-    !rawVariableValues || _typeof(rawVariableValues) === 'object',
+    !rawVariableValues || typeof(rawVariableValues) === 'object',
     'Variables must be provided as an Object where each property is a variable value. ' + 
     'Perhaps look to see if an unparsed JSON string was provided.'
   ); 
@@ -941,7 +932,7 @@ function defaultResolveTypeFn(value, contextValue, info, abstractType) {
   // First, look for `__typename`.
   if (
     value !== null && 
-    _typeof(value) === 'object' && 
+    typeof(value) === 'object' && 
     typeof value.__typename === 'string'
   ) {
     return value.__typename;

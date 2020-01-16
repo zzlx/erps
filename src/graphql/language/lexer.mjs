@@ -20,8 +20,9 @@ const slice = String.prototype.slice;
 export const TokenKind = Object.freeze(tokenKind);
 
 /**
- * 解析器
+ * 语法解析器
  */
+
 export class Lexer {
   constructor(source, options) {
     this.source = source;
@@ -33,12 +34,14 @@ export class Lexer {
     this.lineStart = 0;
   }
 
+  // advance 前进
   advance() {
     this.lastToken = this.token;
     this.token = this.lookahead();
     return this.token;
   }
 
+  // 继续查找
   lookahead() {
     let token = this.token;
     if (token.kind !== TokenKind.EOF) {
@@ -55,9 +58,7 @@ export class Lexer {
  */
 
 export function getTokenDesc(token) {
-  return token.value 
-    ? token.kind + ' ' + token.value
-    : token.kind;
+  return token.value ? token.kind + ' ' + token.value : token.kind;
 }
 
 /**
@@ -123,9 +124,8 @@ function readToken(lexer, prev) {
     case 41: // )
       return new Tok(TokenKind.PAREN_R, pos, pos + 1, line, col, prev);
     case 46: // .
-      if (
-        charCodeAt.call(body, pos + 1) === 46 && 
-        charCodeAt.call(body, pos + 2) === 46
+      if (charCodeAt.call(body, pos + 1) === 46 && 
+          charCodeAt.call(body, pos + 2) === 46
       ) {
         return new Tok(TokenKind.SPREAD, pos, pos + 3, line, col, prev);
       }
@@ -218,9 +218,8 @@ function readToken(lexer, prev) {
 
     // "
     case 34:
-      if (
-        charCodeAt.call(body, pos + 1) === 34 && 
-        charCodeAt.call(body, pos + 2) === 34
+      if (charCodeAt.call(body, pos + 1) === 34 && 
+          charCodeAt.call(body, pos + 2) === 34
       ) {
         return readBlockString(source, pos, line, col, prev, lexer);
       }
@@ -295,8 +294,7 @@ function positionAfterWhitespace(body, startPosition, lexer) {
  */
 
 function readComment(source, start, line, col, prev) {
-  const body = source.body;
-  let code;
+  const body = source.body; let code;
   let position = start;
 
   do {
@@ -385,12 +383,11 @@ function readDigits(source, start, firstCode) {
   let position = start;
   let code = firstCode;
 
+  // 0 - 9
   if (code >= 48 && code <= 57) {
-    // 0 - 9
     do {
       code = charCodeAt.call(body, ++position);
     } while (code >= 48 && code <= 57); // 0 - 9
-
 
     return position;
   }
@@ -610,12 +607,12 @@ function uniCharCode(a, b, c, d) {
  */
 
 function char2hex(a) {
-  return a >= 48 && a <= 57 
-    ? a - 48 // 0-9
-    : a >= 65 && a <= 70 
-      ? a - 55 // A-F
-      : a >= 97 && a <= 102 
-        ? a - 87 // a-f
+  return a >= 48 && a <= 57 // 0-9
+    ? a - 48 
+    : a >= 65 && a <= 70    // A-F 
+      ? a - 55 
+      : a >= 97 && a <= 102 // a-f
+        ? a - 87
         : -1;
 }
 
@@ -639,9 +636,7 @@ function readName(source, start, line, col, prev) {
     code >= 65 && code <= 90 || // A-Z
     code >= 97 && code <= 122 // a-z
     ) 
-  ) {
-    ++position;
-  }
+  ) { ++position; }
 
   return new Tok(
     TokenKind.NAME, 

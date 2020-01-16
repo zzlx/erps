@@ -8,7 +8,6 @@
  *
  */
 
-import invariant from '../../utils/invariant.mjs';
 import defineToStringTag from '../../utils/defineToStringTag.mjs';
 
 export class Source {
@@ -17,14 +16,12 @@ export class Source {
     this.name = name || 'GraphQL source';
     this.locationOffset = locationOffset || { line: 1, column: 1 };
 
-    invariant(
-      this.locationOffset.line > 0,
-      'line in locationOffset is 1-indexed and must be positive'
-    ); 
+    if ( this.locationOffset.line <= 0 ) {
+      throw new Error('line in locationOffset is 1-indexed and must be positive');
+    }
 
-    invariant(
-      this.locationOffset.column > 0,
-      'column in locationOffset is 1-indexed and must be positive'
+    if (this.locationOffset.column <= 0 ),
+      throw new Error('column in locationOffset is 1-indexed and must be positive');
     ); 
   }
 }

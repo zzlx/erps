@@ -2,10 +2,7 @@
  *
  *
  *
- *
- *
- *
- *
+ * @file values.mjs
  */
 
 import inspect from '../../utils/inspect.mjs';
@@ -127,9 +124,10 @@ export function getVariableValues(schema, varDefNodes, inputs) {
  * Prepares an object map of argument values given a list of argument
  * definitions and list of argument AST nodes.
  *
- * Note: The returned value is a plain Object with a prototype, since it is
- * exposed to user code. Care should be taken to not pull values from the
- * Object prototype.
+ * Note: 
+ * The returned value is a plain Object with a prototype, 
+ * since it is exposed to user code. 
+ * Care should be taken to not pull values from the Object prototype.
  */
 
 export function getArgumentValues(def, node, variableValues) {
@@ -227,9 +225,10 @@ export function getArgumentValues(def, node, variableValues) {
  */
 
 export function getDirectiveValues(directiveDef, node, variableValues) {
-  const directiveNode = node.directives && Array.prototype.find.call(node.directives, directive => {
-    return directive.name.value === directiveDef.name;
-  });
+  const directiveNode = node.directives && Array.prototype.find.call(
+    node.directives, 
+    directive => directive.name.value === directiveDef.name
+  );
 
   if (directiveNode) {
     return getArgumentValues(directiveDef, directiveNode, variableValues);

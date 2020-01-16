@@ -6,7 +6,11 @@ export { print } from './printer.mjs';
 export { Source } from './source.mjs';
 export { DirectiveLocation } from './directiveLocation.mjs';
 export { 
-  visit, visitInParallel, visitWithTypeInfo, getVisitFn, BREAK 
+  visit,
+  visitInParallel, 
+  visitWithTypeInfo, 
+  getVisitFn, 
+  BREAK 
 } from './visitor.mjs';
 
 export { 

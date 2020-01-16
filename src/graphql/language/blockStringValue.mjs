@@ -5,6 +5,7 @@
  *
  * This implements the GraphQL spec's BlockStringValue() static algorithm.
  *
+ * @file blockStringValue.mjs
  */
 
 export default function blockStringValue(rawString) {
@@ -12,47 +13,48 @@ export default function blockStringValue(rawString) {
   // Remove common indentation from all lines but first.
   const lines = rawString.split(/\r\n|[\n\r]/g); 
 
-  // indent
+  // indent 缩进
   let commonIndent = null;
 
+  // 遍历所有行
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
-    const indent = leadingWhitespace(line);
+    const indent = leadingWhitespace(line); // 获取缩进的位置
 
     if (indent < line.length && (commonIndent === null || indent < commonIndent)) {
       commonIndent = indent;
-
-      if (commonIndent === 0) {
-        break;
-      }
+      if (commonIndent === 0) break;
     }
   }
 
   if (commonIndent) {
-    for (let _i = 1; _i < lines.length; _i++) {
-      lines[_i] = lines[_i].slice(commonIndent);
+    for (let i = 1; i < lines.length; i++) {
+      lines[i] = lines[i].slice(commonIndent);
     }
   } 
 
-  // Remove leading and trailing blank lines.
+  // Remove leading blank lines.
   while (lines.length > 0 && isBlank(lines[0])) {
     lines.shift();
   }
 
+  // Remove trailing blank lines.
   while (lines.length > 0 && isBlank(lines[lines.length - 1])) {
     lines.pop();
-  } // Return a string of the lines joined with U+000A.
+  } 
 
-
+  // Return a string of the lines joined with U+000A.
   return lines.join('\n');
 }
 
+//  
 function leadingWhitespace(str) {
   let i = 0;
   while (i < str.length && (str[i] === ' ' || str[i] === '\t')) { i++; }
   return i;
 }
 
+// 是否为空字符串
 function isBlank(str) {
   return leadingWhitespace(str) === str.length;
 }
