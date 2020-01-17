@@ -1,5 +1,4 @@
 /**
- *
  * 配置系统环境变量
  *
  * @file: env.mjs
@@ -11,14 +10,15 @@ import path from 'path';
 import { APP_ROOT } from './config.mjs';
 import envParser from './utils/envParser.mjs';
 
-process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 默认使用生产环境
-process.env.PORT = process.env.PORT || 3000; // 默认使用3000端口号
-
 const dotEnvConfig = dotenv(path.join(APP_ROOT, '.env'));
 for (let key of Object.keys(dotEnvConfig)) {
   if (process.env[key]) continue; // @todo: 是否覆盖已有配置项
   process.env[key] = dotEnvConfig[key];
 }
+
+// 系统依赖的变量
+process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 默认使用生产环境
+process.env.PORT = process.env.PORT || 3000; // 默认使用3000端口号
 
 function dotenv(envFile) {
   if (!fs.existsSync(envFile)) return {};

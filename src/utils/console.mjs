@@ -17,13 +17,13 @@ const CLEAR_PAGE = isWin ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H';
 
 export default new Proxy(console, {
 	get: function (target, property, receiver) {
-		if (prop === 'print') {
+		if (property === 'print') {
       return (str) => process.stdout.write(MOVE_LEFT + CLEAR_LINE+String(str));
 		}
 
-		if (prop === 'progressBar') receiver.progressBar = progressBar;
-		if (prop === 'debug') receiver.debug = debug;
-		if (prop === 'clear') {
+		if (property === 'progressBar') receiver.progressBar = progressBar;
+		if (property === 'debug') receiver.debug = debug;
+		if (property === 'clear') {
 			return () => process.stdout.write(CLEAR_PAGE);
 		}
 

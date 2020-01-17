@@ -1,11 +1,7 @@
 /**
- * Given a Source object, this returns a Lexer for that source.
+ * 语法分析模块
  *
- * A Lexer is a stateful stream generator in that every time it is advanced, 
- * it returns the next token in the Source. 
- * Assuming the final Token emitted by the lexer will be of kind EOF, 
- * after which will repeatedly return the same EOF token whenever called.
- *
+ * @file lexer.mjs
  */
 
 import defineToJSON from '../../utils/defineToJSON.mjs';
@@ -20,41 +16,63 @@ const slice = String.prototype.slice;
 export const TokenKind = Object.freeze(tokenKind);
 
 /**
- * 语法解析器
+ * 语法分析器
+ *
+ * Given a Source object, this returns a Lexer for that source.
+ *
+ * Lexer is a stateful stream generator, in that every time it is advanced, 
+ * it returns the next token in the Source. 
+ *
+ * 假定解析器最后将会触发EOF
+ * Assuming the final Token emitted by the lexer will be of kind EOF, 
+ * after which will repeatedly return the same EOF token whenever called.
+ *
  */
 
 export class Lexer {
   constructor(source, options) {
     this.source = source;
     this.options = options;
+
+    // 文件开始标志
     const startOfFileToken = new Tok(TokenKind.SOF, 0, 0, 0, 0, null);
-    this.lastToken = startOfFileToken;
     this.token = startOfFileToken;
+    this.lastToken = startOfFileToken;
+
     this.line = 1;
     this.lineStart = 0;
   }
 
-  // advance 前进
+  /**
+   * move forword.
+   */
   advance() {
-    this.lastToken = this.token;
-    this.token = this.lookahead();
-    return this.token;
+    this.lastToken = this.token;   // 将上一token重置为当前token
+    this.token = this.lookahead(); // 将当前token重置为下一token 
+    return this.token;             // 返回当前token
   }
 
-  // 继续查找
+  /**
+   * look ahead
+   */
   lookahead() {
-    let token = this.token;
-    if (token.kind !== TokenKind.EOF) {
-      do {
-        token = token.next || (token.next = readToken(this, token));
-      } while (token.kind === TokenKind.COMMENT);
-    }
-    return token;
+    let token = this.token; // 获取当前token
+
+    // 如果当前token为EOF(end of file), 直接返回该token
+    if (token.kind === TokenKind.EOF) return token;
+
+    do {
+      // 读取下一token
+      token = token.next || (token.next = readToken(this, token));
+    } while (token.kind === TokenKind.COMMENT); // 直到token类型为comment
+
+    return token; // 返回下一token
   }
 }
 
 /**
  * A helper function to describe a token as a string for debugging
+ *
  */
 
 export function getTokenDesc(token) {

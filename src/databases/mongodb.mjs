@@ -9,38 +9,48 @@
  * @api public
  */
 
-import assert from 'assert';
 import mongodb from 'mongodb'; 
 
 export default new Proxy(mongodb, {
 	apply: function (target, thisArg, argumentsList) {
-    const MongoClient = target['MongoClient'];
-    return new MongoClient(...argumentsList); // 返回client
+    return new target.MongoClient(...argumentsList);
 	},
 
 	construct: function (target, argumentsList, newTarget) {
-    //newTarget.MongoClient = this.apply(target, null, argumentsList);
+    newTarget.MongoClient = this.apply(target, null, argumentsList);
     return newTarget; // 返回proxy实例
 	},
 
 	get: function (target, property, receiver) {
-		if (property === 'prototype') return target.prototype;
-    if (property === 'connect') {
-      const MongoClient = target['MongoClient'];
-      return (url) => MongoClient.connect(url).then(client => {
-        receiver._client = client;
-        return client;
+    if (property == 'connect') {
+      return () => receiver.MongoClient.connect().then(client => {
+          receiver._client = client;
+          return client;
       });
+
     }
 
     if (property === 'client') {
-      if (receiver._client) return receiver._client;
-      return null;
+      if (null == receiver._client)  {
+        return receiver.MongoClient.connect().then(client => {
+          receiver._client = client;
+          return client;
+        });
+      }
+
+      return receiver._client;
     }
 
     if (property === 'db') {
-      if (null !== receiver._client) return receiver._client.db();
-      return null;
+      if (null == receiver._db) {
+        receiver._db = receiver._client.db(); 
+      }
+
+      return receiver._db;
+    }
+
+    if (property === 'tables') {
+      return receiver.db.listCollections({}, {nameOnly: true}).toArray();
     }
 
 		return Reflect.get(target, property, receiver);
@@ -95,3 +105,13 @@ export default new Proxy(mongodb, {
     }: undefined;
 	}
 });
+
+
+/**
+ *
+ *
+ */
+
+function getDB () {
+
+}

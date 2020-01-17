@@ -90,7 +90,7 @@ set noswapfile
 set nobackup
 set undofile
 set undodir=$HOME/.vim/undo
-set autochdir
+set autochdir  " 自动进入文件所在目录
 set history=1000
 set autoread
 set confirm

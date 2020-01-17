@@ -13,9 +13,9 @@ import { syntaxError } from '../error/index.mjs';
  */
 
 export function parse(source, options) {
-  const sourceObj = typeof source === 'string' 
-    ? new Source(source) 
-    : source;
+
+  // 
+  const sourceObj = typeof source === 'string' ? new Source(source) : source;
 
   if (!(sourceObj instanceof Source)) {
     throw new TypeError(
@@ -41,6 +41,7 @@ export function parse(source, options) {
 export function parseValue(source, options) {
   const sourceObj = typeof source === 'string' ? new Source(source) : source;
   const lexer = new Lexer(sourceObj, options || {});
+
   expect(lexer, TokenKind.SOF);
   const value = parseValueLiteral(lexer, false);
   expect(lexer, TokenKind.EOF);
@@ -1220,6 +1221,7 @@ function parseUnionTypeExtension(lexer) {
   const start = lexer.token;
   expectKeyword(lexer, 'extend');
   expectKeyword(lexer, 'union');
+
   const name = parseName(lexer);
   const directives = parseDirectives(lexer, true);
   const types = parseUnionMemberTypes(lexer);

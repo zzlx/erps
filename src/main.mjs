@@ -1,7 +1,10 @@
 /**
- * 主程序
+ * 系统主程序
  *
- * 用于初始化系统环境及启动系统服务
+ * 任务:
+ * 1. 初始化系统执行环境
+ * 2. 提供命令行参数解释及执行功能
+ * 3. 启动系统服务
  *
  * @file: main.mjs
  */
@@ -9,21 +12,14 @@
 /******************************************************************************/
 // node内置模块
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
-import readline from 'readline';
 import { spawn, execSync, } from 'child_process'; 
 
-// 代码库模块
-import MongoDB from './utils/mongodb.mjs';
-import console from './utils/console.mjs';
-import array from './utils/array.mjs';
-import date from './utils/date.mjs';
-import argvParser from './utils/argvParser.mjs';
-import strings from './utils/strings.mjs';
-import * as Fns from '../src/queries/index.mjs';
-import './env.mjs';
+// 模块
+import './env.mjs'; // 导入环境变量
 import { 
-  APP_ROOT as ROOT, 
+  APP_ROOT,
   APP_NAME,
   APP_HOME,
   APP_VERSION,
@@ -34,13 +30,17 @@ import {
   CONFIG_FILE,
 } from './config.mjs';
 
-const dsn = () => date.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
+import MongoDB from './databases/mongodb.mjs';
+import console from './utils/console.mjs';
+import array from './utils/array.mjs';
+import date from './utils/date.mjs';
+import argvParser from './utils/argvParser.mjs';
+import strings from './utils/strings.mjs';
+import * as Fns from '../src/queries/index.mjs';
 
-// 设置主程序模块全局变量
-const dba = new MongoDB();
-let httpd = null;
-let Config = null;
-const Params = argvParser(process.argv.slice(2)); // 获取并解析命令行参数
+// 全局变量
+const dsn = () => date.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
+let dba = null;
 
 /**
  * 主控制程序 
@@ -50,25 +50,35 @@ const Params = argvParser(process.argv.slice(2)); // 获取并解析命令行参
 
 async function main () {
   // 配置进程
-  processSetting();
+  setProcess();
 
-  // 读入配置项目 
-  await getConfig();
+  // 获取并解析命令行参数
+  const Params = argvParser(process.argv.slice(2)); 
 
-  // 设置环境变量
-  setEnvironment(Params);
-  
+  // 根据命令行参数设置环境变量
+  if (Params.devel || Params.development) process.env.NODE_ENV = 'development'; 
+  if (Params.port) process.env.PORT = Number.parseInt(Params.port);
+
+  if (Params.devel && Params.devel === 'ui') {
+    process.env.DEVEL_UI = true; 
+    process.env.PORT=3001;
+  }
+
   // 执行解析的参数命令
-  if (Params.help || Params.h) return await showHelp();       // 显示帮助文件
+  if (Params.help || Params.h) return await showHelp(); // 显示帮助文件
   if (Params.version || Params.v) return await showVersion(); // 显示版本号
-  if (Params.commit) return await commit();                   // 提交代码变更
+  if (Params.sysinfo) return await sysinfo(); // 显示系统信息
+  if (Params.commit) return await commit(); // 提交代码变更
+  if (Params.build) return await build(); // 构建前端应用程序
 
   // 以下任务需要读取本地配置文件,需先检测必要的目录
   // 检测并准备必要的目录
   await readyDir();    // 准备目录
 
-  // 不需要数据连接的任务
-  if (Params.build) return await build();
+  // 读入配置项目 
+  const Config = await getConfig();
+
+  console.log('test');
 
   // 建立数据连接
   if (Config.mongodb == null) {
@@ -84,25 +94,11 @@ async function main () {
     await saveConfig();
   } 
 
-  await dba.connect(url.href).catch(err => {
-    if(err.name === 'MongoNetworkError') {
-      process.stdout.write('mongodb服务器网络错误\n'); 
-      process.stdout.write('请确认mongod服务已启动'); 
-      process.exit();
-    }
-  });
+  dba = new MongoDB(url.href);
+  await dba.connect();
 
-  //const user = await readFromInput('请输入用户名:');
-  //const pwd = await readFromInput('请输入密码:');
-
-  if (Params.import) {
-    await importCSV(Params.import);
-  }
-
-  if (Params.export) {
-    await exportCSV(Params.export);
-    await dba.client.close();
-  }
+  if (Params.import) { await importCSV(Params.import); }
+  if (Params.export) { await exportCSV(Params.export); }
 
   if (Params.query) {
     const fn = Fns[Params.query] ? Fns[Params.query] : () => {}; 
@@ -116,10 +112,10 @@ async function main () {
 
     if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
       watcher([
-        path.join(ROOT, 'src', 'backend'), 
-        path.join(ROOT, 'src', 'schema'), 
-        path.join(ROOT, 'src', 'graphql'), 
-        path.join(ROOT, 'src', 'resolvers'), 
+        path.join(APP_ROOT, 'src', 'backend'), 
+        path.join(APP_ROOT, 'src', 'schema'), 
+        path.join(APP_ROOT, 'src', 'graphql'), 
+        path.join(APP_ROOT, 'src', 'resolvers'), 
       ], () => {
         restartHttpd(Params);
       });
@@ -127,9 +123,10 @@ async function main () {
   }
 
   if (Params.fork) httpd.unref();
-}
 
-main(); // 立即执行main主程序
+  // 执行到此步骤,关闭数据库连接
+  if (dba.client) dba.client.close();
+}
 
 /**
  *
@@ -137,23 +134,21 @@ main(); // 立即执行main主程序
 
 function getConfig () {
   return fs.promises.readFile(CONFIG_FILE, {flag: 'r+'}).then(config => {
-      Config = JSON.parse(config)
+      const Config = JSON.parse(config)
       return Config;
     }).catch(e => {
       if (e.code === 'ENOENT') {
         const file = e.path;
-        Config = {};
-        return Config;
+        return {};
       }
     });
 }
 
 /**
- * 设置进程管理
- *
+ * 设置进程
  */
 
-function processSetting () {
+function setProcess () {
   process.title = APP_NAME; // 设置进程名称
 
   // 捕获unhandled rejection
@@ -168,20 +163,22 @@ function processSetting () {
       await main();
     }
 
-    process.exit();
-    //if (mongodb) mongodb.close(); // 关闭数据链接
+    // 关闭数据链接
+    if (dba && dba.client) dba.client.close();
   });
 
   // 捕获exception
   process.on('uncaughtException', (err, origin) => {
+    console.log(err);
+
     fs.writeSync(
       process.stderr.fd,
       `Caught exception: ${err}\n` +
       `Exception origin: ${origin}`
     );
 
-    //if (null !== mongodb) mongodb.client.close(); // 关闭数据链接
-    process.exit();
+    // 关闭数据链接
+    if (dba && dba.client) dba.client.close();
   });
 
   // 进程退出前执行的任务
@@ -191,13 +188,10 @@ function processSetting () {
   });
 
   process.on('exit', (code) => {
-    if (process.env.NODE_ENV !== 'development') return; // 仅在开发模式下显示退出状态
+    // 仅在开发模式下显示退出状态
+    if (process.env.NODE_ENV !== 'development') return; 
 
-    const status = {
-      'exitCode': code,
-      uptime: process.uptime(),
-    };
-
+    const status = { exitCode: code, uptimeMs: process.uptime() * 1000 };
     console.log('Process status: %o', status);
   });
 
@@ -215,17 +209,17 @@ function showHelp() {
  * commit and push
  */
 
-function commit() {
+function commit () {
   process.stdout.write('准备提交变更...')
   console.log('暂存变更...');
-  execSync(`git -C ${ROOT} add -A .`, {encoding: 'utf8'});
+  execSync(`git -C ${APP_ROOT} add -A .`, {encoding: 'utf8'});
 
   console.log('检查变更...');
 
-  //const diff = execSync(`git -C ${ROOT} diff --staged --quiet`, { encoding: 'utf8', });
+  //const diff = execSync(`git -C ${APP_ROOT} diff --staged --quiet`, { encoding: 'utf8', });
 
   console.log('提交变更...');
-  execSync(`git -C ${ROOT} commit -m "自动提交"`, {encoding: 'utf8'});
+  execSync(`git -C ${APP_ROOT} commit -m "自动提交"`, {encoding: 'utf8'});
 
   console.log('同步远程仓库...');
 }
@@ -234,27 +228,23 @@ function commit() {
  * show version
  */
 
-function showVersion() {
+function showVersion () {
   process.stdout.write(
-    `version: ${APP_VERSION}` + '\n' +
+    `version: v${APP_VERSION}` + '\n' +
     `branch: ${APP_BRANCH}` + '\n' +
     `commit: ${APP_BRANCH_VERSION}`
   );
 }
 
 /**
- * 交互模式
- *
+ * 显示系统信息
  */
-
-function readLine () {
-  const rl = readLine();
-  // Interactive mode.
-  return readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: '> ',
-  });
+function sysinfo () {
+  process.stdout.write(
+    `platform: ${process.arch} (${os.platform()} ${os.release()})` + '\n' +
+    `node_env: ${process.env.NODE_ENV}` + '\n' +
+    `node_version: ${process.version}`
+  );
 }
 
 /**
@@ -398,23 +388,6 @@ async function importCSV (csvFile) {
 }
 
 /**
- * 设置环境变量
- */
-
-function setEnvironment (params) {
-
-  if (params.devel || params.development) process.env.NODE_ENV = 'development'; 
-
-  if (params.devel && params.devel === 'ui') {
-    process.env.DEVEL_UI = true; 
-    process.env.PORT=3001;
-  }
-
-  if (params.port) process.env.PORT = Number.parseInt(params.port);
-
-}
-
-/**
  * 从标准输入读取内容
  *
  * @param: {string} question
@@ -447,3 +420,35 @@ function readFromInput (question, password = false) {
     });
   });
 }
+
+/**
+ * build
+ * 打包构建前端应用程序
+ */
+
+async function build () {
+  const webpack = await import('webpack').then(module => module.default);
+  const config  = await import('./webpack.config.mjs').then(module => {
+    return module.default;
+  });
+
+  // 
+  const compiler = webpack(config());
+
+  compiler.run((err, stats) => {
+    if (err) {
+      console.error(err.stack || err);
+      if (err.details) {
+        console.error(err.details);
+      }
+    }
+
+    console.log(stats.toString({
+      chunks: false,
+      colors: true,
+    }));
+  });
+}
+
+// 执行main主程序
+main(); 
