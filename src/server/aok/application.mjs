@@ -1,3 +1,11 @@
+/**
+ * A onion kernel service application.
+ *
+ * 参考KOA框架,支持sream相应.
+ *
+ * @file application.mjs
+ */
+
 // node modules
 import EventEmitter from 'events'; 
 import path from 'path';
@@ -7,10 +15,6 @@ import compose from './compose.mjs';
 import Context from './context.mjs';
 import respond from './respond.mjs';
 import server from './http2-server.mjs';
-
-/**
- * Server application. 
- */
 
 export default class Application extends EventEmitter {
   constructor(props) {

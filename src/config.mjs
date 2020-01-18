@@ -8,18 +8,21 @@
 import fs from 'fs';
 import path from 'path';
 
-// 目录配置项目
+// 定位代码库根目录
 export const APP_ROOT = path.dirname(path.dirname(import.meta.url).substr(7));
 export const APP_PATH = APP_ROOT;
 
 // get configuration from package.json
 const packageJSON = path.join(APP_ROOT, 'package.json');
-export const PackageJSON  = JSON.parse(fs.readFileSync(packageJSON));
-export const APP_NAME     = PackageJSON.name;
-export const APP_VERSION  = PackageJSON.version;
-export const APP_LICENSE  = PackageJSON.license;
+export const PACKAGE_JSON = JSON.parse(fs.readFileSync(packageJSON));
+export const APP_NAME     = PACKAGE_JSON.name;
+export const APP_VERSION  = PACKAGE_JSON.version;
+export const APP_LICENSE  = PACKAGE_JSON.license;
 
+// 配置常用目录 
+export const PUBLIC_HTML  = path.join(process.env.HOME, 'public_html');
 export const APP_HOME     = path.join(process.env.HOME, `.${APP_NAME}`);
+export const APP_LOG_PATH = path.join(APP_HOME, 'log');
 export const DOT_ENV_FILE = path.join(APP_ROOT, '.env');
 export const VIMRC_FILE   = path.join(APP_ROOT, 'vimrc');
 export const README_FILE  = path.join(APP_ROOT, 'README.md');
@@ -37,4 +40,4 @@ export const APP_BRANCH = path.basename(GIT_HEAD_REF);
 
 // 从REF文件中读取版本信息
 const GIT_COMMIT_FILE = path.join(APP_ROOT, `.git/${GIT_HEAD_REF}`);
-export const APP_BRANCH_VERSION = fs.readFileSync(GIT_COMMIT_FILE, 'utf8');
+export const APP_BRANCH_VERSION = String(fs.readFileSync(GIT_COMMIT_FILE)).trim();

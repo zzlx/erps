@@ -14,6 +14,7 @@
  * @param {object} element that created by react
  * @return {function}
  * @api public
+ *
  */
 
 import ReactDOMServer from 'react-dom/server.js';

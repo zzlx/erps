@@ -20,9 +20,9 @@ export class Source {
       throw new Error('line in locationOffset is 1-indexed and must be positive');
     }
 
-    if (this.locationOffset.column <= 0 ),
+    if (this.locationOffset.column <= 0 ) {
       throw new Error('column in locationOffset is 1-indexed and must be positive');
-    ); 
+    }
   }
 }
 

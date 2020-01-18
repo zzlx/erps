@@ -1,16 +1,17 @@
 /**
- * 系统主程序
+ * 主程序
  *
  * 任务:
- * 1. 初始化系统执行环境
- * 2. 提供命令行参数解释及执行功能
- * 3. 启动系统服务
+ * 1. 初始化运行环境
+ * 2. 解析命令行参数,并执行相应配置功能
+ * 3. 管理系统服务
  *
  * @file: main.mjs
  */
 
 /******************************************************************************/
 // node内置模块
+import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -21,7 +22,7 @@ import './env.mjs'; // 导入环境变量
 import { 
   APP_ROOT,
   APP_NAME,
-  APP_HOME,
+  APP_CONFIG_PATH,
   APP_VERSION,
   APP_BRANCH,
   APP_BRANCH_VERSION,
@@ -37,18 +38,21 @@ import argvParser from './utils/argvParser.mjs';
 import strings from './utils/strings.mjs';
 import * as Fns from '../src/queries/index.mjs';
 
-// 全局变量
 const dsn = () => date.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
-let dba = null;
+let dba = null; // 设置全局变量dba
+let server = null; 
+main(); // 执行main主程序
+
+/******************************************************************************/
 
 /**
- * 主控制程序 
+ * 执行逻辑
  *
  * 管理执行顺序及控制逻辑
  */
 
 async function main () {
-  // 进程配置
+  // 配置进程管理逻辑
   processSetting();
 
   // 获取并解析命令行参数
@@ -56,7 +60,9 @@ async function main () {
 
   // 根据命令行参数设置环境变量
   if (Params.devel || Params.development) process.env.NODE_ENV = 'development'; 
-  if (Params.port) process.env.PORT = Number.parseInt(Params.port);
+  if (Params.port || (Params.p && Params.p !== true)) {
+    process.env.PORT = Number.parseInt(Params.port);
+  }
 
   if (Params.devel && Params.devel === 'ui') {
     process.env.DEVEL_UI = true; 
@@ -72,17 +78,10 @@ async function main () {
 
   // 以下任务需要读取本地配置文件,需先检测必要的目录
   // 检测并准备必要的目录
-  await readyDir();    // 准备目录
+  await readyDir();
 
   // 读入配置项目 
   const Config = await getConfig();
-
-  console.log('test');
-
-  // 建立数据连接
-  if (Config.mongodb == null) {
-    Config.mongodb = 'mongodb://localhost:27017/test';
-  }
 
   const url = new URL(Config.mongodb);
 
@@ -110,12 +109,7 @@ async function main () {
     startHttpd(Params);
 
     if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
-      watcher([
-        path.join(APP_ROOT, 'src', 'backend'), 
-        path.join(APP_ROOT, 'src', 'schema'), 
-        path.join(APP_ROOT, 'src', 'graphql'), 
-        path.join(APP_ROOT, 'src', 'resolvers'), 
-      ], () => {
+      watcher([ 'backend', 'schema', 'graphql', 'resolvers', ], () => {
         restartHttpd(Params);
       });
     }
@@ -125,22 +119,34 @@ async function main () {
 
   // 执行到此步骤,关闭数据库连接
   if (dba.client) dba.client.close();
+
 }
 
 /**
- *
+ * 管理config配置项目
  */
 
 function getConfig () {
+  let Config = null;
+
   return fs.promises.readFile(CONFIG_FILE, {flag: 'r+'}).then(config => {
-      const Config = JSON.parse(config)
-      return Config;
-    }).catch(e => {
-      if (e.code === 'ENOENT') {
-        const file = e.path;
-        return {};
+    Config = JSON.parse(config)
+    if (Config.mongodb == null) {
+      Config.mongodb = 'mongodb://localhost:27017/test';
+    }
+
+    return Config;
+  }).catch(e => {
+    if (e.code === 'ENOENT') {
+      const file = e.path;
+
+      if (Config.mongodb == null) {
+        Config.mongodb = 'mongodb://localhost:27017/test';
       }
-    });
+
+      return Config;
+    }
+  });
 }
 
 /**
@@ -242,13 +248,13 @@ function showVersion () {
     commit:  APP_BRANCH_VERSION,
   }
 
-  console.log('Version information: %o', version);
+  console.log('Version info: %o', version);
 }
 
 /**
  * 显示系统信息
  */
-function sysinfo () {
+function showSysinfo () {
   const sysinfo = {
     platform: `${process.arch} (${os.platform()} ${os.release()})`,
     node_env: process.env.NODE_ENV,
@@ -270,6 +276,7 @@ function watcher (folders, cb) {
     let changeLog = '';
     let lastTimer = null;
     const options = { persistent: true, recursive: true, encoding: 'utf8' };
+    if (!path.isAbsolute(folder)) folder = path.join(APP_ROOT, 'src', folder);
 
     fs.watch(folder, options, (eventType, filename) => {
       const delay = 3; // 默认3s
@@ -335,8 +342,8 @@ function restartHttpd(Params) {
 function readyDir () {
   // 执行准备工作
   const asyncTasks = [
-    fs.promises.mkdir(APP_HOME, {recursive: true}),
-    fs.promises.mkdir(path.join(APP_HOME, 'log'), {recursive: true}),
+    fs.promises.mkdir(APP_CONFIG_PATH, {recursive: true}),
+    fs.promises.mkdir(path.join(APP_CONFIG_PATH, 'log'), {recursive: true}),
   ];
 
   // 等待准备工作完成后再进行下一步工作
@@ -458,6 +465,3 @@ async function build () {
     }));
   });
 }
-
-// 执行main主程序
-main(); 

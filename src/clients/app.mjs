@@ -5,7 +5,7 @@ import {
   Redirect,
   Switch,
 } from '../components/index.mjs';
-import * as M from '../containers/index.mjs';
+import * as M from '../apps/index.mjs';
 import routes from './routes.json'; 
 
 /**

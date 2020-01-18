@@ -1,19 +1,24 @@
 /**
- *
+ * 
  * 读取目录,遍历文件并读入模块对象中
  *
+ * @file getModulesFromPath.mjs
  */
 
 import path from 'path';
 import fs from 'fs';
 
 export default function getModules (dir) {
+
+  if (!path.isAbsolute(dir)) {
+    dir = path.join(process.cwd(), dir);
+  }
+
   // return a promise 
   return fs.promises.readdir(dir, {
     encoding: 'utf8', 
     withFileTypes: true
   }).then( async (files) => {
-
     const Modules = {};
 
     // 
@@ -34,7 +39,3 @@ export default function getModules (dir) {
     return Modules;
   }).catch(err => { console.log(err); });
 }
-
-// test 
-//getModules('../resolvers').then(fns => console.log(fns));
-//getModules('../zzz/middlewares').then(fns => console.log(fns));
