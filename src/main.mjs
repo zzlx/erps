@@ -26,7 +26,6 @@ import {
   APP_BRANCH,
   APP_BRANCH_VERSION,
   HELP_FILE,
-  DOT_ENV_FILE,
   CONFIG_FILE,
 } from './config.mjs';
 
@@ -49,8 +48,8 @@ let dba = null;
  */
 
 async function main () {
-  // 配置进程
-  setProcess();
+  // 进程配置
+  processSetting();
 
   // 获取并解析命令行参数
   const Params = argvParser(process.argv.slice(2)); 
@@ -67,7 +66,7 @@ async function main () {
   // 执行解析的参数命令
   if (Params.help || Params.h) return await showHelp(); // 显示帮助文件
   if (Params.version || Params.v) return await showVersion(); // 显示版本号
-  if (Params.sysinfo) return await sysinfo(); // 显示系统信息
+  if (Params.sysinfo) return await showSysinfo(); // 显示系统信息
   if (Params.commit) return await commit(); // 提交代码变更
   if (Params.build) return await build(); // 构建前端应用程序
 
@@ -145,16 +144,40 @@ function getConfig () {
 }
 
 /**
- * 设置进程
+ * 关闭数据连接
  */
 
-function setProcess () {
+function closeDB () {
+    if (dba && dba.client) dba.client.close();
+}
+
+/**
+ * 进程配置项
+ */
+
+function processSetting () {
   process.title = APP_NAME; // 设置进程名称
+
+  // 进程退出前执行的任务
+  process.on('beforeExit', (code) => {
+    //console.log('Process beforeExit event with code: ', code);
+    closeDB(); // 关闭数据链接
+  });
+
+  process.on('exit', (code) => {
+    closeDB(); // 关闭数据链接
+
+    // 仅在开发模式下显示退出状态
+    if (process.env.NODE_ENV !== 'development') return; 
+
+    const status = { exitCode: code, uptime: process.uptime() };
+    console.log('ProcessExitCode: %o', status);
+  });
 
   // 捕获unhandled rejection
   process.on('unhandledRejection', async (reason, promise) => {
 
-    console.log('捕获到Rejection:', promise, '\nReason:', reason);
+    console.log('捕获到Rejection:', promise);
 
     if (reason.codeName === 'Unauthorized' && reason.code === 13) {
       Params.user = await readFromInput('请输入数据库用户名:');
@@ -163,8 +186,7 @@ function setProcess () {
       await main();
     }
 
-    // 关闭数据链接
-    if (dba && dba.client) dba.client.close();
+    closeDB(); // 关闭数据链接
   });
 
   // 捕获exception
@@ -177,22 +199,7 @@ function setProcess () {
       `Exception origin: ${origin}`
     );
 
-    // 关闭数据链接
-    if (dba && dba.client) dba.client.close();
-  });
-
-  // 进程退出前执行的任务
-  process.on('beforeExit', (code) => {
-    //console.log('Process beforeExit event with code: ', code);
-    //if (mongodb) mongodb.close(); // 关闭数据链接
-  });
-
-  process.on('exit', (code) => {
-    // 仅在开发模式下显示退出状态
-    if (process.env.NODE_ENV !== 'development') return; 
-
-    const status = { exitCode: code, uptimeMs: process.uptime() * 1000 };
-    console.log('Process status: %o', status);
+    closeDB(); // 关闭数据链接
   });
 
 }
@@ -229,22 +236,26 @@ function commit () {
  */
 
 function showVersion () {
-  process.stdout.write(
-    `version: v${APP_VERSION}` + '\n' +
-    `branch: ${APP_BRANCH}` + '\n' +
-    `commit: ${APP_BRANCH_VERSION}`
-  );
+  const version = {
+    version: APP_VERSION,
+    branch:  APP_BRANCH,
+    commit:  APP_BRANCH_VERSION,
+  }
+
+  console.log('Version information: %o', version);
 }
 
 /**
  * 显示系统信息
  */
 function sysinfo () {
-  process.stdout.write(
-    `platform: ${process.arch} (${os.platform()} ${os.release()})` + '\n' +
-    `node_env: ${process.env.NODE_ENV}` + '\n' +
-    `node_version: ${process.version}`
-  );
+  const sysinfo = {
+    platform: `${process.arch} (${os.platform()} ${os.release()})`,
+    node_env: process.env.NODE_ENV,
+    node_version: process.version,
+  };
+
+  console.log('sysinfo: %o', sysinfo);
 }
 
 /**
@@ -428,9 +439,7 @@ function readFromInput (question, password = false) {
 
 async function build () {
   const webpack = await import('webpack').then(module => module.default);
-  const config  = await import('./webpack.config.mjs').then(module => {
-    return module.default;
-  });
+  const config  = await import('./webpack.config.cjs').then(m => m.default);
 
   // 
   const compiler = webpack(config());

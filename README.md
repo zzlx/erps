@@ -1,8 +1,6 @@
-ERPs
+ERPS
 
-ERPs(ERP services),一款ERP服务系统,提供一体化的ERP、CRM、OA、HR等领域的管理应用。
-
-# Usage
+ERPS(ERP services)，一款集成ERP、CRM、OA、HR等功能的综合业务服务平台。
 
 1. 准备Node.js环境
 

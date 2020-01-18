@@ -7,24 +7,25 @@
 /******************************************************************************/
 import fs from 'fs';
 import path from 'path';
-import { APP_ROOT } from './config.mjs';
-import envParser from './utils/envParser.mjs';
+import { APP_ROOT, DOT_ENV_FILE, } from './config.mjs';
 
-const dotEnvConfig = dotenv(path.join(APP_ROOT, '.env'));
+const dotEnvConfig = dotenv(DOT_ENV_FILE);
 for (let key of Object.keys(dotEnvConfig)) {
   if (process.env[key]) continue; // @todo: 是否覆盖已有配置项
   process.env[key] = dotEnvConfig[key];
 }
 
-// 系统依赖的变量
+// 设置系统变量
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 默认使用生产环境
 process.env.PORT = process.env.PORT || 3000; // 默认使用3000端口号
+process.env.HOST = process.env.HOST || 'localhost'; // localhost
 
+// 工具函数
+//
 function dotenv(envFile) {
   if (!fs.existsSync(envFile)) return {};
   const envFileContent = fs.readFileSync(envFile, 'utf8');
-  const parsedObj = parser(envFileContent); 
-  return parsedObj;
+  return parser(envFileContent); 
 }
 
 function parser (source) {
@@ -47,5 +48,3 @@ function parser (source) {
 
   return obj;
 }
-
-/******************************************************************************/
