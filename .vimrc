@@ -224,7 +224,7 @@ autocmd BufWritePost $MYVIMRC source $MYVIMRC
 """"""""""""""""""
 nmap LB 0
 nmap LE $
-nmap <C-s> :w<CR>             " 保存修改
+nmap <C-S> :w<CR>             " 保存修改
 "vmap <C-v> "+gp
 vmap <C-c> "+y
 map <C-A> ggVGY

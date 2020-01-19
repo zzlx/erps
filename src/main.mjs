@@ -22,7 +22,8 @@ import './env.mjs'; // 导入环境变量
 import { 
   APP_ROOT,
   APP_NAME,
-  APP_CONFIG_PATH,
+  APP_HOME,
+  APP_LOG_PATH,
   APP_VERSION,
   APP_BRANCH,
   APP_BRANCH_VERSION,
@@ -30,7 +31,7 @@ import {
   CONFIG_FILE,
 } from './config.mjs';
 
-import MongoDB from './databases/mongodb.mjs';
+import MongoDB from './utils/mongodb.mjs';
 import console from './utils/console.mjs';
 import array from './utils/array.mjs';
 import date from './utils/date.mjs';
@@ -40,7 +41,7 @@ import * as Fns from '../src/queries/index.mjs';
 
 const dsn = () => date.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
 let dba = null; // 设置全局变量dba
-let server = null; 
+let httpd = null; // httpd服务 
 main(); // 执行main主程序
 
 /******************************************************************************/
@@ -109,7 +110,7 @@ async function main () {
     startHttpd(Params);
 
     if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
-      watcher([ 'backend', 'schema', 'graphql', 'resolvers', ], () => {
+      watcher([ 'apis', 'server', 'schema', 'graphql', 'resolvers', ], () => {
         restartHttpd(Params);
       });
     }
@@ -313,7 +314,7 @@ function startHttpd (opts) {
     '--experimental-json-modules',
     process.env.NODE_ENV !== 'development' && '--no-warnings', // 仅在开发模式下显示warning
     `--title=${process.title}.httpd`,
-    path.join(ROOT, 'src', 'backend', 'httpd.mjs'),
+    path.join(APP_ROOT, 'src', 'server', 'httpd.mjs'),
   ].filter(Boolean);
 
   // options
@@ -342,8 +343,8 @@ function restartHttpd(Params) {
 function readyDir () {
   // 执行准备工作
   const asyncTasks = [
-    fs.promises.mkdir(APP_CONFIG_PATH, {recursive: true}),
-    fs.promises.mkdir(path.join(APP_CONFIG_PATH, 'log'), {recursive: true}),
+    fs.promises.mkdir(APP_HOME, {recursive: true}),
+    fs.promises.mkdir(APP_LOG_PATH, {recursive: true}),
   ];
 
   // 等待准备工作完成后再进行下一步工作

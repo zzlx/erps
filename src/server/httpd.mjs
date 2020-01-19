@@ -12,6 +12,7 @@ import path from 'path';
 import Aok from './aok/application.mjs';
 import getModulesFromPath from '../utils/getModulesFromPath.mjs';
 import { 
+  APP_ROOT, 
   APP_HOME, 
   APP_LOG_PATH,
   CONFIG_FILE,
@@ -21,8 +22,10 @@ import '../env.mjs';
 async function httpd () {
   // 加载配置项
   const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); 
-  const m = await getModulesFromPath('./middlewares');
-  const apis = await getModulesFromPath('../apis');
+  const m = await getModulesFromPath(
+    path.join(APP_ROOT, 'src', 'server', 'middlewares')
+  );
+  const apis = await getModulesFromPath(path.join(APP_ROOT, 'src', 'apis'));
 
   // 配置服务器执行逻辑
   const app = new Aok();
@@ -32,7 +35,7 @@ async function httpd () {
   app.use(m.log(APP_LOG_PATH));       // 记录log
   app.use(m.cors());                  // 跨域访问响应
   app.use(m.mongodb(config.mongodb)); // mongo数据库
-  app.use(m.apiRouter(apis));
+  app.use(m.apiRouter(apis));         // API路由
 
   /**
    * 开启服务器监听
