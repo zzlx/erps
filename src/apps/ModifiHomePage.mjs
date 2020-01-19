@@ -14,7 +14,7 @@ import {
 import { 
   types as ActionTypes,
   print as printPage,
-} from '../actions/index.mjs';
+} from '../store/actions/index.mjs';
 
 /**
  * 主页面

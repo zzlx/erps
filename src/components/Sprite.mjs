@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import sprites from '../data/sprites.json';
+import sprites from '../sprites.json';
 
 export default function Sprite (props = {}) {
   const { showAll, id, width, height, ...rests } = props;

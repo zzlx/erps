@@ -154,5 +154,4 @@ function csvToJSON(csv) {
   }
 
   return retval;
-
 }

@@ -2,7 +2,7 @@
  *
  */
 
-import object from '../utils/object.mjs';
+import object from '../../utils/object.mjs';
 import { types } from '../actions/index.mjs';
 
 const profiles = {

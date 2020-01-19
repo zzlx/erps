@@ -1,5 +1,5 @@
 //import $$observable from 'symbol-observable';
-import { types } from '../actions/index.mjs';
+import { types } from './actions/index.mjs';
 import object from '../utils/object.mjs';
 import isPlainObject from '../utils/isPlainObject.mjs';
 

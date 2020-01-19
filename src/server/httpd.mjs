@@ -25,7 +25,6 @@ async function httpd () {
   const m = await getModulesFromPath(
     path.join(APP_ROOT, 'src', 'server', 'middlewares')
   );
-  const apis = await getModulesFromPath(path.join(APP_ROOT, 'src', 'apis'));
 
   // 配置服务器执行逻辑
   const app = new Aok();
@@ -35,18 +34,17 @@ async function httpd () {
   app.use(m.log(APP_LOG_PATH));       // 记录log
   app.use(m.cors());                  // 跨域访问响应
   app.use(m.mongodb(config.mongodb)); // mongo数据库
-  app.use(m.apiRouter(apis));         // API路由
+  app.use(m.router(path.join(APP_ROOT, 'src', 'services'))); // 服务端路由
+  app.use(m.notFound());
 
   /**
    * 开启服务器监听
    */
 
   app.listen({
-    // 绑定服务器主机端口
+    ipv6Only: false, // 是否仅开启IPV6
+    host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
     port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
-    // 绑定服务器主机名
-    host: process.env.HOST ? process.env.HOST : process.env.IPV6 ? '::' : '0.0.0.0',
-    ipv6Only: process.env.IPV6 ? true : false, // 是否仅开启IPV6
     exclusive: false, // 是否共享进程端口
   });
 }

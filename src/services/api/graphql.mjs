@@ -21,33 +21,37 @@ import os from 'os';
 
 import path from 'path';
 import util from 'util';
-import getRawBody from '../server/getRawBody.mjs';
-import { graphql, buildASTSchema, parse, Source } from '../graphql/index.mjs';
-import getResolvers from '../utils/getModulesFromPath.mjs';
-import { APP_PATH } from '../config.mjs';
+import getRawBody from '../../server/getRawBody.mjs';
+import { graphql, buildASTSchema, parse, Source } from '../../graphql/index.mjs';
+import getResolvers from '../../utils/getModulesFromPath.mjs';
+import { APP_PATH } from '../../config.mjs';
 
 const debug = util.debuglog('debug:graphql');
 const schemaPath = path.join(APP_PATH, 'src', 'schema');
 const resolversPath = path.join(APP_PATH, 'src', 'resolvers');
-
-fs.promises.readdir(schemaPath, { encoding: 'utf8' })
-  .then(files => {
-		return files.filter(file => file.match(/\.gql$/))
-	}).then(files => {
-		return Promise.all(files.map(file => fs.promises.readFile(path.join(opts.schemaPath, file), 'utf8')))
-	}).then(content => {
-		return content.join(os.EOL)
-	}).then(schema => {
-		const source = parse(schema);
-    opts.schema = buildASTSchema(source);
-  });
-
-// 获取resolvers
-getResolvers(resolversPath).then(resolvers => { 
-  opts.fieldResolver = resolvers; 
-});
+let schema = null;
+let fieldResolver = null;
 
 export default async function graphqlAPI (ctx, next) {
+
+  if (schema == null) {
+    schema = await fs.promises.readdir(schemaPath, { encoding: 'utf8' }).then(files => {
+      return files.filter(file => file.match(/\.gql$/))
+    }).then(files => {
+      return Promise.all(files.map(file => fs.promises.readFile(path.join(schemaPath, file), 'utf8')))
+    }).then(content => {
+      return content.join(os.EOL)
+    }).then(schema => {
+      const source = parse(schema);
+      return buildASTSchema(source);
+    });
+  }
+
+  if (fieldResolver == null) {
+    // 获取resolvers
+    fieldResolver = await getResolvers(resolversPath);
+  }
+
   let request = Object.create(null);
 
   // only allowed GET/POST method
@@ -86,15 +90,16 @@ export default async function graphqlAPI (ctx, next) {
   try {
     // 执行graphql解析查询
     ctx.body = await graphql({
-      schema: opts.schema, 
+      schema: schema, 
       source: request.query || '{welcome}',
       rootValue: {},
       contextValue: ctx,
       variableValues: request.variables,
       operationName: request.operationName,
-      fieldResolver: opts.fieldResolver,
+      fieldResolver: fieldResolver,
     });
   } catch (e) {
+    console.log(e);
     ctx.body = e;
   }
 }

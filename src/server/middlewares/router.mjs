@@ -1,35 +1,29 @@
 /**
- * Router middleware
+ * 服务端路由
  *
  * @param {array} routes
  * @return {function} middleware function
  * @api public
  */
 
-export default (routes) => {
-  if (!Array.isArray(routes)) {
-    throw new TypeError('Confituration Error: Routes options must be an array.');
-  }
+import fs from 'fs';
+import path from 'path';
 
-  return function routerMiddleware (ctx, next) {
-    for (let route of routes) {
-      if (Array.isArray(route.method)) {
-        if (route.method.indexOf(ctx.method) === -1) continue;
+export default (servicePath, prefix) => {
+  const routeCache = Object.create(null); // 路由缓存
+
+  return async function apisRouterMiddleware (ctx, next) {
+    if (!routeCache[ctx.pathname])  {
+      const serviceModule = path.join(servicePath, ctx.pathname + '.mjs'); 
+      if (fs.existsSync(serviceModule)) {
+        routeCache[ctx.pathname] = await import(serviceModule).then(m => m.default);
       }
-
-      if ('string' === typeof route.method) {
-        if (ctx.method !== route.method && 'ANY' !== route.method) continue;
-      }
-
-      if (!route.path.test(ctx.pathname)) continue;
-
-      const api = route['api'];
-
-      const fn = api.middlewares ? ctx.app.compose(api.middlewares) : api; 
-
-      return fn.apply(null, [ctx, next]);
     }
 
-    return next();
+    // 获取service
+    const service = routeCache[ctx.pathname];
+
+    if (null == service) return next();
+    return await service.apply(null, [ctx, next])
   }
 }

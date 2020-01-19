@@ -13,7 +13,7 @@ import {
     Sprite, Spinner, 
 } from '../components/index.mjs';
 
-import graphql from '../actions/graphql.mjs';
+import graphql from '../store/actions/graphql.mjs';
 
 /**
  * 首页面前端程序

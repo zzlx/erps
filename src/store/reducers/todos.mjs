@@ -3,7 +3,7 @@
  */
 
 import { types } from '../actions/index.mjs';
-import object from '../utils/object.mjs';
+import object from '../../utils/object.mjs';
 
 export default (state = {}, action) => {
   const newState = {

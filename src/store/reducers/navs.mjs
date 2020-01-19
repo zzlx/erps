@@ -9,7 +9,7 @@
  */
 
 import { types } from '../actions/index.mjs';
-import initialState from '../data/navs.json';
+import initialState from '../../navs.json';
 
 export default (state = initialState, action) => {
   switch (action.type) {

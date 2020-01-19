@@ -6,16 +6,14 @@ import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import {
-  PUBLIC_HTML,
-} from '../config.mjs';
+import { PUBLIC_HTML, } from '../config.mjs';
 
 const debug = util.debuglog('debug:static');
 const opts = {};
 
-opts.root = opts.root || path.join(PUBLIC_HTML, 'build');
+opts.root = opts.root || path.join(PUBLIC_HTML, 'dist');
 opts.index = opts.index || 'index.html';
-opts.directoryIndex = opts.directoryIndex || ['index.html'],
+opts.directoryIndex = opts.directoryIndex || ['index.html'];
 opts.immutable = opts.immutable || false;
 opts.maxage = opts.maxage || 0;
 opts.compress = opts.compress || false;

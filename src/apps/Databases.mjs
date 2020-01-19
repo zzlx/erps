@@ -3,7 +3,7 @@ import {
   Alert,
   Tables,
 } from '../components/index.mjs';
-import graphql from '../actions/graphql.mjs';
+import graphql from '../store/actions/graphql.mjs';
 
 /**
  *

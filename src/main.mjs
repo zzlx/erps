@@ -110,7 +110,7 @@ async function main () {
     startHttpd(Params);
 
     if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
-      watcher([ 'apis', 'server', 'schema', 'graphql', 'resolvers', ], () => {
+      watcher([ 'services', 'server', 'schema', 'graphql', 'resolvers', ], () => {
         restartHttpd(Params);
       });
     }
@@ -173,12 +173,6 @@ function processSetting () {
 
   process.on('exit', (code) => {
     closeDB(); // 关闭数据链接
-
-    // 仅在开发模式下显示退出状态
-    if (process.env.NODE_ENV !== 'development') return; 
-
-    const status = { exitCode: code, uptime: process.uptime() };
-    console.log('ProcessExitCode: %o', status);
   });
 
   // 捕获unhandled rejection
@@ -345,6 +339,7 @@ function readyDir () {
   const asyncTasks = [
     fs.promises.mkdir(APP_HOME, {recursive: true}),
     fs.promises.mkdir(APP_LOG_PATH, {recursive: true}),
+    fs.promises.mkdir(PUBLIC_HTML, {recursive: true}),
   ];
 
   // 等待准备工作完成后再进行下一步工作
@@ -446,7 +441,8 @@ function readFromInput (question, password = false) {
  */
 
 async function build () {
-  const webpack = await import('webpack').then(module => module.default);
+  process.env.NODE_ENV = 'production';
+  const webpack = await import('webpack').then(m => m.default);
   const config  = await import('./webpack.config.cjs').then(m => m.default);
 
   // 
@@ -460,9 +456,6 @@ async function build () {
       }
     }
 
-    console.log(stats.toString({
-      chunks: false,
-      colors: true,
-    }));
+    console.log(stats.toString({ chunks: false, colors: true, }));
   });
 }

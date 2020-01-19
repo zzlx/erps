@@ -1,4 +1,3 @@
-/******************************************************************************/
 /**
  * webpack配置文件
  *
@@ -6,6 +5,7 @@
  *
  * @file: config.webpack.cjs
  */
+/******************************************************************************/
 
 const fs = require('fs');
 const path = require('path');
@@ -17,8 +17,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 
-const webpackConfig = module.exports = (env = {}) => {
-  process.env.NODE_ENV = env.env || process.env.NODE_ENV || 'production';
+const webpackConfig = module.exports = (opts = {}) => {
+  process.env.NODE_ENV = opts.env || process.env.NODE_ENV || 'production';
 	const APP_PATH = path.dirname(__dirname);
   const isDevel = 'development' === process.env.NODE_ENV;
   const isProd  = 'production' === process.env.NODE_ENV;
@@ -31,23 +31,15 @@ const webpackConfig = module.exports = (env = {}) => {
     publicUrl: '/',
   };
 
-  process.chdir(paths.appPath);
-
-  // 确保public_html目录存在
-  fs.promises.mkdir(paths.appDist, {recursive: true}).catch(err => {
-    console.log(err);
-  });
-
-  // return configuration
   return {
     mode: isDevel ? 'development' : isProd ? 'production' : 'none',
     bail: isProd,
     devtool: isProd ? 'source-map' : isDevel ? 'inline-source-map' : false,
     node: false,
-    target: 'web',
+    target: opts.target ? opts.target : 'web',
 
     entry: {
-      main: path.join(paths.appPath, 'src', 'front-end', 'dom.mjs'),
+      main: path.join(paths.appPath, 'src', 'clients', 'dom.mjs'),
       styles: path.join(paths.appPath, 'src', 'styles', 'index.scss'),
     },
 
@@ -57,7 +49,7 @@ const webpackConfig = module.exports = (env = {}) => {
       filename: 'static/js/[name].[contenthash:8].bundle.js',
       chunkFilename: 'static/js/[name].[contenthash:8].chunk.js',
       futureEmitAssets: true,
-      publicPath: paths.publicUrl,
+      publicPath: paths.publicPath,
     },
 
     module: {
@@ -68,14 +60,14 @@ const webpackConfig = module.exports = (env = {}) => {
           oneOf: [
             { test: /\.(mjs|js)$/, 
 							exclude: /node_modules/,
-							loader: require.resolve('babel-loader'), 
+							loader: 'babel-loader', 
 							options: {
 								presets: [ "react-app" ]
 							}
 						},
-            { test: /\.gql$/, loader: require.resolve('raw-loader'), },
+            { test: /\.gql$/, loader: 'raw-loader', },
             { test: /\.(md|txt)$/, 
-              loader: require.resolve('file-loader'), 
+              loader: 'file-loader', 
               options: {
                 name: 'doc/[name].[contenthash:8].[ext]',
               }
@@ -89,27 +81,27 @@ const webpackConfig = module.exports = (env = {}) => {
                     reloadAll: true,
                   },
                 } :
-                { loader: require.resolve('style-loader') },
-                { loader: require.resolve('css-loader') },
-                { loader: require.resolve('postcss-loader'),
+                { loader: 'style-loader' },
+                { loader: 'css-loader' },
+                { loader: 'postcss-loader',
                   options: {
                     plugins: function () {
                       return [ require('autoprefixer') ];
                     }
                   }
                 },
-                { loader: require.resolve('sass-loader') },
+                { loader: 'sass-loader' },
               ],
             },
             { test: /\.(png|svg|jpg|gif|jpeg|bmp)$/, 
-              loader: require.resolve('url-loader'),
+              loader: 'url-loader',
               options: {
                 limit: 1024 * 10, // 10kb
                 name: 'static/media/[name].[contenthash:8].[ext]',
                 mimetype: 'image/[ext]',
               },
             },
-            { loader: require.resolve('file-loader'),
+            { loader: 'file-loader',
               exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
               options: {
                 name: 'static/other/[name].[contenthash:8].[ext]',
@@ -265,11 +257,8 @@ const webpackConfig = module.exports = (env = {}) => {
         'src/schema', 
         'src/resolvers', 
         'src/server', 
-        'src/http2.server.mjs',
-        'src/https.mjs',
-        'src/wds.mjs',
+        'src/services', 
       ],
     },
   };
 }
-/******************************************************************************/
