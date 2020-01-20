@@ -1,10 +1,10 @@
-import React from 'react';
-
 /**
  * 页脚组件
  *
  * 结构化组件
  */
+
+import React from 'react';
 
 export default function Footer (props) {
   const { className, ...rests } = props;

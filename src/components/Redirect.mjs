@@ -6,7 +6,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import ReactContext from "./RootContext.mjs";
-import { types } from '../actions/index.mjs';
+import { types } from '../store/actions/index.mjs';
 
 import warning from '../utils/warning.mjs';
 import path from '../utils/path.mjs';

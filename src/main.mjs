@@ -27,6 +27,7 @@ import {
   APP_VERSION,
   APP_BRANCH,
   APP_BRANCH_VERSION,
+  PUBLIC_HTML,
   HELP_FILE,
   CONFIG_FILE,
 } from './config.mjs';
@@ -243,7 +244,7 @@ function showVersion () {
     commit:  APP_BRANCH_VERSION,
   }
 
-  console.log('Version info: %o', version);
+  console.log(version);
 }
 
 /**
@@ -256,7 +257,7 @@ function showSysinfo () {
     node_version: process.version,
   };
 
-  console.log('sysinfo: %o', sysinfo);
+  console.log(sysinfo);
 }
 
 /**

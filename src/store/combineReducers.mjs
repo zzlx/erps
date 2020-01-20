@@ -1,7 +1,3 @@
-import { types } from '../actions/index.mjs';
-import isPlainObject from '../utils/isPlainObject.mjs';
-import warning from '../utils/warning.mjs';
-
 /**
  * Combine Reducers
  *
@@ -23,6 +19,10 @@ import warning from '../utils/warning.mjs';
  * A reducer function that invokes every reducer inside the
  * passed object, and builds a state object with the same shape.
  */
+
+import { types } from './actions/index.mjs';
+import isPlainObject from '../utils/isPlainObject.mjs';
+import warning from '../utils/warning.mjs';
 
 export default function combineReducers(reducers) {
   const reducerKeys = Object.keys(reducers);

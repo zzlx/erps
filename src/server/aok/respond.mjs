@@ -45,7 +45,7 @@ export default function respond (ctx) {
   // status body
   if (null == body) {
     if (ctx.httpVersion >= 2) {
-      body = String(code);
+      body = ctx.message;
     } else {
       body = ctx.message || String(code);
     }

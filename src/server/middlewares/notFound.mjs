@@ -6,6 +6,6 @@
 
 export default function () {
   return function notFoundMiddleware (ctx, next) {
-    ctx.body = '404:not found';
+    ctx.throw(404, '页面未定义');
   }
 }

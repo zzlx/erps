@@ -1,26 +1,25 @@
 /**
  * context上下文对象 
+ *
+ *
+ * @file context.mjs
  */
+
 import assert from 'assert';
 import http from 'http';
 import http2 from 'http2';
 import net from 'net';
 
-// 第三方模块
+// @todo: 第三方模块
 import accepts from 'accepts';
 import contentType from 'content-type';
 import getType from 'cache-content-type';
-import createError from 'http-errors';
 
-// 
+// 定义模块变量
 const IP = Symbol('context#ip');
 const emptyCode = [204, 205, 304];
 const retryCode = [502, 503, 504];
 const redirectCode = [300, 301, 302, 303, 305, 307, 308];
-
-/**
- *
- */
 
 export default class Context {
 
@@ -771,4 +770,55 @@ export default class Context {
     this.length = Buffer.byteLength(msg);
     this.stream.end(msg);
   }
+}
+
+/**
+ * http error
+ *
+ */
+
+function createError () {
+  let error = null;
+  let message = null;
+  let status = 500;
+  let props = {};
+
+  for (let i = 0; i < arguments.length; i++ ) {
+    let arg = arguments[i];
+    if (arg instanceof Error) {
+      err = arg;
+      status = err.status || err.statusCode || status;
+      continue;
+    }
+
+    switch (typeof arg) {
+      case 'string':
+        message = arg;
+        break;
+      case 'number':
+        status = arg;
+        if (i !== 0) throw new Error('non-first-argument status code.');
+        break;
+      case 'object':
+        props = arg
+        break
+    }
+  }
+
+  if (typeof status === 'number' && (status < 400 || status >= 600)) {
+    throw new Error('non-error status code; use only 4xx or 5xx status codes');
+  }
+
+  if (typeof status !== 'number' ||
+    (!http.STATUS_CODES[status] && (status < 400 || status >= 600))) {
+    status = 500
+  }
+
+  if (null == error) {
+    error = new Error(message || http.STATUS_CODES[status]);
+    error.status = status;
+  }
+  
+  // 返回error对象
+  return error;
 }

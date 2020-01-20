@@ -11,7 +11,7 @@ import ISODate from '../../utils/date.mjs';
 const debug = util.debuglog('debug.log');
 
 export default function (logPath) {
-  if (null == logPath) throw new ERROR('You must provide a valid logPath.'); 
+  if (null == logPath) throw new Error('You must provide a valid logPath.'); 
 
   // if logPath already exists, that can be no side effect
   fs.promises.mkdir(logPath, {recursive: true}).catch(err => { debug(err); });
@@ -23,6 +23,7 @@ export default function (logPath) {
 
       // set err message
       ctx.body = err.message;
+      ctx.status = err.status;
 
       if ('development' === ctx.app.env) {
         // 开发模式下将错误信息输出到页面

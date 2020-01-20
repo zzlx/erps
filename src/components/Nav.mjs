@@ -5,7 +5,7 @@
 
 import React from 'react';
 import Context from './RootContext.mjs';
-import { historyPushState } from '../actions/index.mjs';
+import { historyPushState } from '../store/actions/index.mjs';
 
 export default class Nav extends React.PureComponent {
     constructor(props) {
