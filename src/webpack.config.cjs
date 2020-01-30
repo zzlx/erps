@@ -17,7 +17,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 
-const webpackConfig = module.exports = (opts = {}) => {
+module.exports = (opts = {}) => {
   process.env.NODE_ENV = opts.env || process.env.NODE_ENV || 'production';
 	const APP_PATH = path.dirname(__dirname);
   const isDevel = 'development' === process.env.NODE_ENV;
@@ -129,9 +129,7 @@ const webpackConfig = module.exports = (opts = {}) => {
           cache: true, 
         },
       ]),
-      new webpack.EnvironmentPlugin({
-        NODE_ENV: 'production', // 优先使用生产模式
-      }),
+      new webpack.EnvironmentPlugin({ NODE_ENV: 'production', }),
       new webpack.DefinePlugin({
         'PUBLIC_URL': JSON.stringify(process.env.NODE_ENV),
       }),
@@ -244,18 +242,21 @@ const webpackConfig = module.exports = (opts = {}) => {
       hints: isProd ? "warning" : isDevel ? false : 'error',
       assetFilter: (assetFilename) => assetFilename.endsWith('.js'),
     },
+
     node: {
       fs: 'empty',
       os: 'empty',
       path: 'empty',
     },
+
     watchOptions: {
       aggregateTimeout: 300,
       poll: 1000,
       ignored: [
         'node_modules', 
-        'src/schema', 
+        'src/graphql', 
         'src/resolvers', 
+        'src/schema', 
         'src/server', 
         'src/services', 
       ],

@@ -5,7 +5,6 @@
  * @file context.mjs
  */
 
-import assert from 'assert';
 import http from 'http';
 import http2 from 'http2';
 import net from 'net';
@@ -183,9 +182,11 @@ export default class Context {
 
   set status(code) {
     if (this.headersSent) return;
-
-    assert(Number.isInteger(code), 'status code must be a number');
-    assert(code >= 100 && code <= 999, `Invalid status code: ${code}`);
+    if (null == code) code = 500;
+    if (!http.STATUS_CODES[code]) {
+      this.throw(500, `Invalid status code: ${code}`);
+      code = 500;
+    }
     this._explicitStatus = true;
     this.set(http2.constants.HTTP2_HEADER_STATUS, code);
     if (this.body && emptyCode.includes(code)) this.body = null;
@@ -680,8 +681,6 @@ export default class Context {
    * Similar to .throw(), adds assertion.
    *
    *    this.assert(this.user, 401, 'Please login!');
-   *
-   * See: https://github.com/jshttp/http-assert
    *
    * @param {Mixed} test
    * @param {Number} status

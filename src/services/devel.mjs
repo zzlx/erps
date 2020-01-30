@@ -1,5 +1,7 @@
 /**
  * webpack development middleware
+ * 
+ * @file devel.mjs
  */
 
 import path from 'path';

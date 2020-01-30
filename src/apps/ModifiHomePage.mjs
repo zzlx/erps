@@ -1,3 +1,9 @@
+/**
+ * 主页面
+ * 显示欢迎界面及常用信息
+ * 
+ */
+
 import React from 'react';
 
 import {
@@ -15,12 +21,6 @@ import {
   types as ActionTypes,
   print as printPage,
 } from '../store/actions/index.mjs';
-
-/**
- * 主页面
- * 显示欢迎界面及常用信息
- * 
- */
 
 export default class MDocuments extends React.PureComponent {
   render() {

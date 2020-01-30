@@ -1,3 +1,7 @@
+/**
+ * 首页面前端程序
+ */
+
 import React from 'react';
 import { 
     Alert, Anchor,
@@ -14,10 +18,6 @@ import {
 } from '../components/index.mjs';
 
 import graphql from '../store/actions/graphql.mjs';
-
-/**
- * 首页面前端程序
- */
 
 export default class HomePage extends React.Component {
   constructor(props, context) {

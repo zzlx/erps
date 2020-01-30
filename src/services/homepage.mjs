@@ -1,8 +1,10 @@
 /**
  * Static resource server service
+ *
+ *
+ * @file homepage.mjs
  */
 
-import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
@@ -19,7 +21,6 @@ opts.maxage = opts.maxage || 0;
 opts.compress = opts.compress || false;
 
 export default async function staticsMiddleware (ctx, next) {
-
   // only accept GET/HEAD/OPTIONS method
   if (!/(GET|HEAD|OPTIONS)/.test(ctx.method)) {
     ctx.status = 405; // method not allowed.

@@ -13,6 +13,13 @@ export default (servicePath, prefix) => {
   const routeCache = Object.create(null); // 路由缓存
 
   return async function apisRouterMiddleware (ctx, next) {
+    if (!routeCache['/']) {
+      const serviceModule = path.join(servicePath, 'index.mjs'); 
+
+      console.log(serviceModule);
+      routeCache['/'] = await import(serviceModule).then(m => m.default);
+    }
+
     if (!routeCache[ctx.pathname])  {
       const serviceModule = path.join(servicePath, ctx.pathname + '.mjs'); 
       if (fs.existsSync(serviceModule)) {
@@ -21,8 +28,7 @@ export default (servicePath, prefix) => {
     }
 
     // 获取service
-    const service = routeCache[ctx.pathname];
-
+    const service = routeCache[ctx.pathname] || routeCache['/'];
     if (null == service) return next();
     return await service.apply(null, [ctx, next])
   }

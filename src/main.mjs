@@ -15,7 +15,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { spawn, execSync, } from 'child_process'; 
+import cp from 'child_process'; 
 
 // 模块
 import './env.mjs'; // 导入环境变量
@@ -34,13 +34,11 @@ import {
 
 import MongoDB from './utils/mongodb.mjs';
 import console from './utils/console.mjs';
-import array from './utils/array.mjs';
+import array from './utils/arrayUtils.mjs';
 import date from './utils/date.mjs';
 import argvParser from './utils/argvParser.mjs';
 import strings from './utils/strings.mjs';
-import * as Fns from '../src/queries/index.mjs';
 
-const dsn = () => date.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
 let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
 main(); // 执行main主程序
@@ -72,11 +70,26 @@ async function main () {
   }
 
   // 执行解析的参数命令
-  if (Params.help || Params.h) return await showHelp(); // 显示帮助文件
-  if (Params.version || Params.v) return await showVersion(); // 显示版本号
-  if (Params.sysinfo) return await showSysinfo(); // 显示系统信息
-  if (Params.commit) return await commit(); // 提交代码变更
-  if (Params.build) return await build(); // 构建前端应用程序
+  //
+  if (Params.help || Params.h) {
+    return await showHelp(); // 显示帮助文件
+  }
+
+  if (Params.version || Params.v) {
+    return await showVersion(); // 显示版本号
+  }
+
+  if (Params.sysinfo) {
+    return await showSysinfo(); // 显示系统信息
+  }
+
+  if (Params.commit) {
+    return await commit(); // 提交代码变更
+  }
+
+  if (Params.build) {
+    return await build(); // 构建前端应用程序
+  }
 
   // 以下任务需要读取本地配置文件,需先检测必要的目录
   // 检测并准备必要的目录
@@ -218,17 +231,17 @@ function showHelp() {
  * commit and push
  */
 
-function commit () {
+async function commit () {
   process.stdout.write('准备提交变更...')
   console.log('暂存变更...');
-  execSync(`git -C ${APP_ROOT} add -A .`, {encoding: 'utf8'});
+  cp.execSync(`git -C ${APP_ROOT} add -A .`, {encoding: 'utf8'});
 
   console.log('检查变更...');
 
   //const diff = execSync(`git -C ${APP_ROOT} diff --staged --quiet`, { encoding: 'utf8', });
 
   console.log('提交变更...');
-  execSync(`git -C ${APP_ROOT} commit -m "自动提交"`, {encoding: 'utf8'});
+  cp.execSync(`git -C ${APP_ROOT} commit -m "自动提交"`, {encoding: 'utf8'});
 
   console.log('同步远程仓库...');
 }
@@ -300,7 +313,7 @@ function watcher (folders, cb) {
  */
 
 function startHttpd (opts) {
-  const log_file = path.join(APP_HOME, 'log', `${dsn()}_process.log`); 
+  const log_file = path.join(APP_HOME, 'log', `${date.format('yyyymmdd')}_process.log`); 
   const log = fs.openSync(log_file, 'a+');
 
   // args
@@ -320,7 +333,7 @@ function startHttpd (opts) {
   };
 
   // spawn a async process.
-  httpd = spawn('node', args, options);
+  httpd = cp.spawn('node', args, options);
   return httpd;
 }
 
@@ -442,21 +455,31 @@ function readFromInput (question, password = false) {
  */
 
 async function build () {
-  process.env.NODE_ENV = 'production';
   const webpack = await import('webpack').then(m => m.default);
+  if (null == webpack) {
+    throw new Error('请执行`npm install --save-dev webpack`安装webpack');
+  }
   const config  = await import('./webpack.config.cjs').then(m => m.default);
-
-  // 
   const compiler = webpack(config());
+  compiler.run(callback);
 
-  compiler.run((err, stats) => {
+  // callback function 
+  function callback (err, stats) {
+    // Error handler
     if (err) {
       console.error(err.stack || err);
       if (err.details) {
         console.error(err.details);
       }
+      return;
     }
 
-    console.log(stats.toString({ chunks: false, colors: true, }));
-  });
+    const info = stats.toJson();
+
+    if (stats.hasErrors()) console.error(info.errors);
+    if (stats.hasWarnings()) console.warn(info.warnings);
+
+    console.log(stats.toString({chunks: false, colors: true}));
+    //console.log(stats.toJson({ assets: false, hash: true }));
+  }
 }

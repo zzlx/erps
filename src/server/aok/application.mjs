@@ -14,7 +14,6 @@ import util from 'util';
 import compose from './compose.mjs';
 import Context from './context.mjs';
 import respond from './respond.mjs';
-import server from './http2-server.mjs';
 
 export default class Application extends EventEmitter {
   constructor(props) {
@@ -26,7 +25,6 @@ export default class Application extends EventEmitter {
     this.proxy = this.props.proxy || false;
     this.subdomainOffset = this.props.subdomainOffset || 2;;
     this.keys = this.props.keys || ['services'];
-    this.server = server;
     // configured middlewares
     this.middlewares = [];
 

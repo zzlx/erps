@@ -18,8 +18,9 @@ import {
   CONFIG_FILE,
 } from '../config.mjs';
 import '../env.mjs';
+import httpServer from './http2-server.mjs';
 
-async function httpd () {
+export default (async function () {
   // 加载配置项
   const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); 
   const m = await getModulesFromPath(
@@ -28,6 +29,7 @@ async function httpd () {
 
   // 配置服务器执行逻辑
   const app = new Aok();
+  app.server = httpServer;
   app.use(m.error(APP_LOG_PATH));     // 捕获中间件错误
   app.use(m.xResponse());             // 记录响应时间
   app.use(m.cookies());               // 支持cookie读写
@@ -47,6 +49,4 @@ async function httpd () {
     port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
     exclusive: false, // 是否共享进程端口
   });
-}
-
-export default httpd();
+})();

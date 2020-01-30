@@ -1,16 +1,17 @@
 /**
- * date 日期对象工具函数库
+ * Date object extention.
  *
  * @return proxy
  * @api: public
  */
+/******************************************************************************/
 
 export default new Proxy(Date, {
   /**
    * @param: {} target 目标对象() 函数
    * @param: {} thisArg 被调用时的上下文对象
    * @param: {} argumentsList 被调用时的参数数组
-   * @return 可以返回任何值
+   * @return Date object
    *
    */
 
@@ -29,10 +30,7 @@ export default new Proxy(Date, {
   },
 
   get: function (target, property, receiver) {
-    if (property === 'print') receiver.print = print;
     if (property === 'format') receiver.format = format;
-    if (property === 'toString') receiver.toString = toString;
-    if (property === 'toDateString') receiver.toDateString = toDateString;
     if (property === 'toLocaleISOString') receiver.toLocaleISOString = toLocaleISOString;
 
     return Reflect.get(target, property, receiver);
@@ -40,40 +38,40 @@ export default new Proxy(Date, {
 });
 
 /**
+ * 格式化日期字符串
  *
- *
+ * @param {date} date
+ * @return {string}
  */
 
-function toDateString(date) {
-  const d = date ? new Date(date) : this && this._date ? this._date : new Date();
+function format (date, fmt) {
+  if (fmt == null) { fmt = date; date = null; }
+  const d = date ? new Date(date) : this && this.date ? this.date : new Date(); 
 
-	return toLocaleISOString(d).slice(0,10);
+  const o = {
+    'y+': d.getFullYear(),
+    'm+': d.getMonth() + 1,
+    'd+': d.getDate(),
+    'H+': d.getHours(),
+    'M+': d.getMinutes(),
+    's+': d.getSeconds(),
+    'q+': Math.floor((d.getMonth() + 3) / 3),
+    S: d.getMilliseconds()  //毫秒
+  };
+
+  for (let k of Object.keys(o)) {
+    if (new RegExp("(" + k + ")").test(fmt)) {
+      fmt = fmt.replace(
+        new RegExp("(" + k + ")"),
+        RegExp.$1.length === 1 || /y+/.test(RegExp.$1)
+          ? o[k]
+          : ("00" + o[k]).substr(("" + o[k]).length)
+      );
+    }
+  }
+
+  return fmt;
 }
-
-
-/**
- *
- *
- */
-
-function toString(date) {
-  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
-
-	return toLocaleISOString(d).slice(0,19).replace('T', ' ');
-}
-
-/**
- * 打印日期
- *
- * ####年#月#日 星期#
- */
-
-function print(date) {
-  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
-
-	return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-}
-
 
 /**
  * 获取星期日
@@ -88,57 +86,6 @@ function weekday(date) {
 
 	const day = ['日', '一', '二', '三', '四', '五', '六'];
 	return '星期' + day[d.getDay()];
-}
-
-/**
- * 格式化日期字符串
- *
- * weekday
- * @param {date} date
- * @return {string}
- */
-
-function format (date, fmt) {
-  if (fmt == null) {
-    fmt = date;
-    date = null;
-  }
-
-  const d = date 
-    ? new Date(date) 
-    : this && this.date 
-      ? this.date 
-      : new Date(); 
-
-  const o = {
-    "M+": this.getMonth() + 1, //月份
-    "d+": this.getDate(), //日
-    "h+": this.getHours(), //小时
-    "m+": this.getMinutes(), //分
-    "s+": this.getSeconds(), //秒
-    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-    S: this.getMilliseconds() //毫秒
-  };
-
-  if (/(y+)/.test(fmt)) {
-    fmt = fmt.replace(
-      RegExp.$1,
-      (this.getFullYear() + "").substr(4 - RegExp.$1.length)
-    );
-  }
-
-  for (var k in o) {
-    if (new RegExp("(" + k + ")").test(fmt)) {
-      fmt = fmt.replace(
-        RegExp.$1,
-        RegExp.$1.length == 1
-          ? o[k]
-          : ("00" + o[k]).substr(("" + o[k]).length)
-      );
-    }
-  }
-
-  return fmt;
 }
 
 /**
