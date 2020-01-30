@@ -7,18 +7,11 @@
  * 3. 执行graphql查询;
  * 4. 返回查询数据;
  *
+ * @file graphql.mjs
  */
 
 import fs from 'fs';
 import os from 'os';
-/**
- * GraphQL查询服务
- *
- *
- * 为前端应用程序提供数据服务
- *
- */
-
 import path from 'path';
 import util from 'util';
 import getRawBody from '../../server/getRawBody.mjs';
@@ -33,6 +26,8 @@ let schema = null;
 let fieldResolver = null;
 
 export default async function graphqlAPI (ctx, next) {
+
+  ctx.cookies.set('test', '123');
 
   if (schema == null) {
     schema = await fs.promises.readdir(schemaPath, { encoding: 'utf8' }).then(files => {

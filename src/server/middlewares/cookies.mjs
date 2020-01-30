@@ -3,11 +3,12 @@
  *
  * support cookie
  *
+ * @file cookies.mjs
  */
 
 import Keygrip from '../../utils/keygrip.js';
 
-export default (opts) => async function cookieMiddleware (ctx, next) {
+export default (opts) => function cookieMiddleware (ctx, next) {
   Object.defineProperty(ctx, 'cookies', {
     get: function () {
       if (null == this._cookies) {
@@ -19,11 +20,11 @@ export default (opts) => async function cookieMiddleware (ctx, next) {
 
       return  this._cookies;
     },
-    enumerable : true,
-    configurable : true,
+    enumerable: true, // 可枚举属性
+    configurable: true, // 可配置属性
   });
 
-  await next();
+  next();
 }
 
 class Cookies {

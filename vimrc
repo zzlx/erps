@@ -23,7 +23,7 @@ if &background == "light"
 endif
 
 if &background == "dark"
-  hi Normal  ctermfg=LightCyan ctermbg=DarkGrey
+  hi Normal  ctermfg=LightCyan ctermbg=Dark
   hi Comment ctermfg=white ctermbg=None
   hi StatusLine ctermfg=white ctermbg=DarkRed
 endif

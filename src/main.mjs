@@ -1,3 +1,5 @@
+#!/usr/bin/env node --experimental-json-modules --no-warnings
+
 /**
  * 主程序
  *
