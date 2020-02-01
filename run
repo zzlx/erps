@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# 获取代码库根目录位置
+APP_ROOT=$(cd $(dirname $0); pwd)
+# 主程序目录位置
+APP=./src/main.mjs
+# 传递参数列表并执行 $@ 表示所有参数, $n 表示第n个参数
+$APP_ROOT/$APP $@

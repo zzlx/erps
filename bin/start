@@ -1,7 +1,0 @@
-#!/bin/sh
-
-# 获取程序目录位置
-APP_ROOT=$(dirname $(cd $(dirname $0); pwd))
-
-# 传递参数列表并执行 $@ 表示所有参数, $n 表示第n个参数
-$APP_ROOT/src/main.mjs $@

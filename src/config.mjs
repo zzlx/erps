@@ -6,6 +6,7 @@
 
 /******************************************************************************/
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 
 // 定位代码库根目录
@@ -28,6 +29,9 @@ export const VIMRC_FILE   = path.join(APP_ROOT, 'vimrc');
 export const README_FILE  = path.join(APP_ROOT, 'README.md');
 export const HELP_FILE    = path.join(APP_ROOT, 'src', 'help.txt');
 export const CONFIG_FILE  = path.join(APP_HOME, 'config.json');
+
+export const TMP_DIR  = os.tmpDir();
+export const EOL  = os.EOL;
 
 // 获取代码库git版本信息
 //

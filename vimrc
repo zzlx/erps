@@ -1,5 +1,10 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " vimrc配置文件
+"
+"
+"
+"
+"
 " author:wangxuemin@zzlx.org
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -9,7 +14,7 @@
 function! SetTheme()
 
 let Now=strftime("%H") " 获取当前时间
-if Now > 8 && Now < 18
+if Now > 8 && Now < 24
   "colorscheme desert
   set background=light
 else
@@ -23,7 +28,7 @@ if &background == "light"
 endif
 
 if &background == "dark"
-  hi Normal  ctermfg=LightCyan ctermbg=Dark
+  hi Normal ctermfg=LightCyan ctermbg=0
   hi Comment ctermfg=white ctermbg=None
   hi StatusLine ctermfg=white ctermbg=DarkRed
 endif

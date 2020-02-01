@@ -5,8 +5,8 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import os from 'os';
+import path from 'path';
 
 let argvs = process.argv.slice(2);
 const __filename = String(import.meta.url).substr(7);

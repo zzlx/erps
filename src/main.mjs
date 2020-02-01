@@ -12,14 +12,13 @@
  */
 
 /******************************************************************************/
-// node内置模块
+// Node内置模块
 import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import cp from 'child_process'; 
 
-// 模块
+// 本地模块
 import './env.mjs'; // 导入环境变量
 import { 
   APP_ROOT,
@@ -43,7 +42,9 @@ import strings from './utils/strings.mjs';
 
 let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
-main(); // 执行main主程序
+
+// 执行main主程序,捕获exception.
+main().catch(err => console.log(err)); 
 
 /******************************************************************************/
 
@@ -54,6 +55,9 @@ main(); // 执行main主程序
  */
 
 async function main () {
+  // 检测node version
+  checkNodeVersion();
+
   // 配置进程管理逻辑
   processSetting();
 
@@ -77,12 +81,20 @@ async function main () {
     return await showHelp(); // 显示帮助文件
   }
 
+  if (Params.export) {
+    // export modules
+  }
+
   if (Params.version || Params.v) {
     return await showVersion(); // 显示版本号
   }
 
   if (Params.sysinfo) {
     return await showSysinfo(); // 显示系统信息
+  }
+
+  if (Params.setup) {
+    return await setup(); // 初始化设置
   }
 
   if (Params.commit) {
@@ -123,11 +135,11 @@ async function main () {
 
   if (Params.httpd) {
     // 需要数据连接的任务
-    startHttpd(Params);
+    httpd = await startHttpd();
 
     if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
       watcher([ 'services', 'server', 'schema', 'graphql', 'resolvers', ], () => {
-        restartHttpd(Params);
+        return restartHttpd();
       });
     }
   }
@@ -209,7 +221,6 @@ function processSetting () {
   // 捕获exception
   process.on('uncaughtException', (err, origin) => {
     console.log(err);
-
     fs.writeSync(
       process.stderr.fd,
       `Caught exception: ${err}\n` +
@@ -311,39 +322,52 @@ function watcher (folders, cb) {
 }
 
 /**
- * Start https.
+ * spawn a child process.
+ *
  */
 
-function startHttpd (opts) {
+async function spawn (opts) {
+  const cp = await import('child_process'); 
   const log_file = path.join(APP_HOME, 'log', `${date.format('yyyymmdd')}_process.log`); 
   const log = fs.openSync(log_file, 'a+');
 
-  // args
   const args = [
-    //'--experimental-modules',
     '--experimental-json-modules',
-    process.env.NODE_ENV !== 'development' && '--no-warnings', // 仅在开发模式下显示warning
-    `--title=${process.title}.httpd`,
-    path.join(APP_ROOT, 'src', 'server', 'httpd.mjs'),
+    // 仅在开发模式下显示warning
+    process.env.NODE_ENV !== 'development' && '--no-warnings', 
+    `--title=${process.title}.${opts.title ? opts.title : 'child_process'}`,
+    opts.service,
   ].filter(Boolean);
 
   // options
   const options = {
-    env: process.env,
+    cwd: APP_ROOT,
     detached: opts.fork ? true : false, // 是否独立进程
-    stdio: opts.fork ? ['ignore', log, log] : 'inherit', 
+    env: process.env,
+    stdio: opts.fork ? ['ignore', log, log] : ['pipe', 'pipe', 'inherit'], 
   };
 
   // spawn a async process.
-  httpd = cp.spawn('node', args, options);
-  return httpd;
+  return cp.spawn('node', args, options);
 }
 
-function restartHttpd(Params) {
+/**
+ *
+ *
+ */
+
+function startHttpd() {
+  return spawn({
+    service: path.join(APP_ROOT, 'src', 'server', 'httpd.mjs'),
+    title: 'httpd',
+  });
+}
+
+async function restartHttpd() {
   if (null == httpd) return;
   httpd.kill('SIGHUP'); // 先关闭进程
   console.log('服务已重启');
-  httpd = startHttpd(Params);
+  httpd = await startHttpd();
 }
 
 /**
@@ -484,4 +508,34 @@ async function build () {
     console.log(stats.toString({chunks: false, colors: true}));
     //console.log(stats.toJson({ assets: false, hash: true }));
   }
+}
+
+/**
+ * check node version
+ *
+ */
+
+function checkNodeVersion (atleastVersion = 12) {
+  // major node version must gretter than 12
+  if (Number(String(process.version).substr(1,2)) <= atleastVersion) {
+    throw new Error(`当前Node版本:${process.version}, 请升级最新Node版本.`);
+  }
+}
+
+/**
+ * 初始化设置
+ *
+ */
+
+async function setup () {
+  const cp = await import('child_process');
+
+  // 任务1: 建立符号链接启动脚本
+  const APP_MAIN = import.meta.url.substr(7)
+  await cp.spawn('ln', [
+    '-s', 
+    APP_MAIN, 
+    path.join(process.env.HOME, '.bin', APP_NAME + 'ctl')
+  ]);
+
 }
