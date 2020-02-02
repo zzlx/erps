@@ -14,10 +14,10 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import getRawBody from '../../server/getRawBody.mjs';
-import { graphql, buildASTSchema, parse, Source } from '../../graphql/index.mjs';
-import getResolvers from '../../utils/getModulesFromPath.mjs';
-import { APP_PATH } from '../../config.mjs';
+import getRawBody from '../../getRawBody.mjs';
+import { graphql, buildASTSchema, parse, Source } from '../../../graphql/index.mjs';
+import getResolvers from '../../../utils/getModulesFromPath.mjs';
+import { APP_PATH } from '../../../config.mjs';
 
 const debug = util.debuglog('debug:graphql');
 const schemaPath = path.join(APP_PATH, 'src', 'schema');

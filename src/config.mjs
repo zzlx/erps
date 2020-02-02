@@ -29,6 +29,7 @@ export const VIMRC_FILE   = path.join(APP_ROOT, 'vimrc');
 export const README_FILE  = path.join(APP_ROOT, 'README.md');
 export const HELP_FILE    = path.join(APP_ROOT, 'src', 'help.txt');
 export const CONFIG_FILE  = path.join(APP_HOME, 'config.json');
+export const CONFIG = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); 
 
 export const TMP_DIR  = os.tmpDir();
 export const EOL  = os.EOL;
@@ -40,7 +41,7 @@ const GIT_HEAD_FILE = path.join(APP_ROOT, '.git/HEAD');
 const GIT_HEAD_REF = String(fs.readFileSync(GIT_HEAD_FILE)).slice(5).trim();
 
 // 获取当前代码分支
-export const APP_BRANCH = path.basename(GIT_HEAD_REF);
+export const APP_BRANCH_NAME = path.basename(GIT_HEAD_REF);
 
 // 从REF文件中读取版本信息
 const GIT_COMMIT_FILE = path.join(APP_ROOT, `.git/${GIT_HEAD_REF}`);

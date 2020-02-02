@@ -14,7 +14,7 @@
 function! SetTheme()
 
 let Now=strftime("%H") " 获取当前时间
-if Now > 8 && Now < 24
+if Now > 8 && Now < 23
   "colorscheme desert
   set background=light
 else
@@ -23,7 +23,7 @@ endif
 
 if &background == "light"
   "hi Normal  ctermfg=Black ctermbg=LightYellow
-  hi Comment ctermfg=DarkBlue ctermbg=None guifg=DarkGrey guibg=None
+  hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey guibg=None
   hi StatusLine ctermfg=Black ctermbg=LightGray
 endif
 

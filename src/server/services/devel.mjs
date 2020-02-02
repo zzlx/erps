@@ -7,7 +7,7 @@
 import path from 'path';
 import webpack from 'webpack';
 import MemoryFs from 'memory-fs';
-import webpackConfig from '../webpack.config.cjs';
+import webpackConfig from '../../webpack.config.cjs';
 
 const compiler = webpack(webpackConfig());
 const memFs = new MemoryFs();

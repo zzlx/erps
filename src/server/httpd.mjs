@@ -1,52 +1,146 @@
 /**
- * 服务列表:
- * 1. graphql服务;
- * 2. statics静态资源服务；
- * 
+ * http2 server
+ *
+ *
+ *
  * @file httpd.mjs
  */
-/******************************************************************************/
 
-import fs from 'fs';
-import path from 'path';
-import Aok from './aok/application.mjs';
-import getModulesFromPath from '../utils/getModulesFromPath.mjs';
-import { 
-  APP_ROOT, 
-  APP_HOME, 
-  APP_LOG_PATH,
-  CONFIG_FILE,
-} from '../config.mjs';
-import '../env.mjs';
-import httpServer from './http2-server.mjs';
+import fs from 'fs'; 
+import http2 from 'http2';
+import tls from 'tls';
+import util from 'util';
+import cp from 'child_process';
+import app from './app.mjs';
 
-export default (async function () {
-  // 加载配置项
-  const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); 
-  const m = await getModulesFromPath(
-    path.join(APP_ROOT, 'src', 'server', 'middlewares')
-  );
+const debug = util.debuglog('debug:server');
+const streamHandler = app.streamHandler();
 
-  // 配置服务器执行逻辑
-  const app = new Aok();
-  app.server = httpServer;
-  app.use(m.error(APP_LOG_PATH));     // 捕获中间件错误
-  app.use(m.xResponse());             // 记录响应时间
-  app.use(m.cookies());               // 支持cookie读写
-  app.use(m.log(APP_LOG_PATH));       // 记录log
-  app.use(m.cors());                  // 跨域访问响应
-  app.use(m.mongodb(config.mongodb)); // mongo数据库
-  app.use(m.router(path.join(APP_ROOT, 'src', 'services'))); // 服务端路由
-  app.use(m.notFound());
+const server = http2.createSecureServer({
+  //ca: [fs.readFileSync('client-cert.pem')],
+  cert: fs.readFileSync('/etc/ssl/localhost-cert.pem'),
+  //sigalgs: 
+  //ciphers: 
+  //clientCertEngine: 
+  //dhparam
+  //ecdhCurve
+  key:  fs.readFileSync('/etc/ssl/localhost-key.pem'),
+  //privateKeyEngine
+  //passphrase: 'sample',
+  //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+  allowHTTP1: true,
+  // This is necessary only if using client certificate authentication.
+  //requestCert: true,
+  //enableConnectProtocol: true
+});
 
-  /**
-   * 开启服务器监听
-   */
+// secure context
+//const secureContext = tls.createSecureContext(options);
 
-  app.listen({
-    ipv6Only: false, // 是否仅开启IPV6
-    host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
-    port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
-    exclusive: false, // 是否共享进程端口
-  });
-})();
+
+/**
+ * session storage.
+ */
+
+const tlsSessionStore = {};
+
+server.on('keylog', function (line, socket) {
+  const info = {
+    line: line.toString(),
+    address: socket.remoteAddress,
+  };
+
+  //debug('keylog event: %j', info);
+});
+
+server.on('newSession', function (sessionId, sessionData, cb) {
+  // bind session id
+  const id = sessionId.toString('hex');
+  this.sessionID = id;
+  tlsSessionStore[id] = sessionData;
+  cb();
+});
+
+server.on('OCSPRequest', function (certificate, issuer, cb) {
+  //const test = tls.checkServerIdentity('localhost', certificate);
+  //console.log('cert: ', test);
+  //console.log('certificate', certificate.toString('base64'));
+  cb(null, null);
+});
+
+server.on('resumeSession', function (sessionId, callback) {
+  //debug('ticketkey:', this.getTicketKeys());
+  const id = sessionId.toString('hex');
+  this.sessionID = id;
+  callback(null, tlsSessionStore[id] || null );
+});
+
+server.on('secureConnection', function (tlsSocket) {
+  //debug('tlsSocket: ', tlsSocket);
+});
+
+// This event is emitted when an error occurs before a secure connection.
+server.on('tlsClientError', function (exception, tlsSocket) {
+  //debug('tlsClientError: %o \ntlsSocket: %o', exception, tlsSocket);
+});
+
+/**
+ *
+ */
+
+server.on('unknownProtocol', function () {
+});
+
+/**
+ *
+ *
+ */
+
+server.on('close', function () {
+  console.log('Server is closed.');
+});
+
+/**
+ *
+ *
+ */
+
+server.on('error', (err) => {
+  if (err.errno == 'EADDRINUSE')
+    console.log('Port %s was be used.', err.port);
+    process.exit();
+});
+
+/**
+ * 
+ *
+ */
+
+server.on('stream', streamHandler);
+
+/**
+ *
+ */
+
+server.on('listening', function () {
+  const sys_info = {
+    title: process.title,
+    ppid: process.ppid,
+    pid: process.pid,
+    mode: process.env.NODE_ENV,
+    address: this.address(), // 当前监听地址
+  };
+
+  console.log('Server is running...\nprocess_info: %o', sys_info);
+});
+
+/**
+ * 开启服务器监听
+ */
+
+server.listen({
+  ipv6Only: false, // 是否仅开启IPV6
+  host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
+  port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
+  exclusive: false, // 是否共享进程端口
+});

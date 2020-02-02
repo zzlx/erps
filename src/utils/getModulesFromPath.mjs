@@ -1,6 +1,7 @@
 /**
- * 
- * 读取目录,遍历文件并读入模块对象中
+ * 读取目录模块 
+ *
+ * 遍历文件并读入模块对象中
  *
  * @file getModulesFromPath.mjs
  */
@@ -10,18 +11,15 @@ import fs from 'fs';
 
 export default function getModules (dir) {
 
-  if (!path.isAbsolute(dir)) {
-    dir = path.join(process.cwd(), dir);
-  }
+  if (!path.isAbsolute(dir)) dir = path.join(process.cwd(), dir);
 
   // return a promise 
-  return fs.promises.readdir(dir, {
+  return fs.promises.readdir(dir, { 
     encoding: 'utf8', 
-    withFileTypes: true
+    withFileTypes: true,
   }).then( async (files) => {
     const Modules = {};
 
-    // 
     for (let f of files) {
       if (f.isDirectory()) {
         Modules[f.name] = await getModules(path.join(dir, f.name));
@@ -37,5 +35,5 @@ export default function getModules (dir) {
     }
 
     return Modules;
-  }).catch(err => { console.log(err); });
+  });
 }

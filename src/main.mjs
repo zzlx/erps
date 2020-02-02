@@ -26,7 +26,7 @@ import {
   APP_HOME,
   APP_LOG_PATH,
   APP_VERSION,
-  APP_BRANCH,
+  APP_BRANCH_NAME,
   APP_BRANCH_VERSION,
   PUBLIC_HTML,
   HELP_FILE,
@@ -44,7 +44,7 @@ let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
 
 // 执行main主程序,捕获exception.
-main().catch(err => console.log(err)); 
+main();
 
 /******************************************************************************/
 
@@ -55,53 +55,41 @@ main().catch(err => console.log(err));
  */
 
 async function main () {
+  try {
+
   // 检测node version
   checkNodeVersion();
 
   // 配置进程管理逻辑
   processSetting();
 
-  // 获取并解析命令行参数
-  const Params = argvParser(process.argv.slice(2)); 
-
-  // 根据命令行参数设置环境变量
-  if (Params.devel || Params.development) process.env.NODE_ENV = 'development'; 
-  if (Params.port || (Params.p && Params.p !== true)) {
-    process.env.PORT = Number.parseInt(Params.port);
-  }
-
-  if (Params.devel && Params.devel === 'ui') {
-    process.env.DEVEL_UI = true; 
-    process.env.PORT=3001;
-  }
-
   // 执行解析的参数命令
   //
-  if (Params.help || Params.h) {
+  if (process.env.HELP || process.env.H) {
     return await showHelp(); // 显示帮助文件
   }
 
-  if (Params.export) {
+  if (process.env.EXPORT) {
     // export modules
   }
 
-  if (Params.version || Params.v) {
+  if (process.env.VERSION || process.env.V) {
     return await showVersion(); // 显示版本号
   }
 
-  if (Params.sysinfo) {
+  if (process.env.SYSINFO) {
     return await showSysinfo(); // 显示系统信息
   }
 
-  if (Params.setup) {
+  if (process.env.SETUP) {
     return await setup(); // 初始化设置
   }
 
-  if (Params.commit) {
+  if (process.env.COMMIT) {
     return await commit(); // 提交代码变更
   }
 
-  if (Params.build) {
+  if (process.env.BUILD) {
     return await build(); // 构建前端应用程序
   }
 
@@ -114,9 +102,9 @@ async function main () {
 
   const url = new URL(Config.mongodb);
 
-  if (Params.user && Params.pwd) {
-    url.username = Params.user;
-    url.password = Params.pwd;
+  if (process.env.USER && process.env.PWD) {
+    url.username = process.env.USER;
+    url.password = process.env.PWD;
     Config.mongodb = url.href;
     await saveConfig();
   } 
@@ -124,31 +112,35 @@ async function main () {
   dba = new MongoDB(url.href);
   await dba.connect();
 
-  if (Params.import) { await importCSV(Params.import); }
-  if (Params.export) { await exportCSV(Params.export); }
+  if (process.env.IMPORT) { await importCSV(process.env.IMPORT); }
+  if (process.env.EXPORT) { await exportCSV(process.env.EXPORT); }
 
-  if (Params.query) {
-    const fn = Fns[Params.query] ? Fns[Params.query] : () => {}; 
+  if (process.env.QUERY) {
+    const fn = Fns[process.env.QUERY] 
+      ? Fns[process.env.QUERY] : () => {}; 
     await fn.apply({ db: dba.db, params: Params, });
     await dba.client.close();
   }
 
-  if (Params.httpd) {
+  if (process.env.HTTPD) {
     // 需要数据连接的任务
     httpd = await startHttpd();
 
-    if (process.env.NODE_ENV === 'development' && !process.env.DEVEL_UI) {
-      watcher([ 'services', 'server', 'schema', 'graphql', 'resolvers', ], () => {
+    if (process.env.NODE_ENV === 'development') {
+      watcher([ 'server', 'schema', 'graphql', 'resolvers', ], () => {
         return restartHttpd();
       });
     }
   }
 
-  if (Params.fork) httpd.unref();
+  if (process.env.FORK) httpd.unref();
 
   // 执行到此步骤,关闭数据库连接
   if (dba.client) dba.client.close();
 
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 /**
@@ -266,7 +258,7 @@ async function commit () {
 function showVersion () {
   const version = {
     version: APP_VERSION,
-    branch:  APP_BRANCH,
+    branch:  APP_BRANCH_NAME,
     commit:  APP_BRANCH_VERSION,
   }
 
@@ -336,12 +328,12 @@ async function spawn (opts) {
     // 仅在开发模式下显示warning
     process.env.NODE_ENV !== 'development' && '--no-warnings', 
     `--title=${process.title}.${opts.title ? opts.title : 'child_process'}`,
-    opts.service,
+    opts.server,
   ].filter(Boolean);
 
   // options
   const options = {
-    cwd: APP_ROOT,
+    cwd: APP_ROOT, // 运行目录
     detached: opts.fork ? true : false, // 是否独立进程
     env: process.env,
     stdio: opts.fork ? ['ignore', log, log] : ['pipe', 'pipe', 'inherit'], 
@@ -351,6 +343,9 @@ async function spawn (opts) {
   return cp.spawn('node', args, options);
 }
 
+function build () {
+}
+
 /**
  *
  *
@@ -358,7 +353,7 @@ async function spawn (opts) {
 
 function startHttpd() {
   return spawn({
-    service: path.join(APP_ROOT, 'src', 'server', 'httpd.mjs'),
+    server: path.join(APP_ROOT, 'src', 'server', 'httpd.mjs'),
     title: 'httpd',
   });
 }
@@ -476,41 +471,6 @@ function readFromInput (question, password = false) {
 }
 
 /**
- * build
- * 打包构建前端应用程序
- */
-
-async function build () {
-  const webpack = await import('webpack').then(m => m.default);
-  if (null == webpack) {
-    throw new Error('请执行`npm install --save-dev webpack`安装webpack');
-  }
-  const config  = await import('./webpack.config.cjs').then(m => m.default);
-  const compiler = webpack(config());
-  compiler.run(callback);
-
-  // callback function 
-  function callback (err, stats) {
-    // Error handler
-    if (err) {
-      console.error(err.stack || err);
-      if (err.details) {
-        console.error(err.details);
-      }
-      return;
-    }
-
-    const info = stats.toJson();
-
-    if (stats.hasErrors()) console.error(info.errors);
-    if (stats.hasWarnings()) console.warn(info.warnings);
-
-    console.log(stats.toString({chunks: false, colors: true}));
-    //console.log(stats.toJson({ assets: false, hash: true }));
-  }
-}
-
-/**
  * check node version
  *
  */
@@ -531,10 +491,9 @@ async function setup () {
   const cp = await import('child_process');
 
   // 任务1: 建立符号链接启动脚本
-  const APP_MAIN = import.meta.url.substr(7)
   await cp.spawn('ln', [
     '-s', 
-    APP_MAIN, 
+    path.join(APP_ROOT, 'run'), 
     path.join(process.env.HOME, '.bin', APP_NAME + 'ctl')
   ]);
 

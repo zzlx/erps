@@ -8,7 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import { PUBLIC_HTML, } from '../config.mjs';
+import { PUBLIC_HTML, } from '../../config.mjs';
 
 const debug = util.debuglog('debug:static');
 const opts = {};
