@@ -27,8 +27,10 @@ function isCSV () {
 	}
 }
 
-function isJsonString () {
-	const value = arguments.length === 0 ? this.data : arguments[0];
+function isJSON () {
+	const value = arguments.length === 0 
+    ? this.data ? this.data : ''
+    : arguments[0];
 	const jsonValidRegExp = /^[\x20\x09\x0a\x0d]*(\[|\{)/;
 	return jsonValidRegExp.test(value);
 }

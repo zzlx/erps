@@ -1,5 +1,3 @@
-#!/usr/bin/env node --experimental-json-modules --no-warnings
-
 /**
  * 主程序
  *
@@ -10,16 +8,16 @@
  *
  * @file: main.mjs
  */
-
 /******************************************************************************/
 // Node内置模块
 import crypto from 'crypto';
+import cp from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
 // 本地模块
-import './env.mjs'; // 导入环境变量
+import '../env.mjs'; // 导入环境变量
 import { 
   APP_ROOT,
   APP_NAME,
@@ -29,19 +27,26 @@ import {
   APP_BRANCH_NAME,
   APP_BRANCH_VERSION,
   PUBLIC_HTML,
+  RECOMMEND_NODE_VERSION,
   HELP_FILE,
   CONFIG_FILE,
-} from './config.mjs';
-
-import MongoDB from './utils/mongodb.mjs';
-import console from './utils/console.mjs';
-import array from './utils/arrayUtils.mjs';
-import date from './utils/date.mjs';
-import argvParser from './utils/argvParser.mjs';
-import strings from './utils/strings.mjs';
+  CONFIG,
+} from '../config.mjs';
+import MongoDB from '../utils/mongodb.mjs';
+import console from '../utils/console.mjs';
+import array from '../utils/arrayUtils.mjs';
+import date from '../utils/date.mjs';
+import strings from '../utils/strings.mjs';
 
 let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
+let compiler = null; // compiler
+
+// 检测node version
+checkNodeVersion();
+
+// 配置进程逻辑
+processSetting();
 
 // 执行main主程序,捕获exception.
 main();
@@ -49,71 +54,49 @@ main();
 /******************************************************************************/
 
 /**
- * 执行逻辑
+ * 主程序逻辑
  *
- * 管理执行顺序及控制逻辑
+ * 管理执行顺序及控制启动项目
  */
 
 async function main () {
-  try {
-
-  // 检测node version
-  checkNodeVersion();
-
-  // 配置进程管理逻辑
-  processSetting();
-
   // 执行解析的参数命令
-  //
-  if (process.env.HELP || process.env.H) {
-    return await showHelp(); // 显示帮助文件
-  }
-
+  if (process.env.HELP || process.env.H) return showHelp(); // 显示帮助文件
+  if (process.env.SYSINFO) return showSysinfo(); // 显示系统信息
+  if (process.env.SETUP) return setup(); // 初始化设置
+  if (process.env.COMMIT) return commit(); // 提交代码变更
+  if (process.env.VERSION || process.env.V) return showVersion(); // 显示版本号
   if (process.env.EXPORT) {
-    // export modules
-  }
-
-  if (process.env.VERSION || process.env.V) {
-    return await showVersion(); // 显示版本号
-  }
-
-  if (process.env.SYSINFO) {
-    return await showSysinfo(); // 显示系统信息
-  }
-
-  if (process.env.SETUP) {
-    return await setup(); // 初始化设置
-  }
-
-  if (process.env.COMMIT) {
-    return await commit(); // 提交代码变更
-  }
-
-  if (process.env.BUILD) {
-    return await build(); // 构建前端应用程序
   }
 
   // 以下任务需要读取本地配置文件,需先检测必要的目录
   // 检测并准备必要的目录
   await readyDir();
 
-  // 读入配置项目 
-  const Config = await getConfig();
+  if (process.env.IMPORT) { await importCSV(process.env.IMPORT); }
+  if (process.env.EXPORT) { await exportCSV(process.env.EXPORT); }
 
-  const url = new URL(Config.mongodb);
+  if (null == CONFIG.mongodb) {
+    CONFIG.mongodb = await readFromInput('请提供mongodb URL:'); 
+  }
 
-  if (process.env.USER && process.env.PWD) {
-    url.username = process.env.USER;
-    url.password = process.env.PWD;
-    Config.mongodb = url.href;
-    await saveConfig();
+  const url = new URL(CONFIG.mongodb);
+
+  if (null == url.username) {
+    url.username = await readFromInput('请输入用户名:'); 
   } 
+
+  if (null == url.password) {
+    url.password = await readFromInput('请输入密码:'); 
+  }
+
+  CONFIG.mongodb = url.href;
+
+  // 存储配置
+  await saveConfig();
 
   dba = new MongoDB(url.href);
   await dba.connect();
-
-  if (process.env.IMPORT) { await importCSV(process.env.IMPORT); }
-  if (process.env.EXPORT) { await exportCSV(process.env.EXPORT); }
 
   if (process.env.QUERY) {
     const fn = Fns[process.env.QUERY] 
@@ -125,9 +108,21 @@ async function main () {
   if (process.env.HTTPD) {
     // 需要数据连接的任务
     httpd = await startHttpd();
+    compiler = await startCompiler();
+
+    //compiler.send('httpd', httpd);
+
+    compiler.on('message', m => {
+      console.log('compiler:');
+      //httpd.send({test: 'test'});
+    });
+
+    httpd.on('message', (m, message) => {
+      console.log('Message from httpd:',  m);
+    });
 
     if (process.env.NODE_ENV === 'development') {
-      watcher([ 'server', 'schema', 'graphql', 'resolvers', ], () => {
+      watcher([ 'services', 'schema', 'graphql', 'resolvers', ], () => {
         return restartHttpd();
       });
     }
@@ -137,37 +132,6 @@ async function main () {
 
   // 执行到此步骤,关闭数据库连接
   if (dba.client) dba.client.close();
-
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-/**
- * 管理config配置项目
- */
-
-function getConfig () {
-  let Config = null;
-
-  return fs.promises.readFile(CONFIG_FILE, {flag: 'r+'}).then(config => {
-    Config = JSON.parse(config)
-    if (Config.mongodb == null) {
-      Config.mongodb = 'mongodb://localhost:27017/test';
-    }
-
-    return Config;
-  }).catch(e => {
-    if (e.code === 'ENOENT') {
-      const file = e.path;
-
-      if (Config.mongodb == null) {
-        Config.mongodb = 'mongodb://localhost:27017/test';
-      }
-
-      return Config;
-    }
-  });
 }
 
 /**
@@ -179,21 +143,11 @@ function closeDB () {
 }
 
 /**
- * 进程配置项
+ * 进程管理配置项
  */
 
 function processSetting () {
   process.title = APP_NAME; // 设置进程名称
-
-  // 进程退出前执行的任务
-  process.on('beforeExit', (code) => {
-    //console.log('Process beforeExit event with code: ', code);
-    closeDB(); // 关闭数据链接
-  });
-
-  process.on('exit', (code) => {
-    closeDB(); // 关闭数据链接
-  });
 
   // 捕获unhandled rejection
   process.on('unhandledRejection', async (reason, promise) => {
@@ -201,9 +155,9 @@ function processSetting () {
     console.log('捕获到Rejection:', promise);
 
     if (reason.codeName === 'Unauthorized' && reason.code === 13) {
-      Params.user = await readFromInput('请输入数据库用户名:');
-      Params.pwd = await readFromInput('请输入密码:'); 
-      await saveConfig(); // 保存一下配置文件
+      //Params.user = await readFromInput('请输入数据库用户名:');
+      //Params.pwd = await readFromInput('请输入密码:'); 
+      //await saveConfig(); // 保存一下配置文件
       await main();
     }
 
@@ -219,6 +173,16 @@ function processSetting () {
       `Exception origin: ${origin}`
     );
 
+    closeDB(); // 关闭数据链接
+  });
+
+  // 进程退出前执行的任务
+  process.on('beforeExit', (code) => {
+    //console.log('Process beforeExit event with code: ', code);
+    closeDB(); // 关闭数据链接
+  });
+
+  process.on('exit', (code) => {
     closeDB(); // 关闭数据链接
   });
 
@@ -318,32 +282,43 @@ function watcher (folders, cb) {
  *
  */
 
-async function spawn (opts) {
-  const cp = await import('child_process'); 
-  const log_file = path.join(APP_HOME, 'log', `${date.format('yyyymmdd')}_process.log`); 
+async function spawn (app) {
+
+  const file = `${date.format('yyyymmdd')}_process.log`;
+  const log_file = path.join(APP_HOME, 'log', file); 
+
   const log = fs.openSync(log_file, 'a+');
+  const title = path.basename(app);
 
   const args = [
     '--experimental-json-modules',
     // 仅在开发模式下显示warning
     process.env.NODE_ENV !== 'development' && '--no-warnings', 
-    `--title=${process.title}.${opts.title ? opts.title : 'child_process'}`,
-    opts.server,
+    `--title=${process.title}.${title}`,
+    app,
   ].filter(Boolean);
 
   // options
   const options = {
     cwd: APP_ROOT, // 运行目录
-    detached: opts.fork ? true : false, // 是否独立进程
     env: process.env,
-    stdio: opts.fork ? ['ignore', log, log] : ['pipe', 'pipe', 'inherit'], 
+    detached: process.env.FORK ? true : false, // 是否独立进程
+    stdio: process.env.FORK 
+      ? ['ignore', log, log] 
+      : [0, 1, 2, 'ipc'], 
   };
 
   // spawn a async process.
   return cp.spawn('node', args, options);
 }
 
-function build () {
+/**
+ *
+ *
+ */
+
+function startCompiler() {
+  return spawn(path.join(APP_ROOT, 'src', 'compiler.mjs'));
 }
 
 /**
@@ -352,10 +327,7 @@ function build () {
  */
 
 function startHttpd() {
-  return spawn({
-    server: path.join(APP_ROOT, 'src', 'server', 'httpd.mjs'),
-    title: 'httpd',
-  });
+  return spawn(path.join(APP_ROOT, 'src', 'httpd.mjs'));
 }
 
 async function restartHttpd() {
@@ -369,6 +341,7 @@ async function restartHttpd() {
  * 准备工作
  *
  */
+
 function readyDir () {
   // 执行准备工作
   const asyncTasks = [
@@ -388,9 +361,9 @@ function readyDir () {
 
 function saveConfig () {
   // 写入配置文件
-  return fs.promises.writeFile(CONFIG_FILE, JSON.stringify(Config)).catch(e => {
-    console.log(e)
-  });
+  const configuration = JSON.stringify(CONFIG, null, 4);
+  return fs.promises.writeFile(CONFIG_FILE, configuration)
+    .catch(e => { console.log(e) });
 }
 
 /**
@@ -471,14 +444,14 @@ function readFromInput (question, password = false) {
 }
 
 /**
- * check node version
+ * check the recommend node version
  *
  */
 
-function checkNodeVersion (atleastVersion = 12) {
+function checkNodeVersion (atleastVersion = RECOMMEND_NODE_VERSION) {
   // major node version must gretter than 12
-  if (Number(String(process.version).substr(1,2)) <= atleastVersion) {
-    throw new Error(`当前Node版本:${process.version}, 请升级最新Node版本.`);
+  if (Number(String(process.version).substr(1, 2)) < atleastVersion) {
+    console.warn(`当前Node版本:${process.version}, 推荐升级至最新版本.`);
   }
 }
 
@@ -493,7 +466,7 @@ async function setup () {
   // 任务1: 建立符号链接启动脚本
   await cp.spawn('ln', [
     '-s', 
-    path.join(APP_ROOT, 'run'), 
+    path.join(APP_ROOT, 'start.mjs'), 
     path.join(process.env.HOME, '.bin', APP_NAME + 'ctl')
   ]);
 

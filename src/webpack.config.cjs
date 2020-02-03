@@ -250,14 +250,13 @@ module.exports = (opts = {}) => {
     },
 
     watchOptions: {
-      aggregateTimeout: 300,
-      poll: 1000,
+      aggregateTimeout: 300, // 300ms
+      poll: 1000, // 1000ms
       ignored: [
         'node_modules', 
         'src/graphql', 
         'src/resolvers', 
         'src/schema', 
-        'src/server', 
         'src/services', 
       ],
     },

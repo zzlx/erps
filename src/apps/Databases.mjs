@@ -1,14 +1,14 @@
+/**
+ *
+ *
+ */
+
 import React from 'react';
 import {
   Alert,
   Tables,
 } from '../components/index.mjs';
 import graphql from '../store/actions/graphql.mjs';
-
-/**
- *
- *
- */
 
 export default class Databases extends React.PureComponent {
   constructor(props) {

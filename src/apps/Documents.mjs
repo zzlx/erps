@@ -11,7 +11,7 @@ import {
   Markdown,
 } from '../components/Spinner.mjs';
 
-import array from '../utils/array.mjs';
+import array from '../utils/arrayUtils.mjs';
 
 export default class Documents extends React.PureComponent {
   constructor(props) {

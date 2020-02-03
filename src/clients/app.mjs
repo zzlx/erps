@@ -1,3 +1,10 @@
+/**
+ * User Interfaces application.
+ *
+ *
+ * @file app.mjs
+ */
+
 import React from 'react';
 import {
   Provider,
@@ -7,12 +14,6 @@ import {
 } from '../components/index.mjs';
 import * as M from '../apps/index.mjs';
 import routes from './routes.json'; 
-
-/**
- * User Interfaces application.
- *
- *
- */
 
 // App
 const App = function (store) {

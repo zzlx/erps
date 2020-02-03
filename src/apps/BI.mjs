@@ -1,9 +1,9 @@
-import React from 'react'; 
-
 /**
  * 智能数据分析
  *
  */
+
+import React from 'react'; 
 
 export default class BI extends React.PureComponent {
 	constructor (props) {

@@ -7,8 +7,7 @@
   "homepage": ".",
   "scripts": {
     "build": "webpack --config src/webpack.config.cjs",
-    "edit": "vim -u .vimrc",
-    "start": "./bin/start.mjs --help"
+    "start": "./run --help"
   },
   "devDependencies": {
     "@babel/core": "7.1.6",

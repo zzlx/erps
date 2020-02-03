@@ -8,10 +8,14 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import isJSON from './utils/isJSON.mjs';
 
 // 定位代码库根目录
 export const APP_ROOT = path.dirname(path.dirname(import.meta.url).substr(7));
 export const APP_PATH = APP_ROOT;
+
+// 推荐NODE主版本号
+export const RECOMMEND_NODE_VERSION = 13;
 
 // get configuration from package.json
 const packageJSON = path.join(APP_ROOT, 'package.json');
@@ -29,7 +33,9 @@ export const VIMRC_FILE   = path.join(APP_ROOT, 'vimrc');
 export const README_FILE  = path.join(APP_ROOT, 'README.md');
 export const HELP_FILE    = path.join(APP_ROOT, 'src', 'help.txt');
 export const CONFIG_FILE  = path.join(APP_HOME, 'config.json');
-export const CONFIG = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); 
+
+const config =  fs.readFileSync(CONFIG_FILE, 'utf8'); 
+export const CONFIG = JSON.parse(isJSON(config) ? config : '{}');
 
 export const TMP_DIR  = os.tmpDir();
 export const EOL  = os.EOL;

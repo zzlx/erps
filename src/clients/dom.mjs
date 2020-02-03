@@ -6,10 +6,10 @@
  * 1. Consider the condition of server side render;
  * 2. set api address if not exists
  *
+ * @file dom.mjs
  */
 
 import ReactDOM from 'react-dom';
-
 import App from './app.mjs';
 import { store } from '../store/index.mjs';
 import { getApiAddress } from '../store/actions/index.mjs';

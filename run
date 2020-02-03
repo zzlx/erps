@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # 主程序目录位置
-APP=./src/main.mjs
+APP=./start.mjs
 
 # 获取代码库根目录位置
 APP_ROOT=$(cd $(dirname $0); pwd)

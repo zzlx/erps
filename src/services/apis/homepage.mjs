@@ -8,10 +8,12 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import { PUBLIC_HTML, } from '../../config.mjs';
+import { PUBLIC_HTML } from '../../config.mjs';
 
 const debug = util.debuglog('debug:static');
 const opts = {};
+
+//process.on('message', m => { console.log('mem:', m); });
 
 opts.root = opts.root || path.join(PUBLIC_HTML, 'dist');
 opts.index = opts.index || 'index.html';

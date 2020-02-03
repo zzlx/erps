@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * 用于生成目录index.mjs模块
  *

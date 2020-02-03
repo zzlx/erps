@@ -1,20 +1,23 @@
 /**
- * http2 server
- *
- *
+ * http2 daemon
  *
  * @file httpd.mjs
  */
+/******************************************************************************/
 
+// node内置模块
 import fs from 'fs'; 
 import http2 from 'http2';
 import tls from 'tls';
 import util from 'util';
 import cp from 'child_process';
-import app from './app.mjs';
+
+// 本地模块
+import App from './services/index.mjs';
+import console from './utils/console.mjs';
 
 const debug = util.debuglog('debug:server');
-const streamHandler = app.streamHandler();
+const streamHandler = App.streamHandler();
 
 const server = http2.createSecureServer({
   //ca: [fs.readFileSync('client-cert.pem')],
@@ -131,7 +134,7 @@ server.on('listening', function () {
     address: this.address(), // 当前监听地址
   };
 
-  console.log('Server is running...\nprocess_info: %o', sys_info);
+  console.log('Server is running...\n%o', sys_info);
 });
 
 /**
