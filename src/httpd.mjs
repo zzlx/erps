@@ -6,11 +6,11 @@
 /******************************************************************************/
 
 // node内置模块
+import cp from 'child_process';
 import fs from 'fs'; 
 import http2 from 'http2';
 import tls from 'tls';
 import util from 'util';
-import cp from 'child_process';
 
 // 本地模块
 import App from './services/index.mjs';
@@ -27,7 +27,7 @@ const server = http2.createSecureServer({
   //clientCertEngine: 
   //dhparam
   //ecdhCurve
-  key:  fs.readFileSync('/etc/ssl/localhost-key.pem'),
+  key: fs.readFileSync('/etc/ssl/localhost-key.pem'),
   //privateKeyEngine
   //passphrase: 'sample',
   //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
@@ -47,6 +47,10 @@ const server = http2.createSecureServer({
 
 const tlsSessionStore = {};
 
+/**
+ *
+ */
+
 server.on('keylog', function (line, socket) {
   const info = {
     line: line.toString(),
@@ -56,6 +60,11 @@ server.on('keylog', function (line, socket) {
   //debug('keylog event: %j', info);
 });
 
+/**
+ *
+ *
+ */
+
 server.on('newSession', function (sessionId, sessionData, cb) {
   // bind session id
   const id = sessionId.toString('hex');
@@ -64,6 +73,10 @@ server.on('newSession', function (sessionId, sessionData, cb) {
   cb();
 });
 
+/**
+ *
+ */
+
 server.on('OCSPRequest', function (certificate, issuer, cb) {
   //const test = tls.checkServerIdentity('localhost', certificate);
   //console.log('cert: ', test);
@@ -71,12 +84,20 @@ server.on('OCSPRequest', function (certificate, issuer, cb) {
   cb(null, null);
 });
 
+/**
+ *
+ */
+
 server.on('resumeSession', function (sessionId, callback) {
   //debug('ticketkey:', this.getTicketKeys());
   const id = sessionId.toString('hex');
   this.sessionID = id;
   callback(null, tlsSessionStore[id] || null );
 });
+
+/**
+ *
+ */
 
 server.on('secureConnection', function (tlsSocket) {
   //debug('tlsSocket: ', tlsSocket);
@@ -96,7 +117,6 @@ server.on('unknownProtocol', function () {
 
 /**
  *
- *
  */
 
 server.on('close', function () {
@@ -104,7 +124,6 @@ server.on('close', function () {
 });
 
 /**
- *
  *
  */
 
@@ -116,7 +135,6 @@ server.on('error', (err) => {
 
 /**
  * 
- *
  */
 
 server.on('stream', streamHandler);
@@ -147,3 +165,4 @@ server.listen({
   port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
   exclusive: false, // 是否共享进程端口
 });
+

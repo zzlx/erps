@@ -107,24 +107,14 @@ async function main () {
 
   if (process.env.HTTPD) {
     // 需要数据连接的任务
-    httpd = await startHttpd();
     compiler = await startCompiler();
-
-    //compiler.send('httpd', httpd);
-
-    compiler.on('message', m => {
-      console.log('compiler:');
-      //httpd.send({test: 'test'});
-    });
-
-    httpd.on('message', (m, message) => {
-      console.log('Message from httpd:',  m);
-    });
+    httpd = await startHttpd();
 
     if (process.env.NODE_ENV === 'development') {
-      watcher([ 'services', 'schema', 'graphql', 'resolvers', ], () => {
-        return restartHttpd();
-      });
+      watcher(
+        [ 'services', 'schema', 'graphql', 'resolvers', ], 
+        () => { return restartHttpd(); }
+      );
     }
   }
 
@@ -132,6 +122,7 @@ async function main () {
 
   // 执行到此步骤,关闭数据库连接
   if (dba.client) dba.client.close();
+
 }
 
 /**
@@ -220,6 +211,7 @@ async function commit () {
  */
 
 function showVersion () {
+
   const version = {
     version: APP_VERSION,
     branch:  APP_BRANCH_NAME,
@@ -278,17 +270,22 @@ function watcher (folders, cb) {
 }
 
 /**
+ *
+ */
+
+function () {
+}
+
+/**
  * spawn a child process.
  *
  */
 
 async function spawn (app) {
-
+  const title = path.parse(app).name;
   const file = `${date.format('yyyymmdd')}_process.log`;
   const log_file = path.join(APP_HOME, 'log', file); 
-
   const log = fs.openSync(log_file, 'a+');
-  const title = path.basename(app);
 
   const args = [
     '--experimental-json-modules',
@@ -303,9 +300,7 @@ async function spawn (app) {
     cwd: APP_ROOT, // 运行目录
     env: process.env,
     detached: process.env.FORK ? true : false, // 是否独立进程
-    stdio: process.env.FORK 
-      ? ['ignore', log, log] 
-      : [0, 1, 2, 'ipc'], 
+    stdio: process.env.FORK ? ['ignore', log, log] : [0, 1, 2, 'ipc'], 
   };
 
   // spawn a async process.
@@ -314,7 +309,6 @@ async function spawn (app) {
 
 /**
  *
- *
  */
 
 function startCompiler() {
@@ -322,7 +316,6 @@ function startCompiler() {
 }
 
 /**
- *
  *
  */
 
@@ -338,8 +331,7 @@ async function restartHttpd() {
 }
 
 /**
- * 准备工作
- *
+ * 准备工作目录
  */
 
 function readyDir () {
@@ -356,23 +348,18 @@ function readyDir () {
 
 /**
  *
- *
  */
 
 function saveConfig () {
   // 写入配置文件
-  const configuration = JSON.stringify(CONFIG, null, 4);
-  return fs.promises.writeFile(CONFIG_FILE, configuration)
-    .catch(e => { console.log(e) });
+  return fs.promises.writeFile( CONFIG_FILE, JSON.stringify(CONFIG, null, 4));
 }
 
 /**
  *
- *
  */
 
 async function exportCSV (csvFile) {
-
   if ('string' !== typeof csvFile) return;
   if (!path.isAbsolute(csvFile)) csvFile = path.join(process.cwd(), csvFile);
 
@@ -414,7 +401,6 @@ async function importCSV (csvFile) {
  *
  * @param: {string} question
  * @param: {bool} password 是否显示*号代替输入字符 
- *
  */
 
 function readFromInput (question, password = false) {
@@ -445,7 +431,6 @@ function readFromInput (question, password = false) {
 
 /**
  * check the recommend node version
- *
  */
 
 function checkNodeVersion (atleastVersion = RECOMMEND_NODE_VERSION) {
@@ -457,7 +442,6 @@ function checkNodeVersion (atleastVersion = RECOMMEND_NODE_VERSION) {
 
 /**
  * 初始化设置
- *
  */
 
 async function setup () {
@@ -469,5 +453,4 @@ async function setup () {
     path.join(APP_ROOT, 'start.mjs'), 
     path.join(process.env.HOME, '.bin', APP_NAME + 'ctl')
   ]);
-
 }
