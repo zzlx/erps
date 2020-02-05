@@ -9,7 +9,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import ISODate from '../../utils/date.mjs';
+import date from '../../utils/date.mjs';
 const debug = util.debuglog('debug:log');
 
 export default function accessLog (logPath) {
@@ -20,7 +20,7 @@ export default function accessLog (logPath) {
 
   return function logMiddleware (ctx, next) {
     const log = ''
-      + ISODate.toLocaleISOString() + ' '
+      + date.format('yymmdd') + ' ' 
       + ctx.method + ' ' + ctx.href
       + ' from '
       + ctx.socket.remoteAddress + ':' + ctx.socket.remotePort;
@@ -28,8 +28,7 @@ export default function accessLog (logPath) {
     debug(log);
 
     // 写入日志文件
-    const sn = ISODate.toLocaleISOString().substr(0,10).replace(/[-\/]/g, '');
-    const logFile = path.join(logPath, `${sn}_access.log`);
+    const logFile = path.join(logPath, `${date.format('yyyymmdd')}_access.log`);
     fs.promises.open(logFile, 'a+').then(fd => {
       return fd.appendFile(log + os.EOL).then(() => fd.close());
     }).catch(err => debug(err));

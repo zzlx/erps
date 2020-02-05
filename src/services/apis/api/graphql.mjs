@@ -82,19 +82,14 @@ export default async function graphqlAPI (ctx, next) {
     request = body && JSON.parse(body);
   }
 
-  try {
-    // 执行graphql解析查询
-    ctx.body = await graphql({
-      schema: schema, 
-      source: request.query || '{welcome}',
-      rootValue: {},
-      contextValue: ctx,
-      variableValues: request.variables,
-      operationName: request.operationName,
-      fieldResolver: fieldResolver,
-    });
-  } catch (e) {
-    console.log(e);
-    ctx.body = e;
-  }
+  // 执行graphql解析查询
+  ctx.body = await graphql({
+    schema: schema, 
+    source: request.query || '{welcome}',
+    rootValue: {},
+    contextValue: ctx,
+    variableValues: request.variables,
+    operationName: request.operationName,
+    fieldResolver: fieldResolver,
+  });
 }

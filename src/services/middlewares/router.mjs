@@ -8,6 +8,8 @@
 
 import fs from 'fs';
 import path from 'path';
+import util from 'util';
+const debug = util.debuglog('debug:router');
 
 export default (servicePath, prefix) => {
   const routeCache = Object.create(null); // 路由缓存
@@ -16,7 +18,7 @@ export default (servicePath, prefix) => {
     if (!routeCache['/']) {
       const serviceModule = path.join(servicePath, 'index.mjs'); 
 
-      console.log(serviceModule);
+      debug(serviceModule);
       routeCache['/'] = await import(serviceModule).then(m => m.default);
     }
 

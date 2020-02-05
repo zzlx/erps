@@ -12,29 +12,18 @@ import MemoryFs from 'memory-fs';
 const config = webpackConfig();
 const compiler = webpack(config);
 
+// @todo: 内存存储
 // 内存文件系统
 //const memFs = new MemoryFs();
 //compiler.outputFileSystem = memFs;
 
 compiler.watch(config.watchOptions, callback);
 
-// 
-process.on('message', (m, httpd) => {
-  if (m === 'httpd') {
-    console.log(httpd);
-  }
-
-  console.log('Webpack compiler got message:', m);
-});
-
 /**
  *
  */
 
 function callback (err, stats) {
-  // send
-  //if (process.send) process.send({data: memFs.data});
-
   if (err) {
     console.error(err.stack || err);
     if (err.details) console.error(err.details);

@@ -1,3 +1,5 @@
+#!/usr/bin/env node --no-warnings
+
 /**
  * http2 daemon
  *
@@ -6,18 +8,21 @@
 /******************************************************************************/
 
 // node内置模块
-import cp from 'child_process';
-import fs from 'fs'; 
+import cluster from 'cluster';
 import http2 from 'http2';
+import fs from 'fs'; 
+import os from 'os';
 import tls from 'tls';
 import util from 'util';
 
 // 本地模块
+import './env.mjs';
 import App from './services/index.mjs';
 import console from './utils/console.mjs';
 
 const debug = util.debuglog('debug:server');
 const streamHandler = App.streamHandler();
+const numCUPs = os.cpus().length;
 
 const server = http2.createSecureServer({
   //ca: [fs.readFileSync('client-cert.pem')],
@@ -146,13 +151,15 @@ server.on('stream', streamHandler);
 server.on('listening', function () {
   const sys_info = {
     title: process.title,
-    ppid: process.ppid,
     pid: process.pid,
-    mode: process.env.NODE_ENV,
     address: this.address(), // 当前监听地址
   };
 
-  console.log('Server is running...\n%o', sys_info);
+  console.log(
+    'Server is running in %s mode.\n%o', 
+    process.env.NODE_ENV,
+    sys_info,
+  );
 });
 
 /**

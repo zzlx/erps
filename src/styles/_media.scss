@@ -1,9 +1,0 @@
-// 使用方法:
-// 
-
-.media { display: flex; align-items: flex-start; }
-.media > div, .media-body { flex: 1; }
-
-@media screen and (min-device-aspect-ratio: 16/9) {
-  article { padding: 1rem 5vw; }
-}

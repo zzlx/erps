@@ -18,8 +18,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 
 module.exports = (opts = {}) => {
+  const APP_PATH = path.dirname(__dirname);
+
   process.env.NODE_ENV = opts.env || process.env.NODE_ENV || 'production';
-	const APP_PATH = path.dirname(__dirname);
   const isDevel = 'development' === process.env.NODE_ENV;
   const isProd  = 'production' === process.env.NODE_ENV;
 

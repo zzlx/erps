@@ -13,7 +13,7 @@ import unpipe from 'unpipe';
  * @private
  */
 
-var ICONV_ENCODING_MESSAGE_REGEXP = /^Encoding not recognized: /
+const ICONV_ENCODING_MESSAGE_REGEXP = /^Encoding not recognized: /
 
 /**
  * Get the decoder for a given encoding.
@@ -48,7 +48,7 @@ function getDecoder (encoding) {
  * @public
  */
 
-function getRawBody (stream, options, callback) {
+export default function getRawBody (stream, options, callback) {
   var done = callback
   var opts = options || {}
 
@@ -268,5 +268,3 @@ function readStream (stream, encoding, length, limit, callback) {
     stream.removeListener('close', cleanup)
   }
 }
-
-export default getRawBody;

@@ -1,3 +1,4 @@
-#!/usr/bin/env node --experimental-json-modules --no-warnings
+#!/usr/bin/env node --no-warnings
 
-import('./src/main/index.mjs');
+// 载入主控制程序
+import './src/main.mjs';

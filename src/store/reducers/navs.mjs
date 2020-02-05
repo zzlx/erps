@@ -9,7 +9,8 @@
  */
 
 import { types } from '../actions/index.mjs';
-import initialState from '../../navs.json';
+
+const initialState = [];
 
 export default (state = initialState, action) => {
   switch (action.type) {

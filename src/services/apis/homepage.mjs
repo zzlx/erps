@@ -11,16 +11,14 @@ import util from 'util';
 import { PUBLIC_HTML } from '../../config.mjs';
 
 const debug = util.debuglog('debug:static');
+
 const opts = {};
-
-//process.on('message', m => { console.log('mem:', m); });
-
-opts.root = opts.root || path.join(PUBLIC_HTML, 'dist');
-opts.index = opts.index || 'index.html';
-opts.directoryIndex = opts.directoryIndex || ['index.html'];
-opts.immutable = opts.immutable || false;
-opts.maxage = opts.maxage || 0;
-opts.compress = opts.compress || false;
+opts.root = path.join(PUBLIC_HTML, 'dist');
+opts.index = 'index.html';
+opts.directoryIndex = ['index.html'];
+opts.immutable = false;
+opts.maxage = 0;
+opts.compress = false;
 
 export default async function staticsMiddleware (ctx, next) {
   // only accept GET/HEAD/OPTIONS method
@@ -30,6 +28,7 @@ export default async function staticsMiddleware (ctx, next) {
     return await next();
   }
 
+  // 相对目录
   const relativePath = path.relative('/', ctx.pathname);
   let realPath = path.resolve(opts.root, relativePath);
   let url = null;
@@ -38,9 +37,7 @@ export default async function staticsMiddleware (ctx, next) {
     realPath = path.join(realPath, 'index.html');
   }
 
-  if (fs.existsSync(realPath)) {
-    url = realPath;
-  }
+  if (fs.existsSync(realPath)) url = realPath;
 
   // @todo: 完善资源最后修改时间戳对比逻辑
   const lastModified = ctx.get('if-modified-since');
@@ -48,6 +45,7 @@ export default async function staticsMiddleware (ctx, next) {
   // get accept encoding
   const accetpEncoding = ctx.get('accept-encoding');
 
+  // 内容协商
   // set content-encoding
   if (/\bbr\b/.test(accetpEncoding) && fs.existsSync(realPath + '.br')) {
     ctx.set('vary', 'accept-encoding');
@@ -74,14 +72,7 @@ export default async function staticsMiddleware (ctx, next) {
   let stats = null;
 
   // 读取文件
-  try {
-    stats = fs.lstatSync(url);
-    ctx.set('last-modified', new Date(stats.mtimeMs).toUTCString());
-    ctx.body = fs.createReadStream(url);
-  } catch (err) {
-    ctx.status = 500;
-    ctx.body = err;
-    debug('static middleware error: ', err);
-  } finally {
-  }
+  stats = fs.lstatSync(url);
+  ctx.set('last-modified', new Date(stats.mtimeMs).toUTCString());
+  ctx.body = fs.createReadStream(url);
 }

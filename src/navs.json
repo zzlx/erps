@@ -1,7 +1,0 @@
-[
-  { "id": "1", "title": "首页", "href": "/home"},
-  { "id": "2", "title": "关于我们", "href": "/home/about"},
-  { "id": "3", "title": "联系我们", "href": "/home/contact"},
-  { "id": "4", "title": "新闻", "href": "/news", "disabled": true},
-  { "id": "5", "title": "系统设置", "href": "/settings"}
-]

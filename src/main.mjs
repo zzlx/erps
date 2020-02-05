@@ -1,5 +1,7 @@
+#!/usr/bin/env node --no-warnings
+
 /**
- * 主程序
+ * 主控制程序
  *
  * 任务:
  * 1. 初始化运行环境
@@ -17,7 +19,7 @@ import os from 'os';
 import path from 'path';
 
 // 本地模块
-import '../env.mjs'; // 导入环境变量
+import './env.mjs'; // 导入环境变量
 import { 
   APP_ROOT,
   APP_NAME,
@@ -31,16 +33,15 @@ import {
   HELP_FILE,
   CONFIG_FILE,
   CONFIG,
-} from '../config.mjs';
-import MongoDB from '../utils/mongodb.mjs';
-import console from '../utils/console.mjs';
-import array from '../utils/arrayUtils.mjs';
-import date from '../utils/date.mjs';
-import strings from '../utils/strings.mjs';
+} from './config.mjs';
+import MongoDB from './utils/mongodb.mjs';
+import console from './utils/console.mjs';
+import array from './utils/arrayUtils.mjs';
+import date from './utils/date.mjs';
+import strings from './utils/strings.mjs';
 
 let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
-let compiler = null; // compiler
 
 // 检测node version
 checkNodeVersion();
@@ -68,10 +69,6 @@ async function main () {
   if (process.env.VERSION || process.env.V) return showVersion(); // 显示版本号
   if (process.env.EXPORT) {
   }
-
-  // 以下任务需要读取本地配置文件,需先检测必要的目录
-  // 检测并准备必要的目录
-  await readyDir();
 
   if (process.env.IMPORT) { await importCSV(process.env.IMPORT); }
   if (process.env.EXPORT) { await exportCSV(process.env.EXPORT); }
@@ -106,14 +103,15 @@ async function main () {
   }
 
   if (process.env.HTTPD) {
-    // 需要数据连接的任务
-    compiler = await startCompiler();
+    // 开启前端构建
+    await startCompiler();
+
     httpd = await startHttpd();
 
     if (process.env.NODE_ENV === 'development') {
       watcher(
-        [ 'services', 'schema', 'graphql', 'resolvers', ], 
-        () => { return restartHttpd(); }
+        [ 'services', 'schema', 'graphql', 'resolvers', ],
+        () => restartHttpd(),
       );
     }
   }
@@ -238,7 +236,8 @@ function showSysinfo () {
  * Folder watcher
  */
 
-function watcher (folders, cb) {
+function watcher (folders) {
+  console.log('开启观察者模式.');
   if ('string' === typeof(folders)) folders = [folders];
   if (!Array.isArray(folders)) throw TypeError('提供的参数必须为数组');
 
@@ -252,7 +251,7 @@ function watcher (folders, cb) {
       const delay = 3; // 默认3s
 
       const timeout = setTimeout(() => { 
-        cb();
+        restartHttpd();
         lastTimer = null;
       }, delay * 1000);
 
@@ -273,8 +272,7 @@ function watcher (folders, cb) {
  *
  */
 
-function () {
-}
+//function () { }
 
 /**
  * spawn a child process.
@@ -328,22 +326,6 @@ async function restartHttpd() {
   httpd.kill('SIGHUP'); // 先关闭进程
   console.log('服务已重启');
   httpd = await startHttpd();
-}
-
-/**
- * 准备工作目录
- */
-
-function readyDir () {
-  // 执行准备工作
-  const asyncTasks = [
-    fs.promises.mkdir(APP_HOME, {recursive: true}),
-    fs.promises.mkdir(APP_LOG_PATH, {recursive: true}),
-    fs.promises.mkdir(PUBLIC_HTML, {recursive: true}),
-  ];
-
-  // 等待准备工作完成后再进行下一步工作
-  return Promise.all(asyncTasks);
 }
 
 /**
@@ -411,16 +393,6 @@ function readFromInput (question, password = false) {
     if (process.stdin.isPaused()) process.stdin.resume();
     process.stdin.setEncoding('utf8');
 
-    /*
-    process.stdin.on('readable', () => {
-      let chunk = null;
-      while((chunk = process.stdin.read()) !== null) {
-         process.stdout.write(`data: ${chunk}`);
-      }
-
-    });
-    */
-
     process.stdin.on('data', (chunk) => {
       const input = String(chunk).trim();
       resolve(input);
@@ -445,7 +417,16 @@ function checkNodeVersion (atleastVersion = RECOMMEND_NODE_VERSION) {
  */
 
 async function setup () {
-  const cp = await import('child_process');
+  // 执行准备工作
+  // async tasks
+  const ats = [
+    fs.promises.mkdir(APP_HOME, {recursive: true}),
+    fs.promises.mkdir(APP_LOG_PATH, {recursive: true}),
+    fs.promises.mkdir(PUBLIC_HTML, {recursive: true}),
+  ];
+
+  // 等待准备工作完成后再进行下一步工作
+  await Promise.all(ats);
 
   // 任务1: 建立符号链接启动脚本
   await cp.spawn('ln', [

@@ -12,6 +12,7 @@ import path from 'path';
 import { DOT_ENV_FILE, } from './config.mjs';
 import argvParser from './utils/argvParser.mjs';
 
+// 获取并解析.env文件配置参数
 const dotEnvConfig = dotenv(DOT_ENV_FILE);
 
 for (let key of Object.keys(dotEnvConfig)) {
@@ -21,7 +22,6 @@ for (let key of Object.keys(dotEnvConfig)) {
 
 // 获取并解析命令行参数
 const Params = argvParser(process.argv.slice(2)); 
-
 for (let key of Object.keys(Params)) {
   process.env[String(key).toUpperCase()] = String(Params[key]);
 }
@@ -29,8 +29,16 @@ for (let key of Object.keys(Params)) {
 // 设置系统变量
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 默认使用生产环境
 
-if (process.env.DEVEL || process.env.DEVELOPMENT) {
-  process.env.env.NODE_ENV = 'development';
+if (process.env.ENV && process.env.ENV === 'development') {
+  process.env.NODE_ENV = 'development';
+}
+
+if (process.env.ENV && process.env.ENV === 'production') {
+  process.env.NODE_ENV = 'production';
+}
+
+if (process.env.NODE_ENV === 'development') {
+  process.env.NODE_DEBUG = 'debug*';
 }
 
 // 默认使用3000端口号

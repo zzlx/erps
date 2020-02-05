@@ -10,7 +10,7 @@
 
 import path from 'path';
 
-import Aok from './aok.mjs';
+import App from './application.mjs';
 import * as m from './middlewares/index.mjs';
 import { 
   APP_ROOT, 
@@ -18,9 +18,11 @@ import {
   APP_LOG_PATH, 
   CONFIG, 
 } from '../config.mjs';
-import '../env.mjs';
 
-const app = new Aok(); // 配置服务器执行逻辑
+// 初始化服务程序
+const app = new App(); 
+
+// 配置服务器执行逻辑
 app.use(m.error(APP_LOG_PATH));     // 捕获中间件错误
 app.use(m.xResponse());             // 记录响应时间
 app.use(m.cookies());               // 支持cookie读写

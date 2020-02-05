@@ -1,5 +1,6 @@
 /**
  * 首页面前端程序
+ *
  */
 
 import React from 'react';
@@ -55,6 +56,7 @@ HomePage.prototype.render = function () {
 			<Layout.Header>
 				<Nav position="center">
 						<li>test</li>
+						<li>test1</li>
 				</Nav>
 			</Layout.Header>
 			<Layout.Container>
