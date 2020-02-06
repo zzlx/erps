@@ -1,0 +1,282 @@
+// markdown 样式
+
+.markdown {
+  line-height: 1.5em; }
+  .markdown h1 {
+    font-size: 33.1776px; }
+  .markdown h2 {
+    font-size: 27.648px; }
+  .markdown h3 {
+    font-size: 23.04px; }
+  .markdown h4 {
+    font-size: 19.2px; }
+  .markdown h5 {
+    font-size: 16px; }
+  .markdown h6 {
+    font-size: 13.33333px; }
+  .markdown h1,
+  .markdown h2,
+  .markdown h3,
+  .markdown h4,
+  .markdown h5,
+  .markdown h6 {
+    display: flex;
+    align-items: center;
+    font-family: Geomanist, sans-serif;
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 1.5em 0 0.25em;
+    color: #465e69;
+
+    word-break: break-all; }
+    .markdown h1 tt,
+    .markdown h1 code,
+    .markdown h2 tt,
+    .markdown h2 code,
+    .markdown h3 tt,
+    .markdown h3 code,
+    .markdown h4 tt,
+    .markdown h4 code,
+    .markdown h5 tt,
+    .markdown h5 code,
+    .markdown h6 tt,
+    .markdown h6 code {
+      font-size: 90%;
+      color: inherit; 
+    }
+    .markdown h1 a[aria-hidden='true'],
+    .markdown h2 a[aria-hidden='true'],
+    .markdown h3 a[aria-hidden='true'],
+    .markdown h4 a[aria-hidden='true'],
+    .markdown h5 a[aria-hidden='true'],
+    .markdown h6 a[aria-hidden='true'] {
+      margin-left: 8px;
+      font-size: 0.8em;
+      height: 1em;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 250ms; 
+    }
+    .markdown h1:hover a[aria-hidden='true'],
+    .markdown h2:hover a[aria-hidden='true'],
+    .markdown h3:hover a[aria-hidden='true'],
+    .markdown h4:hover a[aria-hidden='true'],
+    .markdown h5:hover a[aria-hidden='true'],
+    .markdown h6:hover a[aria-hidden='true'] {
+      opacity: 1;
+      visibility: visible; }
+  .markdown h1:first-child {
+    margin: 0;
+    line-height: 1; }
+  .markdown p,
+  .markdown blockquote,
+  .markdown table,
+  .markdown pre { margin: 1em 0; }
+  .markdown ul,
+  .markdown ol,
+  .markdown dl { margin: 0.5em 0 1em; }
+  .markdown li { margin: 0.5em 0; }
+  .markdown hr {
+    border: none;
+    background-color: #dedede;
+    height: 3px;
+    margin: 2em 0; 
+  }
+  .markdown ul,
+  .markdown ol { padding-left: 30px; }
+    .markdown ul:first-child,
+    .markdown ol:first-child { margin-top: 0; }
+    .markdown ul:last-child,
+    .markdown ol:last-child { margin-bottom: 0; }
+  .markdown dl dt {
+    font-size: 16px;
+    font-weight: bold;
+    font-style: italic;
+    margin: 15px 0 5px; 
+  }
+    .markdown dl dt:first-child { padding: 0; }
+  .markdown dl dd {
+    margin: 0 0 15px;
+    padding: 0 15px; }
+  .markdown dl dt > :first-child,
+  .markdown dl dd > :first-child {
+    margin-top: 0; }
+  .markdown dl dt > :last-child,
+  .markdown dl dd > :last-child { margin-bottom: 0; }
+  .markdown blockquote {
+    border-left: 4px solid #dddddd;
+    padding: 0.75em 1em;
+    color: #666666;
+    font-style: italic; }
+    .markdown blockquote > :first-child {
+      margin-top: 0; }
+    .markdown blockquote > :last-child {
+      margin-bottom: 0; }
+    .markdown blockquote.tip, .markdown blockquote.warning, .markdown blockquote.todo {
+      border-left: none;
+      border-radius: 3px; }
+      .markdown blockquote.tip .tip-content, .markdown blockquote.warning .tip-content, .markdown blockquote.todo .tip-content {
+        font-style: italic; }
+      .markdown blockquote.tip code, .markdown blockquote.warning code, .markdown blockquote.todo code {
+        color: inherit; }
+    .markdown blockquote.tip {
+      background-color: #eaf8ff;
+      color: #4e7182; }
+    .markdown blockquote.warning {
+      background-color: #fdf5d8;
+      color: #716b53; }
+    .markdown blockquote.todo {
+      background-color: #fbddcd;
+      color: #907a6e; }
+      .markdown blockquote.todo .tip-content::before {
+        content: '[TODO]: ';
+        font-style: normal; }
+  .markdown table {
+    margin: 1em 0; }
+    @media (min-width: 768px) {
+      .markdown table {
+        display: block;
+        overflow-x: auto;
+        overflow-y: hidden; } }
+    .markdown table p {
+      margin: 0; }
+    .markdown table code {
+      padding-top: 0; }
+  .markdown th {
+    font-weight: bold;
+    text-align: left;
+    padding: 6px 12px;
+    background: #f1f4f4;
+    border-right: 1px solid #cccccc; }
+    .markdown th:last-child {
+      border-right: none; }
+  .markdown tr {
+    border: 1px solid #cccccc; }
+    .markdown tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    .markdown tr:last-child {
+      border-bottom: 1px solid #cccccc; }
+  .markdown thead {
+    display: none; }
+    @media (min-width: 768px) {
+      .markdown thead {
+        display: table-header-group; } }
+  .markdown td {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+        flex-basis: 100%;
+        align-self: stretch;
+    padding: 4px 12px;
+    border-right: 1px solid #cccccc; }
+    .markdown td:last-child {
+      border-right: none; }
+    @media (min-width: 768px) {
+      .markdown td {
+        display: table-cell; } }
+  .markdown .title {
+    width: 40%;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: baseline;
+        -ms-flex-pack: baseline;
+            justify-content: baseline;
+    margin: 10px 0; }
+    @media (min-width: 768px) {
+      .markdown .title {
+        display: none; } }
+  .markdown .content {
+    width: 60%;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: baseline;
+        -ms-flex-pack: baseline;
+            justify-content: baseline;
+    margin: 10px 0; }
+  .markdown .description.desktop {
+    display: none; }
+    @media (min-width: 768px) {
+      .markdown .description.desktop {
+        display: block; } }
+  @media (min-width: 768px) {
+    .markdown .description.mobile {
+      display: none; } }
+  .markdown img:not([class*='support__']) {
+    max-width: 100%;
+    height: auto; 
+  }
+  .markdown b,
+  .markdown strong { font-weight: 600; }
+  .markdown i,
+  .markdown em { font-style: italic; }
+  .markdown code,
+  .markdown tt {
+    font-family: "Source Code Pro", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 90%;
+    margin: 0 2px;
+    padding: 2px 6px;
+    white-space: normal;
+    background-color: rgba(70, 94, 105, 0.05);
+    border-radius: 3px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6); }
+  .markdown a code {
+    color: #1a6bac; }
+  .markdown pre {
+    background-color: rgba(238, 238, 238, 0.35);
+    background-color: #2b3a42;
+    font-size: 13px;
+    line-height: 19px;
+    overflow: auto;
+    padding: 8px 16px;
+    border-radius: 3px; }
+    .markdown pre code {
+      margin: 0;
+      padding: 0;
+      white-space: pre;
+      border: none;
+      background: transparent;
+      text-shadow: 0 1px 0 rgba(23, 31, 35, 0.5);
+      color: #a5cee1; }
+      .markdown pre code .code-details-summary-span {
+        margin-left: -15px;
+        cursor: pointer; }
+        .markdown pre code .code-details-summary-span::after {
+          content: '\F103';
+          float: left;
+          position: relative;
+          left: -2px;
+          top: 2px;
+          text-align: center;
+          font-family: icons;
+          color: #1e78c2; }
+      .markdown pre code a {
+        border-bottom: 1px dotted #175d96; }
+      .markdown pre code .code-link {
+        position: relative; }
+        .markdown pre code .code-link:hover {
+          color: #2186d8; }
+    .markdown pre code,
+    .markdown pre tt {
+      background-color: transparent;
+      border: none; }
+  .markdown p code,
+  .markdown p tt {
+    max-width: 100%;
+    line-height: initial;
+    overflow: auto;
+    margin: 0;
+    vertical-align: middle;
+    white-space: normal; 
+  }
+  .markdown span code,
+  .markdown span tt { white-space: pre-line; }

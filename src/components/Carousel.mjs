@@ -124,20 +124,20 @@ class Carousel extends React.PureComponent {
   }
   
   render() {
-    const _ = React.createElement;
     const { 
       interval,
       crossFade, withControl, withIndicators, 
       className, children, ...rests 
     } = this.props;
+
     const cn = ['carousel', 'slide']; // 构造className
     if (crossFade) cn.push('carousel-fade');
     if (crossFade) cn.push('overflow-hidden');
     if (className) cn.push(className);
 
-    const Inner = _('div', { className: 'carousel-inner', }, children);
+    const Inner = React.createElement('div', { className: 'carousel-inner', }, children);
 
-    return _('div', {
+    return React.createElement('div', {
       ref: this.Ref,
       className: cn.join(' '),
       onClick: this.handleClick,

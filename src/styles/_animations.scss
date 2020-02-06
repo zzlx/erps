@@ -1,0 +1,14 @@
+.rainbow {
+  //animation-fill-mode属性:
+  //1.forwards 停留在结束状态
+  //2.backwards 停留在第一帧状态
+  //3.none 停留在开始状态
+  //4.both 停留在第一帧状态
+  animation: 1s rainbow forwards;
+}
+
+@keyframes rainbow {
+  0% { background: #c00; }
+  50% { background: orange; }
+  100% { background: yellowgreen; }
+}

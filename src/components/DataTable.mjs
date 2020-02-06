@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import String from '../../utils/strings.mjs';
+import String from '../utils/strings.mjs';
 
 export default function Table (props) {
   const { 

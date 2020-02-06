@@ -5,7 +5,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import RootContext from './RootContext.mjs';
+import RootContext from './Context.mjs';
 
 export default class Provider extends React.Component {
   constructor(props) {

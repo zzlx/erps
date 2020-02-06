@@ -11,7 +11,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import Context from './RootContext.mjs';
+import Context from './Context.mjs';
 import matchPath from '../utils/matchPath.mjs';
 import warning from '../utils/warning.mjs';
 

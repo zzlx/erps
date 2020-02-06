@@ -40,7 +40,7 @@ module.exports = (opts = {}) => {
     target: opts.target ? opts.target : 'web',
 
     entry: {
-      main: path.join(paths.appPath, 'src', 'clients', 'dom.mjs'),
+      main: path.join(paths.appPath, 'src', 'ui-clients', 'dom.mjs'),
       styles: path.join(paths.appPath, 'src', 'styles', 'index.scss'),
     },
 
@@ -77,10 +77,7 @@ module.exports = (opts = {}) => {
               use: [
                 isProd ? 
                 { loader: MiniCssExtractPlugin.loader,
-                  options: {
-                    hmr: isDevel,
-                    reloadAll: true,
-                  },
+                  options: { hmr: isDevel, reloadAll: true, },
                 } :
                 { loader: 'style-loader' },
                 { loader: 'css-loader' },
@@ -132,7 +129,7 @@ module.exports = (opts = {}) => {
       ]),
       new webpack.EnvironmentPlugin({ NODE_ENV: 'production', }),
       new webpack.DefinePlugin({
-        'PUBLIC_URL': JSON.stringify(process.env.NODE_ENV),
+        //'PUBLIC_URL': JSON.stringify(process.env.NODE_ENV),
       }),
       new HtmlWebpackPlugin({
         filename: 'index.html',

@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import {
-  Clock,
-  Redirect,
-} from '../components/index.mjs';
+import Clock from '../components/Clock.mjs';
+import Redirect from '../components/Redirect.mjs';
 
 export default function NotFound (props) {
   document.title = 'Error:404';

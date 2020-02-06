@@ -1,19 +1,75 @@
 /**
- * Containers
- * Modules is automatic exported by bin/index.mjs. (count: 14)
+ * User Interfaces application.
+ *
+ * @file index.mjs
  */
+/******************************************************************************/
 
-export { default as BI } from './BI.mjs';
-export { default as Dashboard } from './Dashboard.mjs';
-export { default as Databases } from './Databases.mjs';
-export { default as Documents } from './Documents.mjs';
-export { default as Exports } from './Exports.mjs';
-export { default as Games } from './Games.mjs';
-export { default as HomePage } from './HomePage.mjs';
-export { default as Imports } from './Imports.mjs';
-export { default as ModifiHomePage } from './ModifiHomePage.mjs';
-export { default as NotFound } from './NotFound.mjs';
-export { default as Picture } from './Picture.mjs';
-export { default as Settings } from './Settings.mjs';
-export { default as Setup } from './Setup.mjs';
-export { default as SystemInfo } from './SystemInfo.mjs';
+import React from 'react';
+
+// 加载组件
+import Provider from '../components/Provider.mjs';
+import Route from '../components/Route.mjs';
+import Redirect from '../components/Redirect.mjs';
+import Switch from '../components/Switch.mjs';
+
+import HomePage from './HomePage.mjs';
+import NotFound from './NotFound.mjs';
+
+// 加载路由配置
+import routes from './routes.json'; 
+
+
+const M = {
+  HomePage,
+  NotFound,
+}
+
+// App
+const App = function (store) {
+  // 客户端路由
+  const Switcher = React.createElement(Switch, null, routes.map((v, k) => {
+    const {app, ...rests} = v;
+    console.log(rests);
+
+    return React.createElement(v.from ? Redirect : Route, { 
+      key: k,
+      ...rests,
+    }, M[app] || '');
+  }));
+
+  return React.createElement(Provider, { store: store }, Switcher);
+}
+
+
+// Profiler
+// 用于开发环境下分析渲染性能
+const Profiler = (store) => React.createElement(React.Profiler, {
+  id: 'App_Profiler',
+  onRender: onRenderCallback, 
+}, App(store));
+
+function onRenderCallback (
+  id, // the "id" prop of the Profiler tree that has just committed
+  phase, // either "mount" or "update" (if it re-rendered)
+  actualDuration, // time spent rendering the committed update
+  baseDuration, // estimated time to render the entire subtree without memoization
+  startTime, // when React began rendering this update
+  commitTime, // when React committed this update
+  interactions // the Set of interactions belonging to this update
+) {
+  const profiles = {
+    id,
+    phase,
+    actualDuration,
+    baseDuration,
+    startTime,
+    commitTime,
+    interactions
+  } 
+
+  //console.log('profiles: %o', profiles);
+  
+}
+
+export default 'development' === process.env.NODE_ENV ? Profiler : App;

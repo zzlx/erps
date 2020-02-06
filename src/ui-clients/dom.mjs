@@ -10,7 +10,7 @@
  */
 
 import ReactDOM from 'react-dom';
-import App from './app.mjs';
+import App from '../apps/index.mjs';
 import { store } from '../store/index.mjs';
 import { getApiAddress } from '../store/actions/index.mjs';
 import global from '../utils/global.mjs';

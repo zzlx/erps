@@ -37,7 +37,7 @@ export const CONFIG_FILE  = path.join(APP_HOME, 'config.json');
 const config =  fs.readFileSync(CONFIG_FILE, 'utf8'); 
 export const CONFIG = JSON.parse(isJSON(config) ? config : '{}');
 
-export const TMP_DIR  = os.tmpDir();
+export const TMP_DIR  = os.tmpdir();
 export const EOL  = os.EOL;
 
 // 获取代码库git版本信息
