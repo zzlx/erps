@@ -6,20 +6,6 @@
 import React from 'react';
 
 export default function logProps(Component) {
-  class LogProps extends React.Component {
-    componentDidUpdate(prevProps) {
-      console.log('old props:', prevProps);
-      console.log('new props:', this.props);
-    }
-
-    render() {
-      const {forwardedRef, ...rest} = this.props;
-      return React.createElement(Component, {
-        ref: forwardedRef,
-        ...rest,
-      });
-    }
-  }
 
   // Note the second param "ref" provided by React.forwardRef.
   // We can pass it along to LogProps as a regular prop, e.g. "forwardedRef"
@@ -28,4 +14,19 @@ export default function logProps(Component) {
     forwardedRef: ref, 
     ...props, 
   }));
+}
+
+class LogProps extends React.Component {
+  componentDidUpdate(prevProps) {
+    console.log('old props:', prevProps);
+    console.log('new props:', this.props);
+  }
+
+  render() {
+    const {forwardedRef, ...rest} = this.props;
+    return React.createElement(Component, {
+      ref: forwardedRef,
+      ...rest,
+    });
+  }
 }

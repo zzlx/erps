@@ -1,5 +1,5 @@
 /**
- * SCSS 样式系统
+ * SASS 样式系统
  * Licensed under MIT
  */
 
@@ -46,7 +46,7 @@
 @import "~bootstrap/scss/print";
 
 // 增加的组件样式
-@import "animations";
+@import "rainbow";
 @import "gitter";
 @import "placeholder";
 @import "markdown";

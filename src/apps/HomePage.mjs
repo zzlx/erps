@@ -1,6 +1,7 @@
 /**
  * 首页面前端程序
  *
+ * @file HomePage.mjs
  */
 
 import React from 'react';
@@ -22,8 +23,8 @@ HomePage.prototype.render = function () {
   const { store } = this.context;
 
 	return (
-    <Container>
-    test
+    <Container fluid>
+      <Placeholder />
     </Container>
 	);
 }

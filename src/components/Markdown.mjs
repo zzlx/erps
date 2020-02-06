@@ -1,5 +1,11 @@
 /**
+ * Markdown组件
+ *
+ * 解析markdown文本字符串,生成html文档
+ *
  * @param {Object} opts
+ * @return {} react element
+ * @api public
  */
 
 import React from 'react';
@@ -16,9 +22,11 @@ export default function Markdown (opts = {}) {
     props = opts.props;
   }
 
-  const { children, ...rests} = props;
+  const { calssName, children, ...rests} = props;
+  const cn = ['markdown', className].filter(Boolean);
 
   return React.createElement(type, {
+    className: cn.join(' '),
     ...rests,
     dangerouslySetInnerHTML: {__html: markdown.render(children)},
   });

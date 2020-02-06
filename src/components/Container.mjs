@@ -1,16 +1,23 @@
 /**
- * Container组件
+ * Container component
  *
+ * @param {bool} props.fluid
+ * @param {string} props.breakpoint
+ * @return {obj} React element
+ * @api public
+ * @file Container.mjs
+ * *****************************************************************************
  */
 
 import React from 'react';
 
 export default function Container (props) {
-  const { fluid, className, ...rests } = props;
+  const { breakpoint, fluid, className, ...rests } = props;
 
   const cn = [
-    !fluid && 'container',
-    fluid && 'container-fluid',
+    !fluid ? 'container' : null,
+    fluid ?'container-fluid' : null,
+    breakpoint ? 'container-' + breakpoint : null,
     className,
   ].filter(Boolean).join(' ');
 

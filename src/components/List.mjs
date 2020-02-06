@@ -1,6 +1,8 @@
 /**
  * List component
  *
+ * @return {} react element
+ * @api public
  */
 
 import React from 'react';

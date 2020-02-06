@@ -1,13 +1,22 @@
 /**
  * 图标
  *
+ * @return {obj} react element
+ * @api public
  */
 
 import React from 'react';
-import sprites from '../sprites.json';
 
 export default function Sprite (props = {}) {
-  const { showAll, id, width, height, ...rests } = props;
+  const { 
+    showAll, 
+    id, 
+    path,
+    transform,
+    width, 
+    height, 
+    ...rests 
+  } = props;
   let icon = null;
   const propsId = id || 'bookmark';
 
@@ -20,8 +29,8 @@ export default function Sprite (props = {}) {
     viewBox: icon.viewBox || '0 0 8 8',
     ...rests,
   }, React.createElement('path', {
-    d: icon.path || '',
-    transform: icon.transform || null,
+    d: path || '',
+    transform: transform || null,
   }));
   
   // 执行查找

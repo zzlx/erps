@@ -16,9 +16,9 @@ import tls from 'tls';
 import util from 'util';
 
 // 本地模块
-import './env.mjs';
-import App from './services/index.mjs';
-import console from './utils/console.mjs';
+import '../env.mjs';
+import App from '../apis/index.mjs';
+import console from '../utils/console.mjs';
 
 const debug = util.debuglog('debug:server');
 const streamHandler = App.streamHandler();

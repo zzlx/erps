@@ -1,17 +1,16 @@
 /**
- * webpack compiler
+ * 前端编译器
  *
+ * 用于构建前端应用程序
  *
- * @file compiler.mjs
+ * @file UICompiler.mjs
  */
 
 import webpack from 'webpack';
 import webpackConfig from './webpack.config.cjs';
-import MemoryFs from 'memory-fs';
 
 const config = webpackConfig();
 const compiler = webpack(config);
-
 // @todo: 内存存储
 // 内存文件系统
 //const memFs = new MemoryFs();

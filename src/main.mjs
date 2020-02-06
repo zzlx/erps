@@ -110,7 +110,7 @@ async function main () {
 
     if (process.env.NODE_ENV === 'development') {
       watcher(
-        [ 'services', 'schema', 'graphql', 'resolvers', ],
+        [ 'apis', 'server', 'schema', 'graphql', 'resolvers', ],
         () => restartHttpd(),
       );
     }
@@ -237,7 +237,7 @@ function showSysinfo () {
  */
 
 function watcher (folders) {
-  console.log('开启观察者模式.');
+  console.log('观察者模式: 监控开发环境下服务端代码变动,并重启后端服务.');
   if ('string' === typeof(folders)) folders = [folders];
   if (!Array.isArray(folders)) throw TypeError('提供的参数必须为数组');
 
@@ -286,9 +286,8 @@ async function spawn (app) {
   const log = fs.openSync(log_file, 'a+');
 
   const args = [
+    '--no-warnings', 
     '--experimental-json-modules',
-    // 仅在开发模式下显示warning
-    process.env.NODE_ENV !== 'development' && '--no-warnings', 
     `--title=${process.title}.${title}`,
     app,
   ].filter(Boolean);
@@ -298,7 +297,7 @@ async function spawn (app) {
     cwd: APP_ROOT, // 运行目录
     env: process.env,
     detached: process.env.FORK ? true : false, // 是否独立进程
-    stdio: process.env.FORK ? ['ignore', log, log] : [0, 1, 2, 'ipc'], 
+    stdio: process.env.FORK ? ['ignore', log, log] : [0, 1, 2], 
   };
 
   // spawn a async process.
@@ -310,7 +309,7 @@ async function spawn (app) {
  */
 
 function startCompiler() {
-  return spawn(path.join(APP_ROOT, 'src', 'compiler.mjs'));
+  return spawn(path.join(APP_ROOT, 'src', 'UICompiler.mjs'));
 }
 
 /**
@@ -318,7 +317,7 @@ function startCompiler() {
  */
 
 function startHttpd() {
-  return spawn(path.join(APP_ROOT, 'src', 'httpd.mjs'));
+  return spawn(path.join(APP_ROOT, 'src', 'server', 'httpd.mjs'));
 }
 
 async function restartHttpd() {
