@@ -1,12 +1,11 @@
 # 参考文档 http://help.github.com/ignore-files/
 # 忽略目录
 node_modules
-dist
-build
-log
 
 # 忽略文件
+.env
 .DS_Store
+package-lock.json
 *.sw[mnop]
 *.log
 *.local
@@ -18,5 +17,3 @@ log
 *.*.un
 *.un~
 *.*.un~
-.env
-package-lock.json

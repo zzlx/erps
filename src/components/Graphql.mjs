@@ -1,13 +1,9 @@
 /**
- * GraphQL查询
  *
- * @param {object} opts 
  *
  */
 
-import { types } from './index.mjs';
-
-export default (opts) => store => {
+export default function Graphql () {
 
   // 如果没有提供opts.url,则使用同域名下3000端口 
   const url = opts.url 
@@ -40,5 +36,4 @@ export default (opts) => store => {
     console.log(response);
   });
 
-  return store.dispatch({ type: types.GRAPHQL_QUERY, payload: graphql(opts) });
 }

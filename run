@@ -4,4 +4,4 @@
 APP_ROOT=$(cd $(dirname $0); pwd)
 
 # 传递参数列表并执行 $@ 表示所有参数, $n 表示第n个参数
-$APP_ROOT/start.mjs $@
+$APP_ROOT/main.mjs $@

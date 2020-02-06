@@ -1,10 +1,3 @@
-//import $$observable from 'symbol-observable';
-import { types } from './actions/index.mjs';
-import object from '../utils/object.mjs';
-import isPlainObject from '../utils/isPlainObject.mjs';
-
-const $$observable = Symbol('observable');
-
 /**
  * Creates a Redux store that holds the state tree.
  * The only way to change the data in the store is to call `dispatch()` on it.
@@ -29,6 +22,12 @@ const $$observable = Symbol('observable');
  * @returns {Store} A Redux store 
  * that lets you read the state, dispatch actions and subscribe to changes.
  */
+
+import { types } from './actions/index.mjs';
+import object from '../utils/object.mjs';
+import isPlainObject from '../utils/isPlainObject.mjs';
+
+const $$observable = Symbol('observable');
 
 export default function createStore(reducer, preloadedState, enhancer) {
   if (
@@ -282,6 +281,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
   dispatch({ type: types.INIT });
 
   return _ref2 = {
+    actionTypes: types,
     dispatch: dispatch,
     subscribe: subscribe,
     getState: getState,
@@ -296,5 +296,6 @@ export default function createStore(reducer, preloadedState, enhancer) {
 
 class Store {
   constructor() {
+
   }
 }

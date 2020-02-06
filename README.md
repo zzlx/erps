@@ -20,7 +20,7 @@ $ npm install
 3. 启动系统
 
 ```bash
-$ ./bin/start.mjs
+$ npm start 
 ```
 
 ## 系统部署 

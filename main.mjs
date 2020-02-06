@@ -1,6 +1,6 @@
 #!/usr/bin/env node --no-warnings
-
 /**
+ * *****************************************************************************
  * 主控制程序
  *
  * 任务:
@@ -9,8 +9,8 @@
  * 3. 管理系统服务
  *
  * @file: main.mjs
+ * *****************************************************************************
  */
-/******************************************************************************/
 // Node内置模块
 import crypto from 'crypto';
 import cp from 'child_process';
@@ -19,7 +19,7 @@ import os from 'os';
 import path from 'path';
 
 // 本地模块
-import './env.mjs'; // 导入环境变量
+import './src/env.mjs'; // 导入环境变量
 import { 
   APP_ROOT,
   APP_NAME,
@@ -33,12 +33,12 @@ import {
   HELP_FILE,
   CONFIG_FILE,
   CONFIG,
-} from './config.mjs';
-import MongoDB from './utils/mongodb.mjs';
-import console from './utils/console.mjs';
-import array from './utils/arrayUtils.mjs';
-import date from './utils/date.mjs';
-import strings from './utils/strings.mjs';
+} from './src/config.mjs';
+import MongoDB from './src/utils/mongodb.mjs';
+import console from './src/utils/console.mjs';
+import array from './src/utils/arrayUtils.mjs';
+import date from './src/utils/date.mjs';
+import strings from './src/utils/strings.mjs';
 
 let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
@@ -102,10 +102,12 @@ async function main () {
     await dba.client.close();
   }
 
-  if (process.env.HTTPD) {
+  if (process.env.DEVEL) {
     // 开启前端构建
     await startCompiler();
+  }
 
+  if (process.env.HTTPD) {
     httpd = await startHttpd();
 
     if (process.env.NODE_ENV === 'development') {
@@ -430,7 +432,7 @@ async function setup () {
   // 任务1: 建立符号链接启动脚本
   await cp.spawn('ln', [
     '-s', 
-    path.join(APP_ROOT, 'start.mjs'), 
+    path.join(APP_ROOT, 'main.mjs'), 
     path.join(process.env.HOME, '.bin', APP_NAME + 'ctl')
   ]);
 }

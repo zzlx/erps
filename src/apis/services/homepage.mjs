@@ -1,8 +1,9 @@
 /**
- * Static resource server service
- *
+ * 静态资源服务
+ * 提供静态资源服务
  *
  * @file homepage.mjs
+ * *****************************************************************************
  */
 
 import fs from 'fs';
@@ -21,6 +22,7 @@ opts.maxage = 0;
 opts.compress = false;
 
 export default async function staticsMiddleware (ctx, next) {
+
   // only accept GET/HEAD/OPTIONS method
   if (!/(GET|HEAD|OPTIONS)/.test(ctx.method)) {
     ctx.status = 405; // method not allowed.
