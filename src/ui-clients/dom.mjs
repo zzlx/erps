@@ -11,8 +11,8 @@
 
 import ReactDOM from 'react-dom';
 import App from '../apps/index.mjs';
-import { store } from '../store/index.mjs';
-import { getApiAddress } from '../store/actions/index.mjs';
+import store from '../store/index.mjs';
+//import { getApiAddress } from '../store/actions/index.mjs';
 import global from '../utils/global.mjs';
 
 // Prepare parameters for ReactDOM render method.
@@ -45,6 +45,6 @@ function callback() {
   // 如果还未设置API地址，则从服务器获取
   // 或者API无法使用时再从服务器获取
   if (null == api_address) {
-    store.dispatch(getApiAddress('/config.json'));
+    //store.dispatch(getApiAddress('/config.json'));
   }
 }

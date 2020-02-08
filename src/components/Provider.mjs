@@ -1,13 +1,26 @@
 /**
+ * *****************************************************************************
  * Provider
- *
+ * 
+ * 为子组件提供context数据
+ * *****************************************************************************
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import RootContext from './Context.mjs';
+import Context from './Context.mjs';
 
 export default class Provider extends React.Component {
+  static propTypes = {
+    store: PropTypes.shape({
+      subscribe: PropTypes.func.isRequired,
+      dispatch: PropTypes.func.isRequired,
+      getState: PropTypes.func.isRequired
+    }).isRequired,
+    context: PropTypes.object,
+    children: PropTypes.any
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -17,7 +30,6 @@ export default class Provider extends React.Component {
   }
 
   render() {
-    const Context = this.props.context || RootContext 
     return React.createElement(Context.Provider, {
       value: this.state,
       children: this.props.children,
@@ -30,8 +42,7 @@ export default class Provider extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    // always update?
-    return true; 
+    return true; // always update?
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -68,17 +79,5 @@ export default class Provider extends React.Component {
     if (postMountStoreState !== this.state.storeState) {
       this.setState({ storeState: postMountStoreState });
     }
-  }
-}
-
-if (process.env.NODE_ENV === 'development') {
-  Provider.propTypes = {
-    store: PropTypes.shape({
-      subscribe: PropTypes.func.isRequired,
-      dispatch: PropTypes.func.isRequired,
-      getState: PropTypes.func.isRequired
-    }).isRequired,
-    context: PropTypes.object,
-    children: PropTypes.any
   }
 }

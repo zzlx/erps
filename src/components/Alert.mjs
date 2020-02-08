@@ -1,5 +1,6 @@
 /**
- * Alert
+ * *****************************************************************************
+ * Alert组件
  *
  * A contextual feedback messages for typical user actions 
  * with the handful of available and flexible alert messages.
@@ -13,6 +14,7 @@
  * 使用方法：
  * 给Alert一个fixed定位的透明背景容器(比如通知中心),Alert可以悬浮在主界面上
  *
+ * *****************************************************************************
  */
 
 import React from 'react';
@@ -26,45 +28,59 @@ export default class Alert extends React.PureComponent {
       startTouchList: null,
       moveTouchList: null,
     };
-
     // 绑定this
     this.handleCloseClick = this.handleCloseClick.bind(this);
     this.handleTouchStart = this.handleTouchStart.bind(this);
     this.handleTouchMove = this.handleTouchMove.bind(this);
     this.handleTouchEnd = this.handleTouchEnd.bind(this);
   }
-}
 
-Alert.prototype.render = function () {
-  const { 
-    theme, timeout, 
-    dismissible,
-    className, children, ...rest 
-  } = this.props;
+  render () {
+    const { 
+      theme, timeout, 
+      dismissible,
+      className, children, ...rest 
+    } = this.props;
 
-  const cn = ['alert']; // 构造className
-  cn.push(`alert-${theme ? theme : 'primary'}`);
-  if (dismissible || (timeout && timeout > 0)) cn.push('alert-dismissible');
-  if (this.state.disappear) cn.push('d-none');
-  if (className) cn.push(className);
+    // 构造className
+    const cn = [
+      'alert'
+      `alert-${theme ? theme : 'primary'}`,
+      (dismissible || (timeout && timeout > 0)) ? 'alert-dismissible' : null,
+      this.state.disappear ? 'd-none': null,
+      className,
+    ].filter(Boolean); 
 
-  const closeButton = dismissible ? React.createElement('button', {
-    type: "button",
-    className: "close",
-    'data-dismiss': "alert",
-    'aria-label': "Close",
-    onClick: this.handleCloseClick,
-  }, 'x') : null;
+    const closeButton = dismissible ? React.createElement('button', {
+      type: "button",
+      className: "close",
+      'data-dismiss': "alert",
+      'aria-label': "Close",
+      onClick: this.handleCloseClick,
+    }, 'x') : null;
 
-  return React.createElement('div', {
-    className: cn.join(' '),
-    draggable: true,
-    role: 'alert',
-    onTouchStart: dismissible ? null : this.handleTouchStart, 
-    onTouchMove: dismissible ? null : this.handleTouchMove, 
-    onTouchEnd: dismissible ? null : this.handleTouchEnd, 
-    ...rest,
-  }, children, closeButton);
+    return React.createElement('div', {
+      className: cn.join(' '),
+      draggable: true,
+      role: 'alert',
+      onTouchStart: dismissible ? null : this.handleTouchStart, 
+      onTouchMove: dismissible ? null : this.handleTouchMove, 
+      onTouchEnd: dismissible ? null : this.handleTouchEnd, 
+      ...rest,
+    }, children, closeButton);
+  }
+
+  componentDidMount () {
+    if (this.props.timeout && this.props.timeout > 0 ) {
+      this._timeout = setTimeout(() => {
+        this.setState(state => ({disappear: true}));
+      }, this.props.timeout * 1000);
+    }
+  }
+
+  componentWillUnmount () {
+    if (this._timeout) clearTimeout(this._timeout);
+  }
 }
 
 // 
@@ -97,16 +113,4 @@ Alert.prototype.handleTouchEnd = function (e) {
     // 设置alert显示状态
     e.target.classList.add('d-none');
   }
-}
-
-Alert.prototype.componentDidMount = function () {
-  if (this.props.timeout && this.props.timeout > 0 ) {
-    this._timeout = setTimeout(() => {
-      this.setState(state => ({disappear: true}));
-    }, this.props.timeout * 1000);
-  }
-}
-
-Alert.prototype.componentWillUnmount = function () {
-  if (this._timeout) clearTimeout(this._timeout);
 }
