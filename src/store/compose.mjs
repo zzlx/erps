@@ -8,6 +8,7 @@
  * @returns {Function} A function obtained by composing the argument functions
  * from right to left. 
  * For example, compose(f, g, h) is identical to doing (...args) => f(g(h(...args))).
+ *
  */
 
 export default function compose(...functions) {

@@ -23,13 +23,13 @@ endif
 
 if &background == "light"
   "hi Normal  ctermfg=Black ctermbg=LightYellow
-  hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey guibg=None
+  hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey font='Monospace 16'
   hi StatusLine ctermfg=LightGray ctermbg=DarkBlue
 endif
 
 if &background == "dark"
   "hi Normal ctermfg=LightCyan ctermbg=0
-  hi Comment ctermfg=white ctermbg=None
+  hi Comment ctermfg=white ctermbg=None font='Monospace 16'
   hi StatusLine ctermfg=white ctermbg=DarkRed
 endif
 

@@ -1,8 +1,10 @@
 /**
  * *****************************************************************************
- * Alert组件
  *
- * A contextual feedback messages for typical user actions 
+ * Alert component
+ *
+ * 信息提示框(通知、警告、反馈等)
+ * Contextual feedback messages for typical user actions 
  * with the handful of available and flexible alert messages.
  *
  * 逻辑:
@@ -14,10 +16,15 @@
  * 使用方法：
  * 给Alert一个fixed定位的透明背景容器(比如通知中心),Alert可以悬浮在主界面上
  *
+ * @param {object} props
+ * @return {object} react element
+ *
+ * @file Alert.mjs
  * *****************************************************************************
  */
 
 import React from 'react';
+import Element from './Element.mjs';
 
 export default class Alert extends React.PureComponent {
   constructor (props) {
@@ -28,28 +35,28 @@ export default class Alert extends React.PureComponent {
       startTouchList: null,
       moveTouchList: null,
     };
+
     // 绑定this
-    this.handleCloseClick = this.handleCloseClick.bind(this);
-    this.handleTouchStart = this.handleTouchStart.bind(this);
-    this.handleTouchMove = this.handleTouchMove.bind(this);
-    this.handleTouchEnd = this.handleTouchEnd.bind(this);
+    this.handleCloseClick = handleCloseClick.bind(this);
+    this.handleTouchStart = handleTouchStart.bind(this);
+    this.handleTouchMove = handleTouchMove.bind(this);
+    this.handleTouchEnd = handleTouchEnd.bind(this);
   }
 
   render () {
     const { 
-      theme, timeout, 
-      dismissible,
+      theme, timeout, dismissible,
       className, children, ...rest 
     } = this.props;
 
     // 构造className
-    const cn = [
-      'alert'
+    const cn_alert = [
+      'alert',
       `alert-${theme ? theme : 'primary'}`,
       (dismissible || (timeout && timeout > 0)) ? 'alert-dismissible' : null,
       this.state.disappear ? 'd-none': null,
       className,
-    ].filter(Boolean); 
+    ].filter(Boolean).join(' '); 
 
     const closeButton = dismissible ? React.createElement('button', {
       type: "button",
@@ -59,15 +66,29 @@ export default class Alert extends React.PureComponent {
       onClick: this.handleCloseClick,
     }, 'x') : null;
 
+    console.log(children);
+    // 
+		const newChildren = React.Children.map(children, (child, i) => {
+			if (!React.isValidElement(child)) return child;
+
+      if (i === 0 && /^h[1-6]$/.test(child.type)) {
+        const el = new Element(child);
+        el.addClassName('alert-heading');
+        child = el.element;
+      }
+
+      return child;
+    });
+
     return React.createElement('div', {
-      className: cn.join(' '),
+      className: cn_alert,
       draggable: true,
       role: 'alert',
       onTouchStart: dismissible ? null : this.handleTouchStart, 
       onTouchMove: dismissible ? null : this.handleTouchMove, 
       onTouchEnd: dismissible ? null : this.handleTouchEnd, 
       ...rest,
-    }, children, closeButton);
+    }, newChildren, closeButton);
   }
 
   componentDidMount () {
@@ -84,12 +105,12 @@ export default class Alert extends React.PureComponent {
 }
 
 // 
-Alert.prototype.handleCloseClick = function (e) {
+function handleCloseClick (e) {
   this.setState(state => ({disappear: true}));
 }
 
 //
-Alert.prototype.handleTouchStart = function (e) {
+function handleTouchStart (e) {
   // 获取数据
   const DOMRect = e.target.getBoundingClientRect();
   const TouchList = e.targetTouches;
@@ -99,12 +120,12 @@ Alert.prototype.handleTouchStart = function (e) {
   this.setState(state => ({startTouchList: TouchList}));
 }
 
-Alert.prototype.handleTouchMove = function (e) {
+function handleTouchMove (e) {
   const TouchList = e.targetTouches;
   this.setState(state => ({moveTouchList: TouchList}));
 }
 
-Alert.prototype.handleTouchEnd = function (e) {
+function handleTouchEnd (e) {
   // 计算TouchStart到TouchEnd位移
   const displacement = this.state.moveTouchList[0].clientX - this.state.startTouchList[0].clientX;
 

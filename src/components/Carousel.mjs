@@ -1,20 +1,24 @@
 /**
- * Carousel 
+ * *****************************************************************************
  *
- * 用于幻灯片放映效果
+ * Carousel component
  *
+ * 轮播(走马灯)组件,用于播放幻灯片放映效果
  *
- *
- *
+ * @file Carousel.mjs
+ * *****************************************************************************
  */
 
 import React from 'react';
 
-export default function carousel (props) {
-  return React.createElement(Carousel, props);
-}
+export default class Carousel extends React.PureComponent {
+  static defaultProps = {
+    withControl: true,
+    withIndicators: true,
+    crossFade: true,
+    interval: 3000,
+  };
 
-class Carousel extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -22,6 +26,30 @@ class Carousel extends React.PureComponent {
     this.handleClick = this.handleClick.bind(this);
     this.handleMouseOver = this.handleMouseOver.bind(this);
     this.handleMouseOut = this.handleMouseOut.bind(this);
+  }
+
+  render() {
+    const { 
+      interval,
+      crossFade, withControl, withIndicators, 
+      className, children, ...rests 
+    } = this.props;
+
+    const cn = ['carousel', 'slide']; // 构造className
+    if (crossFade) cn.push('carousel-fade');
+    if (crossFade) cn.push('overflow-hidden');
+    if (className) cn.push(className);
+
+    const Inner = React.createElement('div', { className: 'carousel-inner', }, children);
+
+    return React.createElement('div', {
+      ref: this.Ref,
+      className: cn.join(' '),
+      onClick: this.handleClick,
+      onMouseOver: this.handleMouseOver,
+      onMouseOut: this.handleMouseOut,
+      ...rests,
+    }, Inner);
   }
 
   handleMouseOver(e) {
@@ -123,34 +151,4 @@ class Carousel extends React.PureComponent {
     clearInterval(this.timer);
   }
   
-  render() {
-    const { 
-      interval,
-      crossFade, withControl, withIndicators, 
-      className, children, ...rests 
-    } = this.props;
-
-    const cn = ['carousel', 'slide']; // 构造className
-    if (crossFade) cn.push('carousel-fade');
-    if (crossFade) cn.push('overflow-hidden');
-    if (className) cn.push(className);
-
-    const Inner = React.createElement('div', { className: 'carousel-inner', }, children);
-
-    return React.createElement('div', {
-      ref: this.Ref,
-      className: cn.join(' '),
-      onClick: this.handleClick,
-      onMouseOver: this.handleMouseOver,
-      onMouseOut: this.handleMouseOut,
-      ...rests,
-    }, Inner);
-  }
-}
-
-Carousel.defaultProps = {
-  withControl: true,
-  withIndicators: true,
-  crossFade: true,
-  interval: 3000,
 }

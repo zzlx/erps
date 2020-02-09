@@ -1,15 +1,17 @@
 /**
+ * *****************************************************************************
+ *
  * Dropdown component
  *
+ * 下拉菜单
+ *
+ * *****************************************************************************
  */
 
 import React from 'react';
  
 export default function dropdown (props) {
-  const { 
-    directions, split, 
-    className, children, ...rests 
-  } = props;
+  const { directions, split, className, children, ...rests } = props;
   
   const cn = ['dropdown'];
   if (className) cn.push(className);

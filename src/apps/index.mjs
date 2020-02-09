@@ -15,6 +15,7 @@ import Switch from '../components/Switch.mjs';
 
 import HomePage from './HomePage.mjs';
 import NotFound from './NotFound.mjs';
+import Test from './Test.mjs';
 
 // 加载路由配置
 import routes from './routes.json'; 
@@ -23,6 +24,7 @@ import routes from './routes.json';
 const M = {
   HomePage,
   NotFound,
+  Test,
 }
 
 // App

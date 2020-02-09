@@ -2,7 +2,7 @@
 import applyMiddleware from './applyMiddleware.mjs';
 import combineReducers from './combineReducers.mjs';
 import * as middlewares from './middlewares/index.mjs';
-import * as enhancers from './enhancers/index.mjs';
+import monitorReducers from './enhancers/monitorReducers.mjs';
 import createStore from './createStore.mjs';
 import compose from './compose.mjs';
 
@@ -46,7 +46,7 @@ export default function configureStore (opts) {
   const middlewareEnhancer = applyMiddleware(middlewareArray); 
 
   const enhancer = opts.monitorReducers
-    ? compose(middlewareEnhancer, enhancers.monitorReducers) 
+    ? compose(middlewareEnhancer, monitorReducers) 
     : middlewareEnhancer;
 
   const reducerObj = combineReducers(reducers);

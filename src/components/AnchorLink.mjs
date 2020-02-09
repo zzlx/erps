@@ -1,15 +1,16 @@
 /**
+ * *****************************************************************************
+ *
  * Anchor component
  *
+ * @file AnchorLink.mjs
+ * *****************************************************************************
  */
 
 import React from 'react';
 
-export default function Anchor (props) {
-  const { 
-    active, disabled, src,
-    onClick, className, ...rests 
-  } = props;
+export default function AnchorLink (props) {
+  const { active, disabled, src, onClick, className, ...rests } = props;
 
   const cn = [];
   if (disabled && !active) cn.push('disabled');

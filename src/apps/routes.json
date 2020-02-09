@@ -18,6 +18,12 @@
     "exact": true
   },
   { 
+    "app": "Test",
+    "path": "*", 
+    "title": "Test|组件测试",
+    "exact": false
+  },
+  { 
     "app": "NotFound",
     "path": "*", 
     "title": "Error:404|NotFound",

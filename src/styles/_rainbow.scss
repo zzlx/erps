@@ -1,11 +1,13 @@
 // rainbow
 
 .rainbow {
-  animation: rainbow_animation 1s forwards;
+  animation: rainbow_animation 3s forwards;
 }
 
 @keyframes rainbow_animation {
-  0% { background: #c00; }
-  50% { background: orange; }
-  100% { background: yellowgreen; }
+  0% { background: gray; }
+  25% { background: pink; }
+  50% { background: gray; }
+  75% { background: cyan; }
+  100% { background: gray; }
 }

@@ -1,6 +1,8 @@
 /**
  * Card
  *
+ * 卡片
+ *
  * is a flexible and extensible content container.
  *
  */
@@ -11,7 +13,6 @@ export default class Card extends React.PureComponent {
   constructor(props) {
     super(props);
     this.Ref = React.createRef();
-
   }
 }
 

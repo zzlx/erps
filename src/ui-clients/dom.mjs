@@ -38,6 +38,8 @@ if (container.innerHTML) {
 // callback function
 // do something about configuration tasks.
 function callback() {
+  console.info('DOM render');
+
   // configure api_address
   // 从store中获取api_address, 如果未配置，则从服务器获取
   const api_address = store.getState('profiles', 'api_address');

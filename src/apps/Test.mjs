@@ -1,18 +1,20 @@
 /**
  * *****************************************************************************
  *
- * 首页面前端程序
+ * 测试页面
  *
- * @file HomePage.mjs
+ * @file Test.mjs
  * *****************************************************************************
  */
 
 import React from 'react';
+import Alert from '../components/Alert.mjs';
 import Placeholder from '../components/Placeholder.mjs';
 import Context from '../components/Context.mjs';
 import Container from '../components/Container.mjs';
 
-export default class HomePage extends React.Component {
+// export module
+export default class TestPage extends React.Component {
   static contextType = Context;
 
   constructor(props, context) {
@@ -25,8 +27,13 @@ export default class HomePage extends React.Component {
     const { store } = this.context;
 
     return (
-      <Container fluid>
-        test
+      <Container fluid breakpoint='lg'>
+        <Alert theme='secondary'>
+          <h4>header</h4>
+          <hr />
+          <p>test</p>
+        </Alert>
+        <Alert theme='success'> test </Alert>
         <Placeholder />
       </Container>
     );

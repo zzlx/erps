@@ -18,6 +18,7 @@
  * @returns {Function} 
  * A reducer function that invokes every reducer inside the
  * passed object, and builds a state object with the same shape.
+ *
  */
 
 import { types } from './actions/index.mjs';

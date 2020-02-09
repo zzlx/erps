@@ -1,25 +1,27 @@
 /**
- * Switch 
+ * *****************************************************************************
  *
- * 交换机组件: 
- * 用于匹配路由,最快速的渲染匹配的子组件
+ * Switch component
  *
+ * 路由交换组件: 用于匹配路由,最快速的渲染匹配的子组件
  *
- * 
+ * @file Switch.mjs
+ * *****************************************************************************
  */
 
 import React from "react";
 import PropTypes from "prop-types";
-
 import Context from './Context.mjs';
 import matchPath from '../utils/matchPath.mjs';
-import warning from '../utils/warning.mjs';
 
-export default function switcher (props) {
-  return React.createElement(Switch, props); 
-}
+export default class Switch extends React.Component {
+  static contextType = Context;
 
-class Switch extends React.Component {
+  static propTypes = {
+    children: PropTypes.node,
+    location: PropTypes.object,
+  };
+
   render() {
     const location = this.props.location 
       ? this.props.location 
@@ -46,29 +48,26 @@ class Switch extends React.Component {
     // 渲染匹配到的子组件
     return React.cloneElement(element, { location, match, });
   }
-}
 
-Switch.contextType = Context;
-
-Switch.prototype.shouldComponentUpdate = function (nextProps, nextState) {
-  return true;
-}
-  
-if (process.env.NODE_ENV === 'development') {
-  Switch.propTypes = {
-    children: PropTypes.node,
-    location: PropTypes.object,
+  shouldComponentUpdate (nextProps, nextState) {
+    return true;
   }
 
-  Switch.prototype.componentDidUpdate = function(prevProps) {
-    warning(
-      !(this.props.location && !prevProps.location),
-      '<Switch> elements should not change from uncontrolled to controlled (or vice versa). You initially used no "location" prop and then provided one on a subsequent render.'
-    );
+  componentDidUpdate (prevProps) {
+    if (process.env.NODE_ENV !== 'development') return;
 
-    warning(
-      !(!this.props.location && prevProps.location),
-      '<Switch> elements should not change from controlled to uncontrolled (or vice versa). You provided a "location" prop initially but omitted it on a subsequent render.'
-    );
+    if (this.props.location && !prevProps.location) {
+      console.warn(
+        '<Switch> elements should not change from uncontrolled to controlled (or vice versa).' + 
+        'You initially used no "location" prop and then provided one on a subsequent render.'
+      );
+    }
+
+    if (!this.props.location && prevProps.location) {
+      console.warn(
+        '<Switch> elements should not change from controlled to uncontrolled (or vice versa). ' +
+        'You provided a "location" prop initially but omitted it on a subsequent render.'
+      );
+    }
   }
 }
