@@ -17,6 +17,8 @@
  * 给Alert一个fixed定位的透明背景容器(比如通知中心),Alert可以悬浮在主界面上
  *
  * @param {object} props
+ *
+ *
  * @return {object} react element
  *
  * @file Alert.mjs
@@ -66,14 +68,13 @@ export default class Alert extends React.PureComponent {
       onClick: this.handleCloseClick,
     }, 'x') : null;
 
-    console.log(children);
     // 
 		const newChildren = React.Children.map(children, (child, i) => {
 			if (!React.isValidElement(child)) return child;
 
       if (i === 0 && /^h[1-6]$/.test(child.type)) {
         const el = new Element(child);
-        el.addClassName('alert-heading');
+        el.classList.add('alert-heading');
         child = el.element;
       }
 

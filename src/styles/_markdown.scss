@@ -2,6 +2,84 @@
 
 .markdown {
   line-height: 1.5em; 
+
+  .description.desktop { display: none; }
+
+  b, strong { font-weight: 600; }
+  i, em { font-style: italic; }
+
+  span code, span tt { white-space: pre-line; }
+
+  img:not([class*='support__']) {
+    max-width: 100%;
+    height: auto; 
+  }
+
+  p code, p tt {
+    max-width: 100%;
+    line-height: initial;
+    overflow: auto;
+    margin: 0;
+    vertical-align: middle;
+    white-space: normal; 
+  }
+
+  code, tt {
+    font-family: "Source Code Pro", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 90%;
+    margin: 0 2px;
+    padding: 2px 6px;
+    white-space: normal;
+    background-color: rgba(70, 94, 105, 0.05);
+    border-radius: 3px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6); 
+  }
+
+  a code { color: #1a6bac; }
+  pre code a { border-bottom: 1px dotted #175d96; }
+  pre code .code-link { position: relative; }
+  pre code .code-link:hover { color: #2186d8; }
+
+  pre {
+    background-color: rgba(238, 238, 238, 0.35);
+    background-color: #2b3a42;
+    font-size: 13px;
+    line-height: 19px;
+    overflow: auto;
+    padding: 8px 16px;
+    border-radius: 3px; 
+  }
+
+  pre code, pre tt {
+    background-color: transparent;
+    border: none; 
+  }
+
+  pre code .code-details-summary-span::after {
+    content: '\F103';
+    float: left;
+    position: relative;
+    left: -2px;
+    top: 2px;
+    text-align: center;
+    font-family: icons;
+    color: #1e78c2; 
+  }
+
+  pre code .code-details-summary-span {
+    margin-left: -15px;
+    cursor: pointer; 
+  }
+
+  pre code {
+    margin: 0;
+    padding: 0;
+    white-space: pre;
+    border: none;
+    background: transparent;
+    text-shadow: 0 1px 0 rgba(23, 31, 35, 0.5);
+    color: #a5cee1; 
+  }
 }
 
 .markdown h1 tt,
@@ -151,112 +229,42 @@
     border-right: 1px solid #cccccc; }
     .markdown td:last-child {
       border-right: none; }
+
     @media (min-width: 768px) {
       .markdown td {
         display: table-cell; } }
   .markdown .title {
     width: 40%;
-    display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
-    -webkit-box-pack: baseline;
-        -ms-flex-pack: baseline;
-            justify-content: baseline;
-    margin: 10px 0; }
-    @media (min-width: 768px) {
-      .markdown .title {
-        display: none; } }
-  .markdown .content {
-    width: 60%;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
-    -webkit-box-pack: baseline;
-        -ms-flex-pack: baseline;
-            justify-content: baseline;
-    margin: 10px 0; }
+    flex-direction: column;
+    justify-content: baseline;
+    margin: 10px 0; 
+  }
+
+@media (min-width: 768px) {
+  .markdown .title {
+    display: none; 
+  } 
+}
+
+.markdown .content {
+  width: 60%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  flex-direction: column;
+  justify-content: baseline;
+  margin: 10px 0; 
+}
+
+@media (min-width: 768px) {
   .markdown .description.desktop {
-    display: none; }
-    @media (min-width: 768px) {
-      .markdown .description.desktop {
-        display: block; } }
-  @media (min-width: 768px) {
-    .markdown .description.mobile {
-      display: none; } }
-  .markdown img:not([class*='support__']) {
-    max-width: 100%;
-    height: auto; 
-  }
-  .markdown b,
-  .markdown strong { font-weight: 600; }
-  .markdown i,
-  .markdown em { font-style: italic; }
-  .markdown code,
-  .markdown tt {
-    font-family: "Source Code Pro", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-    font-size: 90%;
-    margin: 0 2px;
-    padding: 2px 6px;
-    white-space: normal;
-    background-color: rgba(70, 94, 105, 0.05);
-    border-radius: 3px;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6); }
-  .markdown a code {
-    color: #1a6bac; }
-  .markdown pre {
-    background-color: rgba(238, 238, 238, 0.35);
-    background-color: #2b3a42;
-    font-size: 13px;
-    line-height: 19px;
-    overflow: auto;
-    padding: 8px 16px;
-    border-radius: 3px; }
-    .markdown pre code {
-      margin: 0;
-      padding: 0;
-      white-space: pre;
-      border: none;
-      background: transparent;
-      text-shadow: 0 1px 0 rgba(23, 31, 35, 0.5);
-      color: #a5cee1; }
-      .markdown pre code .code-details-summary-span {
-        margin-left: -15px;
-        cursor: pointer; }
-        .markdown pre code .code-details-summary-span::after {
-          content: '\F103';
-          float: left;
-          position: relative;
-          left: -2px;
-          top: 2px;
-          text-align: center;
-          font-family: icons;
-          color: #1e78c2; }
-      .markdown pre code a {
-        border-bottom: 1px dotted #175d96; }
-      .markdown pre code .code-link {
-        position: relative; }
-        .markdown pre code .code-link:hover {
-          color: #2186d8; }
-    .markdown pre code,
-    .markdown pre tt {
-      background-color: transparent;
-      border: none; }
-  .markdown p code,
-  .markdown p tt {
-    max-width: 100%;
-    line-height: initial;
-    overflow: auto;
-    margin: 0;
-    vertical-align: middle;
-    white-space: normal; 
-  }
-  .markdown span code,
-  .markdown span tt { white-space: pre-line; }
+    display: block; 
+  } 
+}
+
+@media (min-width: 768px) {
+  .markdown .description.mobile {
+    display: none; 
+  } 
+}

@@ -28,7 +28,7 @@ export default class TestPage extends React.Component {
 
     return (
       <Container fluid breakpoint='lg'>
-        <Alert theme='secondary'>
+        <Alert theme='secondary' dismissible>
           <h4>header</h4>
           <hr />
           <p>test</p>

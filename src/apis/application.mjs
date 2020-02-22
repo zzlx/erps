@@ -1,10 +1,11 @@
 /**
  * *****************************************************************************
+ *
  * A onion kernel service application.
  *
  * 参考KOA框架,支持sream响应.
  *
- * @file aok.mjs
+ * @file application.mjs
  * *****************************************************************************
  */
 
@@ -15,6 +16,7 @@ import util from 'util';
 import Stream from 'stream';
 import zlib from 'zlib';
 
+// 
 import Context from './context.mjs';
 
 const isJSON = (value) => /^[\x20\x09\x0a\x0d]*(\[|\{)/.test(String(value));
@@ -23,13 +25,14 @@ const debug = util.debuglog('debug:aok');
 export default class Aok extends EventEmitter {
   constructor(props) {
     super();
-    this.props = props || Object.create(null);
-    this.env = this.props.env || process.env.NODE_ENV || 'production';
-    this.protocol = this.props.protocol ? props.protocol : 'http2';
-    this.proxy = this.props.proxy || false;
-    this.subdomainOffset = this.props.subdomainOffset || 2;;
-    this.keys = this.props.keys || ['services'];
+    props = props ? props : Object.create(null);
+    this.env = props.env || process.env.NODE_ENV || 'production';
+    this.protocol = props.protocol ? props.protocol : 'http2';
+    this.proxy = props.proxy ? props.proxy : false;
+    this.subdomainOffset = props.subdomainOffset ? props.subdomainOffset : 2;
+    this.keys = props.keys || ['services'];
     this.middlewares = []; // configured middlewares
+
   }
 
   /**

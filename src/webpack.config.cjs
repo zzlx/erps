@@ -1,5 +1,6 @@
 /**
  * *****************************************************************************
+      child.props.className = 'test';
  * webpack配置文件
  *
  * 用于生成前端代码
@@ -41,7 +42,7 @@ module.exports = (opts = {}) => {
     target: opts.target ? opts.target : 'web',
 
     entry: {
-      main: path.join(paths.appPath, 'src', 'ui-clients', 'dom.mjs'),
+      main: path.join(paths.appPath, 'src', 'clients', 'dom.mjs'),
       styles: path.join(paths.appPath, 'src', 'styles', 'index.scss'),
     },
 
@@ -86,7 +87,7 @@ module.exports = (opts = {}) => {
                   options: {
                     plugins: function () {
                       return [ 
-                        require('precss'),
+                        //require('precss'),
                         require('autoprefixer'),
                       ];
                     }

@@ -15,39 +15,38 @@ import React from 'react';
 export default class Element {
   constructor (element) {
     this._element = element;
-    this._classList = new ClassList(element);
   }
 
   get classList () {
-    return this;
+    if (this._classList == null) {
+      this._classList = new ClassList(this._element);
+    }
+
+    return this._classList;
   }
 
   get element () {
-    
-  }
+    this._element = React.cloneElement(this._element, { 
+      className: String(this.classList),
+    });
 
-  // 添加className
-  addClassName (className) {
-    const element  = this.element;
-
-    const cn = [
-      element.props.className,
-      ...className,
-    ].filter(Boolean).join(' ');
-
-    this.element = React.cloneElement(element, { className: cn});
-
-    return this;
+    return this._element;
   }
 }
 
+/**
+ *
+ */
+
 class ClassList {
-  constructor (element) {
-    this._element = element;
-    const className = element.props.className;
+  constructor (className) {
     this._classNames = className && 'string' === typeof className
       ? new Set(className.split(/\s+/))
       : new Set();
+  }
+
+  toString() {
+    return [...this._classNames].join(' ');
   }
 
   add () {
