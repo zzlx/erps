@@ -1,4 +1,3 @@
-#!/usr/bin/env node --no-warnings
 /**
  * *****************************************************************************
  *
@@ -20,7 +19,7 @@ import os from 'os';
 import path from 'path';
 
 // 本地模块
-import './src/env.mjs'; // 导入环境变量
+import './env.mjs'; // 导入环境变量
 import { 
   APP_ROOT,
   APP_NAME,
@@ -34,12 +33,12 @@ import {
   HELP_FILE,
   CONFIG_FILE,
   CONFIG,
-} from './src/config.mjs';
-import MongoDB from './src/utils/mongodb.mjs';
-import console from './src/utils/console.mjs';
-import array from './src/utils/arrayUtils.mjs';
-import date from './src/utils/date.mjs';
-import strings from './src/utils/strings.mjs';
+} from './config.mjs';
+import MongoDB from './utils/mongodb.mjs';
+import console from './utils/console.mjs';
+import array from './utils/arrayUtils.mjs';
+import date from './utils/date.mjs';
+import strings from './utils/strings.mjs';
 
 let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
@@ -97,10 +96,13 @@ async function main () {
   await dba.connect();
 
   if (process.env.QUERY) {
-    const fn = Fns[process.env.QUERY] 
-      ? Fns[process.env.QUERY] : () => {}; 
-    await fn.apply({ db: dba.db, params: Params, });
+
+    const cols = dba.db.listCollections({},{nameOnly: true});
+    console.log(await cols.toArray());
+
     await dba.client.close();
+
+    return;
   }
 
   if (process.env.DEVEL) {

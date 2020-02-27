@@ -157,6 +157,7 @@ module.exports = (opts = {}) => {
         favicon: path.join(paths.appPublic, 'favicon.ico'),
         meta: { 
           keywords: '',
+          charset: 'utf-8',
           description: '',
           viewport: 'width=device-width,initial-scale=1,shrink-to-fit=no',
         },

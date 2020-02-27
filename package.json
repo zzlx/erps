@@ -7,7 +7,7 @@
   "homepage": ".",
   "scripts": {
     "build": "webpack --config src/webpack.config.cjs",
-    "start": "./run --httpd"
+    "start": "./bin/run --httpd"
   },
   "devDependencies": {
     "@babel/core": "7.1.6",

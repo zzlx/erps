@@ -113,5 +113,4 @@ export default new Proxy(mongodb, {
  */
 
 function getDB () {
-
 }
