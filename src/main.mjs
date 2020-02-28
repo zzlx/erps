@@ -11,6 +11,7 @@
  * @file: main.mjs
  * *****************************************************************************
  */
+
 // Node内置模块
 import crypto from 'crypto';
 import cp from 'child_process';
@@ -61,13 +62,19 @@ main();
  */
 
 async function main () {
+
   // 执行解析的参数命令
   if (process.env.HELP || process.env.H) return showHelp(); // 显示帮助文件
   if (process.env.SYSINFO) return showSysinfo(); // 显示系统信息
   if (process.env.SETUP) return setup(); // 初始化设置
   if (process.env.COMMIT) return commit(); // 提交代码变更
   if (process.env.VERSION || process.env.V) return showVersion(); // 显示版本号
-  if (process.env.EXPORT) {
+  if (process.env.EXPORT) { }
+  if (process.env.BUILD) {
+    // 构建前端应用程序
+    const buildAppPath = path.join(APP_ROOT, 'src', 'build.mjs');
+    await spawn(buildAppPath);
+    return;
   }
 
   if (process.env.IMPORT) { await importCSV(process.env.IMPORT); }
@@ -93,6 +100,7 @@ async function main () {
   await saveConfig();
 
   dba = new MongoDB(url.href);
+  console.log(dba);
   await dba.connect();
 
   if (process.env.QUERY) {
@@ -115,7 +123,7 @@ async function main () {
 
     if (process.env.NODE_ENV === 'development') {
       watcher(
-        [ 'apis', 'server', 'schema', 'graphql', 'resolvers', ],
+        [ 'server', 'schema', 'graphql', 'resolvers', ],
         () => restartHttpd(),
       );
     }
@@ -227,6 +235,7 @@ function showVersion () {
 /**
  * 显示系统信息
  */
+
 function showSysinfo () {
   const sysinfo = {
     platform: `${process.arch} (${os.platform()} ${os.release()})`,
@@ -284,8 +293,8 @@ function watcher (folders) {
  *
  */
 
-async function spawn (app) {
-  const title = path.parse(app).name;
+async function spawn (appPath) {
+  const title = path.parse(appPath).name;
   const file = `${date.format('yyyymmdd')}_process.log`;
   const log_file = path.join(APP_HOME, 'log', file); 
   const log = fs.openSync(log_file, 'a+');
@@ -294,7 +303,7 @@ async function spawn (app) {
     '--no-warnings', 
     '--experimental-json-modules',
     `--title=${process.title}.${title}`,
-    app,
+    appPath,
   ].filter(Boolean);
 
   // options
@@ -322,13 +331,13 @@ function startCompiler() {
  */
 
 function startHttpd() {
-  return spawn(path.join(APP_ROOT, 'src', 'server', 'httpd.mjs'));
+  return spawn(path.join(APP_ROOT, 'src', 'server', 'index.mjs'));
 }
 
 async function restartHttpd() {
   if (null == httpd) return;
   httpd.kill('SIGHUP'); // 先关闭进程
-  console.log('服务已重启');
+  console.log('服务重启...');
   httpd = await startHttpd();
 }
 

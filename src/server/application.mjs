@@ -11,28 +11,47 @@
 
 // node modules
 import EventEmitter from 'events'; 
+import http from 'http';
+import https from 'https';
+import http2 from 'http2';
 import path from 'path';
-import util from 'util';
 import Stream from 'stream';
+import util from 'util';
 import zlib from 'zlib';
 
-// 
+// modules
 import Context from './context.mjs';
 
-const isJSON = (value) => /^[\x20\x09\x0a\x0d]*(\[|\{)/.test(String(value));
-const debug = util.debuglog('debug:aok');
+const debug = util.debuglog('debug:application');
 
-export default class Aok extends EventEmitter {
+export default class Application extends EventEmitter {
   constructor(props) {
     super();
-    props = props ? props : Object.create(null);
-    this.env = props.env || process.env.NODE_ENV || 'production';
-    this.protocol = props.protocol ? props.protocol : 'http2';
+    this.props = props ? props : Object.create(null);
+
+    // 属性配置
+    this.env = props.env || process.env.NODE_ENV || 'production'; // 默认产品模式
+    this.protocol = props.protocol ? props.protocol : 'http2'; // 默认http2协议
     this.proxy = props.proxy ? props.proxy : false;
     this.subdomainOffset = props.subdomainOffset ? props.subdomainOffset : 2;
-    this.keys = props.keys || ['services'];
+    this.keys = props.keys ? props.keys : ['services'];
     this.middlewares = []; // configured middlewares
+    this.context = Object.create(null);
+    if (util.inspect.custom) {
+      this[util.inspect.custom] = this.inspect;
+    }
+  }
 
+  /**
+   *
+   *
+   */
+
+  listen (...args) {
+    debug('listen');
+    
+    this.server.on('stream', this.callback());
+    return this.server.listen(...args);
   }
 
   /**
@@ -54,19 +73,15 @@ export default class Aok extends EventEmitter {
   }
 
   /**
-   * Return a handler callback for node's http2 server stream event
-   * 
-   * @return {Function}
-   * @api public
+   *
    */
 
-  streamHandler () {
+  callback () {
     const fn = this.compose(this.middlewares);
 
     if (!this.listenerCount('error')) this.on('error', this.onerror);
 
     return (stream, headers, flags) => {
-
       const ctx = new Context();
       ctx.stream = stream;
       ctx.headers = headers;
@@ -74,11 +89,22 @@ export default class Aok extends EventEmitter {
       ctx.app = this;
       ctx.state = {};
 
-      const onerror = err => ctx.onerror(err);
-      const handleResponse = () => this.respond(ctx);
-      // onFinished(ctx.stream, onerror);
-      return fn(ctx).then(handleResponse).catch(onerror);
-    }
+      return this.handleRequest(ctx, fn);
+    };
+  }
+
+  /**
+   * Return a handler callback for node's http2 server stream event
+   * 
+   * @return {Function}
+   * @api public
+   */
+
+  handleRequest (ctx, fn) {
+    const onerror = err => ctx.onerror(err);
+    const handleResponse = () => this.respond(ctx);
+    // onFinished(ctx.stream, onerror);
+    return fn(ctx).then(handleResponse).catch(onerror);
   }
 
   /**
@@ -237,4 +263,83 @@ export default class Aok extends EventEmitter {
       }
     }
   }
+
+  get server () {
+    if (null == this._server) {
+      this._server = http2.createSecureServer({
+        //ca: [fs.readFileSync('client-cert.pem')],
+        cert: this.props.cert,
+        //sigalgs: 
+        //ciphers: 
+        //clientCertEngine: 
+        //dhparam
+        //ecdhCurve
+        key: this.props.key,
+        //privateKeyEngine
+        //passphrase: 'sample',
+        //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+        allowHTTP1: true,
+        // This is necessary only if using client certificate authentication.
+        //requestCert: true,
+        //enableConnectProtocol: true
+      });
+    }
+
+    return this._server;
+  }
+}
+
+
+function setupServer (server) {
+  const tlsSessionStore = {};
+
+  server.on('keylog', function (line, socket) {
+    const info = {
+      line: line.toString(),
+      address: socket.remoteAddress,
+    };
+  });
+
+  server.on('newSession', function (sessionId, sessionData, cb) {
+    // bind session id
+    const id = sessionId.toString('hex');
+    this.sessionID = id;
+    tlsSessionStore[id] = sessionData;
+    cb();
+  });
+
+  server.on('OCSPRequest', function (certificate, issuer, cb) {
+    //const test = tls.checkServerIdentity('localhost', certificate);
+    //console.log('cert: ', test);
+    //console.log('certificate', certificate.toString('base64'));
+    cb(null, null);
+  });
+
+  server.on('resumeSession', function (sessionId, callback) {
+    //debug('ticketkey:', this.getTicketKeys());
+    const id = sessionId.toString('hex');
+    this.sessionID = id;
+    callback(null, tlsSessionStore[id] || null );
+  });
+
+  server.on('error', (err) => {
+    if (err.errno == 'EADDRINUSE')
+      console.log('Port %s was be used.', err.port);
+      process.exit();
+  });
+
+  server.on('listening', function () {
+    const sys_info = {
+      title: process.title,
+      pid: process.pid,
+      address: this.address(), // 当前监听地址
+    };
+
+    console.log(
+      'Server is running in %s mode.\n%o', 
+      process.env.NODE_ENV,
+      sys_info,
+    );
+  });
+
 }

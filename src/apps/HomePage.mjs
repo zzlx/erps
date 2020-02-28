@@ -24,12 +24,9 @@ export default class HomePage extends React.Component {
   render () {
     const { store } = this.context;
 
-    return (
-      <Container fluid>
-        test
-        <Placeholder />
-      </Container>
-    );
+    return React.createElement(Container, {
+      fluid: true,
+    }, Placehosder);
   }
 
 }

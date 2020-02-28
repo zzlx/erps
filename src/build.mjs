@@ -1,31 +1,30 @@
 /**
- * 前端编译器
+ * *****************************************************************************
  *
- * 用于构建前端应用程序
+ * Build ui application
  *
- * @file UICompiler.mjs
+ *
+ * @file build.mjs
+ * *****************************************************************************
  */
 
+import path from 'path';
 import webpack from 'webpack';
+//import MemoryFs from 'memory-fs';
 import webpackConfig from './webpack.config.cjs';
 
-const config = webpackConfig();
-const compiler = webpack(config);
-// @todo: 内存存储
-// 内存文件系统
+const compiler = webpack(webpackConfig());
 //const memFs = new MemoryFs();
 //compiler.outputFileSystem = memFs;
 
-compiler.watch(config.watchOptions, callback);
-
-/**
- *
- */
+compiler.run(callback);
 
 function callback (err, stats) {
   if (err) {
     console.error(err.stack || err);
-    if (err.details) console.error(err.details);
+    if (err.details) {
+      console.error(err.details);
+    }
 
     return;
   }
@@ -35,4 +34,7 @@ function callback (err, stats) {
   if (stats.hasWarnings()) console.warn(info.warnings);
 
   console.log(stats.toString({ chunks: false, colors: true, }));
+
+  if ('development' === process.env.NODE_ENV) {
+  }
 }

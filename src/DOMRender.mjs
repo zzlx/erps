@@ -1,4 +1,6 @@
 /**
+ * *****************************************************************************
+ *
  * 渲染前端程序到DOM
  *
  * Render ui application to DOM.
@@ -7,13 +9,14 @@
  * 2. set api address if not exists
  *
  * @file dom.mjs
+ * *****************************************************************************
  */
 
 import ReactDOM from 'react-dom';
-import App from '../apps/index.mjs';
-import store from '../store/index.mjs';
-//import { getApiAddress } from '../store/actions/index.mjs';
-import global from '../utils/global.mjs';
+import App from './apps/index.mjs';
+import store from './store/index.mjs';
+//import { getApiAddress } from './store/actions/index.mjs';
+import global from './utils/global.mjs';
 
 // Prepare parameters for ReactDOM render method.
 const element = App(store);
