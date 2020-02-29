@@ -70,8 +70,8 @@ async function main () {
   if (process.env.COMMIT)  {
     // 提交代码变更
     const commit = path.join(APP_ROOT, 'src', 'commit.mjs');
-    await spawn(commit);
-    return;
+    console.log(cp);
+    return cp.spawnSync('node', [commit]);
   }
   if (process.env.VERSION || process.env.V) return showVersion(); // 显示版本号
   if (process.env.EXPORT) { }
