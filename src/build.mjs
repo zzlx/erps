@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Build ui application
+ * Build UI application
  *
  *
  * @file build.mjs

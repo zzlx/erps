@@ -67,7 +67,12 @@ async function main () {
   if (process.env.HELP || process.env.H) return showHelp(); // 显示帮助文件
   if (process.env.SYSINFO) return showSysinfo(); // 显示系统信息
   if (process.env.SETUP) return setup(); // 初始化设置
-  if (process.env.COMMIT) return commit(); // 提交代码变更
+  if (process.env.COMMIT)  {
+    // 提交代码变更
+    const commit = path.join(APP_ROOT, 'src', 'commit.mjs');
+    await spawn(commit);
+    return;
+  }
   if (process.env.VERSION || process.env.V) return showVersion(); // 显示版本号
   if (process.env.EXPORT) { }
   if (process.env.BUILD) {
@@ -196,25 +201,6 @@ function processSetting () {
 
 function showHelp() {
   return fs.createReadStream(HELP_FILE).pipe(process.stdout);
-}
-
-/**
- * commit and push
- */
-
-async function commit () {
-  process.stdout.write('准备提交变更...')
-  console.log('暂存变更...');
-  cp.execSync(`git -C ${APP_ROOT} add -A .`, {encoding: 'utf8'});
-
-  console.log('检查变更...');
-
-  //const diff = execSync(`git -C ${APP_ROOT} diff --staged --quiet`, { encoding: 'utf8', });
-
-  console.log('提交变更...');
-  cp.execSync(`git -C ${APP_ROOT} commit -m "自动提交"`, {encoding: 'utf8'});
-
-  console.log('同步远程仓库...');
 }
 
 /**
