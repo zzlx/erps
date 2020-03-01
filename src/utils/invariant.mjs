@@ -1,5 +1,7 @@
 /**
+ *
  * invariant
+ *
  */
 
 export default function invariant(condition, message) {

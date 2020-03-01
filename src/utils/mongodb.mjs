@@ -1,4 +1,6 @@
 /**
+ * *****************************************************************************
+ *
  * MongoDB Administrator
  * 
  * 
@@ -7,6 +9,7 @@
  * [api-doc](http://mongodb.github.io/node-mongodb-native/3.1/api)
  * 
  * @api public
+ * *****************************************************************************
  */
 
 import mongodb from 'mongodb'; 

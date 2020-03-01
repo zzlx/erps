@@ -1,5 +1,7 @@
 /**
+ *
  * Given [ A, B, C ] return 'A, B, or C'.
+ *
  */
 
 import invariant from './invariant.mjs';

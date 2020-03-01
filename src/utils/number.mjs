@@ -1,4 +1,6 @@
 /**
+ * *****************************************************************************
+ *
  * 数值处理 
  * 
  * JavaScript的Number类型为双精度IEEE 754 64位浮点类型。 
@@ -7,6 +9,8 @@
  * @param {[number|string]} value
  * @param {object} a proxy object
  * @api public
+ *
+ * *****************************************************************************
  */
 
 export default function (value) {

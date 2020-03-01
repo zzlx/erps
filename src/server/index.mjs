@@ -30,14 +30,17 @@ const app = new App({
 }); 
 
 // 配置服务器执行逻辑
-app.use(m.error(APP_LOG_PATH));     // 捕获中间件错误
+//app.use(m.error(APP_LOG_PATH));     // 捕获中间件错误
 app.use(m.xResponse());             // 记录响应时间
 app.use(m.cookies());               // 支持cookie读写
 app.use(m.log(APP_LOG_PATH));       // 记录log
 app.use(m.cors());                  // 跨域访问响应
 app.use(m.mongodb(CONFIG.mongodb)); // mongo数据库
-app.use(m.router(path.join(__dirname, 'services'))); // 服务端路由
-app.use(m.notFound()); // 配置not found页面 @todo:添加到路由中
+// 配置路由
+app.use((ctx, next) => {
+  //throw new Error('not not');
+  ctx.throw(404, 'not found');
+});
 
 
 /**

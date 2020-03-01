@@ -1,9 +1,12 @@
 /**
+ * *****************************************************************************
  *
+ * md5算法
  *
+ * *****************************************************************************
  */
 
-function md5_browser (bytes) {
+export default function md5_browser (bytes) {
   if (typeof(bytes) == 'string') {
     var msg = unescape(encodeURIComponent(bytes)); // UTF8 escape
     bytes = new Array(msg.length);

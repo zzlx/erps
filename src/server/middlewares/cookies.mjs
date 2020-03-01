@@ -11,17 +11,19 @@
 
 import Keygrip from '../../utils/keygrip.js';
 
+const COOKIES = Symbol('middleware#cookies');
+
 export default (opts) => function cookieMiddleware (ctx, next) {
   Object.defineProperty(ctx, 'cookies', {
     get: function () {
-      if (null == this._cookies) {
-        this._cookies = new Cookies(ctx, { 
-          keys: ctx.app.keys,
-          secure: ctx.secure,
+      if (null == this[COOKIES]) {
+        this[COOKIES] = new Cookies(this, { 
+          keys: this.app.keys,
+          secure: this.secure,
         })
       }
 
-      return  this._cookies;
+      return  this[COOKIES];
     },
     enumerable: true, // 可枚举属性
     configurable: true, // 可配置属性

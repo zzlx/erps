@@ -49,7 +49,6 @@ export default class Application extends EventEmitter {
 
   listen (...args) {
     debug('listen');
-    
     this.server.on('stream', this.callback());
     return this.server.listen(...args);
   }
@@ -79,6 +78,7 @@ export default class Application extends EventEmitter {
   callback () {
     const fn = this.compose(this.middlewares);
 
+    // 绑定app级别error事件处理
     if (!this.listenerCount('error')) this.on('error', this.onerror);
 
     return (stream, headers, flags) => {
@@ -123,9 +123,9 @@ export default class Application extends EventEmitter {
     if (this.silent) return;
 
     const msg = err.stack || err.toString();
-    console.error();
-    console.error(msg.replace(/^/gm, '  '));
-    console.error();
+
+    // 调试信息
+    debug(msg.replace(/^/gm, '  '));
   }
 
   /**
@@ -168,6 +168,7 @@ export default class Application extends EventEmitter {
 
     // status body
     if (null == body) {
+      ctx.status = 404;
       if (ctx.httpVersion >= 2) {
         body = ctx.message;
       } else {
@@ -324,7 +325,7 @@ function setupServer (server) {
 
   server.on('error', (err) => {
     if (err.errno == 'EADDRINUSE')
-      console.log('Port %s was be used.', err.port);
+      console.log('Port %s was be used, retrying...', err.port);
       process.exit();
   });
 

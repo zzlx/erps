@@ -9,17 +9,26 @@
 import http from 'http';
 import http2 from 'http2';
 import net from 'net';
+import util from 'util';
 
 // @todo: 第三方模块
+import mimeTypes from 'mime-types';
 import accepts from 'accepts';
 import contentType from 'content-type';
-import getType from 'cache-content-type';
+
+// 
+import MemCache from '../utils/memCache.mjs';
 
 // 定义模块变量
 const IP = Symbol('context#ip');
 const emptyCode = [204, 205, 304];
 const retryCode = [502, 503, 504];
 const redirectCode = [300, 301, 302, 303, 305, 307, 308];
+const typeCache = new MemCache(100);
+const debug = util.debuglog('debug:context');
+
+const RES_HEADERS = Symbol('context#response_headers');
+const BODY = Symbol('context#body');
 
 export default class Context {
 
@@ -30,78 +39,7 @@ export default class Context {
    */
 
   has (val) {
-    return this._headers[val.toLowerCase()];
-  }
-
-  /**
-   * Get response body.
-   *
-   * @return {Mixed}
-   * @api public
-   */
-
-  get body() {
-    return this._body;
-  }
-
-
-  /**
-   * Set response body.
-   *
-   * @param {String|Buffer|Object|Stream} val
-   * @api public
-   */
-
-  set body(val) {
-    const original = this._body;
-    this._body = val;
-
-    // no content
-    if (null == val) {
-      if (!emptyCode.includes(this.status)) this.status = 204;
-      this.remove('Content-Type');
-      this.remove('Content-Length');
-      this.remove('Transfer-Encoding');
-      return;
-    }
-
-    // set a proper status
-    if (!this._explicitStatus) this.status = 200;
-
-    // set type
-    const setType = !this.has('Content-Type');
-
-    // string
-    if ('string' == typeof val) {
-      if (setType) this.type = /^\s*</.test(val) ? 'html' : 'text';
-      this.length = Buffer.byteLength(val);
-      return;
-    }
-
-    // buffer
-    if (Buffer.isBuffer(val)) {
-      if (setType) this.type = 'bin';
-      this.length = val.length;
-      return;
-    }
-
-    // stream
-    if ('function' == typeof val.pipe) {
-
-      const handler = err => this.onerror(err);
-      if (!~val.listeners('error').indexOf(handler)) {
-        val.on('error', handler);
-      }
-
-      if (null !== original && original != val) this.remove('Content-Length');
-
-      if (setType) this.type = 'bin';
-      return;
-    }
-
-    // json
-    this.remove('Content-Length');
-    this.type = 'json';
+    return Boolean(this[RES_HEADERS][val.toLowerCase()]);
   }
 
   /**
@@ -120,12 +58,12 @@ export default class Context {
 
   set(field, val) {
     if (this.headerSent) return;
-    if (this._headers == null) this._headers = Object.create(null);
+    if (this[RES_HEADERS] == null) this[RES_HEADERS] = Object.create(null);
 
     if (2 == arguments.length) {
       if (Array.isArray(val)) val = val.map(v => typeof v === 'string' ? v : String(v));
       else if (typeof val !== 'string') val = String(val);
-      this._headers[field.toLowerCase()] = val;
+      this[RES_HEADERS][field.toLowerCase()] = val;
     } else {
       for (const key in field) {
         this.set(key, field[key]);
@@ -171,7 +109,7 @@ export default class Context {
    */
 
   get status() {
-    return this._headers[http2.constants.HTTP2_HEADER_STATUS];
+    return this[RES_HEADERS][http2.constants.HTTP2_HEADER_STATUS];
   }
 
   /**
@@ -295,7 +233,14 @@ export default class Context {
    */
 
   get host() {
-    return this.URL.host;
+    const proxy = this.app.proxy;
+    let host = proxy && this.get('X-Forwarded-Host');
+    if (!host) {
+      if (!host) host = this.URL.host;
+    }
+
+    if (!host) return '';
+    return host.split(/\s*,\s*/, 1)[0];
   }
 
   /**
@@ -378,7 +323,7 @@ export default class Context {
    */
 
   get length() {
-    const len = this._headers[http2.constants.HTTP2_HEADER_CONTENT_LENGTH];
+    const len = this[RES_HEADERS][http2.constants.HTTP2_HEADER_CONTENT_LENGTH];
     if (len == '') return;
     return ~~len;
   }
@@ -488,9 +433,15 @@ export default class Context {
    */
 
   set type(type) {
-    type = getType(type);
-    if (type) {
-      this.set('Content-Type', type);
+    let mimeType = typeCache.get(type);
+
+    if (!mimeType) {
+      mimeType = mimeTypes.contentType(type);
+      typeCache.set(type, mimeType);
+    }
+
+    if (mimeType) {
+      this.set('Content-Type', mimeType);
     } else {
       this.remove('Content-Type');
     }
@@ -519,7 +470,7 @@ export default class Context {
    */
 
   get lastModified() {
-    const date = this._headers[http2.constants.HTTP2_HEADER_LAST_MODIFIED];
+    const date = this[RES_HEADERS][http2.constants.HTTP2_HEADER_LAST_MODIFIED];
     if (date) return new Date(date);
   }
 
@@ -540,7 +491,7 @@ export default class Context {
    */
 
   append(field, val) {
-    const prev = this._headers[field];
+    const prev = this[RES_HEADERS][field];
 
     if (prev) {
       val = Array.isArray(prev)
@@ -561,8 +512,8 @@ export default class Context {
   remove(field) {
     if (this.headerSent) return;
 
-    if (this._headers[field]) {
-      delete this._headers[field];
+    if (this[RES_HEADERS][field]) {
+      delete this[RES_HEADERS][field];
     }
   }
 
@@ -677,21 +628,47 @@ export default class Context {
     return this.accept.charsets(...args);
   }
 
-
   /**
-   * Similar to .throw(), adds assertion.
+   * Check if the request is fresh, aka
+   * Last-Modified and/or the ETag still match.
    *
-   *    this.assert(this.user, 401, 'Please login!');
-   *
-   * @param {Mixed} test
-   * @param {Number} status
-   * @param {String} message
+   * @return {Boolean}
    * @api public
    */
 
-  assert(value, status, msg, opts) {
-    if (value) return
-    throw createError(status, msg, opts)
+  get fresh () {
+    const CACHE_CONTROL_NO_CACHE_REGEXP = /(?:^|,)\s*?no-cache\s*?(?:,|$)/
+    const noneMatch = this.headers[https.constants.HTTP2_HEADER_IF_NONE_MATCH];
+    const modifiedSince = this.headers[https.constants.HTTP2_HEADER_IF_MODIFIED_SINCE];
+    const cache_control = this.headers[https.constants.HTTP2_HEADER_CACHE_CONTROL];
+
+    const method = this.method;
+    const s = this.status;
+     // GET or HEAD for weak freshness validation only
+    if ('GET' != method && 'HEAD' != method) return false;
+
+    // 2xx or 304 as per rfc2616 14.26
+    if ((s >= 200 && s < 300) || 304 == s) {
+      if ( !modifiedSince && !noneMatch) return false;
+      if (cache_control && CACHE_CONTROL_NO_CACHE_REGEXP.test(cache_control)) {
+        return false;
+      }
+
+      if (noneMatch && noneMatch !== '*') {
+        const etag = this[RES_HEADERS]['etag']
+        if (!etag) return false;
+      }
+
+      if (modifiedSince) {
+        const lastModified = this[RES_HEADERS]['last-modified'];
+        const modifiedStale = !lastModified || !(lastModified <= modifiedSince)
+        if (modifiedStale) return false
+      }
+
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -715,8 +692,10 @@ export default class Context {
    * @api public
    */
 
-  throw(...args) {
-    throw createError(...args);
+  throw (...args) {
+    const error = createError(...args); // 构造错误对象
+    debug(error); // 调试错误对象
+    throw error; // 抛出错误对象
   }
 
   /**
@@ -727,6 +706,7 @@ export default class Context {
    */
 
   onerror (err) {
+    debug(err);
     // don‘t do anything if there is no error. 
     // this allows you to pass 'this.onerror'
     if (null == err) return;
@@ -747,12 +727,10 @@ export default class Context {
     // nothing we can do here other
     // than delegate to the app-level
     // handler and log.
-    if (headerSent) {
-      return;
-    }
+    if (headerSent) return;
 
     // unset all headers
-    this._headers = {};
+    this[RES_HEADERS] = {};
 
     // force text/plain
     this.type = 'text';
@@ -761,7 +739,9 @@ export default class Context {
     if ('ENOENT' == err.code) err.status = 404;
 
     // default to 500
-    if ('number' != typeof err.status || !http.STATUS_CODES[err.status]) err.status = 500;
+    if ('number' != typeof err.status || !http.STATUS_CODES[err.status]) {
+      err.status = 500;
+    }
 
     // respond
     const code = http.STATUS_CODES[err.status];
@@ -769,6 +749,76 @@ export default class Context {
     this.status = err.status;
     this.length = Buffer.byteLength(msg);
     this.stream.end(msg);
+  }
+
+  /**
+   * Get response body.
+   *
+   * @return {Mixed}
+   * @api public
+   */
+
+  get body() {
+    return this[BODY];
+  }
+
+  /**
+   * Set response body.
+   *
+   * @param {String|Buffer|Object|Stream} val
+   * @api public
+   */
+
+  set body(val) {
+    const original = this[BODY];
+    this[BODY] = val;
+
+    // no content
+    if (null == val) {
+      if (!emptyCode.includes(this.status)) this.status = 204;
+      this.remove('Content-Type');
+      this.remove('Content-Length');
+      this.remove('Transfer-Encoding');
+      return;
+    }
+
+    // set a proper status
+    if (!this._explicitStatus) this.status = 200;
+
+    // set type
+    const setType = !this.has('Content-Type');
+
+    // string
+    if ('string' == typeof val) {
+      if (setType) this.type = /^\s*</.test(val) ? 'html' : 'text';
+      this.length = Buffer.byteLength(val);
+      return;
+    }
+
+    // buffer
+    if (Buffer.isBuffer(val)) {
+      if (setType) this.type = 'bin';
+      this.length = val.length;
+      return;
+    }
+
+    // stream
+    if ('function' == typeof val.pipe) {
+
+      const handler = err => this.onerror(err);
+      if (!~val.listeners('error').indexOf(handler)) {
+        val.on('error', handler);
+      }
+
+      if (null !== original && original != val) this.remove('Content-Length');
+
+      if (setType) this.type = 'bin';
+      return;
+    }
+
+    // json
+    this.remove('Content-Length');
+    this.type = 'json';
   }
 }
 
@@ -785,6 +835,8 @@ function createError () {
 
   for (let i = 0; i < arguments.length; i++ ) {
     let arg = arguments[i];
+
+    // 错误对象
     if (arg instanceof Error) {
       err = arg;
       status = err.status || err.statusCode || status;

@@ -42,7 +42,7 @@ module.exports = (opts = {}) => {
     target: opts.target ? opts.target : 'web',
 
     entry: {
-      main: path.join(paths.appPath, 'src', 'DOMRender.mjs'),
+      main: path.join(paths.appPath, 'src', 'client', 'DOMRender.mjs'),
       styles: path.join(paths.appPath, 'src', 'styles', 'index.scss'),
     },
 

@@ -20,7 +20,7 @@ export default function accessLog (logPath) {
 
   return function logMiddleware (ctx, next) {
     const log = ''
-      + date.format('yymmdd') + ' ' 
+      + date.format('yy-mm-dd HH:MM:ss') + ' ' 
       + ctx.method + ' ' + ctx.href
       + ' from '
       + ctx.socket.remoteAddress + ':' + ctx.socket.remotePort;

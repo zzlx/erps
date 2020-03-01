@@ -1,6 +1,12 @@
 /**
+ * *****************************************************************************
+ * 
+ * 内存缓存技术
  * 
  *
+ * 特性
+ *
+ * *****************************************************************************
  */
 
 export default class MemCache {
@@ -13,15 +19,18 @@ export default class MemCache {
 
   get(key, options) {
 
-    // read from cache
-    let item = this.cache.get(key);
     const maxAge = options && options.maxAge;
+
     // only call Date.now() when necessary
     let now;
+
     function getNow() {
       now = now || Date.now();
       return now;
     }
+
+    let item = this.cache.get(key); // read from cache
+
     if (item) {
       // check expired
       if (item.expired && getNow() > item.expired) {
@@ -30,29 +39,29 @@ export default class MemCache {
       } else {
         // update expired in get
         if (maxAge !== undefined) {
-          const expired = maxAge ? getNow() + maxAge : 0;
-          item.expired = expired;
+          item.expired = maxAge ? getNow() + maxAge : 0;
         }
       }
+
       return item.value;
     }
 
     // try to read from _cache
     item = this._cache.get(key);
+
     if (item) {
       // check expired
       if (item.expired && getNow() > item.expired) {
         item.expired = 0;
         item.value = undefined;
       } else {
-        // not expired, save to cache
-        this._update(key, item);
+        this._update(key, item); // not expired, save to cache
         // update expired in get
         if (maxAge !== undefined) {
-          const expired = maxAge ? getNow() + maxAge : 0;
-          item.expired = expired;
+          item.expired = maxAge ? getNow() + maxAge : 0;
         }
       }
+
       return item.value;
     }
   }
@@ -60,15 +69,14 @@ export default class MemCache {
   set(key, value, options) {
     const maxAge = options && options.maxAge;
     const expired = maxAge ? Date.now() + maxAge : 0;
+
     let item = this.cache.get(key);
     if (item) {
       item.expired = expired;
       item.value = value;
     } else {
-      item = {
-        value,
-        expired,
-      };
+      item = { value, expired, };
+
       this._update(key, item);
     }
   }

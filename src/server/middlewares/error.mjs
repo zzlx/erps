@@ -8,7 +8,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 import ISODate from '../../utils/date.mjs';
-const debug = util.debuglog('debug.log');
+const debug = util.debuglog('debug:error');
 
 export default function (logPath) {
   if (null == logPath) throw new Error('You must provide a valid logPath.'); 
@@ -19,15 +19,13 @@ export default function (logPath) {
   return async function errorHandlerMiddleware (ctx, next) { 
     try { 
       await next();
-    } catch (err) { 
-
-      // set err message
-      ctx.body = err.message;
-      ctx.status = err.status;
+    } catch (err) { // 捕捉中间件级别的错误
+      debug(err);
+      //ctx.onerror(err); // 处理错误事件
 
       if ('development' === ctx.app.env) {
         // 开发模式下将错误信息输出到页面
-        console.log('Middleware error: ', err);
+        debug('Middleware error: ', err);
       }
 
       const log = err.message + ' ' + new Date().toString() + os.EOL; 

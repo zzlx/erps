@@ -12,14 +12,15 @@
  * *****************************************************************************
  */
 
-// Node内置模块
+// internal modules
 import crypto from 'crypto';
 import cp from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import util from 'util';
 
-// 本地模块
+// modules
 import './env.mjs'; // 导入环境变量
 import { 
   APP_ROOT,
@@ -41,6 +42,7 @@ import array from './utils/arrayUtils.mjs';
 import date from './utils/date.mjs';
 import strings from './utils/strings.mjs';
 
+const debug = util.debuglog('debug:main');
 let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
 
@@ -70,8 +72,7 @@ async function main () {
   if (process.env.COMMIT)  {
     // 提交代码变更
     const commit = path.join(APP_ROOT, 'src', 'commit.mjs');
-    console.log(cp);
-    return cp.spawnSync('node', [commit]);
+    return cp.spawnSync('node', []);
   }
   if (process.env.VERSION || process.env.V) return showVersion(); // 显示版本号
   if (process.env.EXPORT) { }
@@ -118,26 +119,20 @@ async function main () {
     return;
   }
 
-  if (process.env.DEVEL) {
-    // 开启前端构建
-    await startCompiler();
-  }
+  // 执行到此步骤后不再使用数据库,关闭连接
+  if (dba.client) dba.client.close();
 
-  if (process.env.HTTPD) {
-    httpd = await startHttpd();
+  // 启动http服务(新开子进程)
+  httpd = await startHttpd();
 
-    if (process.env.NODE_ENV === 'development') {
-      watcher(
-        [ 'server', 'schema', 'graphql', 'resolvers', ],
-        () => restartHttpd(),
-      );
-    }
+  if (process.env.NODE_ENV === 'development') {
+    watcher(
+      [ 'server', 'schema', 'graphql', 'resolvers', ],
+      () => restartHttpd(),
+    );
   }
 
   if (process.env.FORK) httpd.unref();
-
-  // 执行到此步骤,关闭数据库连接
-  if (dba.client) dba.client.close();
 
 }
 
@@ -208,14 +203,11 @@ function showHelp() {
  */
 
 function showVersion () {
-
-  const version = {
+  console.log({
     version: APP_VERSION,
     branch:  APP_BRANCH_NAME,
     commit:  APP_BRANCH_VERSION,
-  }
-
-  console.log(version);
+  });
 }
 
 /**
@@ -237,7 +229,7 @@ function showSysinfo () {
  */
 
 function watcher (folders) {
-  console.log('观察者模式: 监控开发环境下服务端代码变动,并重启后端服务.');
+  debug('观察者模式: 监控开发环境下服务端代码变动,并重启后端服务.');
   if ('string' === typeof(folders)) folders = [folders];
   if (!Array.isArray(folders)) throw TypeError('提供的参数必须为数组');
 
@@ -302,14 +294,6 @@ async function spawn (appPath) {
 
   // spawn a async process.
   return cp.spawn('node', args, options);
-}
-
-/**
- *
- */
-
-function startCompiler() {
-  return spawn(path.join(APP_ROOT, 'src', 'UICompiler.mjs'));
 }
 
 /**

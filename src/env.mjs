@@ -30,7 +30,10 @@ for (let key of Object.keys(Params)) {
 // 设置系统变量
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 默认使用生产环境
 
-if (process.env.ENV && process.env.ENV === 'development') {
+if (
+  process.env.ENV && process.env.ENV === 'development' ||
+  process.env.DEVEL
+) {
   process.env.NODE_ENV = 'development';
 }
 
