@@ -21,21 +21,17 @@ import path from 'path';
 import util from 'util';
 
 // modules
-import './env.mjs'; // 导入环境变量
+import './env.config.mjs'; // 导入环境变量
 import { 
-  APP_ROOT,
   APP_NAME,
-  APP_HOME,
-  APP_LOG_PATH,
+  APP_ROOT,
   APP_VERSION,
   APP_BRANCH_NAME,
   APP_BRANCH_VERSION,
-  PUBLIC_HTML,
-  RECOMMEND_NODE_VERSION,
-  HELP_FILE,
   CONFIG_FILE,
-  CONFIG,
-} from './config.mjs';
+  HELP_FILE,
+  LOG_DIR,
+} from './sys.config.mjs';
 import MongoDB from './utils/mongodb.mjs';
 import console from './utils/console.mjs';
 import array from './utils/arrayUtils.mjs';
@@ -45,6 +41,7 @@ import strings from './utils/strings.mjs';
 const debug = util.debuglog('debug:main');
 let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
+
 
 // 检测node version
 checkNodeVersion();
@@ -388,7 +385,7 @@ function readFromInput (question, password = false) {
  * check the recommend node version
  */
 
-function checkNodeVersion (atleastVersion = RECOMMEND_NODE_VERSION) {
+function checkNodeVersion (atleastVersion = 13) {
   // major node version must gretter than 12
   if (Number(String(process.version).substr(1, 2)) < atleastVersion) {
     console.warn(`当前Node版本:${process.version}, 推荐升级至最新版本.`);
@@ -400,21 +397,15 @@ function checkNodeVersion (atleastVersion = RECOMMEND_NODE_VERSION) {
  */
 
 async function setup () {
-  // 执行准备工作
-  // async tasks
-  const ats = [
-    fs.promises.mkdir(APP_HOME, {recursive: true}),
-    fs.promises.mkdir(APP_LOG_PATH, {recursive: true}),
-    fs.promises.mkdir(PUBLIC_HTML, {recursive: true}),
-  ];
-
-  // 等待准备工作完成后再进行下一步工作
-  await Promise.all(ats);
-
   // 任务1: 建立符号链接启动脚本
-  await cp.spawn('ln', [
+  const task_1 = cp.spawn('ln', [
     '-s', 
-    path.join(APP_ROOT, 'main.mjs'), 
+    path.join(APP_ROOT, 'bin', 'start.mjs'), 
     path.join(process.env.HOME, '.bin', APP_NAME + 'ctl')
   ]);
+
+  return await Promise.all([
+    task_1
+  ]);
+
 }

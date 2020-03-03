@@ -10,21 +10,31 @@
 
 import fs from 'fs';
 import path from 'path';
-import { DOT_ENV_FILE, } from './config.mjs';
 import argvParser from './utils/argvParser.mjs';
 
+const APP_ROOT = path.dirname(path.dirname(import.meta.url).substr(7));
+
+// 获取并解析命令行参数
+const validArgvs = [
+  '--help', '-h',
+  '--version', '-v',
+  '--env', 
+  '--devel',
+  '--port',
+];
+
+const Params = argvParser(process.argv.slice(2), validArgvs); 
+
+for (let key of Object.keys(Params)) {
+  process.env[String(key).toUpperCase()] = String(Params[key]);
+}
+
 // 获取并解析.env文件配置参数
-const dotEnvConfig = dotenv(DOT_ENV_FILE);
+const dotEnvConfig = dotenv(path.join(APP_ROOT, '.env'));
 
 for (let key of Object.keys(dotEnvConfig)) {
   if (process.env[key]) continue; // @todo: 是否覆盖已有配置项
   process.env[key] = dotEnvConfig[key];
-}
-
-// 获取并解析命令行参数
-const Params = argvParser(process.argv.slice(2)); 
-for (let key of Object.keys(Params)) {
-  process.env[String(key).toUpperCase()] = String(Params[key]);
 }
 
 // 设置系统变量

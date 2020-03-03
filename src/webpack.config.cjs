@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
-      child.props.className = 'test';
+ *
  * webpack配置文件
  *
  * 用于生成前端代码
@@ -9,8 +9,11 @@
  * *****************************************************************************
  */
 
+// internal modules
 const fs = require('fs');
 const path = require('path');
+
+// third-part modules
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
@@ -28,7 +31,7 @@ module.exports = (opts = {}) => {
 
   const paths = {
     appPath: APP_PATH,
-    appDist: path.join(process.env.HOME, 'public_html', 'dist'),
+    appDist: path.join(APP_PATH, 'dist'),
     appPublic: path.join(APP_PATH, 'public'),
     publicPath: '/',
     publicUrl: '/',

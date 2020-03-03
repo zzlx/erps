@@ -3,7 +3,9 @@
  *
  * 参数解析器
  *
- * 解析命令行参数，返回参数对象
+ * 解析获取到的命令行参数列表，返回参数对象
+ *
+ * @todo: 添加对无效参数的处理
  *
  * @params {array|string} argvs
  * @return {object} state
@@ -13,7 +15,7 @@
  * *****************************************************************************
  */
 
-export default function argvParser (argvs) {
+export default function argvParser (argvs, validArgvs = []) {
 
   // 如果提供的参数列表为字符,则先转为数组后再解析
   if ('string' === typeof argvs) argvs = argvs.split(/\s+/);

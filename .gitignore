@@ -1,9 +1,12 @@
 # 参考文档 http://help.github.com/ignore-files/
 # 忽略目录
 node_modules
+build
+dist
 
 # 忽略文件
 .env
+env
 .DS_Store
 package-lock.json
 *.sw[mnop]

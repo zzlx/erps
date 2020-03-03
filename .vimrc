@@ -1,40 +1,9 @@
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" vimrc配置文件
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "
-"
-"
-"
+" Vimrc配置文件
 "
 " author:wangxuemin@zzlx.org
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-"""""""""""""""""
-" Theme配置项目 "
-"""""""""""""""""
-function! SetTheme()
-
-let Now=strftime("%H") " 获取当前时间
-if Now > 6 && Now < 23
-  set background=light
-else
-  set background=dark
-endif
-
-set background=light
-
-if &background == "light"
-  "hi Normal  ctermfg=Black ctermbg=LightYellow
-  hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey font='Monospace 16'
-  hi StatusLine ctermfg=LightGray ctermbg=DarkBlue
-endif
-
-if &background == "dark"
-  "hi Normal ctermfg=LightCyan ctermbg=0
-  hi Comment ctermfg=white ctermbg=None font='Monospace 16'
-  hi StatusLine ctermfg=white ctermbg=DarkRed
-endif
-
-endfunction
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 set nocompatible  " Use Vim defaults instead of 100% vi compatibility
 set backspace=2   " more powerful backspacing
@@ -126,6 +95,43 @@ set laststatus=2
 syntax on
 syntax enable
 
+"""""""""""""""""
+" 配置netrw
+"""""""""""""""""
+let g:netrw_browse_split = 3
+let g:netrw_winsize = 25
+let g:netrw_liststyle = 3
+let g:netrw_sort_by = 'name'
+let g:netrw_sort_direction = 'normal'
+
+"""""""""""""""""
+" Theme配置项目 "
+"""""""""""""""""
+function! SetTheme()
+
+let Now=strftime("%H") " 获取当前时间
+if Now > 6 && Now < 23
+  set background=light
+else
+  set background=dark
+endif
+
+set background=light
+
+if &background == "light"
+  "hi Normal  ctermfg=Black ctermbg=LightYellow
+  hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey font='Monospace 16'
+  hi StatusLine ctermfg=LightGray ctermbg=DarkBlue
+endif
+
+if &background == "dark"
+  "hi Normal ctermfg=LightCyan ctermbg=0
+  hi Comment ctermfg=white ctermbg=None font='Monospace 16'
+  hi StatusLine ctermfg=white ctermbg=DarkRed
+endif
+
+endfunction
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Targets
 " 
@@ -177,24 +183,14 @@ func! SetHeader()
   endif
 endfunc
 
-""""""""""""""""""""""""""""""""""""""""""""""""""
-" NERDTree
-" Plugin 'https://github.com/scrooloose/nerdtree'
-""""""""""""""""""""""""""""""""""""""""""""""""""
-let NERDTreeWinPos="left"
-let NERDTreeCaseSensitiveSort=1
-let NERDTreeWinSize=30
-let NERDTreeShowLineNumbers=1
-let NERDTreeAutoCenter=1
-let NERDTreeShowHidden=0
-let NERDTreeHighlightCursorline=0
-autocmd vimenter * if !argc()|NERDTree|endif
 
 """""""""""
 " 自动识别
 """""""""""
 " c脚本配置
 autocmd BufRead *.c set cindent             "C/C++缩进方式
+
+"autocmd vimenter * if !argc() | NERDTree | endif
 
 " markdown脚本配置
 autocmd BufRead,BufNewFile *.md setfiletype markdown
@@ -240,7 +236,7 @@ map! <C-A> <Esc>ggVGY
 "nmap <silent> <leader>fe :Sexplore!<CR> 
 map <Tab> :tabnext<CR>  " gt
 map <S-Tab> :tabpre<CR> " gT
-map <F5> :NERDTreeToggle<CR> 
+"map <F5> :Vex<CR> 
 map <F6> :call Targets()<CR> 
 map <F12> :!./%<CR> 
 

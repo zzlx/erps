@@ -1,4 +1,6 @@
 /**
+ * *****************************************************************************
+ *
  * Normalize the given path string, and returning a regular expression.
  *
  * An empty array can be passed in for the keys, 
@@ -10,6 +12,9 @@
  * @param  {(Array|Object)=}       keys
  * @param  {Object=}               options
  * @return {!RegExp}
+ *
+ * @file pathToRegexp.mjs
+ * *****************************************************************************
  */
 
 export default function pathToRegexp (path, keys, options = {}) {
@@ -27,6 +32,7 @@ export default function pathToRegexp (path, keys, options = {}) {
   // string path
   return stringToRegexp(path, keys, options);
 }
+
 /**
  * The main path matching regexp utility.
  *
