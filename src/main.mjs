@@ -21,7 +21,7 @@ import path from 'path';
 import util from 'util';
 
 // modules
-import './env.config.mjs'; // 导入环境变量
+import './env.mjs'; // 导入环境变量
 import { 
   APP_NAME,
   APP_ROOT,
@@ -31,7 +31,7 @@ import {
   CONFIG_FILE,
   HELP_FILE,
   LOG_DIR,
-} from './sys.config.mjs';
+} from './config.mjs';
 import MongoDB from './utils/mongodb.mjs';
 import console from './utils/console.mjs';
 import array from './utils/arrayUtils.mjs';
@@ -41,7 +41,7 @@ import strings from './utils/strings.mjs';
 const debug = util.debuglog('debug:main');
 let dba = null; // 设置全局变量dba
 let httpd = null; // httpd服务 
-
+let CONFIG = {};
 
 // 检测node version
 checkNodeVersion();
@@ -359,16 +359,19 @@ async function importCSV (csvFile) {
 }
 
 /**
- * 从标准输入读取内容
+ *
+ * Read from stdin input
  *
  * @param: {string} question
  * @param: {bool} password 是否显示*号代替输入字符 
+ *
  */
 
 function readFromInput (question, password = false) {
+
   process.stdout.write(String(question));
 
-  // 开始从标准输入读入数据
+  // 从标准输入读入数据
   return new Promise((resolve, reject) => {
     if (process.stdin.isPaused()) process.stdin.resume();
     process.stdin.setEncoding('utf8');
@@ -378,17 +381,22 @@ function readFromInput (question, password = false) {
       resolve(input);
       process.stdin.pause();
     });
+
   });
 }
 
 /**
- * check the recommend node version
+ * check node version
+ *
+ * @param {number} leastVersion
+ *
  */
 
-function checkNodeVersion (atleastVersion = 13) {
+function checkNodeVersion (leastVersion = 12) {
   // major node version must gretter than 12
-  if (Number(String(process.version).substr(1, 2)) < atleastVersion) {
-    console.warn(`当前Node版本:${process.version}, 推荐升级至最新版本.`);
+  if (Number(String(process.version).substr(1, 2)) < leastVersion) {
+    console.warn(`当前Node版本:${process.version}, 请升级至最新版本.`);
+    process.exit();
   }
 }
 
@@ -407,5 +415,4 @@ async function setup () {
   return await Promise.all([
     task_1
   ]);
-
 }
