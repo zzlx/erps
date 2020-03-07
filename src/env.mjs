@@ -1,8 +1,13 @@
 /**
  * *****************************************************************************
+ *
  * 配置系统环境变量
  *
  * 读入.env配置
+ *
+ * 约定:
+ * 1. 优先保证已被设置的环境变量不被改动;
+ * 2. 
  *
  * @file: env.mjs
  * *****************************************************************************
@@ -14,7 +19,6 @@ import argvParser from './utils/argvParser.mjs';
 
 const APP_ROOT = path.dirname(path.dirname(import.meta.url).substr(7));
 
-// 获取并解析命令行参数
 const validArgvs = [
   '--help', '-h',
   '--version', '-v',
@@ -23,44 +27,29 @@ const validArgvs = [
   '--port',
 ];
 
+// 获取并解析命令行参数
 const Params = argvParser(process.argv.slice(2), validArgvs); 
-
-for (let key of Object.keys(Params)) {
-  process.env[String(key).toUpperCase()] = String(Params[key]);
-}
-
 // 获取并解析.env文件配置参数
-const dotEnvConfig = dotenv(path.join(APP_ROOT, '.env'));
+const EnvConfig = dotenv(path.join(APP_ROOT, '.env'));
 
-for (let key of Object.keys(dotEnvConfig)) {
-  if (process.env[key]) continue; // @todo: 是否覆盖已有配置项
-  process.env[key] = dotEnvConfig[key];
+// 合并参数对象
+const ENV = Object.assign({}, Params, EnvConfig);
+
+// 写入进程环境
+for (let key of Object.keys(ENV)) {
+  const KEY = String.prototype.toUpperCase.call(key);
+  if (process.env[KEY]) continue; // 已配置项优先,不进行重置
+  process.env[KEY] = ENV[key];
 }
 
-// 设置系统变量
-process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 默认使用生产环境
-
-if (
-  process.env.ENV && process.env.ENV === 'development' ||
-  process.env.DEVEL
-) {
-  process.env.NODE_ENV = 'development';
+if (process.env.ENV) {
+  if (process.env.ENV === 'development') process.env.NODE_ENV = 'development';
+  if (process.env.ENV === 'production')  process.env.NODE_ENV = 'productions';
 }
 
-if (process.env.ENV && process.env.ENV === 'production') {
-  process.env.NODE_ENV = 'production';
-}
-
-if (process.env.NODE_ENV === 'development') {
-  process.env.NODE_DEBUG = 'debug*';
-}
-
-// 默认使用3000端口号
-process.env.PORT = process.env.PORT 
-  ? Number.parseInt(process.env.PORT) : 3000; 
-
-process.env.HOST = process.env.HOST || 'localhost'; // localhost
-
+// 确保NODE_ENV变量被设置
+// 默认使用生产环境
+process.env.NODE_ENV = process.env.NODE_ENV || 'production'; 
 
 /**
  *

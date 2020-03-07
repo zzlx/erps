@@ -39,85 +39,61 @@ import date from './utils/date.mjs';
 import strings from './utils/strings.mjs';
 
 const debug = util.debuglog('debug:main');
-let dba = null; // 设置全局变量dba
-let httpd = null; // httpd服务 
-let CONFIG = {};
 
-// 检测node version
-checkNodeVersion();
+// 设置进程名称
+process.title = APP_NAME; 
 
-// 配置进程逻辑
-processSetting();
+// 捕获exception
+process.on('uncaughtException', (err, origin) => {
+  console.log(err);
+});
 
-// 执行main主程序,捕获exception.
-main();
+// 捕获unhandled rejection
+process.on('unhandledRejection', async (reason, promise) => {
+  console.log('捕获到Rejection:', promise);
+  if (reason.codeName === 'Unauthorized' && reason.code === 13) {
+    //Params.user = await readFromInput('请输入数据库用户名:');
+    //Params.pwd = await readFromInput('请输入密码:'); 
+    //await saveConfig(); // 保存一下配置文件
+    //await main();
+  }
+});
 
-/******************************************************************************/
+class Main {
+  constructor () {
+    this.dba = null;
+    this.httpd = null;
+    this.config = {};
+    this.checkNodeVersion(); // 检测node version
+  }
+
+  errorHandler () {
+
+  }
+
+}
 
 /**
- * 主程序逻辑
- *
- * 管理执行顺序及控制启动项目
+ * 执行程序
  */
 
-async function main () {
-
-  // 执行解析的参数命令
+Main.prototype.run = async function () {
+  if (process.env.SHOW_ENV) return console.log(process.env); // 打印显示环境变量
   if (process.env.HELP || process.env.H) return showHelp(); // 显示帮助文件
+  if (process.env.VERSION || process.env.V) return showVersion(); // 显示版本号
   if (process.env.SYSINFO) return showSysinfo(); // 显示系统信息
   if (process.env.SETUP) return setup(); // 初始化设置
   if (process.env.COMMIT)  {
-    // 提交代码变更
     const commit = path.join(APP_ROOT, 'src', 'commit.mjs');
-    return cp.spawnSync('node', []);
+    return cp.spawnSync('node', [commit]); // 提交代码变更
   }
-  if (process.env.VERSION || process.env.V) return showVersion(); // 显示版本号
-  if (process.env.EXPORT) { }
+
   if (process.env.BUILD) {
     // 构建前端应用程序
     const buildAppPath = path.join(APP_ROOT, 'src', 'build.mjs');
-    await spawn(buildAppPath);
+    await cp.spawn(buildAppPath);
     return;
   }
-
-  if (process.env.IMPORT) { await importCSV(process.env.IMPORT); }
-  if (process.env.EXPORT) { await exportCSV(process.env.EXPORT); }
-
-  if (null == CONFIG.mongodb) {
-    CONFIG.mongodb = await readFromInput('请提供mongodb URL:'); 
-  }
-
-  const url = new URL(CONFIG.mongodb);
-
-  if (null == url.username) {
-    url.username = await readFromInput('请输入用户名:'); 
-  } 
-
-  if (null == url.password) {
-    url.password = await readFromInput('请输入密码:'); 
-  }
-
-  CONFIG.mongodb = url.href;
-
-  // 存储配置
-  await saveConfig();
-
-  dba = new MongoDB(url.href);
-  console.log(dba);
-  await dba.connect();
-
-  if (process.env.QUERY) {
-
-    const cols = dba.db.listCollections({},{nameOnly: true});
-    console.log(await cols.toArray());
-
-    await dba.client.close();
-
-    return;
-  }
-
-  // 执行到此步骤后不再使用数据库,关闭连接
-  if (dba.client) dba.client.close();
 
   // 启动http服务(新开子进程)
   httpd = await startHttpd();
@@ -130,68 +106,13 @@ async function main () {
   }
 
   if (process.env.FORK) httpd.unref();
-
-}
-
-/**
- * 关闭数据连接
- */
-
-function closeDB () {
-    if (dba && dba.client) dba.client.close();
-}
-
-/**
- * 进程管理配置项
- */
-
-function processSetting () {
-  process.title = APP_NAME; // 设置进程名称
-
-  // 捕获unhandled rejection
-  process.on('unhandledRejection', async (reason, promise) => {
-
-    console.log('捕获到Rejection:', promise);
-
-    if (reason.codeName === 'Unauthorized' && reason.code === 13) {
-      //Params.user = await readFromInput('请输入数据库用户名:');
-      //Params.pwd = await readFromInput('请输入密码:'); 
-      //await saveConfig(); // 保存一下配置文件
-      await main();
-    }
-
-    closeDB(); // 关闭数据链接
-  });
-
-  // 捕获exception
-  process.on('uncaughtException', (err, origin) => {
-    console.log(err);
-    fs.writeSync(
-      process.stderr.fd,
-      `Caught exception: ${err}\n` +
-      `Exception origin: ${origin}`
-    );
-
-    closeDB(); // 关闭数据链接
-  });
-
-  // 进程退出前执行的任务
-  process.on('beforeExit', (code) => {
-    //console.log('Process beforeExit event with code: ', code);
-    closeDB(); // 关闭数据链接
-  });
-
-  process.on('exit', (code) => {
-    closeDB(); // 关闭数据链接
-  });
-
 }
 
 /**
  * show help
  */
 
-function showHelp() {
+Main.prototype.showHelp = function () {
   return fs.createReadStream(HELP_FILE).pipe(process.stdout);
 }
 
@@ -199,7 +120,7 @@ function showHelp() {
  * show version
  */
 
-function showVersion () {
+Main.prototype.showVersion = function () {
   console.log({
     version: APP_VERSION,
     branch:  APP_BRANCH_NAME,
@@ -211,11 +132,11 @@ function showVersion () {
  * 显示系统信息
  */
 
-function showSysinfo () {
+Main.prototype.showSysinfo = function () {
   const sysinfo = {
-    platform: `${process.arch} (${os.platform()} ${os.release()})`,
-    node_env: process.env.NODE_ENV,
+    platform: `${os.platform()}@${os.release()} ${os.arch()}`,
     node_version: process.version,
+    node_env: process.env.NODE_ENV,
   };
 
   console.log(sysinfo);
@@ -225,7 +146,7 @@ function showSysinfo () {
  * Folder watcher
  */
 
-function watcher (folders) {
+Main.prototype.watcher = function (folders) {
   debug('观察者模式: 监控开发环境下服务端代码变动,并重启后端服务.');
   if ('string' === typeof(folders)) folders = [folders];
   if (!Array.isArray(folders)) throw TypeError('提供的参数必须为数组');
@@ -258,27 +179,19 @@ function watcher (folders) {
 }
 
 /**
- *
- */
-
-//function () { }
-
-/**
  * spawn a child process.
  *
  */
 
-async function spawn (appPath) {
-  const title = path.parse(appPath).name;
+Main.prototype.startHpptd = async function () {
   const file = `${date.format('yyyymmdd')}_process.log`;
-  const log_file = path.join(APP_HOME, 'log', file); 
-  const log = fs.openSync(log_file, 'a+');
+  const log = fs.openSync(path.join(LOG_DIR, file), 'a+');
 
   const args = [
     '--no-warnings', 
     '--experimental-json-modules',
-    `--title=${process.title}.${title}`,
-    appPath,
+    `--title=${process.title}.${httpd}`,
+    path.join(APP_ROOT, 'src', 'server', 'index.mjs'),
   ].filter(Boolean);
 
   // options
@@ -290,38 +203,30 @@ async function spawn (appPath) {
   };
 
   // spawn a async process.
-  return cp.spawn('node', args, options);
+  this.httpd = cp.spawn('node', args, options);
 }
 
-/**
- *
- */
-
-function startHttpd() {
-  return spawn(path.join(APP_ROOT, 'src', 'server', 'index.mjs'));
-}
-
-async function restartHttpd() {
-  if (null == httpd) return;
-  httpd.kill('SIGHUP'); // 先关闭进程
+Main.prototype.restartHttpd = async function () {
+  if (null == this.httpd) return;
+  this.httpd.kill('SIGHUP'); // 先关闭进程
   console.log('服务重启...');
-  httpd = await startHttpd();
+  this.httpd = await startHttpd();
 }
 
 /**
  *
  */
 
-function saveConfig () {
+Main.prototype.saveConfig = function () {
   // 写入配置文件
-  return fs.promises.writeFile( CONFIG_FILE, JSON.stringify(CONFIG, null, 4));
+  return fs.promises.writeFile(CONFIG_FILE, JSON.stringify(CONFIG, null, 4));
 }
 
 /**
- *
+ * 导出数据
  */
 
-async function exportCSV (csvFile) {
+Main.prototype.exportCSV = async function (csvFile) {
   if ('string' !== typeof csvFile) return;
   if (!path.isAbsolute(csvFile)) csvFile = path.join(process.cwd(), csvFile);
 
@@ -340,7 +245,7 @@ async function exportCSV (csvFile) {
  * 导入数据
  */
 
-async function importCSV (csvFile) {
+Main.prototype.importCSV = async function (csvFile) {
   if ('string' !== typeof csvFile) return;
   if (!path.isAbsolute(csvFile)) csvFile = path.join(process.cwd(), csvFile);
 
@@ -367,7 +272,7 @@ async function importCSV (csvFile) {
  *
  */
 
-function readFromInput (question, password = false) {
+Main.prototype.readFromInput = function (question, password = false) {
 
   process.stdout.write(String(question));
 
@@ -381,7 +286,6 @@ function readFromInput (question, password = false) {
       resolve(input);
       process.stdin.pause();
     });
-
   });
 }
 
@@ -392,7 +296,7 @@ function readFromInput (question, password = false) {
  *
  */
 
-function checkNodeVersion (leastVersion = 12) {
+Main.prototype.checkNodeVersion = function (leastVersion = 12) {
   // major node version must gretter than 12
   if (Number(String(process.version).substr(1, 2)) < leastVersion) {
     console.warn(`当前Node版本:${process.version}, 请升级至最新版本.`);
@@ -404,7 +308,7 @@ function checkNodeVersion (leastVersion = 12) {
  * 初始化设置
  */
 
-async function setup () {
+Main.prototype.setup = async function () {
   // 任务1: 建立符号链接启动脚本
   const task_1 = cp.spawn('ln', [
     '-s', 
@@ -416,3 +320,6 @@ async function setup () {
     task_1
   ]);
 }
+
+// 执行主程序
+new Main().run();

@@ -9,7 +9,7 @@
  * *****************************************************************************
  */
 
-import Keygrip from '../../utils/keygrip.js';
+import Keygrip from '../../utils/keygrip.mjs';
 
 const COOKIES = Symbol('middleware#cookies');
 

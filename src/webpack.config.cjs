@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * webpack配置文件
+ * webpack配置
  *
  * 用于生成前端代码
  *
@@ -45,7 +45,7 @@ module.exports = (opts = {}) => {
     target: opts.target ? opts.target : 'web',
 
     entry: {
-      main: path.join(paths.appPath, 'src', 'client', 'DOMRender.mjs'),
+      main: path.join(paths.appPath, 'src', 'clients', 'DOMRender.mjs'),
       styles: path.join(paths.appPath, 'src', 'styles', 'index.scss'),
     },
 

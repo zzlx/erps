@@ -1,10 +1,13 @@
-const crypto = require("crypto")
-  
-function Keygrip(keys, algorithm, encoding) {
-  if (!algorithm) algorithm = "sha256";
-  if (!encoding) encoding = "base64";
-  if (!(this instanceof Keygrip)) return new Keygrip(keys, algorithm, encoding);
+/**
+ * *****************************************************************************
+ *
+ *
+ * *****************************************************************************
+ */
 
+import crypto from 'crypto';
+  
+export default function Keygrip(keys, algorithm = 'sha256', encoding = 'base64') {
   if (!keys || !(0 in keys)) {
     throw new Error("Keys must be provided.");
   }
@@ -55,6 +58,4 @@ function constantTimeCompare (val1, val2) {
     }
 
     return result === 0;
-};
-
-module.exports = Keygrip
+}

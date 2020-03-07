@@ -4,11 +4,10 @@
 "
 " author:wangxuemin@zzlx.org
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 set nocompatible  " Use Vim defaults instead of 100% vi compatibility
 set backspace=2   " more powerful backspacing
      
-""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " 文件类型设置 "
 """"""""""""""""
 filetype on               " 文件类型检测
@@ -16,7 +15,7 @@ filetype plugin on        " 根据不同类型的文件加载插件
 filetype indent on
 filetype plugin indent on
 
-""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " 字符编码设置 "
 """"""""""""""""
 set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
@@ -24,7 +23,7 @@ set termencoding=utf-8
 set encoding=utf-8
 set fileencoding=utf-8
 
-"""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " GUI配置 "
 """""""""""
 set wildmenu
@@ -33,7 +32,7 @@ set guioptions-=m
 set shortmess=atI
 set title 
 
-""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " 编辑模式配置 "
 """"""""""""""""
 set backupcopy=yes
@@ -103,6 +102,7 @@ let g:netrw_winsize = 25
 let g:netrw_liststyle = 3
 let g:netrw_sort_by = 'name'
 let g:netrw_sort_direction = 'normal'
+let g:netrw_banner = 0
 
 """""""""""""""""
 " Theme配置项目 "
@@ -187,6 +187,8 @@ endfunc
 """""""""""
 " 自动识别
 """""""""""
+autocmd vimenter * if !argc() | :E | endif
+
 " c脚本配置
 autocmd BufRead *.c set cindent             "C/C++缩进方式
 
@@ -229,16 +231,17 @@ nmap LE $
 nmap <C-S> :w<CR>             " 保存修改
 "vmap <C-v> "+gp
 vmap <C-c> "+y
+
 map <C-A> ggVGY
 map! <C-A> <Esc>ggVGY
 "nmap <c-v> "+gp
 "nmap <c-c> "+y
 "nmap <silent> <leader>fe :Sexplore!<CR> 
+"
 map <Tab> :tabnext<CR>  " gt
 map <S-Tab> :tabpre<CR> " gT
-"map <F5> :Vex<CR> 
-map <F6> :call Targets()<CR> 
-map <F12> :!./%<CR> 
+map <F5> :call Targets()<CR> " 打开目标 
+map <F12> :!./%<CR>          " 执行脚本 
 
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>

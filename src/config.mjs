@@ -50,7 +50,7 @@ export const HELP_FILE    = path.join(APP_ROOT, 'src', 'help.txt');
 
 export const TEMP_DIR     = os.tmpDir();
 
-// 执行任务,创建系统需要的目录
+// 执行目录准备任务,创建系统需要的目录路径
 (function readyDir () {
   const md = (dir) => fs.promises.mkdir(dir, {recursive: true})
     .then(() => true)
