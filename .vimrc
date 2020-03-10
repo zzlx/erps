@@ -97,6 +97,7 @@ syntax enable
 """""""""""""""""
 " 配置netrw
 """""""""""""""""
+let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
 let g:netrw_browse_split = 3
 let g:netrw_winsize = 25
 let g:netrw_liststyle = 3
