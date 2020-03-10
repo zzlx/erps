@@ -94,9 +94,9 @@ set laststatus=2
 syntax on
 syntax enable
 
-"""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " 配置netrw
-"""""""""""""""""
+" """""""""
 let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
 let g:netrw_browse_split = 3
 let g:netrw_winsize = 25
@@ -104,6 +104,8 @@ let g:netrw_liststyle = 3
 let g:netrw_sort_by = 'name'
 let g:netrw_sort_direction = 'normal'
 let g:netrw_banner = 0
+
+autocmd vimenter * if !argc() | :E | endif
 
 """""""""""""""""
 " Theme配置项目 "
@@ -188,7 +190,6 @@ endfunc
 """""""""""
 " 自动识别
 """""""""""
-autocmd vimenter * if !argc() | :E | endif
 
 " c脚本配置
 autocmd BufRead *.c set cindent             "C/C++缩进方式
