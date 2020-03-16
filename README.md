@@ -26,4 +26,4 @@ $ npm start
 
 ### 系统需求
 
-推荐部署在类Unix系统中。
+推荐部署在Unix\Linux系统中。

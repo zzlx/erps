@@ -37,10 +37,10 @@ export const APP_BRANCH_NAME = path.basename(GIT_HEAD_REF); // 当前代码分�
 export const APP_BRANCH_VERSION = String(fs.readFileSync(GIT_COMMIT_FILE)).trim();
 
 // 配置系统常用目录
-export const HOME_DIR    = os.homedir(); // process.env.HOME
+export const HOME_DIR    = os.homedir(); // process.env.HOME 
 export const CONFIG_DIR  = path.join(HOME_DIR, `.${APP_NAME}`);
 export const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
-export const LOG_DIR     = path.join(CONFIG_DIR, 'log');
+export const LOG_DIR     = path.join(CONFIG_DIR, 'log'); // 日志目录
 
 export const DOT_ENV_FILE = path.join(APP_ROOT, '.env');
 export const VIMRC_FILE   = path.join(APP_ROOT, '.vimrc');
