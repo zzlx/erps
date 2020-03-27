@@ -6,7 +6,7 @@
  * 约定:
  * 模块输出项目均为文本字符串类型数据
  *
- * @file: sys.config.mjs
+ * @file: config.mjs
  * *****************************************************************************
  */
 
@@ -15,7 +15,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-const debug = util.debuglog('debug:sysconfig');
+const debug = util.debuglog('debug:config');
 
 // 定位代码库根目录
 export const APP_ROOT = path.dirname(path.dirname(import.meta.url).substr(7));

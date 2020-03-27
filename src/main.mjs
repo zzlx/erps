@@ -32,6 +32,8 @@ import {
   HELP_FILE,
   LOG_DIR,
 } from './config.mjs';
+
+import argvParser from './utils/argvParser.mjs';
 import MongoDB from './utils/mongodb.mjs';
 import console from './utils/console.mjs';
 import array from './utils/arrayUtils.mjs';
@@ -64,13 +66,47 @@ class Main {
     this.dba = null;
     this.httpd = null;
     this.config = {};
+
     this.checkNodeVersion(); // 检测node version
+    this.parseArgvs(); // 解析参数列表
+
   }
 
   errorHandler () {
 
   }
 
+}
+
+/**
+ *
+ *
+ */
+
+Main.prototype.setupEnv = function () {
+
+  process.env.NODE_ENV = this.params['env'] && this.params['env'] === 'development'
+    ? 'development' : 'production';
+}
+
+/**
+ * 解析参数列表
+ *
+ * parse argvs
+ *
+ */
+
+Main.prototype.parseArgvs = function () {
+  const validArgvs = [
+    '--help', '-h',
+    '--version', '-v',
+    '--env', 
+    '--devel',
+    '--port',
+  ];
+
+  // 获取并解析命令行参数
+  this.params = argvParser(process.argv.slice(2), validArgvs); 
 }
 
 /**

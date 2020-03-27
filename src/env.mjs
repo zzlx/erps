@@ -1,9 +1,10 @@
 /**
  * *****************************************************************************
  *
- * 配置系统环境变量
+ * 用于配置系统环境变量
  *
- * 读入.env配置
+ * 1. 读入.env配置
+ * 2. 读程序启动参数
  *
  * 约定:
  * 1. 优先保证已被设置的环境变量不被改动;
@@ -15,31 +16,16 @@
 
 import fs from 'fs';
 import path from 'path';
-import argvParser from './utils/argvParser.mjs';
+import { APP_ROOT } from './config.mjs';
 
-const APP_ROOT = path.dirname(path.dirname(import.meta.url).substr(7));
-
-const validArgvs = [
-  '--help', '-h',
-  '--version', '-v',
-  '--env', 
-  '--devel',
-  '--port',
-];
-
-// 获取并解析命令行参数
-const Params = argvParser(process.argv.slice(2), validArgvs); 
 // 获取并解析.env文件配置参数
 const EnvConfig = dotenv(path.join(APP_ROOT, '.env'));
 
-// 合并参数对象
-const ENV = Object.assign({}, Params, EnvConfig);
-
 // 写入进程环境
-for (let key of Object.keys(ENV)) {
+for (let key of Object.keys(EnvConfig)) {
   const KEY = String.prototype.toUpperCase.call(key);
   if (process.env[KEY]) continue; // 已配置项优先,不进行重置
-  process.env[KEY] = ENV[key];
+  process.env[KEY] = EnvConfig[key];
 }
 
 if (process.env.ENV) {

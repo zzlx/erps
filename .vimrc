@@ -2,7 +2,7 @@
 "
 " Vimrc配置文件
 "
-" author:wangxuemin@zzlx.org
+" wangxuemin@zzlx.org
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set nocompatible  " Use Vim defaults instead of 100% vi compatibility
 set backspace=2   " more powerful backspacing
@@ -89,6 +89,7 @@ set ignorecase   " 搜索时大小写不敏感
 set ruler
 set statusline=%F[:b%n]%m%r%h%w%y\ %=\ %-8.(%l,%c%V%)\ %p%%
 set laststatus=2
+set nocursorline
 
 " 语法高亮
 syntax on
@@ -97,7 +98,7 @@ syntax enable
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " 配置netrw
 " """""""""
-let g:netrw_bufsettings = 'noma nomod nu nobl bh ro'
+let g:netrw_bufsettings = 'noma nomod nu nobl bh ro nocursorline'
 let g:netrw_banner = 0
 let g:netrw_browse_split = 3
 let g:netrw_winsize = 25
@@ -185,7 +186,6 @@ func! SetHeader()
     call setline(7,"")
   endif
 endfunc
-
 
 """""""""""
 " 自动识别
