@@ -48,7 +48,6 @@ export default class Application extends EventEmitter {
    */
 
   listen (...args) {
-    debug('listen');
     this.server.on('stream', this.callback());
     return this.server.listen(...args);
   }

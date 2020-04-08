@@ -64,7 +64,7 @@ process.on('unhandledRejection', async (reason, promise) => {
   }
 });
 
-class Main {
+export default class Main {
   constructor () {
     this.dba = null;
     this.httpd = null;
@@ -74,7 +74,6 @@ class Main {
     this.checkNodeVersion(); // 检测node version
     this.parseArgvs(); // 解析参数列表
     this.setupEnv(); // 设置环境
-
   }
 
   errorHandler () {
@@ -159,9 +158,9 @@ Main.prototype.run = async function () {
   this.httpd = await this.startHttpd();
 
   if (process.env.NODE_ENV === 'development') {
-    watcher(
+    this.watcher(
       [ 'server', 'schema', 'graphql', 'resolvers', ],
-      () => restartHttpd(),
+      () => this.restartHttpd(),
     );
   }
 
@@ -221,7 +220,7 @@ Main.prototype.watcher = function (folders) {
       const delay = 3; // 默认3s
 
       const timeout = setTimeout(() => { 
-        restartHttpd();
+        this.restartHttpd();
         lastTimer = null;
       }, delay * 1000);
 
@@ -270,7 +269,7 @@ Main.prototype.restartHttpd = async function () {
   if (null == this.httpd) return;
   this.httpd.kill('SIGHUP'); // 先关闭进程
   console.log('服务重启...');
-  this.httpd = await startHttpd();
+  this.httpd = await this.startHttpd();
 }
 
 /**
@@ -380,6 +379,3 @@ Main.prototype.setup = async function () {
     task_1
   ]);
 }
-
-// 执行主程序
-new Main().run();

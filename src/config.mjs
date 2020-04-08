@@ -49,6 +49,17 @@ export const README_FILE  = path.join(APP_ROOT, 'README.md');
 export const HELP_FILE    = path.join(APP_ROOT, 'src', 'help.txt');
 
 export const TEMP_DIR     = os.tmpDir();
+export const PUBLIC_HTML = '/';
+
+// 获取APP配置信息
+let AppConfig = {};
+if (fs.existsSync(CONFIG_FILE)) {
+  try {
+    AppConfig = JSON.parse(fs.readFileSync(CONFIG_FILE));
+  } catch (e) { debug(e); }
+}
+
+export const APP_CONFIG = AppConfig; 
 
 // 执行目录准备任务,创建系统需要的目录路径
 (function readyDir () {
