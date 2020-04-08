@@ -14,7 +14,6 @@ import fs from 'fs';
 import path from 'path';
 import App from './application.mjs';
 import * as m from './middlewares/index.mjs';
-import '../env.mjs';
 import { 
   APP_HOME, 
   APP_LOG_PATH, 

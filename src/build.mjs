@@ -35,7 +35,4 @@ function callback (err, stats) {
   if (stats.hasWarnings()) console.warn(info.warnings);
 
   console.log(stats.toString({ chunks: false, colors: true, }));
-
-  if ('development' === process.env.NODE_ENV) {
-  }
 }

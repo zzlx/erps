@@ -1,5 +1,4 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"
 " Vimrc配置文件
 "
 " wangxuemin@zzlx.org
@@ -99,16 +98,16 @@ syntax enable
 " 配置netrw
 " """""""""
 let g:netrw_bufsettings = 'noma nomod nu nobl bh ro nocursorline'
-let g:netrw_banner = 0
+let g:netrw_banner = 1
 let g:netrw_browse_split = 3
 let g:netrw_winsize = 25
 let g:netrw_liststyle = 3
 let g:netrw_sort_by = 'name'
 let g:netrw_sort_direction = 'normal'
 
-autocmd vimenter * if !argc() | :E | endif
+autocmd vimenter * if !argc() | :E | endif " 未提供参数时显示目录列表
 
-"""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Theme配置项目 "
 """""""""""""""""
 function! SetTheme()
@@ -172,7 +171,7 @@ else:
 EOM
 endfunction
 
-"""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " 设置头
 """""""""
 func! SetHeader()
@@ -187,8 +186,8 @@ func! SetHeader()
   endif
 endfunc
 
-"""""""""""
-" 自动识别
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" 自动执行
 """""""""""
 
 " c脚本配置
@@ -225,7 +224,7 @@ autocmd BufEnter * exec ":call SetTheme()"
 " 自动生效配置文件
 autocmd BufWritePost $MYVIMRC source $MYVIMRC
 
-""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " 映射键盘快捷键 "
 """"""""""""""""""
 nmap LB 0
@@ -249,3 +248,4 @@ nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
+

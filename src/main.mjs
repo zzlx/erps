@@ -21,7 +21,6 @@ import path from 'path';
 import util from 'util';
 
 // modules
-import './env.mjs'; // 导入环境变量
 import { 
   APP_NAME,
   APP_ROOT,
@@ -34,6 +33,7 @@ import {
 } from './config.mjs';
 
 import argvParser from './utils/argvParser.mjs';
+import envParser from './utils/envParser.mjs';
 import MongoDB from './utils/mongodb.mjs';
 import console from './utils/console.mjs';
 import array from './utils/arrayUtils.mjs';
@@ -44,6 +44,9 @@ const debug = util.debuglog('debug:main');
 
 // 设置进程名称
 process.title = APP_NAME; 
+
+// 初始化系统环境 
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 // 捕获exception
 process.on('uncaughtException', (err, origin) => {
@@ -66,9 +69,11 @@ class Main {
     this.dba = null;
     this.httpd = null;
     this.config = {};
+    this.params = {};
 
     this.checkNodeVersion(); // 检测node version
     this.parseArgvs(); // 解析参数列表
+    this.setupEnv(); // 设置环境
 
   }
 
@@ -79,14 +84,31 @@ class Main {
 }
 
 /**
- *
+ * 环境变量设置
  *
  */
 
 Main.prototype.setupEnv = function () {
+  // 读取并设置.env配置项目
+  const envFile = path.join(APP_ROOT, '.env');
+  if (fs.existsSync(envFile)) {
+    const EnvConfig = envParser(fs.readFileSync(envFile, 'utf8'));
+    // 写入进程环境
+    for (let key of Object.keys(EnvConfig)) {
+      const KEY = String.prototype.toUpperCase.call(key);
+      if (process.env[KEY]) continue; // 已配置项优先,不进行重置
+      process.env[KEY] = EnvConfig[key];
+    }
+  }
 
+
+  // setup NODE_ENV
   process.env.NODE_ENV = this.params['env'] && this.params['env'] === 'development'
     ? 'development' : 'production';
+
+  // setup PORT
+  process.env.PORT = this.params['port'] || 3000;
+
 }
 
 /**
@@ -114,25 +136,27 @@ Main.prototype.parseArgvs = function () {
  */
 
 Main.prototype.run = async function () {
-  if (process.env.SHOW_ENV) return console.log(process.env); // 打印显示环境变量
-  if (process.env.HELP || process.env.H) return showHelp(); // 显示帮助文件
-  if (process.env.VERSION || process.env.V) return showVersion(); // 显示版本号
-  if (process.env.SYSINFO) return showSysinfo(); // 显示系统信息
-  if (process.env.SETUP) return setup(); // 初始化设置
-  if (process.env.COMMIT)  {
+  // 显示帮助文件
+  if (this.params.help || this.params.h) return this.showHelp(); 
+  // 显示版本号
+  if (this.params.version || this.params.v) return this.showVersion(); 
+  if (this.params.sysinfo) return this.showSysinfo(); // 显示系统信息
+  if (this.params.setup) return this.setup(); // 初始化设置
+
+  if (this.params.commit)  {
     const commit = path.join(APP_ROOT, 'src', 'commit.mjs');
     return cp.spawnSync('node', [commit]); // 提交代码变更
   }
 
-  if (process.env.BUILD) {
+  if (this.params.build) {
     // 构建前端应用程序
-    const buildAppPath = path.join(APP_ROOT, 'src', 'build.mjs');
-    await cp.spawn(buildAppPath);
+    const buildApp = path.join(APP_ROOT, 'src', 'build.mjs');
+    await cp.spawn('node', [buildApp]);
     return;
   }
 
   // 启动http服务(新开子进程)
-  httpd = await startHttpd();
+  this.httpd = await this.startHttpd();
 
   if (process.env.NODE_ENV === 'development') {
     watcher(
@@ -141,7 +165,7 @@ Main.prototype.run = async function () {
     );
   }
 
-  if (process.env.FORK) httpd.unref();
+  if (process.env.FORK) this.httpd.unref();
 }
 
 /**
@@ -219,14 +243,14 @@ Main.prototype.watcher = function (folders) {
  *
  */
 
-Main.prototype.startHpptd = async function () {
+Main.prototype.startHttpd = async function () {
   const file = `${date.format('yyyymmdd')}_process.log`;
   const log = fs.openSync(path.join(LOG_DIR, file), 'a+');
 
   const args = [
     '--no-warnings', 
     '--experimental-json-modules',
-    `--title=${process.title}.${httpd}`,
+    `--title=${process.title}.httpd`,
     path.join(APP_ROOT, 'src', 'server', 'index.mjs'),
   ].filter(Boolean);
 
