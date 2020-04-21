@@ -159,7 +159,7 @@ Main.prototype.showHelp = function () {
  */
 
 Main.prototype.showVersion = function () {
-  console.log(`${APP_NAME}@${APP_VERSION}`);
+  console.log(`${APP_NAME} ${APP_VERSION}`);
 
   if (this.argvParams.all) {
     console.log('nodeVersion:', process.version);
