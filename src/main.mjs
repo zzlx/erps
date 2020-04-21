@@ -30,7 +30,7 @@ import {
   CONFIG_FILE,
   HELP_FILE,
   LOG_DIR,
-} from './config.mjs';
+} from './system.config.mjs';
 
 import argvParser from './utils/argvParser.mjs';
 import envParser from './utils/envParser.mjs';
@@ -40,36 +40,15 @@ import array from './utils/arrayUtils.mjs';
 import date from './utils/date.mjs';
 import strings from './utils/strings.mjs';
 
-const debug = util.debuglog('debug:main');
-
-// 设置进程名称
-process.title = APP_NAME; 
-
-// 初始化系统环境 
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-
-// 捕获exception
-process.on('uncaughtException', (err, origin) => {
-  console.log(err);
-});
-
-// 捕获unhandled rejection
-process.on('unhandledRejection', async (reason, promise) => {
-  console.log('捕获到Rejection:', promise);
-  if (reason.codeName === 'Unauthorized' && reason.code === 13) {
-    //Params.user = await readFromInput('请输入数据库用户名:');
-    //Params.pwd = await readFromInput('请输入密码:'); 
-    //await saveConfig(); // 保存一下配置文件
-    //await main();
-  }
-});
-
 export default class Main {
   constructor () {
     this.dba = null;
     this.httpd = null;
     this.config = {};
-    this.params = {};
+    this.argvParams = {};
+    this.state = {
+      restartCounter: 0
+    };
 
     this.checkNodeVersion(); // 检测node version
     this.parseArgvs(); // 解析参数列表
@@ -102,11 +81,11 @@ Main.prototype.setupEnv = function () {
 
 
   // setup NODE_ENV
-  process.env.NODE_ENV = this.params['env'] && this.params['env'] === 'development'
+  process.env.NODE_ENV = this.argvParams['env'] && this.argvParams['env'] === 'development'
     ? 'development' : 'production';
 
   // setup PORT
-  process.env.PORT = this.params['port'] || 3000;
+  process.env.PORT = this.argvParams['port'] || 3000;
 
 }
 
@@ -127,7 +106,7 @@ Main.prototype.parseArgvs = function () {
   ];
 
   // 获取并解析命令行参数
-  this.params = argvParser(process.argv.slice(2), validArgvs); 
+  this.argvParams = argvParser(process.argv.slice(2), validArgvs); 
 }
 
 /**
@@ -136,18 +115,18 @@ Main.prototype.parseArgvs = function () {
 
 Main.prototype.run = async function () {
   // 显示帮助文件
-  if (this.params.help || this.params.h) return this.showHelp(); 
+  if (this.argvParams.help || this.argvParams.h) return this.showHelp(); 
   // 显示版本号
-  if (this.params.version || this.params.v) return this.showVersion(); 
-  if (this.params.sysinfo) return this.showSysinfo(); // 显示系统信息
-  if (this.params.setup) return this.setup(); // 初始化设置
+  if (this.argvParams.version || this.argvParams.v) return this.showVersion();
+  if (this.argvParams.sysinfo) return this.showSysinfo(); // 显示系统信息
+  if (this.argvParams.setup) return this.setup(); // 初始化设置
 
-  if (this.params.commit)  {
+  if (this.argvParams.commit)  {
     const commit = path.join(APP_ROOT, 'src', 'commit.mjs');
     return cp.spawnSync('node', [commit]); // 提交代码变更
   }
 
-  if (this.params.build) {
+  if (this.argvParams.build) {
     // 构建前端应用程序
     const buildApp = path.join(APP_ROOT, 'src', 'build.mjs');
     await cp.spawn('node', [buildApp]);
@@ -180,11 +159,13 @@ Main.prototype.showHelp = function () {
  */
 
 Main.prototype.showVersion = function () {
-  console.log({
-    version: APP_VERSION,
-    branch:  APP_BRANCH_NAME,
-    commit:  APP_BRANCH_VERSION,
-  });
+  console.log(`${APP_NAME}@${APP_VERSION}`);
+
+  if (this.argvParams.all) {
+    console.log('nodeVersion:', process.version);
+    console.log('gitBranch:', APP_BRANCH_NAME);
+    console.log('commitHash:', APP_BRANCH_VERSION);
+  }
 }
 
 /**
@@ -203,10 +184,12 @@ Main.prototype.showSysinfo = function () {
 
 /**
  * Folder watcher
+ *
+ * @param {function} cb
  */
 
-Main.prototype.watcher = function (folders) {
-  debug('观察者模式: 监控开发环境下服务端代码变动,并重启后端服务.');
+Main.prototype.watcher = function (folders, cb) {
+  console.log('开发环境启用观察者模式,监控开发环境下代码变动，并重启服务');
   if ('string' === typeof(folders)) folders = [folders];
   if (!Array.isArray(folders)) throw TypeError('提供的参数必须为数组');
 
@@ -214,13 +197,15 @@ Main.prototype.watcher = function (folders) {
     let changeLog = '';
     let lastTimer = null;
     const options = { persistent: true, recursive: true, encoding: 'utf8' };
+
+    // 判断目录是否为绝对路径
     if (!path.isAbsolute(folder)) folder = path.join(APP_ROOT, 'src', folder);
 
     fs.watch(folder, options, (eventType, filename) => {
       const delay = 3; // 默认3s
 
       const timeout = setTimeout(() => { 
-        this.restartHttpd();
+        cb();
         lastTimer = null;
       }, delay * 1000);
 
@@ -242,7 +227,7 @@ Main.prototype.watcher = function (folders) {
  *
  */
 
-Main.prototype.startHttpd = async function () {
+Main.prototype.startHttpd = function () {
   const file = `${date.format('yyyymmdd')}_process.log`;
   const log = fs.openSync(path.join(LOG_DIR, file), 'a+');
 
@@ -262,13 +247,13 @@ Main.prototype.startHttpd = async function () {
   };
 
   // spawn a async process.
-  this.httpd = cp.spawn('node', args, options);
+  return cp.spawn('node', args, options);
 }
 
 Main.prototype.restartHttpd = async function () {
+  console.log('服务重启', ++this.state.restartCounter, '次.');
   if (null == this.httpd) return;
   this.httpd.kill('SIGHUP'); // 先关闭进程
-  console.log('服务重启...');
   this.httpd = await this.startHttpd();
 }
 
@@ -375,7 +360,35 @@ Main.prototype.setup = async function () {
     path.join(process.env.HOME, '.bin', APP_NAME + 'ctl')
   ]);
 
+  // 并行执行异步任务
   return await Promise.all([
-    task_1
+    task_1,
   ]);
+}
+
+/**
+ *
+ */
+
+Main.prototype.build = async function () {
+  const webpack = await import('webpack').then(m => m.default);
+  const webpackConfig = await import('./webpack.config.cjs');
+  const compiler = webpack(webpackConfig());
+  compiler.run(() => {
+    if (err) {
+      console.error(err.stack || err);
+      if (err.details) {
+        console.error(err.details);
+      }
+
+      return;
+    }
+
+    const info = stats.toJson();
+    if (stats.hasErrors()) console.error(info.errors);
+    if (stats.hasWarnings()) console.warn(info.warnings);
+
+    console.log(stats.toString({ chunks: false, colors: true, }));
+
+  });
 }

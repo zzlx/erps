@@ -12,22 +12,23 @@
 
 import fs from 'fs';
 import path from 'path';
-import App from './application.mjs';
+import Koa from './application.mjs';
 import * as m from './middlewares/index.mjs';
 import { 
   LOG_DIR, 
   APP_CONFIG, 
-} from '../config.mjs';
+} from '../system.config.mjs';
 
 const __dirname = path.dirname(import.meta.url).substr(7);
 
 // 初始化服务程序
-const app = new App({
+const app = new Koa({
   // @todo: read configuration from cofig file
   cert: fs.readFileSync('/etc/ssl/localhost-cert.pem'),
   key: fs.readFileSync('/etc/ssl/localhost-key.pem'),
 }); 
 
+//
 // 配置服务器执行逻辑
 //app.use(m.error(LOG_DIR));     // 捕获中间件错误
 app.use(m.xResponse());             // 记录响应时间

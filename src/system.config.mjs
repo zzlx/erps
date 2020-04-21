@@ -1,7 +1,9 @@
 /**
  * *****************************************************************************
  *
- * 系统配置项
+ * 系统配置
+ *
+ * 配置项来源: 1. .env文件；2.config.json文件 3. 系统默认配置项目
  *
  * 约定:
  * 模块输出项目均为文本字符串类型数据
@@ -15,6 +17,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
+// debug
 const debug = util.debuglog('debug:config');
 
 // 定位代码库根目录
@@ -26,7 +29,7 @@ export const PACKAGE_JSON_FILE  = path.join(APP_ROOT, 'package.json');
 const PACKAGE_JSON = JSON.parse(fs.readFileSync(PACKAGE_JSON_FILE));
 export const APP_NAME     = PACKAGE_JSON.name;
 export const APP_LICENSE  = PACKAGE_JSON.license;
-export const APP_VERSION  = PACKAGE_JSON.version;
+export const APP_VERSION  = 'v' + PACKAGE_JSON.version;
 
 // 获取git代码库信息
 const GIT_HEAD_FILE = path.join(APP_ROOT, '.git/HEAD'); // HEAD文件记录当前分支ref
@@ -46,7 +49,7 @@ export const DOT_ENV_FILE = path.join(APP_ROOT, '.env');
 export const VIMRC_FILE   = path.join(APP_ROOT, '.vimrc');
 export const DIST_DIR     = path.join(APP_ROOT, 'dist');
 export const README_FILE  = path.join(APP_ROOT, 'README.md');
-export const HELP_FILE    = path.join(APP_ROOT, 'src', 'help.txt');
+export const HELP_FILE    = path.join(APP_ROOT, 'help.txt');
 
 export const TEMP_DIR     = os.tmpDir();
 export const PUBLIC_HTML = '/';

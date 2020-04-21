@@ -285,6 +285,8 @@ export default class Application extends EventEmitter {
       });
     }
 
+    setupServer(this._server);
+
     return this._server;
   }
 }

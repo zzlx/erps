@@ -107,5 +107,7 @@
     "xlsx": "^0.14.5",
     "xml-loader": "^1.2.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "tedious": "^8.2.0"
+  }
 }
