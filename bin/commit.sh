@@ -5,5 +5,13 @@
 APP_WORK_TREE=$(dirname $(cd $(dirname $0); pwd))
 
 # -C 指定工作目录 
-git -C $APP_WORK_TREE add -A .
-git -C $APP_WORK_TREE commit -m "自动提交"
+
+_commit_and_push() {
+  if [ -d "$APP_WORK_TREE/.git" ];then
+    git -C $APP_WORK_TREE add -A .
+    git -C $APP_WORK_TREE commit -m "自动提交"
+    return
+  fi
+}
+
+_commit_and_push
