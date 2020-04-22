@@ -20,7 +20,7 @@ _commit_and_push() {
     return 1
   fi
 
-  echo "自动化提交完成 $(_utc_date)" 
+  echo "$(_utc_date) 自动化提交完成"
 }
 
 _commit_and_push
