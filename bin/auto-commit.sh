@@ -16,11 +16,11 @@ _commit_and_push() {
     git -C $APP_WORK_TREE add -A .
     git -C $APP_WORK_TREE commit -m "$(date "+%Y%m%d")_自动化提交"
   else
-    echo "请确认代码库已初始化 ${_utc_date}" 
+    echo "请确认代码库已初始化"
     return 1
   fi
 
-  echo "自动化提交完成"
+  echo "自动化提交完成 ${_utc_date}" 
 }
 
 _commit_and_push
