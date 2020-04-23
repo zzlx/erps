@@ -14,7 +14,7 @@ for i
 do
 echo $i;
 case "$i" in
--m*) MESSAGE=$(i+1);;
+-m*) MESSAGE=$($i+1);;
 -h*) RUN="true"; cat <<EOF
   -m 提交说明
   -h 帮助
