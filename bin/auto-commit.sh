@@ -4,13 +4,15 @@
 # 获取代码库根目录位置
 APP_WORK_TREE=$(dirname $(cd $(dirname $0); pwd))
 
-# -C 指定工作目录 
-
-_utc_date() {
+_utc_date () {
   date -u "+%Y-%m-%d %H:%M:%S"
 }
 
-_commit_and_push() {
+_date_serial_number () {
+  date "+%Y%m%d"
+}
+
+_commit_and_push () {
 
   if [ -d "$APP_WORK_TREE/.git" ];then
     git -C $APP_WORK_TREE add -A .
