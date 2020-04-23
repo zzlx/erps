@@ -49,7 +49,7 @@ export const DOT_ENV_FILE = path.join(APP_ROOT, '.env');
 export const VIMRC_FILE   = path.join(APP_ROOT, '.vimrc');
 export const DIST_DIR     = path.join(APP_ROOT, 'dist');
 export const README_FILE  = path.join(APP_ROOT, 'README.md');
-export const HELP_FILE    = path.join(APP_ROOT, 'help.txt');
+export const HELP_FILE    = path.join(APP_ROOT, 'doc', 'help.txt');
 
 export const TEMP_DIR     = os.tmpDir();
 export const PUBLIC_HTML = '/';
