@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# 传递参数列表并执行 $@ 表示所有参数, $n 表示第n个参数
 # 获取代码库根目录位置
 APP_WORK_TREE=$(dirname $(cd $(dirname $0); pwd))
 
@@ -8,6 +7,20 @@ if [ ! -d "$APP_WORK_TREE/.git" ]; then
   echo "请确认代码库已初始化"
   return 1
 fi
+
+# 获取命令行参数 
+# $@ 表示所有参数, $n 表示第n个参数
+for i
+do
+case "$i" in
+-m*) MESSAGE=$(i+1);;
+-h*) RUN="true"; cat <<EOF
+  -m 提交说明
+  -h 帮助
+EOF
+;;
+esac
+done
 
 _utc_date () {
   date -u "+%Y-%m-%d %H:%M:%S"
@@ -23,4 +36,5 @@ _commit_and_push () {
   echo "$(_utc_date) 自动化提交完成"
 }
 
+# 执行提交任务
 _commit_and_push
