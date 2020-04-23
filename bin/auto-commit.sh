@@ -4,6 +4,11 @@
 # 获取代码库根目录位置
 APP_WORK_TREE=$(dirname $(cd $(dirname $0); pwd))
 
+if [ ! -d "$APP_WORK_TREE/.git" ]; then
+  echo "请确认代码库已初始化"
+  return 1
+fi
+
 _utc_date () {
   date -u "+%Y-%m-%d %H:%M:%S"
 }
@@ -13,15 +18,8 @@ _date_serial_number () {
 }
 
 _commit_and_push () {
-
-  if [ -d "$APP_WORK_TREE/.git" ];then
-    git -C $APP_WORK_TREE add -A .
-    git -C $APP_WORK_TREE commit -m "$(date "+%Y%m%d")_自动化提交"
-  else
-    echo "请确认代码库已初始化"
-    return 1
-  fi
-
+  git -C $APP_WORK_TREE add -A .
+  git -C $APP_WORK_TREE commit -m "$(date "+%Y%m%d")_自动化提交"
   echo "$(_utc_date) 自动化提交完成"
 }
 
