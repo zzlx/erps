@@ -13,7 +13,7 @@ fi
 for i
 do
 case "$i" in
--m*) MESSAGE=${i+1};;
+-m*) MESSAGE=$(i+2);;
 -h*) RUN="true"; cat <<EOF
   -m 提交说明
   -h 帮助
