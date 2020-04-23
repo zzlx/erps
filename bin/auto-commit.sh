@@ -33,7 +33,7 @@ _date_serial_number () {
 _commit_and_push () {
   git -C $APP_WORK_TREE add -A .
   git -C $APP_WORK_TREE commit -m "$(date "+%Y%m%d")_自动化提交"
-  echo "$(_utc_date) 自动化提交完成"
+  echo "$(_utc_date) 自动化提交完成 $MESSAGE"
 }
 
 # 执行提交任务
