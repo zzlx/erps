@@ -12,7 +12,6 @@ fi
 # $@ 表示所有参数, $n 表示第n个参数
 for i
 do
-echo $i;
 case "$i" in
 -m*) MESSAGE=$($i+1);;
 -h*) RUN="true"; cat <<EOF
@@ -21,6 +20,7 @@ case "$i" in
 EOF
 ;;
 esac
+echo $MESSAGE;
 done
 
 _utc_date () {
