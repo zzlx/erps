@@ -12,8 +12,9 @@ fi
 # $@ 表示所有参数, $n 表示第n个参数
 for i
 do
+echo i;
 case "$i" in
--m*) MESSAGE=$(i+2);;
+-m*) MESSAGE=$(i+1);;
 -h*) RUN="true"; cat <<EOF
   -m 提交说明
   -h 帮助
