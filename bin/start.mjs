@@ -1,4 +1,4 @@
-#!/usr/bin/env node --no-warnings --experimental-json-modules
+#! /usr/bin/env node --no-warnings --experimental-json-modules
 
 // 加载主控程序
 import Main from '../src/main.mjs';

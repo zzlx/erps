@@ -13,14 +13,14 @@ fi
 for i
 do
 case "$i" in
--m*) MESSAGE=$($i+1);;
+-m*) MESSAGE=$(expr $i + 1);;
 -h*) RUN="true"; cat <<EOF
+Usage: auto-commit [options]
   -m 提交说明
   -h 帮助
 EOF
 ;;
 esac
-echo $MESSAGE;
 done
 
 _utc_date () {
