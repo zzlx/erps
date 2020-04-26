@@ -39,3 +39,5 @@ _commit_and_push () {
 
 # 执行提交任务
 _commit_and_push
+
+return 0;
