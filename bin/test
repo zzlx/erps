@@ -1,8 +1,0 @@
-#! /bin/sh
-# 用于测试
-
-echo ${0##*/}
-
-for file in `ls ./`; do
-  echo $file
-done

@@ -31,14 +31,6 @@ export const APP_NAME     = PACKAGE_JSON.name;
 export const APP_LICENSE  = PACKAGE_JSON.license;
 export const APP_VERSION  = 'v' + PACKAGE_JSON.version;
 
-// 获取git代码库信息
-const GIT_HEAD_FILE = path.join(APP_ROOT, '.git/HEAD'); // HEAD文件记录当前分支ref
-const GIT_HEAD_REF = String(fs.readFileSync(GIT_HEAD_FILE)).slice(5).trim();
-
-export const GIT_COMMIT_FILE = path.join(APP_ROOT, `.git/${GIT_HEAD_REF}`);
-export const APP_BRANCH_NAME = path.basename(GIT_HEAD_REF); // 当前代码分支
-export const APP_BRANCH_VERSION = String(fs.readFileSync(GIT_COMMIT_FILE)).trim();
-
 // 配置系统常用目录
 export const HOME_DIR    = os.homedir(); // process.env.HOME 
 export const CONFIG_DIR  = path.join(HOME_DIR, `.${APP_NAME}`);

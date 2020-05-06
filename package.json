@@ -1,13 +1,13 @@
 {
   "name": "erps",
   "description": "ERP services system.",
-  "version": "0.20.4",
+  "version": "1.0.0",
   "private": true,
   "license": "MIT",
   "homepage": ".",
   "scripts": {
     "build": "webpack --config src/webpack.config.cjs",
-    "start": "./bin/run --httpd"
+    "start": "./starter"
   },
   "devDependencies": {
     "@babel/core": "7.1.6",
