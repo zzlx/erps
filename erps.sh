@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ################################################################################
 #
 # ERPs启动脚本程序
@@ -14,21 +14,25 @@
 # 脚本级别全局变量命名规则:下划线"_"开头
 ################################################################################
 
-_ORIG_ARGV="$@"       # 记录原始的参数
-_ORIG_CMD="$0 $*"     # 记录原始参数以备再次执行
-_ORIG_UMASK=$(umask)  # 记录原始umask值
-_ORIG_PWD="$(pwd)"    # 记录执行当前命令所在目录
+# 定义只读环境变量
+# readonly等同于declear -r
+readonly _ORIG_ARGV=$@         # 记录原始的参数
+readonly _ORIG_CMD="$0 $*"     # 记录原始参数以备再次执行
+readonly _ORIG_UMASK=$(umask)  # 记录原始umask值
+readonly _ORIG_PWD=$(pwd)      # 记录执行当前命令所在目录
+readonly _DAYS=(一 二 三 四 五 六 日)
 
-_APP_NAME="${0##*/}"
-_APP_ROOT="$(cd $(dirname $0) || exit; pwd -P)" # 获取代码库根目录位置
-_PACKAGE="$_APP_ROOT/package.json"
-
-_APP_FILE="$_APP_ROOT/src/server/index.mjs"
+_APP_NAME=${0##*/}
+_APP_ROOT=$(cd $(dirname $0) || exit; pwd -P) # 获取代码库根目录位置
+_PACKAGE=${_APP_ROOT}/package.json
+_LOG_FILE=${_ORIG_PWD}/${_APP_NAME}_output_log.$$ # 日志文件
+_APP_FILE=${_APP_ROOT}/src/server/index.mjs
 _UPGRADE_CHECK=1
 
-# defaults
-_DEBUG=1 # 调试模式
-_QUITE=0 # 静默模式
+# 定义子shell可以使用的变量
+# export等同于declear -x
+export _DEBUG=1 # 调试模式
+export _QUITE=0 # 静默模式
 
 ################################################################################
 # 定义脚本函数
@@ -36,8 +40,21 @@ _QUITE=0 # 静默模式
 # 约定:函数命名均以下划线"_"开头
 ################################################################################
 
+_is_zsh() {
+  [ -n "${ZSH_VERSION-}" ]
+}
+
+_has() {
+  type "${1-}" >/dev/null 2>&1
+}
+
+_is_alias() {
+  # this is intentionally not "command alias" so it works in zsh.
+  \alias "${1-}" >/dev/null 2>&1
+}
+
 # Print help message
-_show_help_message () { 
+_show_help () { 
   _debug "显示命令行帮助信息"
   cat <<- EOF
 $_SCRIPT_NAME  --Options
@@ -82,6 +99,7 @@ _install() {
 
 # 显示version版本
 _show_version () {
+  local v
   v=$(cat $_PACKAGE | grep version | awk -F ":" '{print $2}' | sed 's/[", ]//g')
 
   cat <<- EOF
@@ -90,6 +108,11 @@ Branch: $(_get_git_branch_name)
 Hash: $(_get_git_commit_hash)
 Node: $(node -v)
 EOF
+  unset v
+}
+
+_curl_version() {
+  curl -V | command awk '{ if ($1 == "curl") print $2 }' | command sed 's/-.*$//g'
 }
 
 _build_ui () {
@@ -124,10 +147,9 @@ _get_git_branch_name () {
 
 # 提交变更
 _commit_and_push () {
-  git -C $_APP_WORK_TREE add -A .
-  git -C $_APP_WORK_TREE commit -m "$(date "+%Y%m%d")_自动化提交"
+  git -C $_APP_ROOT add -A .
+  git -C $_APP_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
   echo "$(_utc_date) 自动化提交完成 $MESSAGE"
-  return;
 }
 
 _get_json_value () {
@@ -200,26 +222,24 @@ _get_curl_response () {
 
 # Detect the current Operating System
 _detect_os() { 
-  uname_res=$(uname -s)  # get the operating system name
-  if [[ $(date -h 2>&1 | grep -ic busybox) -gt 0 ]]; then
-    os="busybox"
-  elif [[ ${uname_res} == "Linux" ]]; then
-    os="linux"
-  elif [[ ${uname_res} == "FreeBSD" ]]; then
-    os="bsd"
-  elif [[ ${uname_res} == "Darwin" ]]; then
-    os="mac"
-  elif [[ ${uname_res:0:6} == "CYGWIN" ]]; then
-    os="cygwin"
-  elif [[ ${uname_res:0:5} == "MINGW" ]]; then
-    os="mingw"
-  else
-    os="unknown"
-  fi
-  _debug "detected os type = $os"
+  local OS=$(uname -s)  # get the operating system name
+
+  case "$OS" in
+    Linux )
+      ;;
+    Darwin )
+      ;;
+    * )
+      ;;
+  esac
+
+  _debug "detected os type = $OS"
+
   if [[ -f /etc/issue ]]; then
     _debug "Running $(cat /etc/issue)"
   fi
+
+  unset OS
 }
 
 # 提供脚本退出时需要执行的任务
@@ -245,17 +265,27 @@ _main () {
   # 解析命令行参数,执行相应程序
   while [[ -n ${1+defined} ]]; do
     case $1 in
-      -h | --help)
-        _show_help_message; _exit 0 ;;
-      -v | --version)
+      -h | --help )
+        _show_help; _exit 0 ;;
+      -v | --version )
         _show_version; _exit 0 ;;
-      -s | --start)
+      -s | --start )
         node --no-warnings --experimental-json-modules $_APP_FILE $@;
         ;;
-      *)
-        echo 'test'; _exit ;;
+      --commit )
+        _commit_and_push;
+        ;;
+      -c )
+        echo -n "输入一些文本 > ";
+        read text
+        echo "你的输入：$text";
+        ;;
+      * )
+        echo "输入的参数$1 不被支持.";
+        ;;
     esac
     shift
   done
 }
+
 _main $@ # 传递所有命令行参数给主程序，执行主程序
