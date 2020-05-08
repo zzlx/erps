@@ -6,40 +6,55 @@
 #
 # 简单、易用、高效的shell脚本为ERPs提供自动化的服务安装、部署、使用等用途.
 #
+# 函数命名约定:
+# 均以下划线"_"开头
+#
 # author: wangxuemin@zzlx.org
 ################################################################################
 
-################################################################################
-# 定义脚本环境变量 
-# 传递参数列表并执行 $@ 表示所有参数, $n 表示第n个参数
-# 脚本级别全局变量命名规则:下划线"_"开头
-#
-# export   = declear -x
-# readonly = declear -r
-################################################################################
+# 定义环境变量 
+_declear_variables () {
+  # 定义只读环境变量
+  readonly _APP_ROOT=$(cd $(dirname $0) || exit; pwd -P) # 获取代码库根目录位置
+  readonly _APP_NAME=$(_get_package_name)
+  readonly _SCRIPT_NAME=${0##*/}
+  readonly _ARGV=$@              # 记录原始的参数
+  readonly _ORIG_PWD=$(pwd)      # 记录执行当前命令所在目录
+  readonly _ORIG_CMD="$0 $*"     # 记录原始参数以备再次执行
+  readonly _ORIG_UMASK=$(umask)  # 记录原始umask值
+  readonly _WEEK_DAYS=(一 二 三 四 五 六 日) # 定义工作日
 
-# 定义只读环境变量
-readonly _APP_NAME=${0##*/}
-readonly _APP_ROOT=$(cd $(dirname $0) || exit; pwd -P) # 获取代码库根目录位置
-readonly _ARGV=$@         # 记录原始的参数
-readonly _PWD=$(pwd)      # 记录执行当前命令所在目录
-readonly _ORIG_CMD="$0 $*"     # 记录原始参数以备再次执行
-readonly _UMASK=$(umask)  # 记录原始umask值
-readonly _WEEK_DAYS=(一 二 三 四 五 六 日) # 定义工作日
+  _LOG_FILE=${_ORIG_PWD}/${_APP_NAME}_output_log.$$ # 日志文件
+  _APP_FILE=${_APP_ROOT}/src/server/index.mjs
+  _UPGRADE_CHECK=1
 
-_LOG_FILE=${_PWD}/${_APP_NAME}_output_log.$$ # 日志文件
-_APP_FILE=${_APP_ROOT}/src/server/index.mjs
-_UPGRADE_CHECK=1
 
-# 定义子shell可以使用的变量
-export _DEBUG=1 # 调试模式
-export _QUITE=0 # 静默模式
+  # 定义子shell可以使用的变量
+  export _DEBUG=1 # 调试模式
+  export _QUITE=0 # 静默模式
+}
 
-################################################################################
-# 定义脚本函数
-#
-# 约定:函数命名均以下划线"_"开头
-################################################################################
+# Print help message
+_show_help () { 
+  cat <<- EOF
+$_APP_NAME  --Options
+
+Options:
+  -b, --build       Build ui apps
+  -h, --help        Display help message
+  -i, --install     Install ERP services
+  -v, --version     Display version
+  -t, --test        Test ERP services
+
+
+  --commit          Commit a change to remote repo
+  --start           Start the ERP service
+  --restart         Restart the ERP service
+  --stop            Stop the ERP service
+
+Examples:
+EOF
+}
 
 _is_zsh() {
   [ -n "${ZSH_VERSION-}" ]
@@ -52,27 +67,6 @@ _has() {
 _is_alias() {
   # this is intentionally not "command alias" so it works in zsh.
   \alias "${1-}" >/dev/null 2>&1
-}
-
-# Print help message
-_show_help () { 
-  _debug "显示命令行帮助信息"
-  cat <<- EOF
-$_APP_NAME  --Options
-
-Options:
-  -b, --build       Build ui apps
-  -h, --help        Display help message
-  -i, --install     Install ERP services
-  -v, --version     Display version
-  -t, --test        Test ERP services
-
-  --start           Start the ERP service
-  --restart         Restart the ERP service
-  --stop            Stop the ERP service
-
-Examples:
-EOF
 }
 
 # 读取配置文件
@@ -95,13 +89,22 @@ _require() {
 _install() {
   cd $_APP_ROOT
   npm install
-  cd $_PWD
+  cd $_ORIG_PWD
+}
+
+
+# 获取package.json中name
+_get_package_name () {
+  local n package=${_APP_ROOT}/package.json
+  n=$(cat $package | grep '"name"' | awk -F ":" '{print $2}' | sed 's/[", ]//g')
+  echo $n
+  unset n package
 }
 
 # 获取package.json中version
 _get_package_version () {
   local v package=${_APP_ROOT}/package.json
-  v=$(cat $package | grep version | awk -F ":" '{print $2}' | sed 's/[", ]//g')
+  v=$(cat $package | grep '"version"' | awk -F ":" '{print $2}' | sed 's/[", ]//g')
   echo $v
   unset v package
 }
@@ -261,7 +264,7 @@ _detect_os() {
 # 提供脚本退出时需要执行的任务
 _exit () {
   # 恢复当前目录,并退出脚本程序
-  cd $_PWD; exit $@;
+  cd $_ORIG_PWD; exit $@;
 }
 
 # 获取进程id号
@@ -274,6 +277,8 @@ _get_process_id () {
 # 主程序
 # 接受命令行参数，执行程序任务
 _main () { 
+  _declear_variables;
+
   cd $_APP_ROOT # 进入程序根目录
   #_get_json_value $(cat "$APP_ROOT/package.json" )
   #_find_dns_utils
