@@ -148,10 +148,18 @@ _get_git_branch_name () {
 # 提交一次变更
 _commit_and_push () {
   read -r -p "是否继续提交? [Y/n] " input
+  
+  case "$input" in
+    [yY][eE][sS]|[yY] )
+      git -C $_APP_ROOT add -A .
+      git -C $_APP_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
+      echo "$(_utc_date) 自动化提交完成 $MESSAGE"
+      ;;
+    * )
+      echo "取消提交"; exit 0;;
+  esac
 
-  git -C $_APP_ROOT add -A .
-  git -C $_APP_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
-  echo "$(_utc_date) 自动化提交完成 $MESSAGE"
+
 }
 
 _get_json_value () {
