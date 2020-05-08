@@ -145,8 +145,10 @@ _get_git_branch_name () {
   echo ${git_head##*/};
 }
 
-# 提交变更
+# 提交一次变更
 _commit_and_push () {
+  read -r -p "是否继续提交? [Y/n] " input
+
   git -C $_APP_ROOT add -A .
   git -C $_APP_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
   echo "$(_utc_date) 自动化提交完成 $MESSAGE"
