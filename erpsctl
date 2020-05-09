@@ -294,7 +294,7 @@ _main () {
       -s | --start )
         node --no-warnings --experimental-json-modules $_APP_FILE $@;
         ;;
-      --commit )
+      --save )
         _commit_and_push;
         ;;
       -c )
