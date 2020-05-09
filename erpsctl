@@ -151,24 +151,24 @@ _check_git_ready () {
 
 # 提交一次变更
 _commit_and_push () {
-  if [[ $(git diff HEAD) ]]; then
-    echo "需要变更"
-    exit;
+
+  if [[ `git diff HEAD` ]]; then
+    git -C $_APP_ROOT add -A
+    git -C $_APP_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
   fi
 
-  read -r -p "是否继续提交? [Y/n] " input
+  read -r -p "是否需要上传远程仓库? [Y/n] " input
 
   case "$input" in
     [yY][eE][sS]|[yY] )
-      git -C $_APP_ROOT add -A .
-      git -C $_APP_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
-      git push
-      echo "$(_utc_date) 自动化提交完成 $MESSAGE"
+      git -C $_APP_ROOT push
       ;;
     * )
-      echo "取消提交"; exit 0;;
+      echo "取消提交"; 
+      ;;
   esac
 
+  echo "$(_utc_date) 自动化提交完成 $MESSAGE"
 
 }
 
