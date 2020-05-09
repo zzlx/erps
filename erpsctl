@@ -161,10 +161,10 @@ _commit_and_push () {
 
   case "$input" in
     [yY][eE][sS]|[yY] )
+      echo "提交至远程仓库"; 
       git -C $_APP_ROOT push
       ;;
     * )
-      echo "取消提交"; 
       ;;
   esac
 
