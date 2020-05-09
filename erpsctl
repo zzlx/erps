@@ -151,6 +151,10 @@ _check_git_ready () {
 
 # 提交一次变更
 _commit_and_push () {
+  if [[ $(git diff HEAD) ]]; then
+    echo "需要变更"
+    exit;
+  fi
 
   read -r -p "是否继续提交? [Y/n] " input
 
