@@ -19,6 +19,9 @@ import {
   APP_CONFIG, 
 } from '../system.config.mjs';
 
+// 初始化系统环境 
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
 const __dirname = path.dirname(import.meta.url).substr(7);
 
 // 初始化服务程序

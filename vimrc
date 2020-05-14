@@ -198,9 +198,9 @@ autocmd BufRead *.c set cindent             "C/C++缩进方式
 " markdown脚本配置
 autocmd BufRead,BufNewFile *.md setfiletype markdown
 
-" shell脚本配置
+" shell脚本配置项目
 autocmd BufNewFile *.sh exec ":call SetHeader()"
-autocmd BufRead,BufNewFile *.sh setfiletype shell
+autocmd BufRead,BufNewFile *.sh setfiletype shell noexpandtab
 autocmd FileType shell noremap <buffer> <F12> :!sh % <CR>
 
 " js脚本配置
