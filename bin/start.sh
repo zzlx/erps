@@ -14,7 +14,7 @@ readonly _ORIG_CMD="$0 $*"     # 记录原始参数以备再次执行
 readonly _ORIG_UMASK=$(umask)  # 记录原始umask值
 readonly _ARGV=$@              # 记录原始的参数
 readonly _FILE_NAME=${0##*/}
-readonly _APP_ROOT=$( cd $(dirname $0) || exit; pwd -P;) # 获取代码库根目录位置
+readonly _APP_ROOT=$(dirname $(dirname $0)) # 获取代码库根目录位置
 
 # 定义可配置变量
 _APP_NAME=null  # 默认为null
@@ -25,46 +25,10 @@ export _QUITE=false    # 静默模式
 export _UPGRADE_CHECK=true # 默认检查更新
 export _IS_ROOT=$(if [ $UID -eq 0 ]; then echo true; else echo false; fi;)
 
-# Main process
-_main() { 
-  # 检查依赖的函数
-	_require host
-  _require openssl 
-
-  # 准备系统变量
-	_get_os;
-
-  # 解析命令行参数,执行相应程序
-  while [[ -n ${1+defined} ]]; do
-    case $1 in
-      -h | --help )
-        _show_help; _exit 0 ;;
-      -v | --version )
-        _show_version; _exit 0 ;;
-      -s | --start )
-        node --no-warnings --experimental-json-modules $_APP_FILE $@;
-        ;;
-      --save )
-        _commit_and_push;
-        ;;
-      --deploy-pki )
-        _deploy_pki_cert;;
-      -c )
-        echo -n "输入一些文本 > ";
-        read text
-        echo "你的输入：$text";
-        ;;
-      * )
-        echo "输入的参数$1 不被支持.";
-        ;;
-    esac
-    shift
-  done
-
-}
+################################################################################
 
 # 帮助文档
-_show_help() { 
+_help_message() { 
   cat <<- EOF
 	$(_get_package_name) --Options
 
@@ -84,6 +48,43 @@ _show_help() {
 	Examples:
 
 	EOF
+}
+
+# Main process
+_main() { 
+  # 检查依赖的函数
+	_require host
+  _require openssl 
+
+  # 准备系统变量
+	_get_os;
+
+  # 解析命令行参数,执行相应程序
+  while [[ -n ${1+defined} ]]; do
+    case $1 in
+      -h | --help )
+        _help_message; _exit 0;;
+      -v | --version )
+        _show_version; _exit 0;;
+      -s | --start )
+        node --no-warnings --experimental-json-modules $_APP_FILE $@;
+        ;;
+      --push-commit )
+        _commit_and_push;
+        _exit 0;;
+      --deploy-pki )
+        _deploy_pki_cert;;
+      -c )
+        echo -n "输入一些文本 > ";
+        read text
+        echo "你的输入：$text";
+        ;;
+      * )
+        echo "输入的参数$1 不被支持.";
+        ;;
+    esac
+    shift
+  done
 }
 
 # create a csr using a private key
