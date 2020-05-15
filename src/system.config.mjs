@@ -43,7 +43,7 @@ export const DIST_DIR     = path.join(APP_ROOT, 'dist');
 export const README_FILE  = path.join(APP_ROOT, 'README.md');
 export const HELP_FILE    = path.join(APP_ROOT, 'doc', 'help.txt');
 
-export const TEMP_DIR     = os.tmpDir();
+export const TEMP_DIR     = os.tmpdir();
 export const PUBLIC_HTML = '/';
 
 // 获取APP配置信息

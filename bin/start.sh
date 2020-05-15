@@ -3,41 +3,31 @@
 #
 # start.sh
 #
-# 安装、部署、管理erps.
-#
-# 约定
-# 全局变量命名规则: 以"_"开头或连接大写命名字母
-#
-#
-#
 # Author: wangxuemin@zzlx.org
+# File: start.sh
 ################################################################################
 
-# defined readonly variables
-# equivalent to "readonly variable"
-declare -r _ORIG_PWD=$(pwd)      # 记录执行当前命令所在目录
-declare -r _ORIG_CMD="$0 $*"     # 记录原始参数以备再次执行
-declare -r _ORIG_UMASK=$(umask)  # 记录原始umask值
-declare -r _ARGV=$@              # 记录原始的参数
-declare -r _FILE=${0##*/}
-declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P;) # 获取目录位置
-declare -r _ROOT=$(dirname $_DIR) # 获取脚本根目录
-declare -r _APP_NAME=$(
-  if [[ -r ${_ROOT}/package.json ]]; then 
-    v=$(
-      cat ${_ROOT}/package.json | grep '"name":' | awk -F ":" '{ printf $2 }' \
-        | sed -e 's/[",]//g'
-    )
-    echo $v;
-  else 
-    echo 'erps'; 
-  fi
-);
+################################################################################
+# 定义shell脚本变量
+# 命名规则:全局变量以"_"开头或连接大写命名字母
+#
+# defined readonly variables `declear -r` equivalent to "readonly variable"
+# defined exported variables `declear -x` equivalent to `export variable`
 
-# define variables used in subsequent command
-# equivalent to "export variable"
+declare -r _ARGV=$@                                   # 记录原始的参数
+declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P;)  # 获取目录路径
+declare -r _FILE=${0##*/}                             # 获取文件名称
+declare -r _ROOT=$(dirname $_DIR)                     # 获取脚本根目录路径
+declare -r _ORIG_CMD="$0 $*"                          # 记录原始参数以备再次执行
+declare -r _ORIG_PWD=$(pwd)                           # 记录执行当前命令所在目录
+declare -r _ORIG_UMASK=$(umask)                       # 记录原始umask值
+
+# 检查_ROOT目录是否存在.env配置文件
+declare -r _HAS_DOT_ENV=$([[ -r ${_ROOT}/.env ]] && echo "true" || echo "false")
+
+# ENV环境设置
 declare -rx _ENV=$(
-  if [[ -r ${_ROOT}/.env ]]; then 
+  if [[ $_HAS_DOT_ENV == 'true' ]]; then 
     v=$(cat ${_ROOT}/.env | grep 'ENV=' | awk -F "=" '{ printf $2 }')
     if [[ $v == 'development' ]]; then 
       echo 'development'; 
@@ -48,23 +38,28 @@ declare -rx _ENV=$(
     echo 'production'; 
   fi
 );
+
+# 调试模式开关
 declare -rx _DEBUG=$(
-  if [[ -r ${_ROOT}/.env ]]; then 
+  if [[ $_HAS_DOT_ENV == 'true' ]]; then 
     v=$(cat ${_ROOT}/.env | grep 'DEBUG=' | awk -F "=" '{ printf $2 }')
     if [[ $v == 'true' ]]; then echo 'true'; else echo 'false'; fi
   else 
     echo 'false'; 
   fi
 );
-declare -rx _QUITE=false    # 静默模式
+
+declare -rx _QUITE=false        # 静默模式
 declare -rx _CHECK_UPGRADE=true # 默认检查更新
 
 ################################################################################
+# 定义shell脚本函数
+# 命名规则:以"_"开头以区别系统工具函数,使用小写字母
 
 # 帮助文档
 _help_message() { 
   cat <<- EOF
-	$(_get_package_name) --Options
+	$(_get_package_name) --[Options]
 
 	Options:
 		-b, --build       Build ui apps
@@ -79,47 +74,64 @@ _help_message() {
 		--restart         Restart the ERP service
 		--stop            Stop the ERP service
 
-	Examples:
+	Usage:
 
 	EOF
 }
 
-# Main process
+# Main function
 _main() { 
   # 检查依赖的函数
 	_require git
 	_require host
   _require openssl 
 
-  # 准备系统变量
-	_get_os;
 
   # 解析命令行参数,执行相应程序
   while [[ -n ${1+defined} ]]; do
     case $1 in
       -h | --help )
-        _help_message; _exit 0;;
+        _help_message; break;;
+
       -v | --version )
-        _show_version; _exit 0;;
+        _show_version; break;;
+
       -s | --start )
-        node --no-warnings --experimental-json-modules $_APP_FILE $@;
-        ;;
+        _start_server; break;;
+
       --commit )
-        _commit_and_push;
-        _exit 0;;
+        _commit_and_push; break;;
+
       --deploy-pki )
-        _deploy_pki_cert;;
+        _deploy_pki_cert; break;;
+
+      --install-node-modules )
+        _install-node-modules; break;;
+
       -c )
         echo -n "输入一些文本 > ";
         read text
         echo "你的输入：$text";
         ;;
+
       * )
         echo "输入的参数$1 不被支持.";
         ;;
     esac
     shift
   done
+}
+
+_detect_node_modules() {
+  if [[ ! -d ${_ROOT}/node_modules ]]; then
+    cd $_ROOT; npm install; cd $_PWD;
+  fi
+}
+
+_start_server() {
+  _detect_node_modules
+  local _SERVER_PATH=${_ROOT}/src/server/index.mjs
+  node --no-warnings --experimental-json-modules $_SERVER_PATH;
 }
 
 # create a csr using a private key
@@ -364,16 +376,9 @@ _read_configurations() {
   echo 'test'
 }
 
-# install required modules
-_install() {
-  cd $_ROOT; npm install; cd $_ORIG_PWD
-}
-
 # 获取package.json中name
 _get_package_name() {
-	if [[ $_APP_NAME != "null"  ]]; then
-		echo $_APP_NAME; return
-	fi
+	if [[ -n $_APP_NAME ]]; then echo $_APP_NAME; return; fi
 
   local package=${_ROOT}/package.json
   _APP_NAME=$(cat $package | grep '"name"' | awk -F ":" '{print $2}' | sed 's/[", ]//g')
@@ -383,28 +388,37 @@ _get_package_name() {
 
 # 获取package.json中version
 _get_package_version() {
-  local v package=${_ROOT}/package.json
-  v=$(cat $package | grep '"version"' | awk -F ":" '{print $2}' | sed 's/[", ]//g')
-  echo $v
-  unset v package
+	if [[ -n $_APP_VERSION ]]; then echo $_APP_VERSION; return; fi
+
+  local package=${_ROOT}/package.json
+  _APP_VERSION=$(cat $package | grep '"version"' | awk -F ":" '{print $2}' | sed 's/[", ]//g')
+  echo $_APP_VERSION
+  unset package
 }
 
 # 确保存在git仓库目录
 _get_git_commit_hash() { 
+	if [[ -n $_COMMIT_HASH ]]; then echo $_COMMIT_HASH; return; fi
+
   _check_git_ready;
   git_head="$(cat ${_ROOT}/.git/HEAD)"
-  commit_hash="$(cat "${_ROOT}/.git/${git_head:5}")";
-  echo $commit_hash;
+  _COMMIT_HASH="$(cat "${_ROOT}/.git/${git_head:5}")";
+  echo $_COMMIT_HASH;
 }
 
 _get_git_branch_name() { 
+	if [[ -n $_BRANCH_NAME ]]; then echo $_BRANCH_NAME; return; fi
+
   _check_git_ready;
   git_head="$(cat ${_ROOT}/.git/HEAD)"
-  echo ${git_head##*/};
+  _BRANCH_NAME=${git_head##*/};
+  echo $_BRANCH_NAME
 }
 
 # get the current operation system name
 _get_os() {
+	if [[ -n $_OS ]]; then echo $_OS; return; fi
+
   uname_res=$(uname -s)
 	if [[ ${uname_res} == "Linux" ]]; then
     _OS="linux"
@@ -419,7 +433,6 @@ _get_os() {
   if [[ -f /etc/issue ]]; then
     _debug "Running $(cat /etc/issue)"
   fi
-
 }
 
 # get curl response
@@ -433,10 +446,6 @@ _get_cr() {
 	_debug code $code
 	_debug "get_cr return code $ret"
 	return $ret
-}
-
-_get_curl_version() {
-  curl -V | command awk '{ if ($1 == "curl") print $2 }' | command sed 's/-.*$//g'
 }
 
 # 显示version版本
@@ -467,7 +476,7 @@ _check_git_ready() {
 # 提交一次变更
 _commit_and_push() {
 
-  if [[ `git diff HEAD` ]]; then
+  if [[ ! -n `git diff HEAD` ]]; then
     git -C $_ROOT add -A
     git -C $_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
   fi
@@ -507,13 +516,13 @@ _get_json_value() {
 
 _root_user() {
   if test "$(id -u)" -ne 0; then
-    echo "${_APP_NAME}: only root can use ${_APP_NAME}" 1>&2
+    echo "$(_get_package_name): only root can use $(_get_package_name)" 1>&2
     exit 1
   fi
 }
 
 _error_and_exit() {
-  echo -e "${_APP_NAME}: ${1:-"Unknown Error"}" >&2
+  echo -e "$(_get_package_name): ${1:-"Unknown Error"}" >&2
   exit 1
 }
 
@@ -550,6 +559,17 @@ _find_dns_utils() {
     _debug "HAS HOST=true"
     HAS_HOST=true
   fi
+}
+
+# get curl useragent
+_get_curl_useragent() {
+  if [[ -n $_CURL_USERAGENT ]]; then echo $_CURL_USERAGENT; return; fi
+  _CURL_USERAGENT="$(_get_package_name)/$(_get_package_version)"
+  echo $_CURL_USERAGENT
+}
+
+_get_curl_version() {
+  curl -V | command awk '{ if ($1 == "curl") print $2 }' | command sed 's/-.*$//g'
 }
 
 _get_curl_response() {
@@ -635,6 +655,12 @@ _stop_service() {
 
 }
 
+_install_node_modules() {
+  cd $_ROOT;
+  npm --registry=https://registry.npm.taobao.org install
+  cd $_ORIG_PWD;
+}
+
 # 获取进程id号
 _get_process_id() {
   process=$1
@@ -649,3 +675,4 @@ _is_root() {
 
 # 传递所有命令行参数给主程序，执行主程序
 _main $@ 
+################################################################################
