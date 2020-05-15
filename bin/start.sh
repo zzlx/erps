@@ -3,27 +3,61 @@
 #
 # start.sh
 #
-# 用户安装、部署、管理erps系统.
+# 安装、部署、管理erps.
+#
+# 约定
+# 全局变量命名规则: 以"_"开头或连接大写命名字母
+#
+#
 #
 # Author: wangxuemin@zzlx.org
 ################################################################################
 
-# 定义只读变量
-readonly _ORIG_PWD=$(pwd)      # 记录执行当前命令所在目录
-readonly _ORIG_CMD="$0 $*"     # 记录原始参数以备再次执行
-readonly _ORIG_UMASK=$(umask)  # 记录原始umask值
-readonly _ARGV=$@              # 记录原始的参数
-readonly _FILE_NAME=${0##*/}
-readonly _APP_ROOT=$(dirname $(dirname $0)) # 获取代码库根目录位置
+# defined readonly variables
+# equivalent to "readonly variable"
+declare -r _ORIG_PWD=$(pwd)      # 记录执行当前命令所在目录
+declare -r _ORIG_CMD="$0 $*"     # 记录原始参数以备再次执行
+declare -r _ORIG_UMASK=$(umask)  # 记录原始umask值
+declare -r _ARGV=$@              # 记录原始的参数
+declare -r _FILE=${0##*/}
+declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P;) # 获取目录位置
+declare -r _ROOT=$(dirname $_DIR) # 获取脚本根目录
+declare -r _APP_NAME=$(
+  if [[ -r ${_ROOT}/package.json ]]; then 
+    v=$(
+      cat ${_ROOT}/package.json | grep '"name":' | awk -F ":" '{ printf $2 }' \
+        | sed -e 's/[",]//g'
+    )
+    echo $v;
+  else 
+    echo 'erps'; 
+  fi
+);
 
-# 定义可配置变量
-_APP_NAME=null  # 默认为null
-
-# 可供子shell使用的变量
-export _USE_DEBUG=true # 调试模式
-export _QUITE=false    # 静默模式
-export _UPGRADE_CHECK=true # 默认检查更新
-export _IS_ROOT=$(if [ $UID -eq 0 ]; then echo true; else echo false; fi;)
+# define variables used in subsequent command
+# equivalent to "export variable"
+declare -rx _ENV=$(
+  if [[ -r ${_ROOT}/.env ]]; then 
+    v=$(cat ${_ROOT}/.env | grep 'ENV=' | awk -F "=" '{ printf $2 }')
+    if [[ $v == 'development' ]]; then 
+      echo 'development'; 
+    else 
+      echo 'production'; 
+    fi
+  else 
+    echo 'production'; 
+  fi
+);
+declare -rx _DEBUG=$(
+  if [[ -r ${_ROOT}/.env ]]; then 
+    v=$(cat ${_ROOT}/.env | grep 'DEBUG=' | awk -F "=" '{ printf $2 }')
+    if [[ $v == 'true' ]]; then echo 'true'; else echo 'false'; fi
+  else 
+    echo 'false'; 
+  fi
+);
+declare -rx _QUITE=false    # 静默模式
+declare -rx _CHECK_UPGRADE=true # 默认检查更新
 
 ################################################################################
 
@@ -53,6 +87,7 @@ _help_message() {
 # Main process
 _main() { 
   # 检查依赖的函数
+	_require git
 	_require host
   _require openssl 
 
@@ -69,7 +104,7 @@ _main() {
       -s | --start )
         node --no-warnings --experimental-json-modules $_APP_FILE $@;
         ;;
-      --push-commit )
+      --commit )
         _commit_and_push;
         _exit 0;;
       --deploy-pki )
@@ -237,6 +272,11 @@ _is_zsh() {
   [ -n "${ZSH_VERSION-}" ]
 }
 
+# has function
+_has() {
+  echo '检查function是否可用'
+}
+
 # check if required function is available
 _require() {
   local res;
@@ -326,7 +366,7 @@ _read_configurations() {
 
 # install required modules
 _install() {
-  cd $_APP_ROOT; npm install; cd $_ORIG_PWD
+  cd $_ROOT; npm install; cd $_ORIG_PWD
 }
 
 # 获取package.json中name
@@ -335,7 +375,7 @@ _get_package_name() {
 		echo $_APP_NAME; return
 	fi
 
-  local package=${_APP_ROOT}/package.json
+  local package=${_ROOT}/package.json
   _APP_NAME=$(cat $package | grep '"name"' | awk -F ":" '{print $2}' | sed 's/[", ]//g')
   echo $_APP_NAME
   unset n package
@@ -343,7 +383,7 @@ _get_package_name() {
 
 # 获取package.json中version
 _get_package_version() {
-  local v package=${_APP_ROOT}/package.json
+  local v package=${_ROOT}/package.json
   v=$(cat $package | grep '"version"' | awk -F ":" '{print $2}' | sed 's/[", ]//g')
   echo $v
   unset v package
@@ -352,14 +392,14 @@ _get_package_version() {
 # 确保存在git仓库目录
 _get_git_commit_hash() { 
   _check_git_ready;
-  git_head="$(cat ${_APP_ROOT}/.git/HEAD)"
-  commit_hash="$(cat "${_APP_ROOT}/.git/${git_head:5}")";
+  git_head="$(cat ${_ROOT}/.git/HEAD)"
+  commit_hash="$(cat "${_ROOT}/.git/${git_head:5}")";
   echo $commit_hash;
 }
 
 _get_git_branch_name() { 
   _check_git_ready;
-  git_head="$(cat ${_APP_ROOT}/.git/HEAD)"
+  git_head="$(cat ${_ROOT}/.git/HEAD)"
   echo ${git_head##*/};
 }
 
@@ -367,17 +407,15 @@ _get_git_branch_name() {
 _get_os() {
   uname_res=$(uname -s)
 	if [[ ${uname_res} == "Linux" ]]; then
-    os="linux"
+    _OS="linux"
   elif [[ ${uname_res} == "FreeBSD" ]]; then
-    os="bsd"
+    _OS="bsd"
   elif [[ ${uname_res} == "Darwin" ]]; then
-    os="mac"
+    _OS="mac"
   else
-    os="unknown"
+    _OS="unknown"
   fi
 	
-	_debug "detected os type = $os"
-
   if [[ -f /etc/issue ]]; then
     _debug "Running $(cat /etc/issue)"
   fi
@@ -420,8 +458,8 @@ _utc_date() {
 }
 
 _check_git_ready() {
-  if [[ ! -d $_APP_ROOT/.git ]]; then 
-    git -C $_APP_ROOT init
+  if [[ ! -d $_ROOT/.git ]]; then 
+    git -C $_ROOT init
   fi
   return 0;
 }
@@ -430,8 +468,8 @@ _check_git_ready() {
 _commit_and_push() {
 
   if [[ `git diff HEAD` ]]; then
-    git -C $_APP_ROOT add -A
-    git -C $_APP_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
+    git -C $_ROOT add -A
+    git -C $_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
   fi
 
   read -r -p "是否需要上传远程仓库? [Y/n] " input
@@ -439,7 +477,7 @@ _commit_and_push() {
   case "$input" in
     [yY][eE][sS]|[yY] )
       echo "提交至远程仓库"; 
-      git -C $_APP_ROOT push 
+      git -C $_ROOT push 
       ;;
     * )
       ;;
@@ -486,7 +524,7 @@ _info() { # Write infomation if QUIET is set 0
 }
 
 _debug() {
-  if [[ $_USE_DEBUG == "true" ]]; then
+  if [[ ${_DEBUG} == "true" ]]; then
     echo "DEBUG: $@"
   fi
 }
@@ -602,6 +640,11 @@ _get_process_id() {
   process=$1
   pid=$(ps -ef | grep $process | grep '/bin/java' | grep -v grep | awk '{print $2}')
   echo $pid
+}
+
+# 判断是否root用户
+_is_root() {
+  if [ $UID -eq 0 ]; then echo true; else echo false; fi;
 }
 
 # 传递所有命令行参数给主程序，执行主程序
