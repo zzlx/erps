@@ -476,7 +476,7 @@ _check_git_ready() {
 # 提交一次变更
 _commit_and_push() {
 
-  if [[ ! -n `git diff HEAD` ]]; then
+  if [[ ! -n $(git diff HEAD) ]]; then
     git -C $_ROOT add -A
     git -C $_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
   fi
