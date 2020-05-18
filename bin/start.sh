@@ -509,7 +509,7 @@ _commit_and_push() {
   case "$input" in
     [yY][eE][sS]|[yY] )
       echo "提交至远程仓库"; 
-      git -C $_ROOT push 
+      git -C $_ROOT push master
       ;;
     * )
       ;;
