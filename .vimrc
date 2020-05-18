@@ -71,11 +71,10 @@ set autoread
 set confirm
 set modeline
 
-" 缩进设置
-set shiftwidth=2  " 格式化代码缩进
-set tabstop=2     " tab缩进空格,默认是8个
-set softtabstop=2 " 编辑模式退格缩回长度
-set expandtab     " tab键转为空格
+" 默认缩进设置
+set sw=2 
+set ts=2 
+set softtabstop=2
 "set autoindent    " 自动缩进 set noautoindent 取消自动缩进
 set smartindent   " 智能缩进
 
@@ -202,13 +201,13 @@ autocmd BufRead,BufNewFile *.md setfiletype markdown
 
 " shell脚本配置项目
 autocmd BufNewFile *.sh exec ":call SetHeader()"
-autocmd BufRead,BufNewFile *.sh setfiletype shell noexpandtab
+autocmd BufRead,BufNewFile *.sh setfiletype shell set noexpandtab sw=2 ts=2 softtabstop=2
 autocmd FileType shell noremap <buffer> <F12> :!sh % <CR>
 
 " js脚本配置
 "autocmd BufWinLeave *.mjs,*.cjs mkview
 "autocmd BufWinEnter *.mjs,*.cjs silent loadview
-autocmd BufRead,BufNewFile *.mjs,*.cjs,*.js setfiletype javascript
+autocmd BufRead,BufNewFile *.mjs,*.cjs,*.js setfiletype javascript set expandtab
 autocmd FileType javascript noremap <buffer> <F12> :!node --no-warnings --experimental-json-modules --experimental-modules %<CR>
 
 " python脚本配置

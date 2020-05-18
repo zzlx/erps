@@ -18,6 +18,8 @@ declare -r _ARGV=$@                                   # 记录原始的参数
 declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P;)  # 获取目录路径
 declare -r _FILE=${0##*/}                             # 获取文件名称
 declare -r _ROOT=$(dirname $_DIR)                     # 获取脚本根目录路径
+declare -x PATH="${PATH}:${_ROOT}/bin"								# 附加PATH路径
+
 declare -r _ORIG_CMD="$0 $*"                          # 记录原始参数以备再次执行
 declare -r _ORIG_PWD=$(pwd)                           # 记录执行当前命令所在目录
 declare -r _ORIG_UMASK=$(umask)                       # 记录原始umask值
@@ -39,18 +41,9 @@ declare -rx _ENV=$(
   fi
 );
 
-# 调试模式开关
-declare -rx _DEBUG=$(
-  if [[ $_HAS_DOT_ENV == 'true' ]]; then 
-    v=$(cat ${_ROOT}/.env | grep 'DEBUG=' | awk -F "=" '{ printf $2 }')
-    if [[ $v == 'true' ]]; then echo 'true'; else echo 'false'; fi
-  else 
-    echo 'false'; 
-  fi
-);
-
 declare -rx _QUITE=false        # 静默模式
 declare -rx _CHECK_UPGRADE=true # 默认检查更新
+declare _RENEW_ALLOW=30
 
 ################################################################################
 # 定义shell脚本函数
@@ -59,7 +52,7 @@ declare -rx _CHECK_UPGRADE=true # 默认检查更新
 # 帮助文档
 _help_message() { 
   cat <<- EOF
-	$(_get_package_name) --[Options]
+	$(_printf $(_get_package_name | _toUpperCase)) --[Options]
 
 	Options:
 		-b, --build       Build ui apps
@@ -94,7 +87,7 @@ _main() {
         _help_message; break;;
 
       -v | --version )
-        _show_version; break;;
+        _get_app_version; break;;
 
       -s | --start )
         _start_server; break;;
@@ -105,8 +98,8 @@ _main() {
       --deploy-pki )
         _deploy_pki_cert; break;;
 
-      --install-node-modules )
-        _install-node-modules; break;;
+      --install )
+        _install_node_modules; break;;
 
       -c )
         echo -n "输入一些文本 > ";
@@ -122,10 +115,13 @@ _main() {
   done
 }
 
-_detect_node_modules() {
-  if [[ ! -d ${_ROOT}/node_modules ]]; then
-    cd $_ROOT; npm install; cd $_PWD;
-  fi
+_open_browser() {
+  os=$(_get_os)
+  case $os in
+    mac )
+      open -a "/Applications/Safari.app" $1;
+      ;;
+	esac
 }
 
 _start_server() {
@@ -134,7 +130,40 @@ _start_server() {
   node --no-warnings --experimental-json-modules $_SERVER_PATH;
 }
 
-# create a csr using a private key
+# 获取进程id号
+_get_process_id() {
+  process=$1
+  pid=$(ps -ef | grep $process | grep '/bin/java' | grep -v grep | awk '{print $2}')
+  echo $pid
+}
+
+# 获取调试开关设置
+_get_debug_switcher() {
+	if [[ -n $_DEBUG ]]; then echo $_DEBUG; return; fi
+
+  if [[ $_HAS_DOT_ENV == 'true' ]]; then 
+    v=$(cat ${_ROOT}/.env | grep 'DEBUG=' | awk -F "=" '{ printf $2 }')
+    if [[ $v == 'true' ]]; then _DEBUG='true'; else _DEBUG='false'; fi
+  else 
+    _DEBUG='false'; 
+  fi
+
+	echo $_DEBUG
+}
+
+# 获取shell类型
+_get_shell_type() {
+	if [[ -n $BASH_VERSION ]]; then echo "bash"; return; fi
+	if [[ -n $ZSH_VERSION ]]; then echo "zsh"; return; fi
+}
+
+# 获取主机名
+_get_hostname() {
+  if [[ -n $HOST ]]; then echo "$HOST"; return; fi
+  if [[ -n $(hostname) ]]; then echo $(hostname); return; fi
+}
+
+# create a csr using openssl
 _create_csr() {
 	csr_file=$1
 	csr_key=$2
@@ -238,6 +267,12 @@ _create_private_key() {
 	fi
 }
 
+_detect_node_modules() {
+  if [[ ! -d ${_ROOT}/node_modules ]]; then
+    cd $_ROOT; npm install; cd $_PWD;
+  fi
+}
+
 # deploy pki private key and certificate
 _deploy_pki_cert() {
 	if [[ ${_IS_ROOT} == 'false' ]]; then
@@ -270,13 +305,8 @@ _date_fmt() {
 
 # calculate the renewal time in epoch
 _date_renew() {
-	date_now_s=$( date +%s )
+	date_now_s=$(date +%s)
 	echo "$((date_now_s + RENEW_ALLOW*24*60*60))"
-}
-
-# Print help message
-_install() {
-  echo '部署服务端程序';
 }
 
 # 是否是zsh
@@ -357,6 +387,11 @@ _urlbase64_decode() {
     openssl base64 -d -A
 }
 
+_is_alias() {
+  # this is intentionally not "command alias" so it works in zsh.
+  \alias "${1-}" >/dev/null 2>&1
+}
+
 # 获取服务端口
 _get_server_port() {
   case "$SERVER_TYPE" in
@@ -364,16 +399,6 @@ _get_server_port() {
       _SERVICE_PORT=443
       ;;
   esac
-}
-
-_is_alias() {
-  # this is intentionally not "command alias" so it works in zsh.
-  \alias "${1-}" >/dev/null 2>&1
-}
-
-# 读取配置文件
-_read_configurations() {
-  echo 'test'
 }
 
 # 获取package.json中name
@@ -429,10 +454,8 @@ _get_os() {
   else
     _OS="unknown"
   fi
-	
-  if [[ -f /etc/issue ]]; then
-    _debug "Running $(cat /etc/issue)"
-  fi
+
+  echo $_OS
 }
 
 # get curl response
@@ -449,12 +472,12 @@ _get_cr() {
 }
 
 # 显示version版本
-_show_version() {
+_get_app_version() {
   cat <<- EOF
-Version: $(_get_package_version)
-Hash: $(_get_git_commit_hash)
-Branch: $(_get_git_branch_name)
-EOF
+	Version: $(_get_package_version)
+	GitBranch: $(_get_git_branch_name)
+	GitHash: $(_get_git_commit_hash)
+	EOF
 }
 
 _build_ui() {
@@ -521,7 +544,7 @@ _root_user() {
   fi
 }
 
-_error_and_exit() {
+_error_exit() {
   echo -e "$(_get_package_name): ${1:-"Unknown Error"}" >&2
   exit 1
 }
@@ -532,8 +555,9 @@ _info() { # Write infomation if QUIET is set 0
   fi
 }
 
+# 打印调试信息
 _debug() {
-  if [[ ${_DEBUG} == "true" ]]; then
+	if [[ $(_get_debug_switcher) == "true" ]]; then
     echo "DEBUG: $@"
   fi
 }
@@ -556,10 +580,17 @@ _find_dns_utils() {
   fi
 
   if [[ -n "$(command -v host 2>/dev/null)" ]]; then
-    _debug "HAS HOST=true"
+    _debug "HAS_HOST=true"
     HAS_HOST=true
   fi
 }
+
+# copy a file, useing scp,sftp,or ftp if required.
+_copy_file() {
+	echo 'test';
+
+}
+
 
 # get curl useragent
 _get_curl_useragent() {
@@ -589,7 +620,7 @@ _get_curl_response() {
 _detect_os() { 
   local OS=$(uname -s)  # get the operating system name
 
-  case "$OS" in
+  case "$_OS" in
     Linux )
       ;;
     Darwin )
@@ -598,7 +629,7 @@ _detect_os() {
       ;;
   esac
 
-  _debug "detected os type = $OS"
+  _debug "detected os type = $_OS"
 
   if [[ -f /etc/issue ]]; then
     _debug "Running $(cat /etc/issue)"
@@ -613,14 +644,34 @@ _copy_file_to_location() {
   local from=$2
   local to=$3
   local suffix=$4
-
-
-
 }
 
-# 安装cert
-_install_cert() {
-  echo "准备安装cert"
+# print color text
+_printf() {
+	# print green
+	printf '\33[1;32m%b\33[0m' "$1"
+}
+
+# to UpperCase
+_toUpperCase() {
+	tr 'a-z' 'A-Z'
+}
+
+# to LowerCase
+_toLowerCase() {
+	tr 'A-Z' 'a-z'
+}
+
+# give error message on error exit
+_exit_error() {
+	echo -e "${_get_package_name}: ${1:-"Unknow Error"}" >&2
+  cd $_ORIG_PWD; 
+	exit 1
+}
+
+_exit_graceful() {
+  cd $_ORIG_PWD; 
+	exit 0
 }
 
 # 提供脚本退出时需要执行的任务
@@ -630,15 +681,6 @@ _exit() {
   exit $@;
 }
 
-# give error message on error exit
-_error_exit() {
-	echo -e "${_get_package_name}: ${1:-"Unknow Error"}" >&2
-	exit 1
-}
-
-_graceful_exit() {
-	exit 0
-}
 
 _hex2bin() {
   echo -e -n "$(cat | os_esed -e 's/[[:space:]]//g' -e 's/^(.(.{2})*)$/0\1/' -e 's/(.{2})/\\x\1/g')"
@@ -655,17 +697,16 @@ _stop_service() {
 
 }
 
+# 安装cert
+_install_cert() {
+  echo "准备安装cert"
+}
+
+
 _install_node_modules() {
   cd $_ROOT;
   npm --registry=https://registry.npm.taobao.org install
   cd $_ORIG_PWD;
-}
-
-# 获取进程id号
-_get_process_id() {
-  process=$1
-  pid=$(ps -ef | grep $process | grep '/bin/java' | grep -v grep | awk '{print $2}')
-  echo $pid
 }
 
 # 判断是否root用户
