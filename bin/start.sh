@@ -4,59 +4,20 @@
 # start.sh
 #
 # Author: wangxuemin@zzlx.org
-# File: start.sh
 ################################################################################
 
 ################################################################################
-# 定义shell脚本变量
-# 命名规则:全局变量以"_"开头或连接大写命名字母
-#
-# defined readonly variables `declear -r` equivalent to "readonly variable"
-# defined exported variables `declear -x` equivalent to `export variable`
-
-declare -r _ARGV=$@                                   # 记录原始的参数
-declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P;)  # 获取目录路径
-declare -r _FILE=${0##*/}                             # 获取文件名称
-declare -r _ROOT=$(dirname $_DIR)                     # 获取脚本根目录路径
-declare -x PATH="${PATH}:${_ROOT}/bin"								# 附加PATH路径
-
-declare -r _ORIG_CMD="$0 $*"                          # 记录原始参数以备再次执行
-declare -r _ORIG_PWD=$(pwd)                           # 记录执行当前命令所在目录
-declare -r _ORIG_UMASK=$(umask)                       # 记录原始umask值
-
-# 检查_ROOT目录是否存在.env配置文件
-declare -r _HAS_DOT_ENV=$([[ -r ${_ROOT}/.env ]] && echo "true" || echo "false")
-
-# ENV环境设置
-declare -rx _ENV=$(
-  if [[ $_HAS_DOT_ENV == 'true' ]]; then 
-    v=$(cat ${_ROOT}/.env | grep 'ENV=' | awk -F "=" '{ printf $2 }')
-    if [[ $v == 'development' ]]; then 
-      echo 'development'; 
-    else 
-      echo 'production'; 
-    fi
-  else 
-    echo 'production'; 
-  fi
-);
-
-declare -rx _QUITE=false        # 静默模式
-declare -rx _CHECK_UPGRADE=true # 默认检查更新
-declare _RENEW_ALLOW=30
-
+# shell函数
 ################################################################################
-# 定义shell脚本函数
-# 命名规则:以"_"开头以区别系统工具函数,使用小写字母
 
 # 帮助文档
-_help_message() { 
+_show_help_message() { 
   cat <<- EOF
-	$(_printf $(_get_package_name | _toUpperCase)) --[Options]
+	$(_printf $(_get_package_name | _toLowerCase)) [options...]
 
 	Options:
 		-b, --build       Build ui apps
-		-h, --help        Display help message
+		-h, --help        Display this help message
 		-i, --install     Install ERP services
 		-v, --version     Display version
 		-t, --test        Test ERP services
@@ -72,53 +33,26 @@ _help_message() {
 	EOF
 }
 
-# Main function
-_main() { 
-  # 检查依赖的函数
-	_require git
-	_require host
-  _require openssl 
+# 显示version版本
+_show_version_message() {
+  cat <<- EOF
+	Version: $(_get_package_version)
+	GitBranch: $(_get_git_branch_name)
+	GitHash: $(_get_git_commit_hash)
+	EOF
+}
 
-
-  # 解析命令行参数,执行相应程序
-  while [[ -n ${1+defined} ]]; do
-    case $1 in
-      -h | --help )
-        _help_message; break;;
-
-      -v | --version )
-        _get_app_version; break;;
-
-      -s | --start )
-        _start_server; break;;
-
-      --commit )
-        _commit_and_push; break;;
-
-      --deploy-pki )
-        _deploy_pki_cert; break;;
-
-      --install )
-        _install_node_modules; break;;
-
-      -c )
-        echo -n "输入一些文本 > ";
-        read text
-        echo "你的输入：$text";
-        ;;
-
-      * )
-        echo "输入的参数$1 不被支持.";
-        ;;
-    esac
-    shift
-  done
+# get url of current subscriber agreement
+_get_agreement() {
+	AGREEMENT=$(curl --silent ${API}/directory | grep '"termsOfService":' | sed 's/^.*"termsOfService": "\([^"]*\)".*$/\1/' | _flatstring)
+	echo $AGREEMENT
 }
 
 _open_browser() {
   os=$(_get_os)
   case $os in
     mac )
+			sleep 3 # 等待3秒后执行下一条命令
       open -a "/Applications/Safari.app" $1;
       ;;
 	esac
@@ -216,6 +150,17 @@ _create_csr() {
   fi
 }
 
+# 下载服务器证书
+_download_certificate() {
+	echo '正在下载证书 ...'
+
+	RESPONSE=$(api_request ${CERTIFICATE_URL} "");
+
+	# 相应包含服务器及中间证书,存储导一个链表文件
+	echo "${RESPONSE}" | awk '/-----BEGIN CERTIFICATE-----/,0' > "${DOMAIN}/${DOMAIN}.crt"
+
+}
+
 # check if the certificate is installed correctly
 _check_certificate() {
 	if [[ $CHECK_REMOTE == "true" ]]; then
@@ -233,6 +178,28 @@ _check_certificate() {
 
 
 	fi
+}
+
+# create a public key
+_create_public_key() {
+	privateKey=$1
+	echo $(openssl rsa -in $privateKey -pubout)
+}
+
+# registering account
+_registering_account() {
+	if [ -n "$CONTACT_EMAIL" ]; then
+		REQUEST="{ \"termsOfServiceAgreed\": true, \"contact\": [ \"mailto:${CONTACT_EMAIL}\" ] }"
+	else
+		REQUEST="{ \"termsOfServiceAgreed\": true }"
+	fi
+
+	RESPONSE=$(api_request "${API}/acme/new-acct" "${REQUEST}")
+	ACCOUNT_URL=$(echo "${RESPONSE}" | grep -i '^location: ' | sed 's/^location: //i' | _flatstring)
+
+	# api authentication by account URL from now on
+	JWS_AUTH="\"kid\": \"${ACCOUNT_URL}\""
+
 }
 
 # create a private key(if it doesn`t already exist)
@@ -267,10 +234,101 @@ _create_private_key() {
 	fi
 }
 
+_create_order() {
+	REQUEST="{ \"identifiers\": ["
+}
+
+_getting_authorization_tokens() {
+	CHALLENGE_URLS=()
+	CHALLENGE_TOKENS=()
+	KEYAUTHS=()
+	for (( i=0; i < ${#DOMAINS[@]}; i++ ))
+	do
+		log " for ${DOMAINS[$i]}"
+		debug "  authorization_url=${AUTHORIZATION_URLS[$i]}"
+		RESPONSE="$(api_request "${AUTHORIZATION_URLS[$i]}" "")"
+		CHALLENGE_URLS[$i]="$(echo "${RESPONSE}" | flatstring | sed 's/^.*"type": "http-01", "status": "pending", "url": "\([^"]*\)", "token": "\([^"]*\)".*$/\1/')"
+		debug "  challenge_url=${CHALLENGE_URLS[$i]}"
+		CHALLENGE_TOKENS[$i]="$(echo "${RESPONSE}" | flatstring | sed 's/^.*"type": "http-01", "status": "pending", "url": "\([^"]*\)", "token": "\([^"]*\)".*$/\2/')"
+		debug "  challenge_token=${CHALLENGE_TOKENS[$i]}"
+		KEYAUTHS[$i]="${CHALLENGE_TOKENS[$i]}.${JWK_THUMBPRINT}"
+		debug "  keyauth=${KEYAUTHS[$i]}"
+	done
+
+}
+
+# 
+_validation_via_http() {
+	echo '验证http';
+	if [ -n "${WEBROOT}" ];
+	then
+		log "Copying challenge tokens to DocumentRoot ${WEBROOT} ..."
+		(
+		cd "${DOMAIN}"
+		rm -rf ".well-known"
+		mkdir -p ".well-known/acme-challenge"
+		for (( i=0; i < ${#DOMAINS[@]}; i++ ))
+		do
+			echo "${KEYAUTHS[$i]}" > ".well-known/acme-challenge/${CHALLENGE_TOKENS[$i]}"
+		done
+		rsync -axR ".well-known/" "${WEBROOT}"
+		)
+		log "Done"
+	else
+		log "Execute in your DocumentRoot:"
+		echo
+		echo
+		echo "mkdir -p .well-known/acme-challenge"
+		for (( i=0; i < ${#DOMAINS[@]}; i++ ))
+		do
+			echo "echo '${KEYAUTHS[$i]}' > .well-known/acme-challenge/${CHALLENGE_TOKENS[$i]}"
+		done
+		echo
+		echo
+		log "Press [Enter] when done."
+		read -r
+	fi
+}
+
+_responsd_to_challenges() {
+	for (( i=0; i < ${#DOMAINS[@]}; i++ ))
+	do
+		debug "${CHALLENGE_URLS[$i]}"
+		RESPONSE="$(api_request "${CHALLENGE_URLS[$i]}" "{}")"
+	done
+}
+
 _detect_node_modules() {
   if [[ ! -d ${_ROOT}/node_modules ]]; then
     cd $_ROOT; npm install; cd $_PWD;
   fi
+}
+
+_waiting_for_validation() {
+	for attempt in 1 2 3 4 5
+	do
+		sleep $((4*attempt))
+		RESPONSE="$(api_request "${ORDER_URL}" "")"
+		STATUS="$(echo "${RESPONSE}" | flatstring | sed 's/^.*"status"\:\ "\([^"]*\)".*$/\1/')"
+		log " check ${attempt}: status=${STATUS}"
+		if [ "${STATUS}" != "pending" ];
+		then
+			break
+		fi
+	done
+	case "${STATUS}" in
+		ready)
+			log "Validation successful."
+			;;
+		invalid)
+			error "The server unsuccessfully validated your authorization challenge(s). Cannot continue."
+			exit 1
+			;;
+		*)
+			error "Timeout. Certificate order status is still \"${STATUS}\" instead of \"ready\". Something went wrong validating the authorization challenge(s). Cannot continue."
+			exit 1
+	esac
+
 }
 
 # deploy pki private key and certificate
@@ -370,8 +428,14 @@ _send_signed_request() {
 
 }
 
-# urlbase64 encoded string with '+' replaced with '-'
-# '/' replaced with '_'
+# base64url encoding
+_base64url() {
+	# replace "+" with "-"
+	# replace "/" with "_"
+	# replace "=*$" with ""
+	base64 -w 0 | sed 's/+/-/g' | sed 's/\//_/g' | sed 's/=*$//g'
+}
+
 _urlbase64() {
   openssl base64 -e | tr -d '\n\r' | os_esed -e 's:=*$::g' 'y:+/:-_:' 
 }
@@ -471,15 +535,6 @@ _get_cr() {
 	return $ret
 }
 
-# 显示version版本
-_get_app_version() {
-  cat <<- EOF
-	Version: $(_get_package_version)
-	GitBranch: $(_get_git_branch_name)
-	GitHash: $(_get_git_commit_hash)
-	EOF
-}
-
 _build_ui() {
   echo 'build';
 }
@@ -537,13 +592,6 @@ _get_json_value() {
   echo "$2";
 }
 
-_root_user() {
-  if test "$(id -u)" -ne 0; then
-    echo "$(_get_package_name): only root can use $(_get_package_name)" 1>&2
-    exit 1
-  fi
-}
-
 _error_exit() {
   echo -e "$(_get_package_name): ${1:-"Unknown Error"}" >&2
   exit 1
@@ -558,7 +606,7 @@ _info() { # Write infomation if QUIET is set 0
 # 打印调试信息
 _debug() {
 	if [[ $(_get_debug_switcher) == "true" ]]; then
-    echo "DEBUG: $@"
+    echo "DEBUG: $@" >&2
   fi
 }
 
@@ -663,10 +711,8 @@ _toLowerCase() {
 }
 
 # give error message on error exit
-_exit_error() {
+_error() {
 	echo -e "${_get_package_name}: ${1:-"Unknow Error"}" >&2
-  cd $_ORIG_PWD; 
-	exit 1
 }
 
 _exit_graceful() {
@@ -681,9 +727,74 @@ _exit() {
   exit $@;
 }
 
-
+# hex to binary
 _hex2bin() {
-  echo -e -n "$(cat | os_esed -e 's/[[:space:]]//g' -e 's/^(.(.{2})*)$/0\1/' -e 's/(.{2})/\\x\1/g')"
+	_require xxd;
+	 xxd -p -r
+  #echo -e -n "$(cat | os_esed -e 's/[[:space:]]//g' -e 's/^(.(.{2})*)$/0\1/' -e 's/(.{2})/\\x\1/g')"
+}
+
+# remove newlines and duplicate whitespace
+_flatstring() {
+	tr -d '\n\r' | sed 's/[[:space:]]\+/ /g'
+}
+
+# make a ACME API request
+# $1 URL
+# $2 body
+# output on stdout
+_make_a_acme_api_request() {
+	URL=$1
+	BODY=$2
+
+	#get a new nonce by HEAD to newNonce API
+	_debug "获取一个nonce"
+	NONCE=$(
+		curl --silient --head $(_ACME_API)/acme/new-nonce \
+		| grep -i '^replay-nonce: ' \
+		| sed 's/^replay-nonce: //i'
+		| tr -d '\n\r'
+		| sed 's/[[:space:]]\+/ /g'
+	);
+
+	_debug "nonce = $NONCE"
+
+	# json web signature
+	HEADER="{ \"alg\": \"RS256\", ${JWS_AUTH}, \"nonce\": \"${NONCE}\", \"url\": \"${URL}\"}"
+	JWS_PROTECTED=$(printf "%s" "${HEADER}" | _base64url)
+	JWS_PAYLOAD=$(printf "%s" "${BODY}" | _base64url)
+	JWS_SIGNATURE=$(printf "%s" "${JWS_PROTECTED}.${JWS_PAYLOAD}" | openssl dgst
+-sha256 -sign "${ACCOUNT_KEY}" | _base64url)
+	JWS="{ \"protected\": \"${JWS_PROTECTED}\", \"payload\": \"${JWS_PAYLOAD}\", \"signature\": \"${JWS_SIGNATURE}\" }"
+
+	_debug "Request URL: ${URL}"
+	_debug "JWS Header: ${HEADER}"
+	_debug "JWS BODY: ${BODY}"
+
+	# base64 encoding/decoding necessary to stay binary safe.
+	# e.g. the new-cert operation responds with a der encoded certificate.
+	CURLOUT=$(curl --silent --include --show-error --write-out "\\n%{http_code}" -X POST -H "Content-Type: application/jose+json" -d "${JWS}" "${URL}" | base64 -w 0)
+
+	HTTP_CODE=$(echo "${CURLOUT}" | base64 -d | tail -n 1)
+	RESPONSE=$(echo "${CURLOUT}" | base64 -d | head -n -1)
+
+	# just in case we get a 2xx status code but an error in response body
+	ACMEERRORCHECK=$(echo ${RESPONSE} | _flatstring | sed 's/^.*"type": "urn:acme:error.*$/ERROR/')
+	
+	if { [ $HTTP_CODE = "200" ]  || [ $HTTP_CODE = "201" ] || [ $HTTP_CODE = "202" ]; } && [ $ACMEERRORCHECK != "ERROR"];
+	then
+		_debug "API request successful"
+	else
+		_debug "API request error"
+		_debug "Request URL: ${URL}"
+		_debug "HTTP status: ${HTTP_CODE}"
+		_debug "${RESPONSE}"
+		return 1;
+	fi
+
+	# do not echo RESPONSE bug decode again from base64 encoded curl output ot stay binary safe
+	echo "${CURLOUT}" | base64 -d | head -n -1
+	return 0
 }
 
 # 重启服务
@@ -709,11 +820,115 @@ _install_node_modules() {
   cd $_ORIG_PWD;
 }
 
-# 判断是否root用户
+# 判断当前用户是否为root
 _is_root() {
   if [ $UID -eq 0 ]; then echo true; else echo false; fi;
 }
 
-# 传递所有命令行参数给主程序，执行主程序
-_main $@ 
 ################################################################################
+# 检查依赖的函数
+################################################################################
+
+_require git
+_require host
+_require openssl 
+
+################################################################################
+# 执行环境设置
+################################################################################
+
+# 执行过程中返回值为非零，退出执行
+set -e
+
+################################################################################
+# 定义shell变量
+# 命名规则:全局变量以"_"开头或连接大写命名字母
+#
+# defined readonly variables `declear -r` equivalent to "readonly variable"
+# defined exported variables `declear -x` equivalent to `export variable`
+################################################################################
+
+declare -r _ARGV=$@                                   # 记录原始的参数
+declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P;)  # 获取目录路径
+declare -r _FILE=${0##*/}                             # 获取文件名称
+declare -r _ROOT=$(dirname $_DIR)                     # 获取脚本根目录路径
+declare -x PATH="${PATH}:${_ROOT}/bin"								# 附加PATH路径
+declare -r _ACME_API="https://acme-v02.api.letsencrypt.org"
+declare -r _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
+
+declare -r _ORIG_CMD="$0 $*"                          # 记录原始参数以备再次执行
+declare -r _ORIG_PWD=$(pwd)                           # 记录执行当前命令所在目录
+declare -r _ORIG_UMASK=$(umask)                       # 记录原始umask值
+
+# 检查_ROOT目录是否存在.env配置文件
+declare -r _HAS_DOT_ENV=$([[ -r ${_ROOT}/.env ]] && echo "true" || echo "false")
+
+# ENV环境设置
+declare -rx _ENV=$(
+  if [[ $_HAS_DOT_ENV == 'true' ]]; then 
+    v=$(cat ${_ROOT}/.env | grep 'ENV=' | awk -F "=" '{ printf $2 }')
+    if [[ $v == 'development' ]]; then 
+      echo 'development'; 
+    else 
+      echo 'production'; 
+    fi
+  else 
+    echo 'production'; 
+  fi
+);
+
+declare -rx _QUITE=false        # 静默模式
+declare -rx _CHECK_UPGRADE=true # 默认检查更新
+declare _RENEW_ALLOW=30
+
+################################################################################
+# 解析命令行参数,执行相应程序
+################################################################################
+
+if [ ${#} -lt 1 ]; then
+	_error "请提供执行参数"
+	_help_message
+	_exit 1
+fi
+
+while [[ ${#} -gt 0 ]]; do
+	ARG=${1}
+  case ${ARG} in
+    -h | --help )
+      _show_help_message; 
+			exit 0;
+			;;
+
+    -v | --version )
+      _show_version_message; 
+			exit 0;
+			;;
+
+    -s | --start )
+      _start_server; break
+			;;
+
+    --commit )
+      _commit_and_push; break
+			;;
+
+    --deploy-pki )
+      _deploy_pki_cert; break
+			;;
+
+    --install )
+      _install_node_modules; break
+			;;
+
+    -c )
+      echo -n "输入一些文本 > ";
+      read text
+      echo "你的输入：$text";
+      ;;
+
+    * )
+      echo "输入的参数$1 不被支持.";
+      ;;
+  esac
+  shift
+done

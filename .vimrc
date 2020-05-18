@@ -46,7 +46,7 @@ set showmode
 set mouse=a
 set selection=exclusive
 set selectmode=mouse,key
-set textwidth=80
+#set textwidth=80
 set wrap
 set linebreak
 set formatoptions+=mM
