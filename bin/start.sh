@@ -3,17 +3,26 @@
 #
 # start.sh
 #
-# Author: wangxuemin@zzlx.org
+# All rights reserved. zzlx.org 立行信息技术
+# EMail: wangxuemin@zzlx.org
 ################################################################################
 
 ################################################################################
-# shell函数
-################################################################################
+# 执行环境设置
 
-# 帮助文档
+# 执行过程中返回值为非零，退出执行
+# set -e
+# trap _exit EXIT
+
+################################################################################
+# functions
+# 定义shell脚本函数
+
+# 显示帮助信息
 _show_help_message() { 
   cat <<- EOF
-	$(_printf $(_get_package_name | _toLowerCase)) [options...]
+
+	Usage: $(_print_red $(_get_package_name | _toLowerCase)) [options...]
 
 	Options:
 		-b, --build       Build ui apps
@@ -27,13 +36,10 @@ _show_help_message() {
 		--start           Start the ERP service
 		--restart         Restart the ERP service
 		--stop            Stop the ERP service
-
-	Usage:
-
 	EOF
 }
 
-# 显示version版本
+# 显示版本信息
 _show_version_message() {
   cat <<- EOF
 	Version: $(_get_package_version)
@@ -44,7 +50,11 @@ _show_version_message() {
 
 # get url of current subscriber agreement
 _get_agreement() {
-	AGREEMENT=$(curl --silent ${API}/directory | grep '"termsOfService":' | sed 's/^.*"termsOfService": "\([^"]*\)".*$/\1/' | _flatstring)
+	AGREEMENT=$(curl --silent ${_ACME_API}/directory \
+		| grep '"termsOfService":' \
+		| sed 's/^.*"termsOfService": "\([^"]*\)".*$/\1/' \
+		| _flatstring
+	)
 	echo $AGREEMENT
 }
 
@@ -76,7 +86,7 @@ _get_debug_switcher() {
 	if [[ -n $_DEBUG ]]; then echo $_DEBUG; return; fi
 
   if [[ $_HAS_DOT_ENV == 'true' ]]; then 
-    v=$(cat ${_ROOT}/.env | grep 'DEBUG=' | awk -F "=" '{ printf $2 }')
+    v=$(cat ${_ROOT}/.env | grep '^DEBUG=' | awk -F "=" '{ printf $2 }')
     if [[ $v == 'true' ]]; then _DEBUG='true'; else _DEBUG='false'; fi
   else 
     _DEBUG='false'; 
@@ -97,7 +107,7 @@ _get_hostname() {
   if [[ -n $(hostname) ]]; then echo $(hostname); return; fi
 }
 
-# create a csr using openssl
+# 创建CSR文件
 _create_csr() {
 	csr_file=$1
 	csr_key=$2
@@ -154,10 +164,11 @@ _create_csr() {
 _download_certificate() {
 	echo '正在下载证书 ...'
 
-	RESPONSE=$(api_request ${CERTIFICATE_URL} "");
+	RESPONSE=$(_acme_api_request ${CERTIFICATE_URL} "");
 
 	# 相应包含服务器及中间证书,存储导一个链表文件
 	echo "${RESPONSE}" | awk '/-----BEGIN CERTIFICATE-----/,0' > "${DOMAIN}/${DOMAIN}.crt"
+	echo "Succcess!"
 
 }
 
@@ -173,20 +184,14 @@ _check_certificate() {
 		if [[ $CERT_LOCAL == $CERT_REMOTE ]]; then
 			echo "${DOMAIN}" - certificate installed OK on server
 		else
-			_error_exit $DOMAIN - certificate obtained but certificate on server is different from the new certificate.
+			_error $DOMAIN - certificate obtained but certificate on server is different from the new certificate.
 		fi
 
 
 	fi
 }
 
-# create a public key
-_create_public_key() {
-	privateKey=$1
-	echo $(openssl rsa -in $privateKey -pubout)
-}
-
-# registering account
+# 注册登记账户
 _registering_account() {
 	if [ -n "$CONTACT_EMAIL" ]; then
 		REQUEST="{ \"termsOfServiceAgreed\": true, \"contact\": [ \"mailto:${CONTACT_EMAIL}\" ] }"
@@ -194,7 +199,7 @@ _registering_account() {
 		REQUEST="{ \"termsOfServiceAgreed\": true }"
 	fi
 
-	RESPONSE=$(api_request "${API}/acme/new-acct" "${REQUEST}")
+	RESPONSE=$(_acme_api_request "${_ACME_API}/acme/new-acct" "${REQUEST}")
 	ACCOUNT_URL=$(echo "${RESPONSE}" | grep -i '^location: ' | sed 's/^location: //i' | _flatstring)
 
 	# api authentication by account URL from now on
@@ -202,11 +207,11 @@ _registering_account() {
 
 }
 
-# create a private key(if it doesn`t already exist)
-_create_private_key() {
-	key_type=$1
-	key_loc=$2
-	key_len=$3
+# generate a private key(if it doesn`t already exist)
+_generate_private_key() {
+	key_type=${1:-rsa}
+	key_loc=${2}
+	key_len=${3}
 
 	#check if key exists, if not then create it
 	if [[ -s "$key_loc" ]]; then
@@ -214,7 +219,7 @@ _create_private_key() {
 	else
 		umask 077
 		echo "creating private key - $key_loc"
-		case "$key_type" in
+		case "${key_type}" in
 			rsa)
 				openssl genrsa "$key_len" > "$key_loc"
 				;;
@@ -234,8 +239,39 @@ _create_private_key() {
 	fi
 }
 
+# 清除.well-known
+_cleanup_well_know() {
+	if [[ -n "${WEBROOT}" ]]; then
+		echo "删除challenge token"
+	fi
+}
+
+# create a public key
+_create_public_key() {
+	privateKey=$1
+	echo $(openssl rsa -in $privateKey -pubout)
+}
+
 _create_order() {
 	REQUEST="{ \"identifiers\": ["
+	for (( i=0; i < ${#DOMAINS[@]}; i++ ))
+	do
+		REQUEST="${REQUEST} { \"type\": \"dns\", \"value\": \"${DOMAINS[$i]}\" }"
+		if [ $i -lt $((${#DOMAINS[@]}-1)) ]; then REQUEST="${REQUEST},"; fi
+	done
+	REQUEST="${REQUEST} ] }"
+	RESPONSE="$(_acme_api_request "${API}/acme/new-order" "${REQUEST}")"
+	ORDER_URL=$(echo "${RESPONSE}" | grep -i '^location: ' | sed 's/^location: //i' | flatstring)
+	IFS=" " read -r -a AUTHORIZATION_URLS <<< "$(echo "${RESPONSE}" | flatstring | sed 's/^.*"authorizations"\:\ \[\ \(.*\)\ \].*$/\1/' | tr -d ',"')"
+	debug "authorization_urls=${AUTHORIZATION_URLS[*]}"
+	if [ ${#DOMAINS[@]} -ne ${#AUTHORIZATION_URLS[@]} ];
+	then
+		debug "${RESPONSE}"
+		error "Number of returned authorization URLs (${#AUTHORIZATION_URLS[@]}) does not match the number your requested domains (${#DOMAINS[@]}). Cannot continue."
+		exit 1
+	fi
+	FINALIZE_URL="$(echo "${RESPONSE}" | flatstring | sed 's/^.*"finalize"\:\ "\([^"]*\)".*$/\1/')"
+	debug "finalize_url=${FINALIZE_URL}"
 }
 
 _getting_authorization_tokens() {
@@ -257,12 +293,34 @@ _getting_authorization_tokens() {
 
 }
 
+# get jwk thumbprint
+_get_jwk_thumbprint() {
+	# account public key exponent
+	# formatting: Exponent dec => hex => binary => base64url
+	# e.g. 65537 => 0x010001 => ... => AQAB
+	# printf 0.32 and cutting 00 in pairs makes sure we have even number of digits for hexbin
+	JWK_E="$(openssl rsa -pubin -in "${ACCOUNT_PUB}" -text -noout | grep ^Exponent | awk '{ printf "%0.32x",$2; }' | sed 's/^\(00\)*//g' | hexbin | base64url)"
+
+	# account public key modulus
+	JWK_N="$(openssl rsa -pubin -in "${ACCOUNT_PUB}" -modulus -noout | sed 's/^Modulus=//' | hexbin | base64url)"
+
+	# API authentication by JWK until we have an account
+	JWS_AUTH="\"jwk\": { \"e\": \"${JWK_E}\", \"kty\": \"RSA\", \"n\": \"${JWK_N}\" }"
+
+	# Important: no whitespaces at all. The server computes the thumbprint from our
+	# E and N values in JWK and does so with this exact JSON. The sha256 from us
+	# will not match theirs if we use a different JSON formatting.
+	# see example in https://tools.ietf.org/html/rfc7638
+	JWK_THUMBPRINT="$(printf "%s" "{\"e\":\"${JWK_E}\",\"kty\":\"RSA\",\"n\":\"${JWK_N}\"}" | openssl dgst -sha256 -binary | base64url)"
+
+}
+
 # 
 _validation_via_http() {
 	echo '验证http';
 	if [ -n "${WEBROOT}" ];
 	then
-		log "Copying challenge tokens to DocumentRoot ${WEBROOT} ..."
+		echo "Copying challenge tokens to DocumentRoot ${WEBROOT} ..."
 		(
 		cd "${DOMAIN}"
 		rm -rf ".well-known"
@@ -273,9 +331,9 @@ _validation_via_http() {
 		done
 		rsync -axR ".well-known/" "${WEBROOT}"
 		)
-		log "Done"
+		echo "Done"
 	else
-		log "Execute in your DocumentRoot:"
+		echo "Execute in your DocumentRoot:"
 		echo
 		echo
 		echo "mkdir -p .well-known/acme-challenge"
@@ -285,16 +343,17 @@ _validation_via_http() {
 		done
 		echo
 		echo
-		log "Press [Enter] when done."
+		echo "Press [Enter] when done."
 		read -r
 	fi
 }
 
+# 响应一次挑战
 _responsd_to_challenges() {
 	for (( i=0; i < ${#DOMAINS[@]}; i++ ))
 	do
 		debug "${CHALLENGE_URLS[$i]}"
-		RESPONSE="$(api_request "${CHALLENGE_URLS[$i]}" "{}")"
+		RESPONSE="$(_acme_api_request "${CHALLENGE_URLS[$i]}" "{}")"
 	done
 }
 
@@ -308,7 +367,7 @@ _waiting_for_validation() {
 	for attempt in 1 2 3 4 5
 	do
 		sleep $((4*attempt))
-		RESPONSE="$(api_request "${ORDER_URL}" "")"
+		RESPONSE="$(_acme_api_request "${ORDER_URL}" "")"
 		STATUS="$(echo "${RESPONSE}" | flatstring | sed 's/^.*"status"\:\ "\([^"]*\)".*$/\1/')"
 		log " check ${attempt}: status=${STATUS}"
 		if [ "${STATUS}" != "pending" ];
@@ -318,15 +377,15 @@ _waiting_for_validation() {
 	done
 	case "${STATUS}" in
 		ready)
-			log "Validation successful."
+			echo "Validation successful."
 			;;
 		invalid)
-			error "The server unsuccessfully validated your authorization challenge(s). Cannot continue."
-			exit 1
+			_error "The server unsuccessfully validated your authorization challenge(s). Cannot continue."
+			_exit 1
 			;;
 		*)
-			error "Timeout. Certificate order status is still \"${STATUS}\" instead of \"ready\". Something went wrong validating the authorization challenge(s). Cannot continue."
-			exit 1
+			_error "Timeout. Certificate order status is still \"${STATUS}\" instead of \"ready\". Something went wrong validating the authorization challenge(s). Cannot continue."
+			_exit 1
 	esac
 
 }
@@ -429,11 +488,17 @@ _send_signed_request() {
 }
 
 # base64url encoding
+# 从stdin获取input,处理后输出至stdout
 _base64url() {
-	# replace "+" with "-"
-	# replace "/" with "_"
-	# replace "=*$" with ""
-	base64 -w 0 | sed 's/+/-/g' | sed 's/\//_/g' | sed 's/=*$//g'
+	# replace "+" => "-" "/" =>"_" "=*$" => ""
+	if [[ $(_get_os) == 'linux' ]]; then
+		base64 -w 0 | sed 's/+/-/g' | sed 's/\//_/g' | sed 's/=*$//g'
+	fi
+
+	if [[ $(_get_os) == 'mac' ]]; then
+		base64 -b 0 | sed 's/+/-/g' | sed 's/\//_/g' | sed 's/=*$//g'
+	fi
+
 }
 
 _urlbase64() {
@@ -564,7 +629,7 @@ _commit_and_push() {
   case "$input" in
     [yY][eE][sS]|[yY] )
       echo "提交至远程仓库"; 
-      git -C $_ROOT push master
+      git -C $_ROOT push
       ;;
     * )
       ;;
@@ -592,9 +657,9 @@ _get_json_value() {
   echo "$2";
 }
 
-_error_exit() {
+_error() {
+	# 将消息定向到stderr
   echo -e "$(_get_package_name): ${1:-"Unknown Error"}" >&2
-  exit 1
 }
 
 _info() { # Write infomation if QUIET is set 0
@@ -606,6 +671,7 @@ _info() { # Write infomation if QUIET is set 0
 # 打印调试信息
 _debug() {
 	if [[ $(_get_debug_switcher) == "true" ]]; then
+		# 调试信息定向至2 => stderr,以避免调试信息成为函数返回到一部分 
     echo "DEBUG: $@" >&2
   fi
 }
@@ -695,9 +761,13 @@ _copy_file_to_location() {
 }
 
 # print color text
-_printf() {
-	# print green
-	printf '\33[1;32m%b\33[0m' "$1"
+_print_green() {
+	printf '\33[1;32m%b\33[0m' "$1" # print green
+}
+
+# print color text
+_print_red() {
+	printf '\33[1;31m%b\33[0m' "$1" # print green
 }
 
 # to UpperCase
@@ -727,28 +797,25 @@ _exit() {
   exit $@;
 }
 
-# hex to binary
+# 将16进制字符转为2进制
 _hex2bin() {
-	_require xxd;
 	 xxd -p -r
   #echo -e -n "$(cat | os_esed -e 's/[[:space:]]//g' -e 's/^(.(.{2})*)$/0\1/' -e 's/(.{2})/\\x\1/g')"
 }
 
-# remove newlines and duplicate whitespace
+# 过滤字符串
 _flatstring() {
+	# remove newlines and duplicate whitespace
 	tr -d '\n\r' | sed 's/[[:space:]]\+/ /g'
 }
 
-# make a ACME API request
-# $1 URL
-# $2 body
-# output on stdout
-_make_a_acme_api_request() {
+# ACME API请求
+_acme_api_request() {
 	URL=$1
 	BODY=$2
 
 	#get a new nonce by HEAD to newNonce API
-	_debug "获取一个nonce"
+	_debug "获取一个nonce..."
 	NONCE=$(
 		curl --silient --head $(_ACME_API)/acme/new-nonce \
 		| grep -i '^replay-nonce: ' \
@@ -759,12 +826,13 @@ _make_a_acme_api_request() {
 
 	_debug "nonce = $NONCE"
 
-	# json web signature
+	# JSON web signature
 	HEADER="{ \"alg\": \"RS256\", ${JWS_AUTH}, \"nonce\": \"${NONCE}\", \"url\": \"${URL}\"}"
+
 	JWS_PROTECTED=$(printf "%s" "${HEADER}" | _base64url)
 	JWS_PAYLOAD=$(printf "%s" "${BODY}" | _base64url)
-	JWS_SIGNATURE=$(printf "%s" "${JWS_PROTECTED}.${JWS_PAYLOAD}" | openssl dgst
--sha256 -sign "${ACCOUNT_KEY}" | _base64url)
+
+	JWS_SIGNATURE=$(printf "%s" "${JWS_PROTECTED}.${JWS_PAYLOAD}" | openssl dgst -sha256 -sign "${ACCOUNT_KEY}" | _base64url)
 	JWS="{ \"protected\": \"${JWS_PROTECTED}\", \"payload\": \"${JWS_PAYLOAD}\", \"signature\": \"${JWS_SIGNATURE}\" }"
 
 	_debug "Request URL: ${URL}"
@@ -781,8 +849,7 @@ _make_a_acme_api_request() {
 	# just in case we get a 2xx status code but an error in response body
 	ACMEERRORCHECK=$(echo ${RESPONSE} | _flatstring | sed 's/^.*"type": "urn:acme:error.*$/ERROR/')
 	
-	if { [ $HTTP_CODE = "200" ]  || [ $HTTP_CODE = "201" ] || [ $HTTP_CODE = "202" ]; } && [ $ACMEERRORCHECK != "ERROR"];
-	then
+	if { [ $HTTP_CODE = "200" ]  || [ $HTTP_CODE = "201" ] || [ $HTTP_CODE = "202" ]; } && [ $ACMEERRORCHECK != "ERROR"]; then
 		_debug "API request successful"
 	else
 		_debug "API request error"
@@ -792,9 +859,27 @@ _make_a_acme_api_request() {
 		return 1;
 	fi
 
-	# do not echo RESPONSE bug decode again from base64 encoded curl output ot stay binary safe
+	# do not echo RESPONSE but decode again from base64 encoded curl output to stay binary safe
 	echo "${CURLOUT}" | base64 -d | head -n -1
 	return 0
+}
+
+# 请求证书订单
+_order_cert() {
+	CSR="$(openssl req -in "${DOMAIN}/${DOMAIN}.csr" -inform PEM -outform DER | base64url)"
+	REQUEST="{ \"csr\": \"${CSR}\" }"
+	RESPONSE="$(api_request "${FINALIZE_URL}" "${REQUEST}")"
+	STATUS="$(echo "${RESPONSE}" | flatstring | sed 's/^.*"status"\:\ "\([^"]*\)".*$/\1/')"
+	debug "status=${STATUS}"
+	if [ "${STATUS}" != "valid" ];
+	then
+		debug "${RESPONSE}"
+		error "Certificate order status is \"${STATUS}\" instead of \"valid\". Something went wrong issuing the certificate. Cannot continue."
+		exit 1
+	fi
+	CERTIFICATE_URL="$(echo "${RESPONSE}" | flatstring | sed 's/^.*"certificate"\:\ "\([^"]*\)".*$/\1/')"
+	debug "certificate_url=${CERTIFICATE_URL}"
+	log "OK"
 }
 
 # 重启服务
@@ -805,14 +890,12 @@ _restart_service() {
 # 停止服务
 _stop_service() {
   echo "停止服务"
-
 }
 
 # 安装cert
 _install_cert() {
   echo "准备安装cert"
 }
-
 
 _install_node_modules() {
   cd $_ROOT;
@@ -827,18 +910,10 @@ _is_root() {
 
 ################################################################################
 # 检查依赖的函数
-################################################################################
 
 _require git
 _require host
 _require openssl 
-
-################################################################################
-# 执行环境设置
-################################################################################
-
-# 执行过程中返回值为非零，退出执行
-set -e
 
 ################################################################################
 # 定义shell变量
@@ -846,15 +921,11 @@ set -e
 #
 # defined readonly variables `declear -r` equivalent to "readonly variable"
 # defined exported variables `declear -x` equivalent to `export variable`
-################################################################################
 
 declare -r _ARGV=$@                                   # 记录原始的参数
-declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P;)  # 获取目录路径
+declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P)  # 获取目录路径
 declare -r _FILE=${0##*/}                             # 获取文件名称
 declare -r _ROOT=$(dirname $_DIR)                     # 获取脚本根目录路径
-declare -x PATH="${PATH}:${_ROOT}/bin"								# 附加PATH路径
-declare -r _ACME_API="https://acme-v02.api.letsencrypt.org"
-declare -r _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
 
 declare -r _ORIG_CMD="$0 $*"                          # 记录原始参数以备再次执行
 declare -r _ORIG_PWD=$(pwd)                           # 记录执行当前命令所在目录
@@ -881,13 +952,17 @@ declare -rx _QUITE=false        # 静默模式
 declare -rx _CHECK_UPGRADE=true # 默认检查更新
 declare _RENEW_ALLOW=30
 
+# letsencrypt`s ACME service API address
+_ACME_API="https://acme-v02.api.letsencrypt.org"
+_ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
+
 ################################################################################
-# 解析命令行参数,执行相应程序
+# 解析命令参数,执行参数指令
 ################################################################################
 
 if [ ${#} -lt 1 ]; then
 	_error "请提供执行参数"
-	_help_message
+	_show_help_message
 	_exit 1
 fi
 
@@ -896,16 +971,26 @@ while [[ ${#} -gt 0 ]]; do
   case ${ARG} in
     -h | --help )
       _show_help_message; 
-			exit 0;
+			_exit 0;
 			;;
 
     -v | --version )
       _show_version_message; 
-			exit 0;
+			_exit 0;
 			;;
 
     -s | --start )
       _start_server; break
+			;;
+
+    -t | --test )
+			_DEBUG="true"
+			_debug "使用staging API进行测试"
+			_ACME_API=${_ACME_API_STAGING}
+			;;
+
+    --debug )
+			_DEBUG="true"
 			;;
 
     --commit )
@@ -927,8 +1012,10 @@ while [[ ${#} -gt 0 ]]; do
       ;;
 
     * )
-      echo "输入的参数$1 不被支持.";
+      echo "输入的参数${ARG} 不被支持.";
       ;;
   esac
   shift
 done
+
+################################################################################
