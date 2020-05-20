@@ -16,12 +16,15 @@ import https from 'https';
 import http2 from 'http2';
 import path from 'path';
 import Stream from 'stream';
+import cp from 'child_process';
 import util from 'util';
 import zlib from 'zlib';
 
 // modules
 import Context from './context.mjs';
+import setupServer from './setupServer.mjs';
 
+// debug tool
 const debug = util.debuglog('debug:application');
 
 export default class Application extends EventEmitter {
@@ -40,16 +43,6 @@ export default class Application extends EventEmitter {
     if (util.inspect.custom) {
       this[util.inspect.custom] = this.inspect;
     }
-  }
-
-  /**
-   *
-   *
-   */
-
-  listen (...args) {
-    this.server.on('stream', this.callback());
-    return this.server.listen(...args);
   }
 
   /**
@@ -81,7 +74,9 @@ export default class Application extends EventEmitter {
     if (!this.listenerCount('error')) this.on('error', this.onerror);
 
     return (stream, headers, flags) => {
+			console.log('test');
       const ctx = new Context();
+
       ctx.stream = stream;
       ctx.headers = headers;
       ctx.flags = flags;
@@ -283,65 +278,24 @@ export default class Application extends EventEmitter {
         //requestCert: true,
         //enableConnectProtocol: true
       });
-    }
 
-    setupServer(this._server);
+			// 配置server监听事件
+			//setupServer(this._server);
+    }
 
     return this._server;
   }
-}
 
+  /**
+   *
+   *
+   */
 
-function setupServer (server) {
-  const tlsSessionStore = {};
-
-  server.on('keylog', function (line, socket) {
-    const info = {
-      line: line.toString(),
-      address: socket.remoteAddress,
-    };
-  });
-
-  server.on('newSession', function (sessionId, sessionData, cb) {
-    // bind session id
-    const id = sessionId.toString('hex');
-    this.sessionID = id;
-    tlsSessionStore[id] = sessionData;
-    cb();
-  });
-
-  server.on('OCSPRequest', function (certificate, issuer, cb) {
-    //const test = tls.checkServerIdentity('localhost', certificate);
-    //console.log('cert: ', test);
-    //console.log('certificate', certificate.toString('base64'));
-    cb(null, null);
-  });
-
-  server.on('resumeSession', function (sessionId, callback) {
-    //debug('ticketkey:', this.getTicketKeys());
-    const id = sessionId.toString('hex');
-    this.sessionID = id;
-    callback(null, tlsSessionStore[id] || null );
-  });
-
-  server.on('error', (err) => {
-    if (err.errno == 'EADDRINUSE')
-      console.log('Port %s was be used, retrying...', err.port);
-      process.exit();
-  });
-
-  server.on('listening', function () {
-    const sys_info = {
-      title: process.title,
-      pid: process.pid,
-      address: this.address(), // 当前监听地址
-    };
-
-    console.log(
-      'Server is running in %s mode.\n%o', 
-      process.env.NODE_ENV,
-      sys_info,
-    );
-  });
-
+  listen (...args) {
+    //this.server.on('stream', this.callback());
+    this.server.on('stream', (stream, headers) => {
+			console.log('test');
+		});
+		this.server.listen(...args);
+  }
 }

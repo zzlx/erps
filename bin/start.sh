@@ -8,15 +8,88 @@
 ################################################################################
 
 ################################################################################
-# 执行环境设置
+# 定义shell函数
 
-# 执行过程中返回值为非零，退出执行
-# set -e
-# trap _exit EXIT
+# 解析命令参数,执行参数指令
+_parseArgv() {
+	_debug '当前进程PID:' $$
 
-################################################################################
-# functions
-# 定义shell脚本函数
+	if [ ${#} -lt 1 ]; then
+		_error "请提供执行参数"
+		_show_help_message
+		_exit 1
+	fi
+
+	while [[ ${#} -gt 0 ]]; do
+		ARG=${1}
+		case ${ARG} in
+			-h | --help )
+				_show_help_message; 
+				_exit 0;
+				;;
+
+			-v | --version )
+				_show_version_message; 
+				_exit 0;
+				;;
+
+			--stop )
+				_stop_httpd
+				;;
+
+			--restart )
+				_restart_httpd
+				;;
+
+			--start )
+				_start_httpd
+				;;
+
+			-t | --test )
+				_DEBUG="true"
+				_debug "使用staging API进行测试"
+				_ACME_API=${_ACME_API_STAGING}
+				;;
+
+			--debug )
+				_DEBUG="true"
+				;;
+
+			--env )
+				shift
+				if [[ $1 == 'development' ]]; then ENV=$1; else ENV='production'; fi
+				;;
+
+			--commit )
+				_commit_and_push; break
+				;;
+
+			--get-pid )
+				shift
+				_get_pid_by_name $1; break
+				;;
+
+			--deploy-pki )
+				_deploy_pki_cert; break
+				;;
+
+			--install )
+				_install_node_modules; break
+				;;
+
+			-c )
+				echo -n "输入一些文本 > ";
+				read text
+				echo "你的输入：$text";
+				;;
+
+			* )
+				echo "输入的参数${ARG} 不被支持.";
+				;;
+		esac
+		shift
+	done
+}
 
 # 显示帮助信息
 _show_help_message() { 
@@ -33,9 +106,10 @@ _show_help_message() {
 
 		--install         Install
 		--commit          Commit a change to remote repo
-		--start           Start the ERP service
-		--restart         Restart the ERP service
-		--stop            Stop the ERP service
+
+		--start           Start http service
+		--restart         Restart http service
+		--stop            Stop http service
 	EOF
 }
 
@@ -68,10 +142,74 @@ _open_browser() {
 	esac
 }
 
-_start_server() {
-  _detect_node_modules
+_stop_httpd() {
+	set -e
+
+	# step1: 获取httpd pid
+	httpdPid=$(_get_httpd_pid)
+
+	# step2: kill httpdPid
+	if [[ -n $httpdPid ]]; then
+		echo "PID:${httpdPid}进程正在关闭..."
+		kill -9 $httpdPid 2>/dev/null # 错误信息重定向
+		rm -f $HOME/.node.httpd.pid
+		echo "进程PID:${httpdPid}已经关闭."
+	fi
+
+}
+
+_start_httpd() {
+  # _detect_node_modules
   local _SERVER_PATH=${_ROOT}/src/server/index.mjs
-  node --no-warnings --experimental-json-modules $_SERVER_PATH;
+	export NODE_ENV=${_ENV}
+	export IPV6=true
+
+	if [[ $(_get_debug_setting) == 'true' ]]; then
+		export NODE_DEBUG="debug*"
+	fi
+
+	# 启动httpd服务
+	node --no-warnings --experimental-json-modules $_SERVER_PATH
+}
+
+_restart_httpd() {
+	# step1: stop httpd
+	_stop_httpd
+
+	# step2: start httpd
+	_start_httpd
+
+	printf "node.httpd服务已重启\n"
+}
+
+_get_pid_by_name() {
+	local name=$1
+	ps -ef | grep "$name" | grep -v "$_ORIG_CMD\|grep" | awk '{print $2}'
+	unset name
+}
+
+_get_httpd_pid() {
+	local pidFile="${HOME}/.node.httpd.pid"
+
+	if [[ -r $pidFile ]]; then
+		pid=$(head -n 1 $pidFile | sed 's/\n//g')
+		if [[ -n $pid ]]; then 
+			echo $pid; 
+		else
+			rm -f $pidFile
+		fi
+	fi	
+
+	unset pidFile
+}
+
+# 自签名证书,用于本地测试
+_self_sign_cert() {
+	local csr=$1
+	local key=$2
+	local certFile=$3
+
+	openssl x509 -req -in ${csr} -signkey ${key} -out ${certFile}
 }
 
 # 获取进程id号
@@ -82,15 +220,22 @@ _get_process_id() {
 }
 
 # 获取调试开关设置
-_get_debug_switcher() {
+_get_debug_setting() {
 	if [[ -n $_DEBUG ]]; then echo $_DEBUG; return; fi
 
   if [[ $_HAS_DOT_ENV == 'true' ]]; then 
-    v=$(cat ${_ROOT}/.env | grep '^DEBUG=' | awk -F "=" '{ printf $2 }')
-    if [[ $v == 'true' ]]; then _DEBUG='true'; else _DEBUG='false'; fi
-  else 
-    _DEBUG='false'; 
+    v=$(cat ${_ROOT}/.env | grep '^DEBUG=' | sed 's/\n//g' | awk -F "=" '{ printf $2 }')
+    if [[ $v == 'true' ]]; then _DEBUG='true'; fi
+    if [[ $v == 'false' ]]; then _DEBUG='false'; fi
   fi
+
+	if [[ -z $_DEBUG ]]; then 
+		if [[ $_ENV == 'development' ]]; then 
+			_DEBUG='true'; 
+		else
+			_DEBUG='false'; 
+		fi
+	fi
 
 	echo $_DEBUG
 }
@@ -483,8 +628,6 @@ _send_signed_request() {
   payload64="$(printf "%s" "${payload}" | _urlbase64)"
   
   #get nonce from ACME server
-
-
 }
 
 # base64url encoding
@@ -662,18 +805,10 @@ _error() {
   echo -e "$(_get_package_name): ${1:-"Unknown Error"}" >&2
 }
 
-_info() { # Write infomation if QUIET is set 0
-  if [[ $_QUIET -eq 0 ]]; then
-    echo "$@"
-  fi
-}
-
-# 打印调试信息
+# 调试信息
 _debug() {
-	if [[ $(_get_debug_switcher) == "true" ]]; then
-		# 调试信息定向至2 => stderr,以避免调试信息成为函数返回到一部分 
-    echo "DEBUG: $@" >&2
-  fi
+	# 调试信息定向至2 => stderr, 以避免调试信息成为函数返回到一部分 
+	if [[ $(_get_debug_setting) == "true" ]]; then echo "DEBUG $@" >&2; fi
 }
 
 _find_dns_utils() {
@@ -780,21 +915,15 @@ _toLowerCase() {
 	tr 'A-Z' 'a-z'
 }
 
-# give error message on error exit
-_error() {
+# echo error message on error exit
+_echo_error() {
 	echo -e "${_get_package_name}: ${1:-"Unknow Error"}" >&2
-}
-
-_exit_graceful() {
-  cd $_ORIG_PWD; 
-	exit 0
 }
 
 # 提供脚本退出时需要执行的任务
 _exit() {
-  # 恢复当前目录,并退出脚本程序
-  cd $_ORIG_PWD; 
-  exit $@;
+  # 恢复到程序执行时所在目录,并退出脚本程序
+  cd $_ORIG_PWD; exit $@;
 }
 
 # 将16进制字符转为2进制
@@ -882,16 +1011,6 @@ _order_cert() {
 	log "OK"
 }
 
-# 重启服务
-_restart_service() {
-  echo "重启服务"
-}
-
-# 停止服务
-_stop_service() {
-  echo "停止服务"
-}
-
 # 安装cert
 _install_cert() {
   echo "准备安装cert"
@@ -909,8 +1028,14 @@ _is_root() {
 }
 
 ################################################################################
-# 检查依赖的函数
+# 执行环境设置
 
+# 执行过程中返回值为非零，退出执行
+# set -e
+# trap _exit EXIT
+
+################################################################################
+# 检查依赖的函数
 _require git
 _require host
 _require openssl 
@@ -935,9 +1060,9 @@ declare -r _ORIG_UMASK=$(umask)                       # 记录原始umask值
 declare -r _HAS_DOT_ENV=$([[ -r ${_ROOT}/.env ]] && echo "true" || echo "false")
 
 # ENV环境设置
-declare -rx _ENV=$(
+declare -r _ENV=$(
   if [[ $_HAS_DOT_ENV == 'true' ]]; then 
-    v=$(cat ${_ROOT}/.env | grep 'ENV=' | awk -F "=" '{ printf $2 }')
+    v=$(cat ${_ROOT}/.env | grep '^ENV=' | awk -F "=" '{ printf $2 }')
     if [[ $v == 'development' ]]; then 
       echo 'development'; 
     else 
@@ -957,65 +1082,5 @@ _ACME_API="https://acme-v02.api.letsencrypt.org"
 _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
 
 ################################################################################
-# 解析命令参数,执行参数指令
-################################################################################
-
-if [ ${#} -lt 1 ]; then
-	_error "请提供执行参数"
-	_show_help_message
-	_exit 1
-fi
-
-while [[ ${#} -gt 0 ]]; do
-	ARG=${1}
-  case ${ARG} in
-    -h | --help )
-      _show_help_message; 
-			_exit 0;
-			;;
-
-    -v | --version )
-      _show_version_message; 
-			_exit 0;
-			;;
-
-    -s | --start )
-      _start_server; break
-			;;
-
-    -t | --test )
-			_DEBUG="true"
-			_debug "使用staging API进行测试"
-			_ACME_API=${_ACME_API_STAGING}
-			;;
-
-    --debug )
-			_DEBUG="true"
-			;;
-
-    --commit )
-      _commit_and_push; break
-			;;
-
-    --deploy-pki )
-      _deploy_pki_cert; break
-			;;
-
-    --install )
-      _install_node_modules; break
-			;;
-
-    -c )
-      echo -n "输入一些文本 > ";
-      read text
-      echo "你的输入：$text";
-      ;;
-
-    * )
-      echo "输入的参数${ARG} 不被支持.";
-      ;;
-  esac
-  shift
-done
-
-################################################################################
+# 解析命令参数并执行
+_parseArgv $@

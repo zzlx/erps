@@ -19,6 +19,7 @@ export default function accessLog (logPath) {
   fs.promises.mkdir(logPath, {recursive: true}).catch(err => { debug(err); });
 
   return function logMiddleware (ctx, next) {
+		console.log('test');
     const log = ''
       + date.format('yy-mm-dd HH:MM:ss') 
       + ' ' 
