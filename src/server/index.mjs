@@ -49,10 +49,10 @@ const app = new Koa({
 //
 // 配置服务器执行逻辑
 //app.use(m.error(LOG_DIR));        // 捕获中间件错误
-app.use(m.xResponse());             // 记录响应时间
-app.use(m.cookies());               // 支持cookie读写
-app.use(m.log(LOG_DIR));            // 记录log
-app.use(m.cors());                  // 跨域访问响应
+//app.use(m.xResponse());             // 记录响应时间
+//app.use(m.cookies());               // 支持cookie读写
+//app.use(m.log(LOG_DIR));            // 记录log
+//app.use(m.cors());                  // 跨域访问响应
 //app.use(m.mongodb(APP_CONFIG.mongodb)); // mongo数据库
 //
 // 配置路由

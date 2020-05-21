@@ -1,10 +1,15 @@
 /**
+ * *****************************************************************************
  *
- * server配置
+ * http2 server配置
  *
+ * *****************************************************************************
  */
 
-export default function setupServer (server) {
+import util from 'util';
+const debug = util.debuglog('debug:http2Server');
+
+export default function http2Server (server) {
   const tlsSessionStore = {};
 
   server.on('keylog', function (line, socket) {

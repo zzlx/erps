@@ -22,10 +22,9 @@ import zlib from 'zlib';
 
 // modules
 import Context from './context.mjs';
-import setupServer from './setupServer.mjs';
+import setupServer from './http2Server.mjs';
 
-// debug tool
-const debug = util.debuglog('debug:application');
+const debug = util.debuglog('debug:application'); // debug function
 
 export default class Application extends EventEmitter {
   constructor(props) {
@@ -43,6 +42,16 @@ export default class Application extends EventEmitter {
     if (util.inspect.custom) {
       this[util.inspect.custom] = this.inspect;
     }
+  }
+
+  /**
+   *
+   *
+   */
+
+  listen (...args) {
+    this.server.on('stream', this.callback());
+		this.server.listen(...args); // 开启服务
   }
 
   /**
@@ -74,7 +83,6 @@ export default class Application extends EventEmitter {
     if (!this.listenerCount('error')) this.on('error', this.onerror);
 
     return (stream, headers, flags) => {
-			console.log('test');
       const ctx = new Context();
 
       ctx.stream = stream;
@@ -284,18 +292,5 @@ export default class Application extends EventEmitter {
     }
 
     return this._server;
-  }
-
-  /**
-   *
-   *
-   */
-
-  listen (...args) {
-    //this.server.on('stream', this.callback());
-    this.server.on('stream', (stream, headers) => {
-			console.log('test');
-		});
-		this.server.listen(...args);
   }
 }

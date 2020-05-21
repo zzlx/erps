@@ -3,93 +3,17 @@
 #
 # start.sh
 #
+# 功能描述
+# 1.提供源代码库版本管理及变更提交
+# 2.Http服务启动、停止、重启等操作
+# 3.服务器证书申请或自签名证书等签发
+#
 # All rights reserved. zzlx.org 立行信息技术
 # EMail: wangxuemin@zzlx.org
 ################################################################################
 
 ################################################################################
 # 定义shell函数
-
-# 解析命令参数,执行参数指令
-_parseArgv() {
-	_debug '当前进程PID:' $$
-
-	if [ ${#} -lt 1 ]; then
-		_error "请提供执行参数"
-		_show_help_message
-		_exit 1
-	fi
-
-	while [[ ${#} -gt 0 ]]; do
-		ARG=${1}
-		case ${ARG} in
-			-h | --help )
-				_show_help_message; 
-				_exit 0;
-				;;
-
-			-v | --version )
-				_show_version_message; 
-				_exit 0;
-				;;
-
-			--stop )
-				_stop_httpd
-				;;
-
-			--restart )
-				_restart_httpd
-				;;
-
-			--start )
-				_start_httpd
-				;;
-
-			-t | --test )
-				_DEBUG="true"
-				_debug "使用staging API进行测试"
-				_ACME_API=${_ACME_API_STAGING}
-				;;
-
-			--debug )
-				_DEBUG="true"
-				;;
-
-			--env )
-				shift
-				if [[ $1 == 'development' ]]; then ENV=$1; else ENV='production'; fi
-				;;
-
-			--commit )
-				_commit_and_push; break
-				;;
-
-			--get-pid )
-				shift
-				_get_pid_by_name $1; break
-				;;
-
-			--deploy-pki )
-				_deploy_pki_cert; break
-				;;
-
-			--install )
-				_install_node_modules; break
-				;;
-
-			-c )
-				echo -n "输入一些文本 > ";
-				read text
-				echo "你的输入：$text";
-				;;
-
-			* )
-				echo "输入的参数${ARG} 不被支持.";
-				;;
-		esac
-		shift
-	done
-}
 
 # 显示帮助信息
 _show_help_message() { 
@@ -107,9 +31,11 @@ _show_help_message() {
 		--install         Install
 		--commit          Commit a change to remote repo
 
-		--start           Start http service
-		--restart         Restart http service
-		--stop            Stop http service
+		--httpd start | stop | restart
+			start           Start http service
+			stop            Stop http service
+			restart         Restart http service
+
 	EOF
 }
 
@@ -143,8 +69,8 @@ _open_browser() {
 }
 
 _stop_httpd() {
+	_debug "停止httpd服务..."
 	set -e
-
 	# step1: 获取httpd pid
 	httpdPid=$(_get_httpd_pid)
 
@@ -159,8 +85,10 @@ _stop_httpd() {
 }
 
 _start_httpd() {
+	_debug "启动httpd服务..."
   # _detect_node_modules
   local _SERVER_PATH=${_ROOT}/src/server/index.mjs
+
 	export NODE_ENV=${_ENV}
 	export IPV6=true
 
@@ -178,8 +106,6 @@ _restart_httpd() {
 
 	# step2: start httpd
 	_start_httpd
-
-	printf "node.httpd服务已重启\n"
 }
 
 _get_pid_by_name() {
@@ -203,8 +129,8 @@ _get_httpd_pid() {
 	unset pidFile
 }
 
-# 自签名证书,用于本地测试
-_self_sign_cert() {
+# 签发自签名证书
+_self_signed_certtificate() {
 	local csr=$1
 	local key=$2
 	local certFile=$3
@@ -928,8 +854,8 @@ _exit() {
 
 # 将16进制字符转为2进制
 _hex2bin() {
-	 xxd -p -r
   #echo -e -n "$(cat | os_esed -e 's/[[:space:]]//g' -e 's/^(.(.{2})*)$/0\1/' -e 's/(.{2})/\\x\1/g')"
+	 xxd -p -r
 }
 
 # 过滤字符串
@@ -1082,5 +1008,79 @@ _ACME_API="https://acme-v02.api.letsencrypt.org"
 _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
 
 ################################################################################
-# 解析命令参数并执行
-_parseArgv $@
+# 解析命令参数,执行参数指令
+if [ ${#} -lt 1 ]; then
+	_error "请提供执行参数"
+	_show_help_message
+	_exit 1
+fi
+
+while [[ ${#} -gt 0 ]]; do
+	ARG=${1}
+	case ${ARG} in
+		-h | --help )
+			_show_help_message; 
+			_exit 0;
+			;;
+
+		-v | --version )
+			_show_version_message; 
+			_exit 0;
+			;;
+
+		--debug )
+			_DEBUG="true"
+			;;
+
+		--env )
+			shift
+			if [[ $1 == 'development' ]]; then ENV=$1; else ENV='production'; fi
+			;;
+
+		--httpd )
+			shift
+			action=$1
+			if [[ $action == 'start' ]]; then _start_httpd; fi
+			if [[ $action == 'restart' ]]; then _restart_httpd; fi
+			if [[ $action == 'stop' ]]; then _stop_httpd; fi
+			;;
+
+		-t | --test )
+			_DEBUG="true"
+			_debug "使用staging API进行测试"
+			_ACME_API=${_ACME_API_STAGING}
+			;;
+
+		--commit )
+			_commit_and_push; break
+			;;
+
+		--get-pid )
+			shift
+			_get_pid_by_name $1; break
+			;;
+
+		--git-log )
+			git -C $_ROOT log
+			;;
+
+		--deploy-pki )
+			_deploy_pki_cert; break
+			;;
+
+		--install )
+			_install_node_modules; break
+			;;
+
+		-c )
+			echo -n "输入一些文本 > ";
+			read text
+			echo "你的输入：$text";
+			;;
+
+		* )
+			echo "输入的参数${ARG} 不被支持.";
+			;;
+	esac
+	shift
+done
