@@ -690,7 +690,7 @@ _commit_and_push() {
 
   if [[ ! -n $(git diff HEAD) ]]; then
     git -C $_ROOT add -A
-    git -C $_ROOT commit -m "$(date "+%Y%m%d")_自动化提交"
+    git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
   fi
 
   read -r -p "是否需要上传远程仓库? [Y/n] " input
