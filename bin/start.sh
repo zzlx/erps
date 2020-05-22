@@ -31,10 +31,9 @@ _show_help_message() {
 		--install         Install
 		--commit          Commit a change to remote repo
 
-		--httpd start | stop | restart
-			start           Start http service
-			stop            Stop http service
-			restart         Restart http service
+		start [services] Start service
+		stop [services]  Stop service
+		restart [services] Restart service
 
 	EOF
 }
@@ -87,7 +86,7 @@ _stop_httpd() {
 _start_httpd() {
 	_debug "启动httpd服务..."
   # _detect_node_modules
-  local _SERVER_PATH=${_ROOT}/src/server/index.mjs
+  local _SERVER_PATH=${_ROOT}/src/server/main.mjs
 
 	export NODE_ENV=${_ENV}
 	export IPV6=true
@@ -130,12 +129,20 @@ _get_httpd_pid() {
 }
 
 # 签发自签名证书
-_self_signed_certtificate() {
-	local csr=$1
-	local key=$2
-	local certFile=$3
+_issue_self_signed_certificate() {
+	local domain=$(hostname | awk '{printf $1}')
+	local keyFile="${_ORIG_PWD}/${domain}-key.pem"
+	local csrFile="${_ORIG_PWD}/${domain}-csr.pem"
+	local certFile="${_ORIG_PWD}/${domain}-crt.pem"
 
-	openssl x509 -req -in ${csr} -signkey ${key} -out ${certFile}
+	_debug '任务1: 创建private key'
+	openssl genrsa -out $keyFile 2048
+
+	_debug '任务2: 生成csr'
+	openssl req -new -sha256 -key $keyFile -out $csrFile -days 365
+
+	_debug '任务3: 签发自签名证书'
+	openssl x509 -req -in ${csrFile} -signkey ${keyFile} -out ${certFile}
 }
 
 # 获取进程id号
@@ -428,7 +435,7 @@ _responsd_to_challenges() {
 	done
 }
 
-_detect_node_modules() {
+_npm_install() {
   if [[ ! -d ${_ROOT}/node_modules ]]; then
     cd $_ROOT; npm install; cd $_PWD;
   fi
@@ -1037,12 +1044,22 @@ while [[ ${#} -gt 0 ]]; do
 			if [[ $1 == 'development' ]]; then ENV=$1; else ENV='production'; fi
 			;;
 
-		--httpd )
+		--start )
 			shift
-			action=$1
-			if [[ $action == 'start' ]]; then _start_httpd; fi
-			if [[ $action == 'restart' ]]; then _restart_httpd; fi
-			if [[ $action == 'stop' ]]; then _stop_httpd; fi
+			service=$1
+			if [[ $service == 'httpd' ]]; then _start_httpd; fi
+			;;
+
+		--stop )
+			shift
+			service=$1
+			if [[ $service == 'httpd' ]]; then _stop_httpd; fi
+			;;
+
+		--restart )
+			shift
+			service=$1
+			if [[ $service == 'httpd' ]]; then _restart_httpd; fi
 			;;
 
 		-t | --test )
@@ -1068,8 +1085,13 @@ while [[ ${#} -gt 0 ]]; do
 			_deploy_pki_cert; break
 			;;
 
-		--install )
-			_install_node_modules; break
+		--npm-install )
+			_npm_install; break
+			;;
+
+		# 签发自签名服务器证书
+		--self-signed-certificate )
+			_issue_self_signed_certificate;
 			;;
 
 		-c )

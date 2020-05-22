@@ -15,19 +15,19 @@ import util from 'util';
 import mimeTypes from 'mime-types';
 import accepts from 'accepts';
 import contentType from 'content-type';
+import MemCache from '../../utils/memCache.mjs';
 
-// 
-import MemCache from '../utils/memCache.mjs';
+// 调试工具
+const debug = util.debuglog('debug:context');
 
-// 定义模块变量
+// 定义变量
 const IP = Symbol('context#ip');
 const emptyCode = [204, 205, 304];
 const retryCode = [502, 503, 504];
 const redirectCode = [300, 301, 302, 303, 305, 307, 308];
 const typeCache = new MemCache(100);
-const debug = util.debuglog('debug:context');
 
-const RES_HEADERS = Symbol('context#response_headers');
+const RES_HEADERS = Symbol.for('context#response_headers');
 const BODY = Symbol('context#body');
 
 export default class Context {
@@ -706,7 +706,7 @@ export default class Context {
    */
 
   onerror (err) {
-    debug(err);
+    debug('处理中间件内错误');
     // don‘t do anything if there is no error. 
     // this allows you to pass 'this.onerror'
     if (null == err) return;

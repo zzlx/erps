@@ -11,18 +11,15 @@
 
 // node modules
 import EventEmitter from 'events'; 
-import http from 'http';
-import https from 'https';
 import http2 from 'http2';
 import path from 'path';
-import Stream from 'stream';
 import cp from 'child_process';
 import util from 'util';
-import zlib from 'zlib';
 
 // modules
 import Context from './context.mjs';
-import setupServer from './http2Server.mjs';
+import respond from './respond.mjs';
+import setupServer from '../http2Server.mjs';
 
 const debug = util.debuglog('debug:application'); // debug function
 
@@ -50,7 +47,7 @@ export default class Application extends EventEmitter {
    */
 
   listen (...args) {
-    this.server.on('stream', this.callback());
+		this.server.on('stream', this.callback());
 		this.server.listen(...args); // 开启服务
   }
 
@@ -77,6 +74,7 @@ export default class Application extends EventEmitter {
    */
 
   callback () {
+		// 组合中间件链
     const fn = this.compose(this.middlewares);
 
     // 绑定app级别error事件处理
@@ -84,7 +82,6 @@ export default class Application extends EventEmitter {
 
     return (stream, headers, flags) => {
       const ctx = new Context();
-
       ctx.stream = stream;
       ctx.headers = headers;
       ctx.flags = flags;
@@ -103,10 +100,9 @@ export default class Application extends EventEmitter {
    */
 
   handleRequest (ctx, fn) {
-    const onerror = err => ctx.onerror(err);
-    const handleResponse = () => this.respond(ctx);
-    // onFinished(ctx.stream, onerror);
-    return fn(ctx).then(handleResponse).catch(onerror);
+		debug('handleRequest');
+		// 中间件链处理请求后发送请求
+    return fn(ctx).then(() => respond(ctx)).catch(err => ctx.onerror(err));
   }
 
   /**
@@ -117,6 +113,8 @@ export default class Application extends EventEmitter {
    */
 
   onerror(err) {
+		debug('onerror: 处理系统级错误');
+
     if (!(err instanceof Error)) {
       throw new TypeError(util.format('non-error thrown: %j', err));
     }
@@ -131,108 +129,6 @@ export default class Application extends EventEmitter {
   }
 
   /**
-   *
-   *
-   */
-
-  respond (ctx) {
-    // Indicate the version of server environment.
-    if ('development' === ctx.app.env) {
-      ctx.set('X-Powered-By', `Node@${process.version}`);
-    }
-
-    // allow bypassing.
-    if (false === ctx.respond) return; 
-
-    if (!ctx.writable) return;
-
-    let body = ctx.body;
-    const code = ctx.status;
-
-    // ignore body
-    // 204: no content
-    // 205: reset content
-    // 304: not modified
-    const emptyCode = [204, 205, 304];
-    if (emptyCode.includes(code)) {
-      ctx.body = null;
-      return ctx.stream.end();
-    }
-
-    if ('HEAD' == ctx.method || 'OPTIONS' == ctx.method) {
-      if (!ctx.headersSent && !ctx.has('Content-Length')) {
-        //ctx.length 
-      }
-
-      ctx.stream.respond(ctx._headers);
-      return ctx.stream.end();
-    }
-
-    // status body
-    if (null == body) {
-      ctx.status = 404;
-      if (ctx.httpVersion >= 2) {
-        body = ctx.message;
-      } else {
-        body = ctx.message || String(code);
-      }
-
-      if (!ctx.headersSent) {
-        ctx.type = 'text';
-        ctx.length = Buffer.byteLength(body);
-        ctx.stream.respond(ctx._headers);
-      }
-
-      if (ctx.writable) {
-        return ctx.stream.end(body);
-      } else {
-        return ctx.stream.end();
-      }
-    }
-
-    // responses
-    if (Buffer.isBuffer(body) || 'string' == typeof body) {
-      ctx.stream.respond(ctx._headers);
-      return ctx.stream.end(body);
-    }
-
-    if (body instanceof Stream) {
-      ctx.stream.respond(ctx._headers);
-      return body.pipe(ctx.stream);
-    }
-
-    // Assume body is a json value
-    body = JSON.stringify(body);
-
-    if (!ctx.headersSent) {
-      ctx.length = Buffer.byteLength(body);
-
-      // only compress filesize gretter than 100kb
-      if (ctx.length > 1024 * 100) {
-        if (/\bbr\b/.test(ctx.get('accept-encoding'))) {
-          ctx.set('content-encoding', 'br');
-          ctx.set('vary', 'accept-encoding');
-          body = zlib.brotliCompressSync(body);
-          ctx.length = Buffer.byteLength(body);
-        } else if (/\bdefate\b/.test(ctx.get('accept-encoding'))) {
-          ctx.set('content-encoding', 'deflate');
-          ctx.set('vary', 'accept-encoding');
-          body = zlib.deflateSync(body);
-          ctx.length = Buffer.byteLength(body);
-        } else if (/\bgzip\b/.test(ctx.get('accept-encoding'))) {
-          ctx.set('content-encoding', 'gzip');
-          ctx.set('vary', 'accept-encoding');
-          body = zlib.gzipSync(body);
-          ctx.length = Buffer.byteLength(body);
-        }
-      }
-    }
-
-    ctx.stream.respond(ctx._headers);
-    ctx.stream.end(body);
-  }
-
-  /**
    * Compose `middleware` returning a fully valid middleware.
    *
    * @param {Array} middleware
@@ -244,12 +140,11 @@ export default class Application extends EventEmitter {
       throw new TypeError('Middleware must be an array!');
     }
 
-    return function composedMiddleware (context, next) {
+    return function middlewareFn (context, next) {
       let index = -1;
       return dispatch(0);
 
       function dispatch (i) {
-
         if (i <= index) {
           return Promise.reject(new Error('next() called multiple times'));
         }
@@ -257,6 +152,8 @@ export default class Application extends EventEmitter {
         index = i;
         let fn = (i === middleware.length) ? next : middleware[i];
         if (!fn) return Promise.resolve();
+
+				debug('dispatch fn:', fn);
 
         try {
           return Promise.resolve(fn(context, dispatch.bind(null, ++i)));
@@ -288,7 +185,7 @@ export default class Application extends EventEmitter {
       });
 
 			// 配置server监听事件
-			//setupServer(this._server);
+			setupServer(this._server);
     }
 
     return this._server;

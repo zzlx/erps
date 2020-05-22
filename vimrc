@@ -1,9 +1,9 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " vimrc配置文件
 "
-" 指定vimrc配置文件运行vim: `vim -u .vimrc`
+" 以指定vimrc配置文件运行vim: `vim -u vimrc`
 "
-" wangxuemin@zzlx.org
+" author: wangxuemin@zzlx.org
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set nocompatible  " Use Vim defaults instead of 100% vi compatibility
 set backspace=2   " more powerful backspacing

@@ -17,11 +17,11 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-// debug
-const debug = util.debuglog('debug:config');
+const debug = util.debuglog('debug:config'); // debug
+const __dirname = path.dirname(import.meta.url).substr(7); // __dirname
 
 // 定位代码库根目录
-export const APP_ROOT = path.dirname(path.dirname(import.meta.url).substr(7));
+export const APP_ROOT = path.dirname(__dirname);
 export const APP_PATH = APP_ROOT;
 
 // 获取package.json配置信息

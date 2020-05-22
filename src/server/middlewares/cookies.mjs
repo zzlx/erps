@@ -29,7 +29,7 @@ export default (opts) => function cookieMiddleware (ctx, next) {
     configurable: true, // 可配置属性
   });
 
-  next();
+  return next();
 }
 
 class Cookies {
