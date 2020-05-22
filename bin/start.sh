@@ -5,7 +5,7 @@
 #
 # 功能描述
 # 1.提供源代码库版本管理及变更提交
-# 2.Http服务启动、停止、重启等操作
+# 2.服务启动、停止、重启等操作
 # 3.服务器证书申请或自签名证书等签发
 #
 # All rights reserved. zzlx.org 立行信息技术
@@ -18,23 +18,20 @@
 # 显示帮助信息
 _show_help_message() { 
   cat <<- EOF
-
 	Usage: $(_print_red $(_get_package_name | _toLowerCase)) [options...]
 
 	Options:
-		-b, --build       Build ui apps
-		-h, --help        Display this help message
-		-i, --install     Install ERP services
-		-v, --version     Display version
-		-t, --test        Test ERP services
+		-h, --help        显示帮助信息
+		-v, --version     显示版本号
 
-		--install         Install
-		--commit          Commit a change to remote repo
+		--start           启动服务
+		--stop            停止服务
+		--restart         重启服务
 
-		start [services] Start service
-		stop [services]  Stop service
-		restart [services] Restart service
-
+		--build           重建前端程序
+		--commit          提交一次代码库改动
+		--install         系统初始化安装与配置
+		--test            测试系统
 	EOF
 }
 
@@ -45,6 +42,24 @@ _show_version_message() {
 	GitBranch: $(_get_git_branch_name)
 	GitHash: $(_get_git_commit_hash)
 	EOF
+}
+
+# remove files
+_rm() {
+	_debug '_rm';
+	local trash_dir="$HOME/.trash_temp"
+	if [[ ! $(mkdir -p $trash_dir) ]]; then return; fi
+
+	for i in $*; do
+		timestamp=$(date +%s)
+		filename=$(basename $i)
+
+		if [[ -r $i ]]; then
+			mv $i ${trash_dir}/${filename}.${timestamp}
+		fi
+	done
+
+	unset trash_dir
 }
 
 # get url of current subscriber agreement
@@ -84,6 +99,11 @@ _stop_httpd() {
 }
 
 _start_httpd() {
+	if [[ -n $(_get_httpd_pid)  ]]; then
+		printf "服务正在运行,重启服务请使用'--restart'参数."
+		return;
+	fi
+
 	_debug "启动httpd服务..."
   # _detect_node_modules
   local _SERVER_PATH=${_ROOT}/src/server/main.mjs
@@ -695,7 +715,7 @@ _check_git_ready() {
 # 提交一次变更
 _commit_and_push() {
 
-  if [[ ! -n $(git diff HEAD) ]]; then
+  if [[ -n $(git diff HEAD) ]]; then
     git -C $_ROOT add -A
     git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
   fi
@@ -961,10 +981,8 @@ _is_root() {
 }
 
 ################################################################################
-# 执行环境设置
-
-# 执行过程中返回值为非零，退出执行
-# set -e
+# 预设执行环境
+set -e # 执行过程中返回值为非零，退出执行
 # trap _exit EXIT
 
 ################################################################################
@@ -981,9 +999,10 @@ _require openssl
 # defined exported variables `declear -x` equivalent to `export variable`
 
 declare -r _ARGV=$@                                   # 记录原始的参数
-declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P)  # 获取目录路径
+declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P)   # 获取目录路径
 declare -r _FILE=${0##*/}                             # 获取文件名称
 declare -r _ROOT=$(dirname $_DIR)                     # 获取脚本根目录路径
+declare -rx PATH=$PATH:$_ROOT/bin                      # 添加bin至PATH路径
 
 declare -r _ORIG_CMD="$0 $*"                          # 记录原始参数以备再次执行
 declare -r _ORIG_PWD=$(pwd)                           # 记录执行当前命令所在目录
@@ -1045,21 +1064,15 @@ while [[ ${#} -gt 0 ]]; do
 			;;
 
 		--start )
-			shift
-			service=$1
-			if [[ $service == 'httpd' ]]; then _start_httpd; fi
+			_start_httpd;
 			;;
 
 		--stop )
-			shift
-			service=$1
-			if [[ $service == 'httpd' ]]; then _stop_httpd; fi
+			_stop_httpd;
 			;;
 
 		--restart )
-			shift
-			service=$1
-			if [[ $service == 'httpd' ]]; then _restart_httpd; fi
+			_restart_httpd;
 			;;
 
 		-t | --test )

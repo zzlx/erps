@@ -3,5 +3,8 @@ ERPS
 
 ERPS(ERP Services), 集成ERP、CRM、OA、HR等系统功能于一体的综合业务服务平台。
 
-# 项目开发
+# 使用帮助
 
+```bash
+bin/start.sh --help
+```
