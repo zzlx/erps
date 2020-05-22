@@ -715,6 +715,11 @@ _check_git_ready() {
 # 提交一次变更
 _commit_and_push() {
 
+	# 比对工作区与暂存区
+	# 如果出现差异,则进行暂存
+  if [[ -n $(git diff --cached) ]]; then echo '执行暂存'; fi
+
+	# 比对工作区与仓库差异
   if [[ -n $(git diff HEAD) ]]; then
     git -C $_ROOT add -A
     git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
