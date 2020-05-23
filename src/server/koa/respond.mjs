@@ -68,7 +68,6 @@ export default function respond (ctx) {
 
   // responses
   if (Buffer.isBuffer(body) || 'string' == typeof body) {
-		debug('headers', ctx[RES_HEADERS]);
     ctx.stream.respond(ctx[RES_HEADERS]);
     return ctx.stream.end(body);
   }

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 ################################################################################
 #
-# start.sh
+# EPR服务管理脚本
 #
-# 功能描述
-# 1.提供源代码库版本管理及变更提交
-# 2.服务启动、停止、重启等操作
-# 3.服务器证书申请或自签名证书等签发
+# 功能特性:
+# * 提供源代码库版本管理及变更提交
+# * 服务启动、停止、重启等操作
+# * 服务器证书申请或自签名证书等签发
 #
 # All rights reserved. zzlx.org 立行信息技术
 # EMail: wangxuemin@zzlx.org
@@ -24,14 +24,21 @@ _show_help_message() {
 		-h, --help        显示帮助信息
 		-v, --version     显示版本号
 
+		环境设置参数
+		--env [development|production]  运行环境配置
+
+		服务管理参数
 		--start           启动服务
 		--stop            停止服务
 		--restart         重启服务
 
+		代码库管理参数
 		--build           重建前端程序
 		--commit          提交一次代码库改动
 		--install         系统初始化安装与配置
-		--test            测试系统
+
+		系统测试参数
+		--test            测试
 	EOF
 }
 
@@ -104,10 +111,6 @@ _start_httpd() {
 		return;
 	fi
 
-	_debug "启动httpd服务..."
-  # _detect_node_modules
-  local _SERVER_PATH=${_ROOT}/src/server/main.mjs
-
 	export NODE_ENV=${_ENV}
 	export IPV6=true
 
@@ -116,7 +119,16 @@ _start_httpd() {
 	fi
 
 	# 启动httpd服务
-	node --no-warnings --experimental-json-modules $_SERVER_PATH
+	node --no-warnings --experimental-json-modules \
+		${_ROOT}/src/server/main.mjs \
+		&
+
+	if [[ $_ENV == 'development' ]]; then
+		# @todo: 监控src目录下文件改动时,再重启服务
+		_debug "开发环境下间隔60s,重启服务"
+		sleep 60
+		$_ORIG_CMD --restart
+	fi 
 }
 
 _restart_httpd() {
@@ -129,7 +141,7 @@ _restart_httpd() {
 
 _get_pid_by_name() {
 	local name=$1
-	ps -ef | grep "$name" | grep -v "$_ORIG_CMD\|grep" | awk '{print $2}'
+	ps -ef | grep "$name" | grep -v "$_ORIG_TASK\|grep" | awk '{print $2}'
 	unset name
 }
 
@@ -491,8 +503,8 @@ _waiting_for_validation() {
 # deploy pki private key and certificate
 _deploy_pki_cert() {
 	if [[ ${_IS_ROOT} == 'false' ]]; then
-		echo "需要系统管理权限, 请使用\"sudo $_ORIG_CMD\"执行此任务"
-		sudo $_ORIG_CMD
+		echo "需要系统管理权限, 请使用\"sudo $_ORIG_TASK\"执行此任务"
+		sudo $_ORIG_TASK
 	fi
 
 	# 创建private key
@@ -717,10 +729,10 @@ _commit_and_push() {
 
 	# 比对工作区与暂存区
 	# 如果出现差异,则进行暂存
-  if [[ -n $(git diff --cached) ]]; then echo '执行暂存'; fi
+  if [[ -n $(git -C $_ROOT diff --cached) ]]; then echo '执行暂存'; fi
 
 	# 比对工作区与仓库差异
-  if [[ -n $(git diff HEAD) ]]; then
+  if [[ -n $(git -C $_ROOT diff HEAD) ]]; then
     git -C $_ROOT add -A
     git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
   fi
@@ -750,6 +762,7 @@ _os_esed() {
   fi
 }
 
+# 解析json文本,取出字段值 @todo: 未完成
 _get_json_value() {
   if [[ -z "$1" ]] || [[ "$1" == "null" ]]; then
     echo "json was blank"
@@ -795,7 +808,6 @@ _find_dns_utils() {
 # copy a file, useing scp,sftp,or ftp if required.
 _copy_file() {
 	echo 'test';
-
 }
 
 
@@ -1003,15 +1015,16 @@ _require openssl
 # defined readonly variables `declear -r` equivalent to "readonly variable"
 # defined exported variables `declear -x` equivalent to `export variable`
 
+declare -r _ORIG_CMD="$0"                             # 记录原始命令 
 declare -r _ARGV=$@                                   # 记录原始的参数
-declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P)   # 获取目录路径
-declare -r _FILE=${0##*/}                             # 获取文件名称
-declare -r _ROOT=$(dirname $_DIR)                     # 获取脚本根目录路径
-declare -rx PATH=$PATH:$_ROOT/bin                      # 添加bin至PATH路径
-
-declare -r _ORIG_CMD="$0 $*"                          # 记录原始参数以备再次执行
+declare -r _ORIG_TASK="$0 $*"                         # 记录原始命令任务
 declare -r _ORIG_PWD=$(pwd)                           # 记录执行当前命令所在目录
 declare -r _ORIG_UMASK=$(umask)                       # 记录原始umask值
+
+declare -r _FILE=${0##*/}                             # 获取文件名称
+declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P)   # 获取目录路径
+declare -r _ROOT=$(dirname $_DIR)                     # 获取脚本根目录路径
+declare -rx PATH=$PATH:$_ROOT/bin                      # 添加bin至PATH路径
 
 # 检查_ROOT目录是否存在.env配置文件
 declare -r _HAS_DOT_ENV=$([[ -r ${_ROOT}/.env ]] && echo "true" || echo "false")
@@ -1039,7 +1052,8 @@ _ACME_API="https://acme-v02.api.letsencrypt.org"
 _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
 
 ################################################################################
-# 解析命令参数,执行参数指令
+# 解析命令行参数,执行指令
+
 if [ ${#} -lt 1 ]; then
 	_error "请提供执行参数"
 	_show_help_message
@@ -1065,11 +1079,11 @@ while [[ ${#} -gt 0 ]]; do
 
 		--env )
 			shift
-			if [[ $1 == 'development' ]]; then ENV=$1; else ENV='production'; fi
+			if [[ $1 == 'development' ]]; then _ENV=$1; else _ENV='production'; fi
 			;;
 
 		--start )
-			_start_httpd;
+			_start_httpd
 			;;
 
 		--stop )

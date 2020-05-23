@@ -35,7 +35,7 @@ export default function configureApp() {
 	//
 	
 	app.use((ctx, next) => {
-		ctx.body='ttt';
+		ctx.body='ttsuuuu';
 	});
 
 	return app;

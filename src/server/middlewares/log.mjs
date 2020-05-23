@@ -33,7 +33,7 @@ export default function log (logPath) {
       + ' ' 
       + ctx.socket.remotePort;
 
-    debug('logMiddleware: log=', log);
+    debug('Request log:', log);
 
     // 写入日志文件
     const logFile = path.join(logPath, `${date.format('yyyymmdd')}_access.log`);
@@ -41,7 +41,6 @@ export default function log (logPath) {
       return fd.appendFile(log + os.EOL).then(() => fd.close());
     }).catch(err => debug(err));
 
-    // next如果放到代码块开始处，将导致后续中间件执行顺序错误
     return next();
   } 
 }
