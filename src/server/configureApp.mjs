@@ -13,7 +13,7 @@ import util from 'util';
 
 import Koa from './koa/application.mjs';
 import * as m from './middlewares/index.mjs';
-import { LOG_DIR, APP_CONFIG, } from '../system.config.mjs';
+import { LOG_DIR, APP_CONFIG, } from '../config.mjs';
 
 const debug = util.debuglog('debug:application'); // debug function
 const hostname = cp.execSync("hostname | awk '{printf $1}'");
@@ -35,7 +35,6 @@ export default function configureApp() {
 	//
 	
 	app.use((ctx, next) => {
-		ctx.body='ttsuuuu';
 	});
 
 	return app;

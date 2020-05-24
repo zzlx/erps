@@ -35,6 +35,7 @@ _show_help_message() {
 		代码库管理参数
 		--build           重建前端程序
 		--commit          提交一次代码库改动
+		--show-git-log    显示git版本日志
 		--install         系统初始化安装与配置
 
 		系统测试参数
@@ -737,7 +738,7 @@ _commit_and_push() {
     git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
   fi
 
-  read -r -p "是否需要上传远程仓库? [Y/n] " input
+	read -r -p "是否需要上传远程仓库? /Y(es)?|No?/i " input
 
   case "$input" in
     [yY][eE][sS]|[yY] )
@@ -1030,7 +1031,7 @@ declare -rx PATH=$PATH:$_ROOT/bin                      # 添加bin至PATH路径
 declare -r _HAS_DOT_ENV=$([[ -r ${_ROOT}/.env ]] && echo "true" || echo "false")
 
 # ENV环境设置
-declare -r _ENV=$(
+declare +r _ENV=$(
   if [[ $_HAS_DOT_ENV == 'true' ]]; then 
     v=$(cat ${_ROOT}/.env | grep '^ENV=' | awk -F "=" '{ printf $2 }')
     if [[ $v == 'development' ]]; then 
@@ -1109,7 +1110,7 @@ while [[ ${#} -gt 0 ]]; do
 			_get_pid_by_name $1; break
 			;;
 
-		--git-log )
+		--show-git-log )
 			git -C $_ROOT log
 			;;
 

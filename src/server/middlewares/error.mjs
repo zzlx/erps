@@ -39,3 +39,9 @@ export default function (logPath) {
     } 
   }
 }
+
+function dateSNumber () {
+	const date = new Date();
+
+
+}

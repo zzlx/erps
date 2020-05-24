@@ -6,7 +6,7 @@
   "license": "MIT",
   "homepage": ".",
   "scripts": {
-    "build": "webpack --config src/webpack.config.cjs",
+    "build": "webpack --config webpack.config.cjs",
     "start": "./starter"
   },
   "devDependencies": {
