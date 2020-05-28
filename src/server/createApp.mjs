@@ -18,7 +18,7 @@ import { LOG_DIR, APP_CONFIG, } from '../config.mjs';
 const debug = util.debuglog('debug:application'); // debug function
 const hostname = cp.execSync("hostname | awk '{printf $1}'");
 
-export default function configureApp() {
+export default function createApp() {
 	const app = new Koa({
 		// @todo: read configuration from cofig file
 		cert: fs.readFileSync(`/etc/ssl/${hostname}-cert.pem`),

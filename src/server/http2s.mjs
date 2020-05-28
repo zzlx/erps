@@ -7,7 +7,7 @@
  */
 
 import util from 'util';
-const debug = util.debuglog('debug:http2Server');
+const debug = util.debuglog('debug:http2-server');
 
 export default function http2Server (server) {
   const tlsSessionStore = {};
@@ -38,8 +38,7 @@ export default function http2Server (server) {
 
   server.on('resumeSession', function (sessionId, callback) {
 		debug('resumeSession');
-		console.log('resumeSession');
-    //debug('ticketkey:', this.getTicketKeys());
+    debug('ticketkey:', this.getTicketKeys());
     const id = sessionId.toString('hex');
     this.sessionID = id;
     callback(null, tlsSessionStore[id] || null );
@@ -47,22 +46,23 @@ export default function http2Server (server) {
 
   server.on('error', (err) => {
     if (err.code == 'EADDRINUSE') {
-      console.log('端口%s被占用, 请更换端口后重试...', err.port);
+      console.warn('端口%s被占用, 请更换端口后重试...', err.port);
 			process.exit();
 		}
   });
 
   server.on('listening', function () {
 		//let time = cp.execSync('date "+%Y%m%d"').toString().replace(/\s/, '');
-    debug(
-      'Http服务正在运行...\n%o', 
-			{
-				title: process.title,
-				pid: process.pid,
-				mode: process.env.NODE_ENV,
-				address: this.address(), // 当前监听地址
-			},
-    );
+		const address = this.address();
+
+    debug('%s服务(PID %s)运行在%s模式,监听地址(%s)%s:%s',
+			process.title,
+			process.pid,
+			process.env.NODE_ENV,
+			address.family,
+			address.address,
+			address.port,
+		);
   });
 
 }

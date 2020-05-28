@@ -28,7 +28,7 @@ export default function logMiddleware (logPath, format) {
   return function logMiddleware (ctx, next) {
 
     const log = ''
-      + date.format('yy-mm-dd HH:MM:ss') 
+      + date.toLocaleISOString()
       + ' ' 
       + ctx.method 
       + ' ' 
@@ -38,7 +38,7 @@ export default function logMiddleware (logPath, format) {
       + ' ' 
       + ctx.socket.remotePort;
 
-    debug('Request log:', log);
+    debug('客户端请求', log);
 
 		next();
 

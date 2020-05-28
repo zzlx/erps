@@ -1,4 +1,6 @@
 /**
+ * *****************************************************************************
+ *
  * CORS middleware
  *
  * @param {Object} [options]
@@ -11,7 +13,11 @@
  *  - {Boolean} keepHeadersOnError Add set headers to `err.header` if an error is thrown
  * @return {Function} cors middleware
  * @api public
+ * *****************************************************************************
  */
+
+import util from 'util';
+const debug = util.debuglog('debug:middleware-cors');
 
 export default function (options) {
 

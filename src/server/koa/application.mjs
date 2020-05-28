@@ -19,7 +19,7 @@ import util from 'util';
 // modules
 import Context from './context.mjs';
 import respond from './respond.mjs';
-import setupServer from '../http2Server.mjs';
+import setupServer from '../http2s.mjs';
 
 const debug = util.debuglog('debug:application'); // debug function
 

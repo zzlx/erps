@@ -11,7 +11,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 import ISODate from '../../utils/date.mjs';
-const debug = util.debuglog('debug:errorHandlerMiddleware');
+const debug = util.debuglog('debug:errorMiddleware');
 
 export default function (logPath) {
   if (null == logPath) throw new Error('You must provide a valid logPath.'); 
@@ -19,7 +19,7 @@ export default function (logPath) {
   // if logPath already exists, that can be no side effect
   fs.promises.mkdir(logPath, {recursive: true}).catch(err => { debug(err); });
 
-  return async function errorHandlerMiddleware (ctx, next) { 
+  return async function errorMiddleware (ctx, next) { 
     try { 
       await next();
     } catch (err) { // 捕捉中间件级别的错误

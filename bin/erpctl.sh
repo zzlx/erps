@@ -22,7 +22,7 @@ _show_help_message() {
 
 	Options:
 		-h, --help        显示帮助信息
-		-v, --version     显示版本号
+		--version     显示版本号
 
 		环境设置参数
 		--env [development|production]  运行环境配置
@@ -47,8 +47,8 @@ _show_help_message() {
 _show_version_message() {
   cat <<- EOF
 	Version: $(_get_package_version)
+	GitVersion: $(_get_git_commit_hash)
 	GitBranch: $(_get_git_branch_name)
-	GitHash: $(_get_git_commit_hash)
 	EOF
 }
 
@@ -90,26 +90,31 @@ _open_browser() {
 	esac
 }
 
+# 打包版本
+_package_app() {
+	_debug '打包当前版本:' $(_get_package_name)@v$(_get_package_version)
+}
+
 _stop_httpd() {
-	_debug "停止httpd服务..."
-	set -e
+	_debug "尝试关闭服务..."
+	# set -e
 	# step1: 获取httpd pid
-	httpdPid=$(_get_httpd_pid)
+	declare -i httpdPid=$(_get_httpd_pid)
 
 	# step2: kill httpdPid
 	if [[ -n $httpdPid ]]; then
-		echo "PID:${httpdPid}进程正在关闭..."
-		kill -9 $httpdPid 2>/dev/null # 错误信息重定向
-		rm -f $HOME/.node.httpd.pid
-		echo "进程PID:${httpdPid}已经关闭."
+		kill -9 $httpdPid >/dev/null 2>&1
+		rm -f $HOME/.node.httpd.pid >/dev/null 2>&1
 	fi
-
 }
 
+# 启动http服务
 _start_httpd() {
 	if [[ -n $(_get_httpd_pid)  ]]; then
-		printf "服务正在运行,重启服务请使用'--restart'参数."
+		printf "服务正在运行,重启服务请使用'--restart'参数.\n"
 		return;
+	else
+		_debug "服务正在启动..."
 	fi
 
 	export NODE_ENV=${_ENV}
@@ -120,24 +125,25 @@ _start_httpd() {
 	fi
 
 	# 启动httpd服务
-	node --no-warnings --experimental-json-modules \
-		${_ROOT}/src/server/main.mjs \
-		&
+	node --no-warnings ${_ROOT}/src/server/main.mjs \
+		>> "${_ORIG_PWD}/$(_get_package_name)_$(date +%Y%m%d).log" 2>&1 \
+		& # 后台执行
 
-	if [[ $_ENV == 'development' ]]; then
-		# @todo: 监控src目录下文件改动时,再重启服务
-		_debug "开发环境下间隔60s,重启服务"
-		sleep 60
-		$_ORIG_CMD --restart
+	if [[ ${_ENV} == 'development' ]]; then
+		_debug "开发模式下将自动重启服务,间隔30秒"
+		sleep 30; _restart_httpd
 	fi 
 }
 
 _restart_httpd() {
+	_debug "服务正在重启..."
+
 	# step1: stop httpd
 	_stop_httpd
 
 	# step2: start httpd
 	_start_httpd
+
 }
 
 _get_pid_by_name() {
@@ -780,7 +786,7 @@ _error() {
 # 调试信息
 _debug() {
 	# 调试信息定向至2 => stderr, 以避免调试信息成为函数返回到一部分 
-	if [[ $(_get_debug_setting) == "true" ]]; then echo "DEBUG $@" >&2; fi
+	if [[ $(_get_debug_setting) == "true" ]]; then echo "DEBUG: $@" >&2; fi
 }
 
 _find_dns_utils() {
@@ -1069,7 +1075,7 @@ while [[ ${#} -gt 0 ]]; do
 			_exit 0;
 			;;
 
-		-v | --version )
+		--version )
 			_show_version_message; 
 			_exit 0;
 			;;
@@ -1084,15 +1090,15 @@ while [[ ${#} -gt 0 ]]; do
 			;;
 
 		--start )
-			_start_httpd
+			_start_httpd    # 启动服务
 			;;
 
 		--stop )
-			_stop_httpd;
+			_stop_httpd;    # 停止服务
 			;;
 
 		--restart )
-			_restart_httpd;
+			_restart_httpd; # 重启服务
 			;;
 
 		-t | --test )
@@ -1121,6 +1127,11 @@ while [[ ${#} -gt 0 ]]; do
 		--npm-install )
 			_npm_install; break
 			;;
+
+		--package )
+			_package_app; break
+			;;
+
 
 		# 签发自签名服务器证书
 		--self-signed-certificate )

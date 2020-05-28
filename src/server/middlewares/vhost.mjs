@@ -1,10 +1,13 @@
 /**
+ * *****************************************************************************
+ *
  * vhost
  *
  * opts: [{hostname: 'zzlx.org', app: apis}, {hostname: '', app: apis}]
  *
  * @param {String} opts
  * @return {function} middleware function
+ * *****************************************************************************
  */
 
 export default (opts) => async function vhost (ctx, next) {

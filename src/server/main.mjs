@@ -11,7 +11,7 @@ import cp from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import configureApp from './configureApp.mjs';
+import createApp from './createApp.mjs';
 
 // 进程管理
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 初始化系统环境 
@@ -72,7 +72,7 @@ process.on('exit', (code) => {
 	deletePidFile();
 });
 
-const app = configureApp();
+const app = createApp();
 
 // 开启服务器监听
 app.listen({
