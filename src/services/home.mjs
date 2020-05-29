@@ -9,7 +9,7 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import { PUBLIC_HTML } from '../../config.mjs';
+import { PUBLIC_HTML } from '../config.mjs';
 
 const debug = util.debuglog('debug:static');
 
@@ -21,13 +21,13 @@ opts.immutable = false;
 opts.maxage = 0;
 opts.compress = false;
 
-export default async function staticsMiddleware (ctx, next) {
+export default async function staticsMiddleware (ctx) {
 
   // only accept GET/HEAD/OPTIONS method
   if (!/(GET|HEAD|OPTIONS)/.test(ctx.method)) {
     ctx.status = 405; // method not allowed.
     ctx.set('Allow', 'GET, HEAD, OPTIONS');
-    return await next();
+    return;
   }
 
   // 相对目录

@@ -21,7 +21,7 @@ import ReactDOMServer from 'react-dom/server.js';
 import React from 'react';
 
 export default function (element) {
-    return function domRenderMiddleware(ctx, next) {
+    return function domRenderMiddleware(ctx) {
         // render to stream
         const retval = ReactDOMServer.renderToString(element);
 

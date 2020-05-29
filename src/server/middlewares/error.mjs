@@ -28,10 +28,11 @@ export default function (logPath) {
       }
 
       const log = err.message + ' ' + new Date().toString() + os.EOL; 
+
       debug('Middleware error: ', log);
 
       const sn = ISODate.toLocaleISOString().substr(0, 10).replace(/[-\/]/g, '');
-      const logFile = path.join(logPath, `${sn}_error.log`);
+      const logFile = path.join(logPath, `error.log_${sn}`);
 
       fs.promises.open(logFile, 'a+').then(fd => {
         return fd.appendFile(log).then(() => fd.close());

@@ -1,7 +1,12 @@
 /**
  * *****************************************************************************
  *
- * 响应输出
+ * 内容响应处理程序
+ *
+ * 特性:
+ * 支持内容协商
+ * 支持压缩
+ *
  *
  * *****************************************************************************
  */
@@ -11,12 +16,12 @@ import https from 'https';
 import Stream from 'stream';
 import zlib from 'zlib';
 import util from 'util';
+import { RES_HEADERS, EmptyCode } from './constants.mjs';
 const debug = util.debuglog('debug:respond'); // debug function
 
-const RES_HEADERS = Symbol.for('context#response_headers');
-
 export default function respond (ctx) {
-  // allow bypassing.
+
+  // bypassing respond.
   if (false === ctx.respond) return; 
 
   if (!ctx.writable) return;
@@ -24,14 +29,10 @@ export default function respond (ctx) {
   let body = ctx.body;
 
   const code = ctx.status;
-  // ignore body
-  // 204: no content
-  // 205: reset content
-  // 304: not modified
-  const emptyCode = [204, 205, 304];
-  if (emptyCode.includes(code)) {
+
+  if (EmptyCode.includes(code)) {
     ctx.body = null;
-    return ctx.stream.end();
+    return ctx.stream.end(); // 结束respond
   }
 
   if ('HEAD' == ctx.method || 'OPTIONS' == ctx.method) {
@@ -43,33 +44,36 @@ export default function respond (ctx) {
     return ctx.stream.end();
   }
 
-  // status body
+  // null body
   if (null == body) {
     ctx.status = 404;
-
-    if (ctx.httpVersion >= 2) {
-      body = ctx.message;
-    } else {
-      body = ctx.message || String(code);
-    }
-
-    if (!ctx.headersSent) {
-      ctx.type = 'text';
-      ctx.length = Buffer.byteLength(body);
-      ctx.stream.respond(ctx[RES_HEADERS]);
-    }
-
-    if (ctx.writable) {
-      return ctx.stream.end(body);
-    } else {
-      return ctx.stream.end();
-    }
+    body = ctx.message;
   }
 
-  // responses
+  // 响应文本内容
   if (Buffer.isBuffer(body) || 'string' == typeof body) {
-    ctx.stream.respond(ctx[RES_HEADERS]);
-    return ctx.stream.end(body);
+    if (!ctx.headersSent) {
+			// 内容协商
+			// 优先响应html 
+			if (ctx.accepts('html')) {
+				ctx.type = 'html';
+				// @todo: 应用html模版
+				body = `<p>${body}<p>`;
+			} else if (ctx.accepts('json')) {
+				ctx.type = 'json';
+				body = `{"data": ${body}}`;
+			} else if (ctx.accepts('xml')) {
+				ctx.type = 'xml';
+				body = `<data>${body}</data>`;
+			} else {
+				ctx.type = 'text';
+			}
+
+			ctx.stream.respond(ctx[RES_HEADERS]);
+		}
+
+		if (!ctx.writable) return ctx.stream.end();
+		else return ctx.stream.end(body);
   }
 
 	// stream
@@ -110,4 +114,3 @@ export default function respond (ctx) {
   ctx.stream.respond(ctx[RES_HEADERS]);
   ctx.stream.end(body);
 }
-

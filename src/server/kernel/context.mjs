@@ -15,20 +15,22 @@ import util from 'util';
 import mimeTypes from 'mime-types';
 import accepts from 'accepts';
 import contentType from 'content-type';
+
 import MemCache from '../../utils/memCache.mjs';
+import { 
+	RES_HEADERS, 
+	RES_BODY, 
+	REQ_IP, 
+	EmptyCode,
+	RetryCode,
+	RedirectCode,
+} from './constants.mjs';
 
 // 调试工具
 const debug = util.debuglog('debug:context');
 
 // 定义变量
-const IP = Symbol('context#ip');
-const emptyCode = [204, 205, 304];
-const retryCode = [502, 503, 504];
-const redirectCode = [300, 301, 302, 303, 305, 307, 308];
 const typeCache = new MemCache(100);
-
-const RES_HEADERS = Symbol.for('context#response_headers');
-const BODY = Symbol('context#body');
 
 export default class Context {
 
@@ -128,7 +130,7 @@ export default class Context {
     }
     this._explicitStatus = true;
     this.set(http2.constants.HTTP2_HEADER_STATUS, code);
-    if (this.body && emptyCode.includes(code)) this.body = null;
+    if (this.body && EmptyCode.includes(code)) this.body = null;
 
   }
 
@@ -358,10 +360,10 @@ export default class Context {
    */
 
   get ip() {
-    if (!this[IP]) {
-      this[IP] = this.socket.remoteAddress || '';
+    if (!this[REQ_IP]) {
+      this[REQ_IP] = this.socket.remoteAddress || '';
     }
-    return this[IP];
+    return this[REQ_IP];
   }
 
   /**
@@ -759,7 +761,7 @@ export default class Context {
    */
 
   get body() {
-    return this[BODY];
+    return this[RES_BODY];
   }
 
   /**
@@ -770,12 +772,12 @@ export default class Context {
    */
 
   set body(val) {
-    const original = this[BODY];
-    this[BODY] = val;
+    const original = this[RES_BODY];
+    this[RES_BODY] = val;
 
     // no content
     if (null == val) {
-      if (!emptyCode.includes(this.status)) this.status = 204;
+      if (!EmptyCode.includes(this.status)) this.status = 204;
       this.remove('Content-Type');
       this.remove('Content-Length');
       this.remove('Transfer-Encoding');

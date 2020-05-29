@@ -3,15 +3,12 @@
  *
  * A onion kernel service application.
  *
- * 参考KOA框架,支持sream响应.
- *
  * @file application.mjs
  * *****************************************************************************
  */
 
 // node modules
 import EventEmitter from 'events'; 
-import http2 from 'http2';
 import path from 'path';
 import cp from 'child_process';
 import util from 'util';
@@ -19,7 +16,7 @@ import util from 'util';
 // modules
 import Context from './context.mjs';
 import respond from './respond.mjs';
-import setupServer from '../http2s.mjs';
+import setupServer from './http2s.mjs';
 
 const debug = util.debuglog('debug:application'); // debug function
 
@@ -164,28 +161,16 @@ export default class Application extends EventEmitter {
     }
   }
 
+	set server (server) {
+		if ( null == this._server) this._server = server;
+	}
+
   get server () {
     if (null == this._server) {
-      this._server = http2.createSecureServer({
-        //ca: [fs.readFileSync('client-cert.pem')],
+      this._server = setupServer({
         cert: this.props.cert,
-        //sigalgs: 
-        //ciphers: 
-        //clientCertEngine: 
-        //dhparam
-        //ecdhCurve
         key: this.props.key,
-        //privateKeyEngine
-        //passphrase: 'sample',
-        //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-        allowHTTP1: true,
-        // This is necessary only if using client certificate authentication.
-        //requestCert: true,
-        //enableConnectProtocol: true
       });
-
-			// 配置server监听事件
-			setupServer(this._server);
     }
 
     return this._server;

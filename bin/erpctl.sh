@@ -1,12 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # ------------------------------------------------------------------------------
 #
 # EPR服务管理脚本
 #
-# 功能特性:
+# 功能列表:
 #
-# * 提供源代码库版本管理及变更提交
 # * 服务启动、停止、重启等操作
+# * 提供源代码库版本管理及变更提交
 # * 服务器证书申请或自签名证书等签发
 #
 # 运行环境:
@@ -15,7 +15,7 @@
 
 # ------------------------------------------------------------------------------
 # 执行环境设定
-set -e # 执行过程中返回值为非零，退出执行
+# set -e # 执行过程中返回值为非零，退出执行
 # trap exit EXIT
 
 # ------------------------------------------------------------------------------
@@ -34,11 +34,10 @@ declare -r _FILE=${0##*/}                           # 获取文件名称
 declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P) # 获取目录路径
 declare -r _ROOT=$(dirname $_DIR)                   # 获取脚本根目录路径
 
-declare +r  _ENV="production"   # 生产环境
-declare +r  _DEBUG=false        # 默认关闭调试
-declare -rx _CHECK_UPGRADE=true # 默认检查更新
-declare -rx _QUITE=false        # 静默模式
-declare -r  _RENEW_ALLOW=30
+declare +r _ENV="production"   # 生产环境
+declare +r _DEBUG=false        # 默认关闭调试
+declare -r _RENEW_ALLOW=30
+declare -r _RESTART_INT=15     # 开发模式下重启服务间隔时间
 
 # Letsencrypt`s ACME service API address
 declare -r _ACME_API="https://acme-v02.api.letsencrypt.org"
@@ -47,24 +46,25 @@ declare -r _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
 declare -r _PREFIX="org.zzlx.erps"
 declare -r _PIDFILE="$HOME/.erps/${_PREFIX}.httpd.pid"
 
+# 定义子shell中可用的变量
+declare -rx CHECK_UPGRADE=true # 默认检查更新
+declare -rx QUITE=false        # 静默模式
+
 # ------------------------------------------------------------------------------
 # shell函数定义
+# 实现原则:简单、一次仅做一项任务
 # 函数命名规则: 脚本函数均以“_”作为前缀及单词连接符
 # @todo: 按函数首字母顺序排列
 
 _httpd_restart() {
 	_debug "尝试重启httpd..."
 
-	# step1: stop httpd
+	# _httpd_stop && _httpd_start
 	_httpd_stop
-
-	# step2: start httpd
 	_httpd_start
 }
 
 _httpd_start() {
-	_debug "尝试启动httpd..."
-
 	local pid=$(_get_httpd_pid)
 	if [[ -n $pid ]]; then
 		if [[ $(_is_pid_process $pid) == "true" ]]; then
@@ -80,17 +80,11 @@ _httpd_start() {
 		export NODE_DEBUG="debug*"
 	fi
 
-	_debug "后台运行httpd服务..."
-
-	(node ${_ROOT}/src/server/main.mjs \
-		>> "${HOME}/.$(_get_package_name)/log/process_$(date +%Y%m%d).log" 2>&1
-	)&
-
+	_debug "尝试后台运行httpd..."
+	(node ${_ROOT}/src/server/main.mjs)&
 }
 
 _httpd_stop() {
-	_debug "尝试🔚结束httpd..."
-
 	# 获取httpd pid
 	local pid=$(_get_httpd_pid)
 
@@ -101,7 +95,7 @@ _httpd_stop() {
 			kill -KILL $httpdPid
 		fi
 
-		rm -f ${_PIDFILE} >/dev/null 2>&1
+		_rm ${_PIDFILE} >/dev/null 2>&1
 	else
 		_debug "pkill给进程名称发送结束信号"
 		pkill -KILL org.zzlx.httpd
@@ -133,10 +127,12 @@ _show_help_message() {
 
 	Options:
 		-h, --help        显示帮助信息
-		--version     显示版本号
+		--version         显示版本号
 
-		环境设置参数
-		--env [development|production]  运行环境配置
+		环境参数
+		--debug           调试环境
+		--development     开发环境
+		--production      生产环境
 
 		服务管理参数
 		--start           启动服务
@@ -152,8 +148,6 @@ _show_help_message() {
 		系统测试参数
 		--test            测试
 	EOF
-
-	_exit 0
 }
 
 _show_version_message() {
@@ -163,8 +157,6 @@ _show_version_message() {
 	GitVersion: $(_get_git_commit_hash)
 	GitBranch: $(_get_git_branch_name)
 	EOF
-
-	_exit 0
 }
 
 _get_agreement() {
@@ -809,7 +801,6 @@ _check_git_ready() {
   return 0;
 }
 
-# 提交一次变更
 _commit_and_push() {
 
 	# 比对工作区与暂存区
@@ -1085,24 +1076,16 @@ _install_node_modules() {
   cd $_ORIG_PWD;
 }
 
-# 判断当前用户是否为root
 _is_root() {
+	_debug "判断当前用户是否为root"
   if [ $UID -eq 0 ]; then printf true; else printf false; fi;
 }
 
+_parse_argv() {
+	_debug "解析命令行参数,执行指令"
 
-_main() { # 定义脚本程序执行流程
-
-	# 检测系统依赖 
-	# @todo: 仅在必要时检测shell工具是否可用
-	_require git host openssl
-
-	# 未提供参数时的默认行为
+	# 未提供参数时执行的任务
 	if [ ${#} -eq 0 ]; then _show_help_message; fi
-
-	# 解析命令行参数,执行指令(分两个阶段)
-
-	# 阶段1: 解析并设置OPTION参数
 
 	# 阶段2: 解析并执行命令
 
@@ -1110,36 +1093,42 @@ _main() { # 定义脚本程序执行流程
 		ARG=${1}
 		case ${ARG} in
 			-h | --help )
-				_show_help_message; 
+				_show_help_message; break
 				;;
 
 			--version )
-				_show_version_message; 
-				;;
-
-			--debug )
-				_DEBUG="true"
+				_show_version_message; break
 				;;
 
 			--development )
 				_ENV='development'
 				;;
 
+			--debug )
+		    _DEBUG='true'
+				;;
+
 			--start )
-				_httpd_start   # 启动服务
+				_httpd_start
 
 				if [[ $(_get_env_setting) == 'development' ]]; then
-					_debug "每间隔25秒,重启一次httpd"
-					sleep 25; _httpd_restart
+					_debug "每间隔${_RESTART_INT}秒,重启一次httpd,重启10000次"
+					for ((i=1; i < 10000; i++))
+					do
+						sleep ${_RESTART_INT}; _httpd_restart
+					done
 				fi 
+				break 
 				;;
 
 			--stop )
 				_httpd_stop;    # 停止服务
+				break 
 				;;
 
 			--restart )
 				_httpd_restart; # 重启服务
+				break 
 				;;
 
 			-t | --test )
@@ -1194,5 +1183,15 @@ _main() { # 定义脚本程序执行流程
 }
 
 # ------------------------------------------------------------------------------
+# 定义主程序
+# 设定程序执行流程
+_main() { 
+	# @todo: 仅在必要时检测shell工具是否可用
+	_require git host openssl
+
+	# 解析命令行参数
+	_parse_argv $_ORIG_ARGV
+}
+
 # 执行主程序 
-_main $_ORIG_ARGV 
+_main 

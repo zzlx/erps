@@ -1,9 +1,8 @@
 /**
  * *****************************************************************************
  *
- * HTTPD服务
+ * 配置服务
  *
- * @file index.mjs
  * *****************************************************************************
  */
 
@@ -12,65 +11,36 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-import setupApp from './setupApp.mjs';
+import './process.mjs'; // 载入进程管理模块
+import Kernel from './kernel/application.mjs';
+import * as m from './middlewares/index.mjs';
+import { LOG_DIR, APP_CONFIG, } from '../config.mjs';
 
-// 进程管理
-process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 初始化系统环境 
-process.title = 'org.zzlx' + '.' + 'httpd'; // 设置进程名称
+const debug = util.debuglog('debug:application'); // debug function
+const hostname = cp.execSync("hostname | awk '{printf $1}'");
 
-const debug = util.debuglog('debug:main');
+const app = new Kernel({
+	// @todo: read configuration from cofig file
+	cert: fs.readFileSync(`/etc/ssl/${hostname}-cert.pem`),
+	key: fs.readFileSync(`/etc/ssl/${hostname}-key.pem`),
+}); 
 
-// 定义pidFile文件路径
-const pidFile = `${process.env.HOME}/.erps/.${process.title}.pid`;
-// 将process.pid写入PID文件
-fs.promises.writeFile(pidFile, String(process.pid), 'utf8');
-// 定义删除pidFile函数
-const deletePidFile = () => fs.promises.unlink(pidFile);
+// 配置服务器执行逻辑
+app.use(m.error(LOG_DIR));          // 捕获中间件错误
+app.use(m.xResponse());             // 记录响应时间
+app.use(m.cookies());               // 支持cookie读写
+app.use(m.log(LOG_DIR));            // 记录log
+app.use(m.cors());                  // 跨域访问响应
+//app.use(m.mongodb(APP_CONFIG.mongodb)); // mongo数据库
 
-process.on('uncaughtException', (err, origin) => {
-	debug('捕获到未被管理的Exception');
-	debug(err);
+app.use((ctx, next) => {
+	ctx.body = "hello"
+
 });
 
-// 处理未被控制的rejection
-process.on('unhandledRejection', (reason, promise) => {
-	debug('捕获到未被管理的Rejection');
-	debug('Rejection reason: ', reason);
-	debug('promise: ', promise);
+app.listen({
+	ipv6Only: false, // 是否仅开启IPV6
+  host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
+  port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
+  exclusive: false, // 是否共享进程端口
 });
-
-
-// SIGINT计数器
-let sigintCount = 0;
-
-const signalHandler = (code) => {
-	debug('Process signal: ', code);
-
-	if (code === 'SIGINT') {
-		if (sigintCount >= 0) {
-			process.exit(1); // 结束进程
-		} else {
-			sigintCount++;
-			console.log('Press Control-C twice to exit.');
-		}
-	}
-}
-
-process.on('SIGINT', signalHandler);
-process.on('SIGTERM', signalHandler);
-
-// 被重定向时触发进程信号
-process.on('SIGPIPE', (code) => {
-	debug('Received SIGPIPE');
-})
-
-process.on('beforeExit', (code) => {
-  console.log('beforeExit event code: ', code);
-});
-
-process.on('exit', (code) => { 
-	debug('任务1: 进程正常退出前,删除掉pid文件');
-	deletePidFile();
-});
-
-const app = setupApp();
