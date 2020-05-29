@@ -37,5 +37,12 @@ export default function createApp() {
 	app.use((ctx, next) => {
 	});
 
+	app.listen({
+		ipv6Only: false, // 是否仅开启IPV6
+    host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
+    port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
+    exclusive: false, // 是否共享进程端口
+	});
+
 	return app;
 }

@@ -11,19 +11,20 @@ import cp from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import createApp from './createApp.mjs';
+
+import setupApp from './setupApp.mjs';
 
 // 进程管理
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 初始化系统环境 
-process.title = process.title + '.' + 'httpd'; // 设置进程名称
+process.title = 'org.zzlx' + '.' + 'httpd'; // 设置进程名称
 
 const debug = util.debuglog('debug:main');
-// 定义pidFile文件路径
-const pidFile = `${process.env.HOME}/.${process.title}.pid`;
 
+// 定义pidFile文件路径
+const pidFile = `${process.env.HOME}/.erps/.${process.title}.pid`;
 // 将process.pid写入PID文件
 fs.promises.writeFile(pidFile, String(process.pid), 'utf8');
-
+// 定义删除pidFile函数
 const deletePidFile = () => fs.promises.unlink(pidFile);
 
 process.on('uncaughtException', (err, origin) => {
@@ -64,7 +65,7 @@ process.on('SIGPIPE', (code) => {
 })
 
 process.on('beforeExit', (code) => {
-  console.log('Process beforeExit event with code: ', code);
+  console.log('beforeExit event code: ', code);
 });
 
 process.on('exit', (code) => { 
@@ -72,12 +73,4 @@ process.on('exit', (code) => {
 	deletePidFile();
 });
 
-const app = createApp();
-
-// 开启服务器监听
-app.listen({
-	ipv6Only: false, // 是否仅开启IPV6
-	host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
-	port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
-	exclusive: false, // 是否共享进程端口
-});
+const app = setupApp();

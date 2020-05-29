@@ -1,7 +1,7 @@
 /**
- * *****************************************************************************
+ * -----------------------------------------------------------------------------
  *
- * 系统配置
+ * 配置项目管理
  *
  * 配置项来源: 1. .env文件；2.config.json文件 3. 系统默认配置项目
  *
@@ -9,7 +9,7 @@
  * 模块输出项目均为文本字符串类型数据
  *
  * @file: config.mjs
- * *****************************************************************************
+ * -----------------------------------------------------------------------------
  */
 
 import fs from 'fs';
@@ -48,23 +48,22 @@ export const PUBLIC_HTML = '/';
 
 // 获取APP配置信息
 let AppConfig = {};
+
 if (fs.existsSync(CONFIG_FILE)) {
-  try {
-    AppConfig = JSON.parse(fs.readFileSync(CONFIG_FILE));
-  } catch (e) { debug(e); }
+  AppConfig = JSON.parse(fs.readFileSync(CONFIG_FILE));
 }
 
 export const APP_CONFIG = AppConfig; 
 
 // 执行目录准备任务,创建系统需要的目录路径
 (function readyDir () {
-  const md = (dir) => fs.promises.mkdir(dir, {recursive: true})
+  const mkdir = (dir) => fs.promises.mkdir(dir, {recursive: true})
     .then(() => true)
     .catch(() => false); 
 
   return Promise.all([
-    md(CONFIG_DIR),
-    md(LOG_DIR),
-    md(DIST_DIR),
+    mkdir(CONFIG_DIR),
+    mkdir(LOG_DIR),
+    //mkdir(DIST_DIR),
   ]);
 })();

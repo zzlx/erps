@@ -1,22 +1,133 @@
 #!/usr/bin/env bash
-################################################################################
+# ------------------------------------------------------------------------------
 #
 # EPR服务管理脚本
 #
 # 功能特性:
+#
 # * 提供源代码库版本管理及变更提交
 # * 服务启动、停止、重启等操作
 # * 服务器证书申请或自签名证书等签发
 #
-# All rights reserved. zzlx.org 立行信息技术
-# EMail: wangxuemin@zzlx.org
-################################################################################
+# 运行环境:
+# Linux、MacOS等类Unix系统环境
+# ------------------------------------------------------------------------------
 
-################################################################################
-# 定义shell函数
+# ------------------------------------------------------------------------------
+# 执行环境设定
+set -e # 执行过程中返回值为非零，退出执行
+# trap exit EXIT
 
-# 显示帮助信息
+# ------------------------------------------------------------------------------
+# shell变量定义
+# 命名规则:全局变量以"_"开头或连接大写命名字母
+# defined readonly variables `declear -r` equivalent to "readonly variable"
+# defined exported variables `declear -x` equivalent to `export variable`
+
+declare -r _ORIG_ARGV=$@        # 记录原始的参数
+declare -r _ORIG_CMD="$0"       # 记录原始命令 
+declare -r _ORIG_TASK="$0 $*"   # 记录原始命令任务
+declare -r _ORIG_PWD=$(pwd)     # 记录执行当前命令所在目录
+declare -r _ORIG_UMASK=$(umask) # 记录原始umask值
+
+declare -r _FILE=${0##*/}                           # 获取文件名称
+declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P) # 获取目录路径
+declare -r _ROOT=$(dirname $_DIR)                   # 获取脚本根目录路径
+
+declare +r  _ENV="production"   # 生产环境
+declare +r  _DEBUG=false        # 默认关闭调试
+declare -rx _CHECK_UPGRADE=true # 默认检查更新
+declare -rx _QUITE=false        # 静默模式
+declare -r  _RENEW_ALLOW=30
+
+# Letsencrypt`s ACME service API address
+declare -r _ACME_API="https://acme-v02.api.letsencrypt.org"
+declare -r _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
+
+declare -r _PREFIX="org.zzlx.erps"
+declare -r _PIDFILE="$HOME/.erps/${_PREFIX}.httpd.pid"
+
+# ------------------------------------------------------------------------------
+# shell函数定义
+# 函数命名规则: 脚本函数均以“_”作为前缀及单词连接符
+# @todo: 按函数首字母顺序排列
+
+_httpd_restart() {
+	_debug "尝试重启httpd..."
+
+	# step1: stop httpd
+	_httpd_stop
+
+	# step2: start httpd
+	_httpd_start
+}
+
+_httpd_start() {
+	_debug "尝试启动httpd..."
+
+	local pid=$(_get_httpd_pid)
+	if [[ -n $pid ]]; then
+		if [[ $(_is_pid_process $pid) == "true" ]]; then
+			printf "检测到服务正在运行,请使用'--restart'参数启动服务.\n"
+			return;
+		fi
+	fi
+
+	export NODE_ENV=$(_get_env_setting)
+	export IPV6=true
+
+	if [[ $(_get_debug_setting) == 'true' ]]; then
+		export NODE_DEBUG="debug*"
+	fi
+
+	_debug "后台运行httpd服务..."
+
+	(node ${_ROOT}/src/server/main.mjs \
+		>> "${HOME}/.$(_get_package_name)/log/process_$(date +%Y%m%d).log" 2>&1
+	)&
+
+}
+
+_httpd_stop() {
+	_debug "尝试🔚结束httpd..."
+
+	# 获取httpd pid
+	local pid=$(_get_httpd_pid)
+
+	# kill httpdPid
+	if [[ -n $pid ]]; then
+		if [[ $(_is_pid_process $pid) == "true" ]]; then
+			_debug "kill给进程发送KILL信号"
+			kill -KILL $httpdPid
+		fi
+
+		rm -f ${_PIDFILE} >/dev/null 2>&1
+	else
+		_debug "pkill给进程名称发送结束信号"
+		pkill -KILL org.zzlx.httpd
+	fi
+}
+
+_rm() {
+	_debug '_rm: remove files';
+
+	local trash_dir="$HOME/.trash_temp"
+	if [[ ! $(mkdir -p $trash_dir) ]]; then return; fi
+
+	for i in $*; do
+		timestamp=$(date +%s)
+		filename=$(basename $i)
+
+		if [[ -r $i ]]; then
+			mv $i ${trash_dir}/${filename}.${timestamp}
+		fi
+	done
+
+	unset trash_dir
+}
+
 _show_help_message() { 
+	_debug "显示帮助信息"
   cat <<- EOF
 	Usage: $(_print_red $(_get_package_name | _toLowerCase)) [options...]
 
@@ -41,37 +152,24 @@ _show_help_message() {
 		系统测试参数
 		--test            测试
 	EOF
+
+	_exit 0
 }
 
-# 显示版本信息
 _show_version_message() {
+	_debug "显示版本信息"
   cat <<- EOF
 	Version: $(_get_package_version)
 	GitVersion: $(_get_git_commit_hash)
 	GitBranch: $(_get_git_branch_name)
 	EOF
+
+	_exit 0
 }
 
-# remove files
-_rm() {
-	_debug '_rm';
-	local trash_dir="$HOME/.trash_temp"
-	if [[ ! $(mkdir -p $trash_dir) ]]; then return; fi
-
-	for i in $*; do
-		timestamp=$(date +%s)
-		filename=$(basename $i)
-
-		if [[ -r $i ]]; then
-			mv $i ${trash_dir}/${filename}.${timestamp}
-		fi
-	done
-
-	unset trash_dir
-}
-
-# get url of current subscriber agreement
 _get_agreement() {
+	_debug "get url of current subscriber agreement"
+
 	AGREEMENT=$(curl --silent ${_ACME_API}/directory \
 		| grep '"termsOfService":' \
 		| sed 's/^.*"termsOfService": "\([^"]*\)".*$/\1/' \
@@ -81,6 +179,8 @@ _get_agreement() {
 }
 
 _open_browser() {
+	_debug "尝试打开浏览器客户端..."
+
   os=$(_get_os)
   case $os in
     mac )
@@ -90,85 +190,35 @@ _open_browser() {
 	esac
 }
 
-# 打包版本
 _package_app() {
 	_debug '打包当前版本:' $(_get_package_name)@v$(_get_package_version)
-}
 
-_stop_httpd() {
-	_debug "尝试关闭服务..."
-	# set -e
-	# step1: 获取httpd pid
-	declare -i httpdPid=$(_get_httpd_pid)
-
-	# step2: kill httpdPid
-	if [[ -n $httpdPid ]]; then
-		kill -9 $httpdPid >/dev/null 2>&1
-		rm -f $HOME/.node.httpd.pid >/dev/null 2>&1
-	fi
-}
-
-# 启动http服务
-_start_httpd() {
-	if [[ -n $(_get_httpd_pid)  ]]; then
-		printf "服务正在运行,重启服务请使用'--restart'参数.\n"
-		return;
-	else
-		_debug "服务正在启动..."
-	fi
-
-	export NODE_ENV=${_ENV}
-	export IPV6=true
-
-	if [[ $(_get_debug_setting) == 'true' ]]; then
-		export NODE_DEBUG="debug*"
-	fi
-
-	# 启动httpd服务
-	node --no-warnings ${_ROOT}/src/server/main.mjs \
-		>> "${_ORIG_PWD}/$(_get_package_name)_$(date +%Y%m%d).log" 2>&1 \
-		& # 后台执行
-
-	if [[ ${_ENV} == 'development' ]]; then
-		_debug "开发模式下将自动重启服务,间隔30秒"
-		sleep 30; _restart_httpd
-	fi 
-}
-
-_restart_httpd() {
-	_debug "服务正在重启..."
-
-	# step1: stop httpd
-	_stop_httpd
-
-	# step2: start httpd
-	_start_httpd
-
+	cd $_ROOT && npm run build && cd $_ORIG_PWD
 }
 
 _get_pid_by_name() {
+	_debug "通过名称获取PID进程号"
 	local name=$1
 	ps -ef | grep "$name" | grep -v "$_ORIG_TASK\|grep" | awk '{print $2}'
 	unset name
 }
 
 _get_httpd_pid() {
-	local pidFile="${HOME}/.node.httpd.pid"
+	_debug "尝试获取httpd PID进程号..."
 
-	if [[ -r $pidFile ]]; then
-		pid=$(head -n 1 $pidFile | sed 's/\n//g')
+	if [[ -r $_PIDFILE ]]; then
+		pid=$(head -n 1 $_PIDFILE | sed 's/\n//g')
 		if [[ -n $pid ]]; then 
-			echo $pid; 
+			echo $pid 
 		else
-			rm -f $pidFile
+			rm -f $_PIDFILE
 		fi
 	fi	
-
-	unset pidFile
 }
 
-# 签发自签名证书
 _issue_self_signed_certificate() {
+	_debug "签发自签名服务器证书"
+
 	local domain=$(hostname | awk '{printf $1}')
 	local keyFile="${_ORIG_PWD}/${domain}-key.pem"
 	local csrFile="${_ORIG_PWD}/${domain}-csr.pem"
@@ -184,6 +234,10 @@ _issue_self_signed_certificate() {
 	openssl x509 -req -in ${csrFile} -signkey ${keyFile} -out ${certFile}
 }
 
+_show_git_log() {
+	git -C $_ROOT log
+}
+
 # 获取进程id号
 _get_process_id() {
   process=$1
@@ -191,18 +245,30 @@ _get_process_id() {
   echo $pid
 }
 
+# ENV环境设置
+_get_env_setting () {
+	if [[ -r ${_ROOT}/.env ]]; then 
+		v=$(cat ${_ROOT}/.env | grep '^ENV=' | awk -F "=" '{ printf $2 }')
+		if [[ $v == 'development' ]]; then _ENV=$v; fi
+		if [[ $v == 'production' ]];  then _ENV=$v; fi
+	fi
+
+	if [[ -z $_ENV ]]; then _ENV="production"; fi
+
+	echo $_ENV;
+}
+
+
 # 获取调试开关设置
 _get_debug_setting() {
-	if [[ -n $_DEBUG ]]; then echo $_DEBUG; return; fi
-
-  if [[ $_HAS_DOT_ENV == 'true' ]]; then 
+  if [[ -r ${_ROOT}/.env ]]; then 
     v=$(cat ${_ROOT}/.env | grep '^DEBUG=' | sed 's/\n//g' | awk -F "=" '{ printf $2 }')
     if [[ $v == 'true' ]]; then _DEBUG='true'; fi
     if [[ $v == 'false' ]]; then _DEBUG='false'; fi
   fi
 
 	if [[ -z $_DEBUG ]]; then 
-		if [[ $_ENV == 'development' ]]; then 
+		if [[ $(_get_env_seting) == 'development' ]]; then 
 			_DEBUG='true'; 
 		else
 			_DEBUG='false'; 
@@ -303,8 +369,6 @@ _check_certificate() {
 		else
 			_error $DOMAIN - certificate obtained but certificate on server is different from the new certificate.
 		fi
-
-
 	fi
 }
 
@@ -543,14 +607,28 @@ _date_renew() {
 	echo "$((date_now_s + RENEW_ALLOW*24*60*60))"
 }
 
-# 是否是zsh
-_is_zsh() {
-  [ -n "${ZSH_VERSION-}" ]
-}
-
 # has function
 _has() {
   echo '检查function是否可用'
+}
+
+# 判断pid进程是否正在运行
+_is_pid_process() {
+	local pid=${1:-0} 
+	local isProcess="false"
+
+	# pid进程正在执行中
+	if [[ $(ps -p ${pid} | awk 'END{print NR}') -eq 2 ]]; then
+		isProcess="true"
+	fi
+
+	echo $isProcess
+	unset pid isProcess
+}
+
+# 是否是zsh
+_is_zsh() {
+  [ -n "${ZSH_VERSION-}" ]
 }
 
 # check if required function is available
@@ -899,8 +977,16 @@ _echo_error() {
 
 # 提供脚本退出时需要执行的任务
 _exit() {
-  # 恢复到程序执行时所在目录,并退出脚本程序
-  cd $_ORIG_PWD; exit $@;
+	# 执行脚本退出时任务
+
+  # task1: 恢复目录
+  cd $_ORIG_PWD; 
+
+  # task2: 恢复umask
+  umask $_ORIG_UMASK; 
+
+  # task3:
+	if [[ ${#} -eq 0 ]]; then exit 0; else exit $@; fi
 }
 
 # 将16进制字符转为2进制
@@ -1001,152 +1087,112 @@ _install_node_modules() {
 
 # 判断当前用户是否为root
 _is_root() {
-  if [ $UID -eq 0 ]; then echo true; else echo false; fi;
+  if [ $UID -eq 0 ]; then printf true; else printf false; fi;
 }
 
-################################################################################
-# 预设执行环境
-set -e # 执行过程中返回值为非零，退出执行
-# trap _exit EXIT
 
-################################################################################
-# 检查依赖的函数
-_require git
-_require host
-_require openssl 
+_main() { # 定义脚本程序执行流程
 
-################################################################################
-# 定义shell变量
-# 命名规则:全局变量以"_"开头或连接大写命名字母
-#
-# defined readonly variables `declear -r` equivalent to "readonly variable"
-# defined exported variables `declear -x` equivalent to `export variable`
+	# 检测系统依赖 
+	# @todo: 仅在必要时检测shell工具是否可用
+	_require git host openssl
 
-declare -r _ORIG_CMD="$0"                             # 记录原始命令 
-declare -r _ARGV=$@                                   # 记录原始的参数
-declare -r _ORIG_TASK="$0 $*"                         # 记录原始命令任务
-declare -r _ORIG_PWD=$(pwd)                           # 记录执行当前命令所在目录
-declare -r _ORIG_UMASK=$(umask)                       # 记录原始umask值
+	# 未提供参数时的默认行为
+	if [ ${#} -eq 0 ]; then _show_help_message; fi
 
-declare -r _FILE=${0##*/}                             # 获取文件名称
-declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P)   # 获取目录路径
-declare -r _ROOT=$(dirname $_DIR)                     # 获取脚本根目录路径
-declare -rx PATH=$PATH:$_ROOT/bin                      # 添加bin至PATH路径
+	# 解析命令行参数,执行指令(分两个阶段)
 
-# 检查_ROOT目录是否存在.env配置文件
-declare -r _HAS_DOT_ENV=$([[ -r ${_ROOT}/.env ]] && echo "true" || echo "false")
+	# 阶段1: 解析并设置OPTION参数
 
-# ENV环境设置
-declare +r _ENV=$(
-  if [[ $_HAS_DOT_ENV == 'true' ]]; then 
-    v=$(cat ${_ROOT}/.env | grep '^ENV=' | awk -F "=" '{ printf $2 }')
-    if [[ $v == 'development' ]]; then 
-      echo 'development'; 
-    else 
-      echo 'production'; 
-    fi
-  else 
-    echo 'production'; 
-  fi
-);
+	# 阶段2: 解析并执行命令
 
-declare -rx _QUITE=false        # 静默模式
-declare -rx _CHECK_UPGRADE=true # 默认检查更新
-declare _RENEW_ALLOW=30
+	while [[ ${#} -gt 0 ]]; do
+		ARG=${1}
+		case ${ARG} in
+			-h | --help )
+				_show_help_message; 
+				;;
 
-# letsencrypt`s ACME service API address
-_ACME_API="https://acme-v02.api.letsencrypt.org"
-_ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
+			--version )
+				_show_version_message; 
+				;;
 
-################################################################################
-# 解析命令行参数,执行指令
+			--debug )
+				_DEBUG="true"
+				;;
 
-if [ ${#} -lt 1 ]; then
-	_error "请提供执行参数"
-	_show_help_message
-	_exit 1
-fi
+			--development )
+				_ENV='development'
+				;;
 
-while [[ ${#} -gt 0 ]]; do
-	ARG=${1}
-	case ${ARG} in
-		-h | --help )
-			_show_help_message; 
-			_exit 0;
-			;;
+			--start )
+				_httpd_start   # 启动服务
 
-		--version )
-			_show_version_message; 
-			_exit 0;
-			;;
+				if [[ $(_get_env_setting) == 'development' ]]; then
+					_debug "每间隔25秒,重启一次httpd"
+					sleep 25; _httpd_restart
+				fi 
+				;;
 
-		--debug )
-			_DEBUG="true"
-			;;
+			--stop )
+				_httpd_stop;    # 停止服务
+				;;
 
-		--env )
-			shift
-			if [[ $1 == 'development' ]]; then _ENV=$1; else _ENV='production'; fi
-			;;
+			--restart )
+				_httpd_restart; # 重启服务
+				;;
 
-		--start )
-			_start_httpd    # 启动服务
-			;;
+			-t | --test )
+				_DEBUG="true"
+				_debug "使用staging API进行测试"
+				_ACME_API=${_ACME_API_STAGING}
+				;;
 
-		--stop )
-			_stop_httpd;    # 停止服务
-			;;
+			--commit )
+				_commit_and_push; break
+				;;
 
-		--restart )
-			_restart_httpd; # 重启服务
-			;;
+			--get-pid )
+				shift
+				_get_pid_by_name $1; break
+				;;
 
-		-t | --test )
-			_DEBUG="true"
-			_debug "使用staging API进行测试"
-			_ACME_API=${_ACME_API_STAGING}
-			;;
+			--show-git-log )
+				_show_git_log;
+				;;
 
-		--commit )
-			_commit_and_push; break
-			;;
+			--deploy-pki )
+				_deploy_pki_cert; break
+				;;
 
-		--get-pid )
-			shift
-			_get_pid_by_name $1; break
-			;;
+			--npm-install )
+				_npm_install; break
+				;;
 
-		--show-git-log )
-			git -C $_ROOT log
-			;;
+			--package )
+				_package_app; break
+				;;
 
-		--deploy-pki )
-			_deploy_pki_cert; break
-			;;
+			--self-signed-certificate )
+				_issue_self_signed_certificate;
+				;;
 
-		--npm-install )
-			_npm_install; break
-			;;
+			-c )
+				echo -n "输入一些文本 > ";
+				read text
+				echo "你的输入：$text";
+				;;
 
-		--package )
-			_package_app; break
-			;;
+			* )
+				echo "参数${ARG}不被支持, 请确认.";
+				# 添加参数分析功能,对不支持对参数进行指导性提示.
+				;;
 
+		esac
+		shift
+	done
+}
 
-		# 签发自签名服务器证书
-		--self-signed-certificate )
-			_issue_self_signed_certificate;
-			;;
-
-		-c )
-			echo -n "输入一些文本 > ";
-			read text
-			echo "你的输入：$text";
-			;;
-
-		* )
-			echo "输入的参数${ARG} 不被支持.";
-			;;
-	esac
-	shift
-done
+# ------------------------------------------------------------------------------
+# 执行主程序 
+_main $_ORIG_ARGV 

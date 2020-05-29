@@ -16,7 +16,7 @@ import path from 'path';
 import util from 'util';
 
 import date from '../../utils/date.mjs'; // @todo: 
-const debug = util.debuglog('debug:middleware_log');
+const debug = util.debuglog('debug:middleware.log');
 
 export default function logMiddleware (logPath, format) {
 	if (null == logPath) logPath = path.join(process.env.HOME, '.log');
@@ -26,29 +26,24 @@ export default function logMiddleware (logPath, format) {
   fs.promises.mkdir(logPath, {recursive: true});
 
   return function logMiddleware (ctx, next) {
+    const log = new Array(
+			date.toLocaleISOString(),
+      ctx.method, 
+			ctx.href,
+      ctx.socket.remoteAddress,
+			'"' + ctx.headers['user-agent'] + '"', // 记录用户代理
+      ctx.socket.remotePort,
+		).join(' ');
 
-    const log = ''
-      + date.toLocaleISOString()
-      + ' ' 
-      + ctx.method 
-      + ' ' 
-      + ctx.href
-      + ' ' 
-      + ctx.socket.remoteAddress 
-      + ' ' 
-      + ctx.socket.remotePort;
+		next();     // 执行下一中间件
+		debug(log); // 打印调试信息
 
-    debug('客户端请求', log);
-
-		next();
-
+		const dateSN = date.format('yyyymmdd');
     // 写入日志文件
-    const logFile = path.join(logPath, `${date.format('yyyymmdd')}_access.log`);
-
-    fs.promises.open(logFile, 'a+').then(fd => {
-			// 写入后关闭fd
+    fs.promises.open(path.join(logPath, `request_${dateSN}.log`), 'a+')
+		.then(fd => {
 			return fs.promises.appendFile(fd, log + os.EOL).then(() => fd.close())
-		});
+		}).catch(err => console.log(err));
 
   } 
 }
