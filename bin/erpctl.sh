@@ -811,10 +811,13 @@ _commit_and_push() {
 	# 比对工作区与仓库差异
   if [[ -n $(git -C $_ROOT diff HEAD) ]]; then
     git -C $_ROOT add -A
-		if [[ -n $1 ]]; then
-			git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") ${1}"
-		else
-			git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
+		if [[ -z $1 ]]; then
+			read -p "变更说明:" message
+			if [[ -n ${message} ]]; then
+				git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") ${message}"
+			else
+				git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
+			fi
 		fi
   fi
 
