@@ -31,13 +31,13 @@ declare -r _ORIG_PWD=$(pwd)     # 记录执行当前命令所在目录
 declare -r _ORIG_UMASK=$(umask) # 记录原始umask值
 
 declare -r _FILE=${0##*/}                           # 获取文件名称
-declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P) # 获取目录路径
-declare -r _ROOT=$(dirname $_DIR)                   # 获取脚本根目录路径
+declare -r _BIN=$(cd $(dirname $0) || exit; pwd -P) # 获取目录路径
+declare -r _ROOT=$(dirname $_BIN)                   # 获取脚本根目录路径
 
 declare +r _ENV="production"   # 生产环境
 declare +r _DEBUG=false        # 默认关闭调试
 declare -r _RENEW_ALLOW=30
-declare -r _RESTART_INT=15     # 开发模式下重启服务间隔时间
+declare -r _RESTART_INT=30     # 设置开发模式下重启服务间隔时间
 
 # Letsencrypt`s ACME service API address
 declare -r _ACME_API="https://acme-v02.api.letsencrypt.org"
@@ -49,6 +49,7 @@ declare -r _PIDFILE="$HOME/.erps/${_PREFIX}.httpd.pid"
 # 定义子shell中可用的变量
 declare -rx CHECK_UPGRADE=true # 默认检查更新
 declare -rx QUITE=false        # 静默模式
+declare -x  PATH=$PATH:${_BIN} # 添加PATH路径
 
 # ------------------------------------------------------------------------------
 # shell函数定义
@@ -81,7 +82,7 @@ _httpd_start() {
 	fi
 
 	_debug "尝试后台运行httpd..."
-	(node ${_ROOT}/src/server/main.mjs)&
+	(node --no-warnings --experimental-json-modules ${_ROOT}/src/server/main.mjs)&
 }
 
 _httpd_stop() {
@@ -142,7 +143,7 @@ _show_help_message() {
 		代码库管理参数
 		--build           重建前端程序
 		--commit          提交一次代码库改动
-		--show-git-log    显示git版本日志
+		--git-log    显示git版本日志
 		--install         系统初始化安装与配置
 
 		系统测试参数
@@ -810,7 +811,11 @@ _commit_and_push() {
 	# 比对工作区与仓库差异
   if [[ -n $(git -C $_ROOT diff HEAD) ]]; then
     git -C $_ROOT add -A
-    git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
+		if [[ -n $1 ]]; then
+			git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") ${1}"
+		else
+			git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
+		fi
   fi
 
 	read -r -p "是否需要上传远程仓库? /Y(es)?|No?/i " input
@@ -1137,8 +1142,9 @@ _parse_argv() {
 				_ACME_API=${_ACME_API_STAGING}
 				;;
 
-			--commit )
-				_commit_and_push; break
+			--git-commit )
+				shift
+				_commit_and_push $1; break
 				;;
 
 			--get-pid )
@@ -1146,7 +1152,7 @@ _parse_argv() {
 				_get_pid_by_name $1; break
 				;;
 
-			--show-git-log )
+			--git-log )
 				_show_git_log;
 				;;
 

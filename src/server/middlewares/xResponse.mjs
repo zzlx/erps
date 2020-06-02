@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * x-response中间件
+ * x-response middleware
  *
  * @return {function} middleware
  * @api public
@@ -9,7 +9,7 @@
  */
 
 import util from 'util';
-const debug = util.debuglog('debug:x-response-middleware');
+const debug = util.debuglog('debug:middleware.x-response');
 
 export default function () {
 	return async function xResponseMiddleware (ctx, next) {
@@ -21,8 +21,9 @@ export default function () {
     timer = process.hrtime(timer); // 获取一个精确的时间戳对象:[秒,纳秒]
     // 计算耗时,将时间戳对象转换为毫秒
     const interval = Math.round(timer[0] * 1000 + timer[1] / 1000000);
-
     ctx.set('X-Response-Time', `${interval}ms`); // 设置响应时间
-		ctx.set('X-Powered-By', `Node.js@${process.version}`); // 设置服务器信息
+
+		// 设置x-powered-by
+		ctx.set('X-Powered-By', `Node.js@${process.version}`);
   }
 }

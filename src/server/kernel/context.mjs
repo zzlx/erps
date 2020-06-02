@@ -11,29 +11,27 @@ import http2 from 'http2';
 import net from 'net';
 import util from 'util';
 
-// @todo: 第三方模块
-import mimeTypes from 'mime-types';
+// @todo: 本地化第三方模块
 import accepts from 'accepts';
 import contentType from 'content-type';
 
+import MimeTypes from './mime-types.mjs';
 import MemCache from '../../utils/memCache.mjs';
 import { 
 	RES_HEADERS, 
 	RES_BODY, 
 	REQ_IP, 
-	EmptyCode,
-	RetryCode,
-	RedirectCode,
+	EMPTY_CODE,
+	RETRY_CODE,
+	REDIRECT_CODE,
 } from './constants.mjs';
 
 // 调试工具
-const debug = util.debuglog('debug:context');
-
-// 定义变量
+const debug = util.debuglog('debug:application.context');
+const mimeTypes = new MimeTypes();
 const typeCache = new MemCache(100);
 
 export default class Context {
-
   /**
    *
    * @return {Bool}
@@ -130,7 +128,7 @@ export default class Context {
     }
     this._explicitStatus = true;
     this.set(http2.constants.HTTP2_HEADER_STATUS, code);
-    if (this.body && EmptyCode.includes(code)) this.body = null;
+    if (this.body && EMPTY_CODE.includes(code)) this.body = null;
 
   }
 
@@ -413,7 +411,7 @@ export default class Context {
    */
 
   get type() {
-    const type = this.headers[http2.constants.HTTP2_HEADER_CONTENT_TYPE];
+    const type = this[RES_HEADERS][http2.constants.HTTP2_HEADER_CONTENT_TYPE];
     if (!type) return '';
     return type.split(';')[0];
   }
@@ -695,9 +693,8 @@ export default class Context {
    */
 
   throw (...args) {
-    const error = createError(...args); // 构造错误对象
-    debug(error); // 调试错误对象
-    throw error; // 抛出错误对象
+		const error = createHttpError(...args);
+		throw error;
   }
 
   /**
@@ -708,7 +705,6 @@ export default class Context {
    */
 
   onerror (err) {
-    debug('处理中间件内错误');
     // don‘t do anything if there is no error. 
     // this allows you to pass 'this.onerror'
     if (null == err) return;
@@ -726,9 +722,7 @@ export default class Context {
     // delegate
     this.app.emit('error', err, this);
 
-    // nothing we can do here other
-    // than delegate to the app-level
-    // handler and log.
+    // nothing we can do here other than delegate to the app-level handler and log.
     if (headerSent) return;
 
     // unset all headers
@@ -751,6 +745,7 @@ export default class Context {
     this.status = err.status;
     this.length = Buffer.byteLength(msg);
     this.stream.end(msg);
+
   }
 
   /**
@@ -777,7 +772,7 @@ export default class Context {
 
     // no content
     if (null == val) {
-      if (!EmptyCode.includes(this.status)) this.status = 204;
+      if (!EMPTY_CODE.includes(this.status)) this.status = 204;
       this.remove('Content-Type');
       this.remove('Content-Length');
       this.remove('Transfer-Encoding');
@@ -829,7 +824,7 @@ export default class Context {
  *
  */
 
-function createError () {
+function createHttpError () {
   let error = null;
   let message = null;
   let status = 500;
@@ -840,8 +835,7 @@ function createError () {
 
     // 错误对象
     if (arg instanceof Error) {
-      err = arg;
-      status = err.status || err.statusCode || status;
+      status = arg.status || arg.statusCode || status;
       continue;
     }
 
@@ -863,8 +857,8 @@ function createError () {
     throw new Error('non-error status code; use only 4xx or 5xx status codes');
   }
 
-  if (typeof status !== 'number' ||
-    (!http.STATUS_CODES[status] && (status < 400 || status >= 600))) {
+  if (typeof status !== 'number' || 
+		(!http.STATUS_CODES[status] && (status < 400 || status >= 600))) {
     status = 500
   }
 
@@ -872,7 +866,9 @@ function createError () {
     error = new Error(message || http.STATUS_CODES[status]);
     error.status = status;
   }
-  
-  // 返回error对象
+
+	// debug http error
+	debug('HttpError:', error); 
+
   return error;
 }

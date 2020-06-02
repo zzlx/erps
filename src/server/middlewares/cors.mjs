@@ -17,7 +17,7 @@
  */
 
 import util from 'util';
-const debug = util.debuglog('debug:middleware-cors');
+const debug = util.debuglog('debug:middleware.cors');
 
 export default function (options) {
 

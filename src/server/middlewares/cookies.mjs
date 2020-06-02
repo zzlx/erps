@@ -12,7 +12,7 @@
 import util from 'util';
 import Keygrip from '../../utils/keygrip.mjs';
 
-const debug = util.debuglog('debug:middleware-cookie');
+const debug = util.debuglog('debug:middleware.cookie');
 const COOKIES = Symbol('middleware#cookies');
 
 export default (opts) => function cookieMiddleware (ctx, next) {

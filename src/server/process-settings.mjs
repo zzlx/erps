@@ -11,31 +11,35 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
+const debug = util.debuglog('debug:process');
+
 // 进程管理
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 初始化系统环境 
 process.title = 'org.zzlx' + '.' + 'httpd'; // 设置进程名称
 
-const debug = util.debuglog('debug:process');
 
 // 定义pidFile文件路径
 const pidFile = `${process.env.HOME}/.erps/.${process.title}.pid`;
+
 // 将process.pid写入PID文件
 fs.promises.writeFile(pidFile, String(process.pid), 'utf8');
+
 // 定义删除pidFile函数
 const deletePidFile = () => fs.promises.unlink(pidFile);
 
+// 被此事件捕获的exception,需要进行妥善处理
+// 不应出现未经管理的exception
 process.on('uncaughtException', (err, origin) => {
-	debug('捕获到未被管理的Exception');
-	debug(err);
+	debug('exception: ', err);
+	debug('origin: ', origin);
 });
 
-// 处理未被控制的rejection
+// 被此事件捕获的rejection,需要进行妥善处理
+// 系统不应出现未经管理的rejection
 process.on('unhandledRejection', (reason, promise) => {
-	debug('捕获到未被管理的Rejection');
-	debug('Rejection reason: ', reason);
+	debug('rejection reason: ', reason);
 	debug('promise: ', promise);
 });
-
 
 // SIGINT计数器
 let sigintCount = 0;

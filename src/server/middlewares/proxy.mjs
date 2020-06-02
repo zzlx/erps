@@ -11,6 +11,9 @@
 
 import http2 from 'http2';
 import http from 'http';
+import util from 'util';
+
+const debug = util.debuglog('node:middleware.proxy');
 
 export default function (opts) {
   return async function proxyMiddleware (ctx, next) {

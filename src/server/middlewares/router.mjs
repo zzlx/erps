@@ -18,8 +18,9 @@ import http from 'http';
 import path from 'path';
 import util from 'util';
 
+const debug = util.debuglog('debug:middleware.router');
+
 export default function router (servicePath, prefix) {
-  const debug = util.debuglog('debug:router');
   const routeCache = Object.create(null); // 路由缓存
 
   return async function routerMiddleware (ctx, next) {
@@ -108,6 +109,5 @@ for (let i = 0; i < methods.length; i++) {
       path = name;
       name = null;
     }
-
   }
 }

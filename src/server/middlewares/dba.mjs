@@ -1,9 +1,10 @@
 /**
  * *****************************************************************************
  *
- * mongo.mjs
+ * DBA数据库管理
  *
- * mongodb中间件: 提供mongo数据库连接
+ * 支持的数据库连接工具
+ * mongodb: 提供mongo数据库连接
  *
  *
  * @todo: 增加支持sql/mysql/db2/oracal/等数据库
@@ -12,20 +13,16 @@
  */
 
 import assert from 'assert';
+import util from 'util';
+
 import MongoDBA from '../../utils/mongodb.mjs';
+const debug = util.debuglog('debug:middleware.mongodb');
 
 export default function (opts = null) {
-  // 参数配置
-  if (null == opts) {
-    opts = new URL('mongodb://localhost:27017/test'); 
-  };
+	let mongodbURL = new URL(opts ? opts : 'mongodb://localhost:27017/test');
 
-  if ('string' === typeof opts) {
-    opts = new URL(opts);
-  }
+  return async function dbaMiddleware (ctx, next) {
 
-  return async function mongodbMiddleware (ctx, next) {
-    // 使用时初始化
     Object.defineProperty(ctx, 'mongodb', {
       get: function() {
         if (this._mongoClient == null) {

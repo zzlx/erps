@@ -1,11 +1,13 @@
 /**
  * *****************************************************************************
+ * -----------------------------------------------------------------------------
  *
  * webpack配置
  *
  * 用于生成前端代码
  *
  * @file: config.webpack.cjs
+ * -----------------------------------------------------------------------------
  * *****************************************************************************
  */
 
@@ -23,7 +25,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 
 module.exports = (opts = {}) => {
-	const APP_PATH = opts.dir || __dirname;
+	const APP_PATH = opts.dir || path.dirname(__dirname);
   process.env.NODE_ENV = opts.env || process.env.NODE_ENV || 'production';
   const isDevel = 'development' === process.env.NODE_ENV;
   const isProd  = 'production' === process.env.NODE_ENV;

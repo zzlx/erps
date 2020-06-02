@@ -14,9 +14,10 @@ import cp from 'child_process';
 import util from 'util';
 
 // modules
+import compose from '../middlewares/compose.mjs';
 import Context from './context.mjs';
 import respond from './respond.mjs';
-import setupServer from './http2s.mjs';
+import setupServer from '../http2s.mjs';
 
 const debug = util.debuglog('debug:application'); // debug function
 
@@ -24,15 +25,13 @@ export default class Application extends EventEmitter {
   constructor(props) {
     super();
     this.props = props ? props : Object.create(null);
-
-    // 属性配置
-    this.env = props.env || process.env.NODE_ENV || 'production'; // 默认产品模式
-    this.protocol = props.protocol ? props.protocol : 'http2'; // 默认http2协议
+    this.env = props.env || process.env.NODE_ENV || 'production';
+    this.protocol = props.protocol ? props.protocol : 'http2';
     this.proxy = props.proxy ? props.proxy : false;
     this.subdomainOffset = props.subdomainOffset ? props.subdomainOffset : 2;
     this.keys = props.keys ? props.keys : ['services'];
     this.middlewares = []; // configured middlewares
-    this.context = Object.create(null);
+
     if (util.inspect.custom) {
       this[util.inspect.custom] = this.inspect;
     }
@@ -57,12 +56,10 @@ export default class Application extends EventEmitter {
    */
 
   use (fn) {
-    if (typeof fn !== 'function') {
-      throw new TypeError('middleware must be a function!');
-    }
+    if (typeof fn !== 'function') throw new TypeError('middleware must be a function!');
 
+		debug('use %s', fn._name || fn.name || 'anonymous function');
     this.middlewares.push(fn);
-
     return this;
   }
 
@@ -71,13 +68,12 @@ export default class Application extends EventEmitter {
    */
 
   callback () {
-		// 组合中间件链
-    const fn = this.compose(this.middlewares);
+    const fn = compose(this.middlewares);
 
-    // 绑定app级别error事件处理
     if (!this.listenerCount('error')) this.on('error', this.onerror);
 
     return (stream, headers, flags) => {
+			// 创建context对象
       const ctx = new Context();
       ctx.stream = stream;
       ctx.headers = headers;
@@ -97,68 +93,26 @@ export default class Application extends EventEmitter {
    */
 
   handleRequest (ctx, fn) {
-		debug('handleRequest');
-		// 中间件链处理请求后发送请求
-    return fn(ctx).then(() => respond(ctx)).catch(err => ctx.onerror(err));
+		const onError = err => ctx.onerror(err);
+		const responseHandler = () => respond(ctx);
+		return fn(ctx).then(responseHandler).catch(onError);
   }
 
   /**
-   * Error handler
+	 * app-level error handler
    *
    * @param {Error} err
    * @api private
    */
 
   onerror(err) {
-		debug('onerror: 处理系统级错误');
-
-    if (!(err instanceof Error)) {
-      throw new TypeError(util.format('non-error thrown: %j', err));
-    }
+    if (!(err instanceof Error)) throw new TypeError(util.format('non-error thrown: %j', err));
 
     if (404 == err.status || err.expose) return;
     if (this.silent) return;
 
     const msg = err.stack || err.toString();
-
-    // 调试信息
     debug(msg.replace(/^/gm, '  '));
-  }
-
-  /**
-   * Compose `middleware` returning a fully valid middleware.
-   *
-   * @param {Array} middleware
-   * @return {Function}
-   */
-
-  compose (middleware) {
-    if (!Array.isArray(middleware)) {
-      throw new TypeError('Middleware must be an array!');
-    }
-
-    return function middlewareFn (context, next) {
-      let index = -1;
-      return dispatch(0);
-
-      function dispatch (i) {
-        if (i <= index) {
-          return Promise.reject(new Error('next() called multiple times'));
-        }
-
-        index = i;
-        let fn = (i === middleware.length) ? next : middleware[i];
-        if (!fn) return Promise.resolve();
-
-				debug('dispatch fn:', fn);
-
-        try {
-          return Promise.resolve(fn(context, dispatch.bind(null, ++i)));
-        } catch (err) {
-          return Promise.reject(err);
-        }
-      }
-    }
   }
 
 	set server (server) {

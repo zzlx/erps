@@ -1,9 +1,9 @@
 /**
  * *****************************************************************************
  *
- * Static resources middlewares 
+ * Statics middlewares 
  *
- * 提供静态资源服务
+ * 静态资源服务
  * 支持内容协商
  * 支持压缩版本
  *
@@ -14,8 +14,10 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
+
 import { PUBLIC_HTML } from '../../config.mjs';
-const debug = util.debuglog('debug:static');
+
+const debug = util.debuglog('debug:middleware.static');
 
 export default function (opts = {}) {
 
