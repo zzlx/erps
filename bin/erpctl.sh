@@ -812,7 +812,7 @@ _commit_and_push() {
   if [[ -n $(git -C $_ROOT diff HEAD) ]]; then
     git -C $_ROOT add -A
 		if [[ -z $1 ]]; then
-			read -p "变更说明:" message
+			read -p "变更提交说明:" message
 			if [[ -n ${message} ]]; then
 				git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") ${message}"
 			else
