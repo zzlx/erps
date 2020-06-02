@@ -818,6 +818,8 @@ _commit_and_push() {
 			else
 				git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
 			fi
+		else
+			git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") ${1}"
 		fi
   fi
 
