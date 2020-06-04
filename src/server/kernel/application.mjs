@@ -17,7 +17,6 @@ import util from 'util';
 import compose from '../middlewares/compose.mjs';
 import Context from './context.mjs';
 import respond from './respond.mjs';
-import setupServer from '../http2s.mjs';
 
 const debug = util.debuglog('debug:application'); // debug function
 
@@ -25,11 +24,11 @@ export default class Application extends EventEmitter {
   constructor(props) {
     super();
     this.props = props ? props : Object.create(null);
-    this.env = props.env || process.env.NODE_ENV || 'production';
-    this.protocol = props.protocol ? props.protocol : 'http2';
-    this.proxy = props.proxy ? props.proxy : false;
-    this.subdomainOffset = props.subdomainOffset ? props.subdomainOffset : 2;
-    this.keys = props.keys ? props.keys : ['services'];
+    this.env = this.props.env || process.env.NODE_ENV || 'production';
+    this.protocol = this.props.protocol ? this.props.protocol : 'http2';
+    this.proxy = this.props.proxy ? this.props.proxy : false;
+    this.subdomainOffset = this.props.subdomainOffset ? this.props.subdomainOffset : 2;
+    this.keys = this.props.keys ? this.props.keys : ['services'];
     this.middlewares = []; // configured middlewares
 
     if (util.inspect.custom) {
@@ -43,6 +42,8 @@ export default class Application extends EventEmitter {
    */
 
   listen (...args) {
+    if (null == this.server) return console.log('未配置http2 server');
+
 		this.server.on('stream', this.callback());
 		this.server.listen(...args); // 开启服务
   }
@@ -93,9 +94,7 @@ export default class Application extends EventEmitter {
    */
 
   handleRequest (ctx, fn) {
-		const onError = err => ctx.onerror(err);
-		const responseHandler = () => respond(ctx);
-		return fn(ctx).then(responseHandler).catch(onError);
+		return fn(ctx).then(() => respond(ctx)).catch(err => respond(ctx, err));
   }
 
   /**
@@ -113,20 +112,5 @@ export default class Application extends EventEmitter {
 
     const msg = err.stack || err.toString();
     debug(msg.replace(/^/gm, '  '));
-  }
-
-	set server (server) {
-		if ( null == this._server) this._server = server;
-	}
-
-  get server () {
-    if (null == this._server) {
-      this._server = setupServer({
-        cert: this.props.cert,
-        key: this.props.key,
-      });
-    }
-
-    return this._server;
   }
 }

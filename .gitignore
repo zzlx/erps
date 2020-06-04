@@ -1,23 +1,29 @@
+# #############################################
 # 参考文档 http://help.github.com/ignore-files/
-# 忽略的目录
-node_modules
-build
-dist
+# #############################################
 
-# 忽略的文件
-.env
-env
+# OS
 .DS_Store
-package-lock.json
+
+# vim
 *.sw[mnop]
+*.un
+*.*.un
+*.un~
+*.*.un~
+*.~
+
+# Node.js
+node_modules
+package-lock.json
+yarn.lock
+
+# Package
+dist
+.env
 *.log
 *.local
 *.local.conf
 *.local.json
 *.o
 *.out
-*.un
-*.*.un
-*.un~
-*.*.un~
-*.~

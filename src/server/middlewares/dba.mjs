@@ -19,14 +19,17 @@ import MongoDBA from '../../utils/mongodb.mjs';
 const debug = util.debuglog('debug:middleware.mongodb');
 
 export default function (opts = null) {
-	let mongodbURL = new URL(opts ? opts : 'mongodb://localhost:27017/test');
+
+	let mongodbURL = opts && opts.mongodb
+    ? new URL(opts.mongodb)
+    : new URL('mongodb://localhost:27017/test');
 
   return async function dbaMiddleware (ctx, next) {
 
     Object.defineProperty(ctx, 'mongodb', {
       get: function() {
         if (this._mongoClient == null) {
-          this._mongoClient = new MongoDBA(opts.href, {
+          this._mongoClient = new MongoDBA(mongodbURL.href, {
             useNewUrlParser: true,
             //sslValidate: true,
             //sslCA: fs.readFileSync(),

@@ -16,24 +16,52 @@ import accepts from 'accepts';
 import contentType from 'content-type';
 
 import MimeTypes from './mime-types.mjs';
+import HttpError from './http-errors.mjs';
 import MemCache from '../../utils/memCache.mjs';
 import { 
-	RES_HEADERS, 
-	RES_BODY, 
-	REQ_IP, 
 	EMPTY_CODE,
 	RETRY_CODE,
 	REDIRECT_CODE,
 } from './constants.mjs';
 
-// 调试工具
-const debug = util.debuglog('debug:application.context');
+const debug = util.debuglog('debug:application.context'); // 调试工具
+
+// 常量
+const REQ_URL = Symbol('context#request-URL');
+const REQ_IP = Symbol('context#request-ip');
+const ACCEPT = Symbol('accept');
+const RES_HEADERS = Symbol.for('context#response-headers');
+const RES_BODY = Symbol('context#response-body');
+
 const mimeTypes = new MimeTypes();
 const typeCache = new MemCache(100);
 
 export default class Context {
+
   /**
    *
+   */
+
+  get request () {
+    return {
+      headers: this.headers,
+      method: this.method,
+      body: null,
+    }
+  }
+
+  /**
+   *
+   */
+
+  get response () {
+    return {
+      headers: this[RES_HEADERS],
+      body: this[RES_BODY],
+    }
+  }
+
+  /**
    * @return {Bool}
    * @api public
    */
@@ -53,11 +81,12 @@ export default class Context {
    *
    * @param {String|Object|Array} field
    * @param {String} val
+   * @return {Boolean}
    * @api public
    */
 
   set(field, val) {
-    if (this.headerSent) return;
+    if (this.headerSent) return false; // set header failure
     if (this[RES_HEADERS] == null) this[RES_HEADERS] = Object.create(null);
 
     if (2 == arguments.length) {
@@ -69,6 +98,8 @@ export default class Context {
         this.set(key, field[key]);
       }
     }
+
+    return true; // set header success
   }
 
   /**
@@ -102,6 +133,16 @@ export default class Context {
   }
 
   /**
+   * headersSent
+   *
+   * @api public
+   */
+
+  get headersSent() {
+    return this.stream.headersSent;
+  }
+
+  /**
    * Get response status code.
    *
    * @return {Number}
@@ -129,7 +170,6 @@ export default class Context {
     this._explicitStatus = true;
     this.set(http2.constants.HTTP2_HEADER_STATUS, code);
     if (this.body && EMPTY_CODE.includes(code)) this.body = null;
-
   }
 
   /**
@@ -140,18 +180,7 @@ export default class Context {
    */
 
   get message() {
-    const code = String(this.status);
-    return code + ': ' + http.STATUS_CODES[code];
-  }
-
-  /**
-   * headersSent
-   *
-   * @api public
-   */
-
-  get headersSent() {
-    return this.stream.headersSent;
+    return http.STATUS_CODES[String(this.status)];
   }
 
   /**
@@ -194,15 +223,23 @@ export default class Context {
    */
 
   get URL() {
-    if (!this.memoizedURL) {
+    if (!this[REQ_URL]) {
       try {
-        this.memoizedURL = new URL(`${this.schema}://${this.authority}${this.path}`);
+        this[REQ_URL] = new URL(`${this.schema}://${this.authority}${this.path}`);
       } catch (err) {
-        this.memoizedURL = Object.create(null);
+        this[REQ_URL] = Object.create(null);
       }
     }
 
-    return this.memoizedURL;
+    return this[REQ_URL];
+  }
+
+  /**
+   * href
+   */
+
+  get href() {
+    return this.URL.href;
   }
 
   /**
@@ -217,28 +254,39 @@ export default class Context {
   }
 
   /**
-   * PROTOCOL
+   * protocol
    */
 
   get protocol() {
-    let protocol = this.headers[http2.constants.HTTP2_HEADER_PROTOCOL];
-    if (protocol == null) {
-      protocol = this.URL.protocol;
-    }
-    return protocol;
+    return this.URL.protocol;
+  }
+
+  /**
+   * username
+   */
+
+  get username() {
+    return this.URL.username;
+  }
+
+  /**
+   * password
+   */
+
+  get password() {
+    return this.URL.password;
   }
 
   /**
    * host
+   *
+   * @todo: 完善hostname获取逻辑
    */
 
   get host() {
     const proxy = this.app.proxy;
-    let host = proxy && this.get('X-Forwarded-Host');
-    if (!host) {
-      if (!host) host = this.URL.host;
-    }
-
+    let host = proxy && this.get(http2.constants.HTTP2_HEADER_X_FORWARDED_FOR);
+    if (!host) host = this.URL.host;
     if (!host) return '';
     return host.split(/\s*,\s*/, 1)[0];
   }
@@ -252,6 +300,14 @@ export default class Context {
   }
 
   /**
+   * port
+   */
+
+  get port() {
+    return this.URL.port;
+  }
+
+  /**
    * pathname
    */
 
@@ -260,15 +316,10 @@ export default class Context {
   }
 
   /**
-   * href
-   */
-
-  get href() {
-    return this.URL.href;
-  }
-
-  /**
    * search
+   *
+   * strings with?
+   *
    */
 
   get search() {
@@ -277,6 +328,8 @@ export default class Context {
 
   /**
    * searchParams
+   *
+   * Usage: ctx.searchParams.get('param') => value
    */
 
   get searchParams() {
@@ -312,7 +365,7 @@ export default class Context {
    */
 
   set length(n) {
-    this.set('content-length', n);
+    this.set('content-length', Number(n));
   }
 
   /**
@@ -324,13 +377,13 @@ export default class Context {
 
   get length() {
     const len = this[RES_HEADERS][http2.constants.HTTP2_HEADER_CONTENT_LENGTH];
-    if (len == '') return;
-    return ~~len;
+    if (len == '') return 0;
+    return Number(len); // ~~len
   }
 
   /**
-   * When `app.proxy` is `true`, parse
-   * the "X-Forwarded-For" ip address list.
+   * When `app.proxy` is `true`, 
+   * parse the "X-Forwarded-For" ip address list.
    *
    * For example if the value were "client, proxy1, proxy2"
    * you would receive the array `["client", "proxy1", "proxy2"]`
@@ -341,17 +394,16 @@ export default class Context {
    */
 
   get ips() {
-    const proxy = this.app.proxy;
     const val = this.headers('X-Forwarded-For');
-    return proxy && val
+    return this.app.proxy && val
       ? val.split(/\s*,\s*/)
       : [];
   }
 
   /**
    * Return request's remote address
-   * When `app.proxy` is `true`, parse
-   * the "X-Forwarded-For" ip address list and return the first one
+   * When `app.proxy` is `true`, 
+   * parse the "X-Forwarded-For" ip address list and return the first one
    *
    * @return {String}
    * @api public
@@ -384,10 +436,7 @@ export default class Context {
     const offset = this.app.subdomainOffset;
     const hostname = this.hostname;
     if (net.isIP(hostname)) return [];
-    return hostname
-      .split('.')
-      .reverse()
-      .slice(offset);
+    return hostname.split('.').reverse().slice(offset);
   }
 
   /**
@@ -399,7 +448,7 @@ export default class Context {
    */
 
   get accept() {
-    return this._accept || (this._accept = accepts(this));
+    return this[ACCEPT] || (this[ACCEPT] = accepts(this));
   }
 
   /**
@@ -440,11 +489,8 @@ export default class Context {
       typeCache.set(type, mimeType);
     }
 
-    if (mimeType) {
-      this.set('Content-Type', mimeType);
-    } else {
-      this.remove('Content-Type');
-    }
+    if (mimeType) this.set(http2.constants.HTTP2_HEADER_CONTENT_TYPE, mimeType);
+    else this.remove(http2.constants.HTTP2_HEADER_CONTENT_TYPE);
   }
 
   /**
@@ -543,7 +589,7 @@ export default class Context {
     switch (field = field.toLowerCase()) {
       case 'referer':
       case 'referrer':
-        return this.headers.referrer || this.headers.referer || '';
+        return this.headers[http2.constants.HTTP2_HEADER_REFERER] || '';
       default:
         return this.headers[field] || '';
     }
@@ -672,83 +718,6 @@ export default class Context {
   }
 
   /**
-   * Throw an error with `status` (default 500) and `msg`. 
-   * Note that these are user-level errors, 
-   * and the message may be exposed to the client.
-   *
-   *    this.throw(403)
-   *    this.throw(400, 'name required')
-   *    this.throw('something exploded')
-   *    this.throw(new Error('invalid'))
-   *    this.throw(400, new Error('invalid'))
-   *
-   * See: https://github.com/jshttp/http-errors
-   *
-   * Note: `status` should only be passed as the first parameter.
-   *
-   * @param {String|Number|Error} err, msg or status
-   * @param {String|Number|Error} [err, msg or status]
-   * @param {Object} [props]
-   * @api public
-   */
-
-  throw (...args) {
-		const error = createHttpError(...args);
-		throw error;
-  }
-
-  /**
-   * error handler
-   *
-   * @param {Error} err
-   * @api private
-   */
-
-  onerror (err) {
-    // don‘t do anything if there is no error. 
-    // this allows you to pass 'this.onerror'
-    if (null == err) return;
-
-    if (!(err instanceof Error)) {
-      err = new Error(util.format('non-error thrown: %j', err));
-    }
-
-    let headerSent = false;
-
-    if (this.headerSent || !this.writable) {
-      headerSent = err.headerSent = true;
-    }
-
-    // delegate
-    this.app.emit('error', err, this);
-
-    // nothing we can do here other than delegate to the app-level handler and log.
-    if (headerSent) return;
-
-    // unset all headers
-    this[RES_HEADERS] = {};
-
-    // force text/plain
-    this.type = 'text';
-
-    // ENOENT support
-    if ('ENOENT' == err.code) err.status = 404;
-
-    // default to 500
-    if ('number' != typeof err.status || !http.STATUS_CODES[err.status]) {
-      err.status = 500;
-    }
-
-    // respond
-    const code = http.STATUS_CODES[err.status];
-    const msg = err.expose ? err.message : code;
-    this.status = err.status;
-    this.length = Buffer.byteLength(msg);
-    this.stream.end(msg);
-
-  }
-
-  /**
    * Get response body.
    *
    * @return {Mixed}
@@ -772,7 +741,10 @@ export default class Context {
 
     // no content
     if (null == val) {
-      if (!EMPTY_CODE.includes(this.status)) this.status = 204;
+      if (!EMPTY_CODE.includes(this.status)) {
+        this.status = http2.constants['HTTP_STATUS_NO_CONTENT']; // 204
+      }
+
       this.remove('Content-Type');
       this.remove('Content-Length');
       this.remove('Transfer-Encoding');
@@ -780,7 +752,7 @@ export default class Context {
     }
 
     // set a proper status
-    if (!this._explicitStatus) this.status = 200;
+    if (!this._explicitStatus) this.status = http2.constants['HTTP_STATUS_OK'];
 
     // set type
     const setType = !this.has('Content-Type');
@@ -817,58 +789,31 @@ export default class Context {
     this.remove('Content-Length');
     this.type = 'json';
   }
-}
 
-/**
- * http error
- *
- */
+  /**
+   * Throw an error with `status` (default 500) and `msg`. 
+   * Note that these are user-level errors, 
+   * and the message may be exposed to the client.
+   *
+   *    this.throw(403)
+   *    this.throw(400, 'name required')
+   *    this.throw('something exploded')
+   *    this.throw(new Error('invalid'))
+   *    this.throw(400, new Error('invalid'))
+   *
+   * See: https://github.com/jshttp/http-errors
+   *
+   * Note: `status` should only be passed as the first parameter.
+   *
+   * @param {String|Number|Error} err, msg or status
+   * @param {String|Number|Error} [err, msg or status]
+   * @param {Object} [props]
+   * @api public
+   */
 
-function createHttpError () {
-  let error = null;
-  let message = null;
-  let status = 500;
-  let props = {};
-
-  for (let i = 0; i < arguments.length; i++ ) {
-    let arg = arguments[i];
-
-    // 错误对象
-    if (arg instanceof Error) {
-      status = arg.status || arg.statusCode || status;
-      continue;
-    }
-
-    switch (typeof arg) {
-      case 'string':
-        message = arg;
-        break;
-      case 'number':
-        status = arg;
-        if (i !== 0) throw new Error('non-first-argument status code.');
-        break;
-      case 'object':
-        props = arg
-        break
-    }
+  throw (...args) {
+    const error = new HttpError(...args);
+    debug(error);
+		throw error;
   }
-
-  if (typeof status === 'number' && (status < 400 || status >= 600)) {
-    throw new Error('non-error status code; use only 4xx or 5xx status codes');
-  }
-
-  if (typeof status !== 'number' || 
-		(!http.STATUS_CODES[status] && (status < 400 || status >= 600))) {
-    status = 500
-  }
-
-  if (null == error) {
-    error = new Error(message || http.STATUS_CODES[status]);
-    error.status = status;
-  }
-
-	// debug http error
-	debug('HttpError:', error); 
-
-  return error;
 }

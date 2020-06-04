@@ -1,38 +1,56 @@
 /**
  * *****************************************************************************
  *
- * Respond
+ * Respond处理器
  *
  * 支持特性:
  * 内容协商
  * 内容压缩
+ * 系统错误
  *
  * *****************************************************************************
  */
 
 import http from 'http';
-import https from 'https';
+import http2 from 'http2';
 import Stream from 'stream';
 import zlib from 'zlib';
 import util from 'util';
-import { RES_HEADERS, EMPTY_CODE } from './constants.mjs';
+import { EMPTY_CODE } from './constants.mjs';
 
-const debug = util.debuglog('debug:respond'); // debug function
+const debug = util.debuglog('debug:application.respond'); // debug function
 
-export default function respond (ctx) {
-	debug('Before respond: body =', ctx.body);
-
+export default function respond (ctx, error) {
   if (false === ctx.respond) {
 		debug('Bypassing respond, (ctx.respond === false)');
 		return; 
 	}
 
+  let body = ctx.body;
+
+  if (error != null) {
+    ctx.app.emit('error', error);
+
+    // ENOENT support
+    if ('ENOENT' == error.code) ctx.status = 404;
+
+    // default to 500
+    if ('number' != typeof error.status || !http.STATUS_CODES[error.status]) {
+      ctx.status = http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR; // 500
+    }
+
+    if ('development' === ctx.app.env) {
+      body = error.stack;
+    } else {
+      body = http.STATUS_CODES[error.status];
+    }
+
+  }
+
   if (!ctx.writable) {
 		debug('Can not write to stream, because ctx.writable is false.');
 		return;
 	}
-
-  let body = ctx.body;
 
   if (EMPTY_CODE.includes(ctx.status)) {
     ctx.body = null;
@@ -45,7 +63,7 @@ export default function respond (ctx) {
       //ctx.length 
     }
 
-    ctx.stream.respond(ctx[RES_HEADERS]);
+    ctx.stream.respond(body);
 
 		debug(`End respond for ${ctx.method} method.`);
     return ctx.stream.end();
@@ -64,7 +82,7 @@ export default function respond (ctx) {
 
 	// stream body
   if (body instanceof Stream) {
-    ctx.stream.respond(ctx[RES_HEADERS]);
+    ctx.stream.respond(body);
     return body.pipe(ctx.stream);
   }
 
@@ -77,7 +95,7 @@ export default function respond (ctx) {
 	// send response headers
   if (!ctx.headersSent) {
 		compress(500); // compress content bigger than 500kb
-		ctx.stream.respond(ctx[RES_HEADERS]);
+		ctx.stream.respond(ctx.response.headers);
   }
 
 

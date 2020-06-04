@@ -33,14 +33,8 @@ export default function (logPath) {
       await fs.promises.open(logFile, 'a+')
 				.then(fd => fd.appendFile(log).then(() => fd.close()));
 
-			// set respond status
-			ctx.status = err.status || 500;
-
-			if (ctx.app.env === 'development') {
-				ctx.body = `<pre>${err.stack}</pre>`;
-			} else {
-				ctx.body = err.message
-			}
+      // 将捕获到的错误转发,并执行系统错误处理程序
+      return Promise.reject(err);
     } 
   }
 }

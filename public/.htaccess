@@ -1,3 +1,4 @@
+# Apache httpd htaccess配置
 Options -MultiViews
 
 <IfModule mod_rewrite.c> 

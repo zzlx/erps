@@ -36,8 +36,6 @@ export default function logMiddleware (logPath, format) {
       ctx.socket.remoteAddress + ':' + ctx.socket.remotePort,
 		).join(' ');
 
-		debug(log);
-
     // 写入request日志后再执行后续中间件
 		const dateSN = date.format('yyyymmdd');
     return fs.promises.open(path.join(logPath, `request_${dateSN}.log`), 'a+')

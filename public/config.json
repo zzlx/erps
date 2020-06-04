@@ -1,8 +1,0 @@
-{
-  "api": {
-    "graphql": {
-      "address": "https://192.168.1.3:3000/api/graphql",
-      "description": "graphqlAPI服务地址"
-    }
-  }
-}

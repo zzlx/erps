@@ -6,7 +6,7 @@
   "license": "MIT",
   "homepage": ".",
   "scripts": {
-    "build": "webpack --config webpack.config.cjs",
+    "build": "webpack --config src/webpack.config.cjs",
     "start": "./starter"
   },
   "devDependencies": {
@@ -22,7 +22,7 @@
     "babel-preset-react-app": "^7.0.0",
     "bcryptjs": "^2.4.3",
     "bfj": "6.1.1",
-    "bootstrap": "^4.4.1",
+    "bootstrap": "^4.5.0",
     "bootstrap-icons": "^1.0.0-alpha2",
     "browserslist": "^4.7.2",
     "cache-content-type": "^1.0.1",

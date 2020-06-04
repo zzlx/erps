@@ -1,13 +1,11 @@
 /**
  * *****************************************************************************
- * -----------------------------------------------------------------------------
  *
  * webpack配置
  *
  * 用于生成前端代码
  *
  * @file: config.webpack.cjs
- * -----------------------------------------------------------------------------
  * *****************************************************************************
  */
 
@@ -46,8 +44,8 @@ module.exports = (opts = {}) => {
     target: opts.target ? opts.target : 'web',
 
     entry: {
-      main: path.join(paths.appPath, 'src', 'clients', 'DOMRender.mjs'),
-      styles: path.join(paths.appPath, 'src', 'styles', 'index.scss'),
+      main: path.join(paths.appPath, 'src', 'DOMRender.mjs'),
+      styles: path.join(paths.appPath, 'src', 'scss', 'index.scss'),
     },
 
     output: {
@@ -87,11 +85,13 @@ module.exports = (opts = {}) => {
                 } :
                 { loader: 'style-loader' },
                 { loader: 'css-loader' },
+                /*
                 { loader: 'postcss-loader',
                   options: {
                     plugins: () => [ 'autoprefixer' ],
                   }
                 },
+                */
                 { loader: 'sass-loader' },
               ],
             },
@@ -138,7 +138,7 @@ module.exports = (opts = {}) => {
       new HtmlWebpackPlugin({
         filename: 'index.html',
         title: 'App|Home',
-        template: path.join(paths.appPublic, 'index.html'),
+        template: path.join(paths.appPath, 'src', 'templates', 'index.html'),
         templateParameters: {
           'PUBLIC_URL': '/',
         },

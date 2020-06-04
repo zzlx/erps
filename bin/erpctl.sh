@@ -10,7 +10,9 @@
 # * 服务器证书申请或自签名证书等签发
 #
 # 运行环境:
-# Linux、MacOS等类Unix系统环境
+# OS: Linux、MacOS等类Unix系统环境
+# Node.js: v14.4.0
+#
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -57,6 +59,13 @@ declare -x  PATH=$PATH:${_BIN} # 添加PATH路径
 # 函数命名规则: 脚本函数均以“_”作为前缀及单词连接符
 # @todo: 按函数首字母顺序排列
 
+_build_ui() {
+  _debug "构建前端APP...";
+  cd $_ROOT
+  npm run build
+  cd $_ORIG_PWD
+}
+
 _httpd_restart() {
 	_debug "尝试重启httpd..."
 
@@ -82,7 +91,10 @@ _httpd_start() {
 	fi
 
 	_debug "尝试后台运行httpd..."
+
 	(node --no-warnings --experimental-json-modules ${_ROOT}/src/server/main.mjs)&
+
+  local pid=$! # 记录httpd进程pid
 }
 
 _httpd_stop() {
@@ -786,10 +798,6 @@ _get_cr() {
 	return $ret
 }
 
-_build_ui() {
-  echo 'build';
-}
-
 # 获取utc时间
 _utc_date() { 
   date -u "+%Y-%m-%d %H:%M:%S"
@@ -1122,10 +1130,10 @@ _parse_argv() {
 				_httpd_start
 
 				if [[ $(_get_env_setting) == 'development' ]]; then
-					_debug "每间隔${_RESTART_INT}秒,重启一次httpd,重启10000次"
+					_debug "当前为开发环境"
 					for ((i=1; i < 10000; i++))
 					do
-						sleep ${_RESTART_INT}; _httpd_restart
+						sleep ${_RESTART_INT}; _httpd_restart;
 					done
 				fi 
 				break 
@@ -1171,6 +1179,10 @@ _parse_argv() {
 
 			--package )
 				_package_app; break
+				;;
+
+			--build )
+				_build_ui; break
 				;;
 
 			--self-signed-certificate )

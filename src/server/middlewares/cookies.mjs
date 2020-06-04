@@ -10,7 +10,7 @@
  */
 
 import util from 'util';
-import Keygrip from '../../utils/keygrip.mjs';
+import crypto from 'crypto';
 
 const debug = util.debuglog('debug:middleware.cookie');
 const COOKIES = Symbol('middleware#cookies');
@@ -38,6 +38,7 @@ class Cookies {
   constructor (ctx, options) {
     this.ctx = ctx
     this.secure = options && options.secure ? options.secure : false;
+
     this.keys = options && options.keys
       ? 'string' === typeof options.keys
         ? new Keygrip([options.keys])
@@ -55,7 +56,7 @@ class Cookies {
 
   get (name, opts) {
     // step_1: 获取cookie项, 若为空，直接返回空值
-    let header = this.headers["cookie"];
+    let header = this.ctx.headers["cookie"];
     if (!header) return;
 
     // step_2: 模式匹配特定name项cookie的值,匹配不到直接返回空值
@@ -73,7 +74,6 @@ class Cookies {
 
     // step_3: 若未配置签名项,直接返回值，不再进行校验
     if (!(opts && opts.signed && !!this.keys)) return value;
-
 
     // step_4: 获取签名项
     const sigName = name + ".sig"; // 签名项
@@ -102,7 +102,7 @@ class Cookies {
 
   set (name, value, opts) {
     // 获取Set-Cookie值
-    let headers = this.ctx._headers["set-cookie"] || [];
+    let headers = this.ctx.response.headers["set-cookie"] || [];
     if (typeof headers == "string") headers = [headers];
 
     // cookie项目 
@@ -132,6 +132,12 @@ class Cookies {
 
 class Cookie{
   constructor (name, value, attrs) {
+    this.path = "/";
+    this.expires = undefined;
+    this.domain = undefined;
+    this.httpOnly = true;
+    this.sameSite = false;
+    this.secure = false;
 
     /**
      * RegExp to match field-content in RFC 7230 sec 3.2
@@ -179,30 +185,83 @@ class Cookie{
       throw new TypeError('option sameSite is invalid')
     }
   }
+
+  /**
+   * 拼接cookie字符串
+   *
+   */
+  toString() {
+    return this.name + "=" + this.value;
+  }
+
+  /**
+   *
+   */
+
+  toHeader() {
+    let header = this.toString()
+    if (this.maxAge) this.expires = new Date(Date.now() + this.maxAge);
+
+    if (this.path     ) header += "; path=" + this.path;
+    if (this.expires  ) header += "; expires=" + this.expires.toUTCString();
+    if (this.domain   ) header += "; domain=" + this.domain;
+    if (this.sameSite ) header += "; samesite=" + (this.sameSite === true ? 'strict' : this.sameSite.toLowerCase());
+    if (this.secure   ) header += "; secure";
+    if (this.httpOnly ) header += "; httponly";
+
+    return header
+  }
 }
 
-Cookie.prototype.path = "/";
-Cookie.prototype.expires = undefined;
-Cookie.prototype.domain = undefined;
-Cookie.prototype.httpOnly = true;
-Cookie.prototype.sameSite = false;
-Cookie.prototype.secure = false;
+class Keygrip {
+  constructor (keys, algorithm = 'sha256', encoding = 'base64') {
+    if (!keys || !(0 in keys)) throw new Error("Keys must be provided.");
+    this.keys = keys;
+    this.algorithm = algorithm;
+    this.encoding = encoding;
+  }
 
-// 拼接cookie字符串
-Cookie.prototype.toString = function () {
-  return this.name + "=" + this.value;
+  sign(data) {
+    return crypto
+      .createHmac(this.algorithm, this.keys[0])
+      .update(data)
+      .digest(this.encoding)
+      .replace(/\/|\+|=/g, x => ({ "/": "_", "+": "-", "=": "" })[x]);
+  }
+
+  verify (data, digest) {
+    return this.index(data, digest) > -1
+  }
+
+  index (data, digest) {
+    for (let i = 0; i < this.keys.length; i++) {
+      if (constantTimeCompare(digest, sign(data, this.keys[i]))) return i
+    }
+
+    return -1
+  }
+
 }
 
-Cookie.prototype.toHeader = function () {
-  let header = this.toString()
-  if (this.maxAge) this.expires = new Date(Date.now() + this.maxAge);
+//http://codahale.com/a-lesson-in-timing-attacks/
+function constantTimeCompare (val1, val2) {
+    if(val1 == null && val2 != null){
+        return false;
+    } else if(val2 == null && val1 != null){
+        return false;
+    } else if(val1 == null && val2 == null){
+        return true;
+    }
 
-  if (this.path     ) header += "; path=" + this.path;
-  if (this.expires  ) header += "; expires=" + this.expires.toUTCString();
-  if (this.domain   ) header += "; domain=" + this.domain;
-  if (this.sameSite ) header += "; samesite=" + (this.sameSite === true ? 'strict' : this.sameSite.toLowerCase());
-  if (this.secure   ) header += "; secure";
-  if (this.httpOnly ) header += "; httponly";
+    if(val1.length !== val2.length){
+        return false;
+    }
 
-  return header
+    let result = 0;
+
+    for(let i = 0; i < val1.length; i++){
+        result |= val1.charCodeAt(i) ^ val2.charCodeAt(i); //Don't short circuit
+    }
+
+    return result === 0;
 }

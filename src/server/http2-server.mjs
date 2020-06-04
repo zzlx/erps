@@ -17,9 +17,7 @@ const debug = util.debuglog('debug:server.http2');
 // server session缓存
 const tlsSessionStore = {};
 
-
 export default function http2Server (opts) {
-
 	const server = http2.createSecureServer({
 		cert: opts.cert,
 		key: opts.key,
@@ -33,6 +31,7 @@ export default function http2Server (opts) {
 		//privateKeyEngine
 		//passphrase: 'sample',
 		//pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+    
 		// This is necessary only if using client certificate authentication.
 		//requestCert: true,
 	});
@@ -63,6 +62,8 @@ function newSessionEventHandler (sessionId, sessionData, cb) {
 
 function OCSPRequestEventHandler (certificate, issuer, cb) {
 	debug('OCSPRequest');
+  debug(certificate);
+  debug(issuer);
   //const test = tls.checkServerIdentity('localhost', certificate);
   //debug('cert: ', test);
   //debug('certificate', certificate.toString('base64'));
@@ -81,7 +82,6 @@ function errorEventHandler (err) {
 		process.exit();
 	}
 }
-
 
 function listeningEventHandler () {
 
