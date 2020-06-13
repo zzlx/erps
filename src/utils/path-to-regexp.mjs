@@ -1,11 +1,23 @@
+import test from './test.mjs';
+
+test.then(() => {
+  // test
+  let r = pathToRegexp('/abc/:id');
+  console.log(r);
+});
+
 /**
  * *****************************************************************************
  *
+ * 规范化路径字符串,返回正则表达式
  * Normalize the given path string, and returning a regular expression.
  *
+ * 传入空数组
  * An empty array can be passed in for the keys, 
  * which will hold the placeholder key descriptions. 
- * For example, using `/user/:id`, `keys` will contain 
+ *
+ * For example:
+ * using `/user/:id`, `keys` will contain 
  * `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
  *
  * @param  {(string|RegExp|Array)} path
@@ -17,32 +29,29 @@
  */
 
 export function pathToRegexp (path, keys, options = {}) {
-  if (!Array.isArray(keys)) {
-    options = keys || options;
-    keys = [];
+  if (!Array.isArray(keys)) { 
+    options = keys || options; 
+    keys = []; 
   }
 
   // regexp path
-  if (path instanceof RegExp) {
-    return regexpToRegexp(path, keys);
-  }
+  if (path instanceof RegExp) return regexpToRegexp(path, keys);
 
   // array path
-  if (Array.isArray(path)) {
-    return arrayToRegexp(path, keys, options); 
-  }
+  if (Array.isArray(path)) return arrayToRegexp(path, keys, options); 
 
   // string path
   return stringToRegexp(path, keys, options); 
 }
 
 /**
+ * 定义路径匹配正则表达式
  * The main path matching regexp utility.
  *
  * @type {RegExp}
  */
 
-const PATH_REGEXP = new RegExp([
+export const PATH_REGEXP = new RegExp([
   // Match escaped characters that would otherwise appear in future matches.
   // This allows the user to escape special characters that won't transform.
   '(\\\\.)',

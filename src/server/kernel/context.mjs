@@ -82,6 +82,7 @@ export default class Context {
   }
 
   /**
+   * Request
    *
    */
 
@@ -94,7 +95,7 @@ export default class Context {
   }
 
   /**
-   *
+   * Response
    */
 
   get response () {

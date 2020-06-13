@@ -486,11 +486,12 @@ for (let i = 0; i < methods.length; i++) {
 }
 
 /**
- *
+ * 路由层
  *
  */
 
 class Layer {
+
   /**
    * Initialize a new routing Layer with given `method`, `path`, and `middleware`.
    *
@@ -502,15 +503,36 @@ class Layer {
    * @param {String=} opts.sensitive case sensitive (default: false)
    * @param {String=} opts.strict require the trailing slash (default: false)
    * @returns {Layer}
-   *
+   * @private
    */
 
-  constructor (path, methods, middleware, opts) {
+  constructor (path, methods, middleware, opts = {}) {
+    this.opts = opts;
+    this.name = this.opts.name || null;
+    this.methods = [];
+    this.paramNames = [];
+    this.stack = Array.isArray(middleware) ? middleware : [middleware];
+
+    for (let i = 0; i < methods.length; i++) {
+      const len = this.methods.push(methods[i].toUpperCase());
+      if (this.methods[len-1] === 'GET') this.methods.unshift('HEAD');
+    }
+
+    for (let i = 0; i < this.stack.length; i++) {
+      const fn = this.stack[i];
+      if (typeof(fn) !== 'function') {
+        throw new Error(`${this.opts.name || path}: middleware must be a function.`);
+      }
+    }
+
+    this.path = path;
+    this.regexp = pathToRegexp(path, this.paramNames, this.opts);
+
+    debug('route layer %s %s', this.methods, `${this.opts.prefix}${this.path}`);
   }
 
 
   /**
-   *
    * Returns whether request `path` matches route.
    *
    * @param {String} path
@@ -523,7 +545,6 @@ class Layer {
   }
 
   /**
-   *
    * Returns map of URL parameters for given `path` and `paramNames`.
    *
    * @param {String} path
@@ -531,7 +552,6 @@ class Layer {
    * @param {Object=} existingParams
    * @returns {Object}
    * @private
-   *
    */
 
   params (path, captures, existingParams) {
@@ -572,10 +592,10 @@ class Layer {
     let args = params;
     const url = this.path.replace(/\(\.\*\)/g, '');
 
-    if (typeof params != 'object') {
+    if (typeof(params) !== 'object') {
       args = Array.prototype.slice.call(arguments);
 
-      if (typeof args[args.length - 1] == 'object') {
+      if (typeof args[args.length - 1] === 'object') {
         options = args[args.length -1];
         args = args.slice(0, args.length -1);
       }
