@@ -13,24 +13,27 @@
  * @param  {Object=}               options
  * @return {!RegExp}
  *
- * @file pathToRegexp.mjs
  * *****************************************************************************
  */
 
-export default function pathToRegexp (path, keys, options = {}) {
+export function pathToRegexp (path, keys, options = {}) {
   if (!Array.isArray(keys)) {
     options = keys || options;
     keys = [];
   }
 
   // regexp path
-  if (path instanceof RegExp) return regexpToRegexp(path, keys);
+  if (path instanceof RegExp) {
+    return regexpToRegexp(path, keys);
+  }
 
   // array path
-  if (Array.isArray(path)) return arrayToRegexp(path, keys, options);
+  if (Array.isArray(path)) {
+    return arrayToRegexp(path, keys, options); 
+  }
 
   // string path
-  return stringToRegexp(path, keys, options);
+  return stringToRegexp(path, keys, options); 
 }
 
 /**
@@ -43,6 +46,7 @@ const PATH_REGEXP = new RegExp([
   // Match escaped characters that would otherwise appear in future matches.
   // This allows the user to escape special characters that won't transform.
   '(\\\\.)',
+
   // Match Express-style parameters and un-named parameters with a prefix
   // and optional suffixes. Matches appear as:
   //
@@ -62,6 +66,7 @@ const PATH_REGEXP = new RegExp([
  */
 
 export function parse (str, options) {
+
   const tokens = [];
   let key = 0
   let index = 0

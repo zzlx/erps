@@ -13,12 +13,6 @@ export const EMPTY_CODE = [
 	304, // not modified
 ];
 
-export const RETRY_CODE = [
-	502, // BAD_GATEWAY
-	503, // SERVICE_UNAVAILABLE
-	504, // GATEWAY_TIMEOUT
-];
-
 export const REDIRECT_CODE = [
 	300,  // MULTIPLE_CHOICES 
 	301,  // MOVED_PERMANENTLY
@@ -28,3 +22,10 @@ export const REDIRECT_CODE = [
 	307,  // TEMPORARY_REDIRECT
 	308,  // PERMANENT_REDIRECT
 ];
+
+export const RETRY_CODE = [
+	502, // BAD_GATEWAY
+	503, // SERVICE_UNAVAILABLE
+	504, // GATEWAY_TIMEOUT
+];
+

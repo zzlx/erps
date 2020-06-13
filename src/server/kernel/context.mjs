@@ -32,42 +32,21 @@ const REQ_IP = Symbol('context#request-ip');
 const ACCEPT = Symbol('accept');
 const RES_HEADERS = Symbol.for('context#response-headers');
 const RES_BODY = Symbol('context#response-body');
+const REQ_BODY = Symbol('context#request-body');
 
 const mimeTypes = new MimeTypes();
 const typeCache = new MemCache(100);
 
 export default class Context {
-
   /**
+   * check field from response header
    *
-   */
-
-  get request () {
-    return {
-      headers: this.headers,
-      method: this.method,
-      body: null,
-    }
-  }
-
-  /**
-   *
-   */
-
-  get response () {
-    return {
-      headers: this[RES_HEADERS],
-      body: this[RES_BODY],
-    }
-  }
-
-  /**
    * @return {Bool}
    * @api public
    */
 
-  has (val) {
-    return Boolean(this[RES_HEADERS][val.toLowerCase()]);
+  has (field) {
+    return Boolean(this[RES_HEADERS][field.toLowerCase()]);
   }
 
   /**
@@ -100,6 +79,29 @@ export default class Context {
     }
 
     return true; // set header success
+  }
+
+  /**
+   *
+   */
+
+  get request () {
+    return {
+      headers: this.headers,
+      method: this.method,
+      body: this[REQ_BODY], // @TODO: 增加读取post body逻辑
+    }
+  }
+
+  /**
+   *
+   */
+
+  get response () {
+    return {
+      headers: this[RES_HEADERS],
+      body: this[RES_BODY],
+    }
   }
 
   /**
@@ -145,31 +147,38 @@ export default class Context {
   /**
    * Get response status code.
    *
-   * @return {Number}
+   * @return {number}
    * @api public
    */
 
   get status() {
-    return this[RES_HEADERS][http2.constants.HTTP2_HEADER_STATUS];
+    return this.httpVersion === 2
+      ? this[RES_HEADERS][http2.constants.HTTP2_HEADER_STATUS]
+      : this[RES_HEADERS]['status'];
   }
 
   /**
    * Set response status code.
    *
-   * @param {Number} code
+   * @param {number|string} code
    * @api public
    */
 
   set status(code) {
-    if (this.headersSent) return;
-    if (null == code) code = 500;
-    if (!http.STATUS_CODES[code]) {
-      this.throw(500, `Invalid status code: ${code}`);
-      code = 500;
+    if (!(typeof code === 'string' || typeof code === 'number')) {
+      throw new TypeError(`status code:${code} must be a number or string.`);
     }
-    this._explicitStatus = true;
-    this.set(http2.constants.HTTP2_HEADER_STATUS, code);
-    if (this.body && EMPTY_CODE.includes(code)) this.body = null;
+
+    // status code
+    let sc = Number.parseInt(code, 10);
+
+    // check status is valid.
+    if (!http.STATUS_CODES[sc]) throw new Error('Invalid status code: ' + code)
+
+    this.set(
+      this.httpVersion === 2 ? http2.constants.HTTP2_HEADER_STATUS : 'status',
+      sc
+    );
   }
 
   /**
@@ -180,7 +189,7 @@ export default class Context {
    */
 
   get message() {
-    return http.STATUS_CODES[String(this.status)];
+    return http.STATUS_CODES[this.status];
   }
 
   /**
@@ -752,7 +761,7 @@ export default class Context {
     }
 
     // set a proper status
-    if (!this._explicitStatus) this.status = http2.constants['HTTP_STATUS_OK'];
+    if (this.status == null) this.status = http2.constants['HTTP_STATUS_OK'];
 
     // set type
     const setType = !this.has('Content-Type');
@@ -813,7 +822,6 @@ export default class Context {
 
   throw (...args) {
     const error = new HttpError(...args);
-    debug(error);
 		throw error;
   }
 }

@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Respond处理器
+ * Response处理器
  *
  * 支持特性:
  * 内容协商
@@ -20,7 +20,7 @@ import { EMPTY_CODE } from './constants.mjs';
 
 const debug = util.debuglog('debug:application.respond'); // debug function
 
-export default function respond (ctx, error) {
+export default function respond (ctx, error = null) {
   if (false === ctx.respond) {
 		debug('Bypassing respond, (ctx.respond === false)');
 		return; 
@@ -29,22 +29,15 @@ export default function respond (ctx, error) {
   let body = ctx.body;
 
   if (error != null) {
-    ctx.app.emit('error', error);
-
-    // ENOENT support
-    if ('ENOENT' == error.code) ctx.status = 404;
-
-    // default to 500
-    if ('number' != typeof error.status || !http.STATUS_CODES[error.status]) {
-      ctx.status = http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR; // 500
-    }
+    ctx.status = error.status || 500; // 设置错误码
 
     if ('development' === ctx.app.env) {
+      // string
       body = error.stack;
+      debug(error);
     } else {
-      body = http.STATUS_CODES[error.status];
+      body = http.STATUS_CODES[ctx.status];
     }
-
   }
 
   if (!ctx.writable) {
@@ -98,7 +91,6 @@ export default function respond (ctx, error) {
 		ctx.stream.respond(ctx.response.headers);
   }
 
-
 	if (ctx.writable) {
 		debug('End respond: body =', body);
 		return ctx.stream.end(body);
@@ -135,19 +127,17 @@ export default function respond (ctx, error) {
 		debug(`compress content use ${ctx.get('content-encoding')}.`);
 	} // end of comporess function
 
-	// 内容协商逻辑
 	function contentNegotiation () {
+	  // 内容协商规则
+    
+    if (ctx.type !== '') return;
 
-		if (ctx.accepts('html')) {
+		if (ctx.accepts('html') && /<\/html>/.test(body)) {
 			ctx.type = 'html';
-			// @todo: 应用html模版
-			body = `<html>${body}</html>`;
-		} else if (ctx.accepts('json')) {
+		} else if (ctx.accepts('json') && /^{/.test(body)) {
 			ctx.type = 'json';
-			body = `{"data": ${body}}`;
-		} else if (ctx.accepts('xml')) {
+		} else if (ctx.accepts('xml') && /<\/xml>/.test(body)) {
 			ctx.type = 'xml';
-			body = `<data>${body}</data>`;
 		} else {
 			ctx.type = 'text';
 		}

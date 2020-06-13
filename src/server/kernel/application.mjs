@@ -14,7 +14,7 @@ import cp from 'child_process';
 import util from 'util';
 
 // modules
-import compose from '../middlewares/compose.mjs';
+import compose from './compose.mjs';
 import Context from './context.mjs';
 import respond from './respond.mjs';
 

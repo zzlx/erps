@@ -51,7 +51,7 @@ const signalHandler = (code) => {
 		if (sigintCount >= 0) {
 			process.exit(1); // 结束进程
 		} else {
-			sigintCount++;
+			sigintCounudon++;
 			console.log('Press Control-C twice to exit.');
 		}
 	}

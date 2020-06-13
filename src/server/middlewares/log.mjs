@@ -27,7 +27,17 @@ export default function logMiddleware (logPath, format) {
 		debug('创建日志目录时发生错误:');
 	});
 
+  // format: 
+  // {time}
+  // {method}
+  // {ip}
+  // {port}
+  // {user-agent}
+  // {referer}
+  // {status}
+
   return function logMiddleware (ctx, next) {
+
     const log = new Array(
 			date.toLocaleISOString(),
       ctx.method, 

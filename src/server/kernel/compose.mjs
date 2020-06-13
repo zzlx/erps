@@ -1,8 +1,11 @@
 /**
  * Compose `middleware` returning a fully valid middleware.
  *
+ * @TODO: 中间件中this指向ctx
+ *
  * @param {Array} middleware
  * @return {Function}
+ *
  */
 
 import util from 'util';
@@ -27,7 +30,8 @@ export default function compose (middleware) {
       if (!fn) return Promise.resolve();
 
       try {
-        return Promise.resolve(fn(context, dispatch.bind(null, ++i)));
+        // 给中间件绑定this对象
+        return Promise.resolve(fn.call(context, context, dispatch.bind(null, ++i)));
       } catch (err) {
         return Promise.reject(err);
       }
