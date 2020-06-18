@@ -13,21 +13,9 @@
  * *****************************************************************************
  */
 
-import fs from 'fs';
 import http from 'http';
-import http2 from 'http2';
-import path from 'path';
-import util from 'util';
-
-import { 
-  compile,
-  parse,
-  pathToRegexp, 
-} from '../utils/path-to-regexp.mjs';
-import compose from './kernel/compose.mjs';
-import HttpError from './kernel/http-errors.mjs';
-
-const debug = util.debuglog('debug:router');
+import { compile, parse, pathToRegexp, } from '../utils/path-to-regexp.mjs';
+import HttpError from './HttpError.mjs';
 
 export default class Router {
   constructor (props = {}) {
@@ -79,7 +67,7 @@ export default class Router {
           Object.create(Router.prototype), 
           middleware.router, 
           {
-            stack: middleware.router.stack.slice(0);
+            stack: middleware.router.stack.slice(0),
           }
         );
 
@@ -174,6 +162,7 @@ export default class Router {
         return memo.concat(layer.stack);
       }, []);
 
+      const compose = ctx.app.compose;
       return compose(layerChain)(ctx, next);
     }
 
@@ -201,7 +190,7 @@ export default class Router {
     return async function allowedMethods(ctx, next) {
       await next();
 
-      if (!ctx.status || ctx.status === http2.constants.HTTP_STATUS_NOT_FOUND) {
+      if (!ctx.status || ctx.status === 404) {
         for (let i = 0; i < ctx.matched.length; i++) {
           const route = ctx.matched[i];
           for (let j = 0; j < route.methods.length; j++) {
@@ -214,18 +203,18 @@ export default class Router {
 
         if (!~implemented.indexOf(ctx.method)) {
           if (options.throw) {
-            let notImplementedThrowable = (typeof options.notImplemented == function)
+            let notImplementedThrowable = (typeof options.notImplemented === 'function')
               ? options.notImplemented()
               : new HttpError.NotImplemened();
 
             throw notImplementedThrowable;
           } else {
-            ctx.status = http2.constants.HTTP_STATUS_NOT_IMPLEMENTED; // 501
+            ctx.status = 501;
             ctx.set('Allow', allowedArr.join(', '));
           }
         } else if (allowedArr.length) {
           if (ctx.method === 'OPTIONS') {
-            ctx.status = http2.constants.HTTP_STATUS_OK; // 200
+            ctx.status = 200;
             ctx.body = '';
             ctx.set('Allow', allowedArr.join(', '));
           } else if (!allowed[ctx.method]) {
@@ -235,7 +224,7 @@ export default class Router {
                 : new HttpError.methodNotAllowed();
               throw notAllowedThrowable;
             } else {
-              ctx.status = http2.constants.HTTP_STATUS_METHOD_NOT_ALLOWED; // 405
+              ctx.status = 405; // METHOD_NOT_ALLOWED
               ctx.set('Allow', allowedArr.join(', '));
             }
           }
@@ -290,7 +279,7 @@ export default class Router {
 
     return this.all(source, ctx => {
       ctx.redirect(destination);
-      ctx.status = code || http2.constants.HTTP_STATUS_MOVED_PERMANENTLY; // 301
+      ctx.status = code || 301; // MOVED_PERMANENTLY;
     });
   }
 
@@ -464,7 +453,12 @@ Router.url = function (path) {
  *
  */
 
-const methods = http.METHODS.map(method => method.toLowerCase());
+const HTTP_METHODS = [
+  'HEAD', 'OPTIONS',
+  'GET', 'POST',
+];
+
+const methods = HTTP_METHODS.map(method => method.toLowerCase());
 
 for (let i = 0; i < methods.length; i++) {
   const method = methods[i];
@@ -527,8 +521,6 @@ class Layer {
 
     this.path = path;
     this.regexp = pathToRegexp(path, this.paramNames, this.opts);
-
-    debug('route layer %s %s', this.methods, `${this.opts.prefix}${this.path}`);
   }
 
 

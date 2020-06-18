@@ -9,8 +9,8 @@
 
 // node modules
 import EventEmitter from 'events'; 
-import path from 'path';
 import cp from 'child_process';
+import path from 'path';
 import util from 'util';
 
 // modules
@@ -37,15 +37,12 @@ export default class Application extends EventEmitter {
   }
 
   /**
-   *
+   * inspect
    *
    */
 
-  listen (...args) {
-    if (null == this.server) return console.log('未配置http2 server');
+  inspect () {
 
-		this.server.on('stream', this.callback());
-		this.server.listen(...args); // 开启服务
   }
 
   /**
@@ -69,7 +66,7 @@ export default class Application extends EventEmitter {
    */
 
   callback () {
-    const fn = compose(this.middlewares);
+    const fn = this.compose(this.middlewares);
 
     if (!this.listenerCount('error')) this.on('error', this.onerror);
 
@@ -98,6 +95,21 @@ export default class Application extends EventEmitter {
   }
 
   /**
+   * listen
+   */
+
+  listen (...args) {
+    if (null == this.server) {
+      throw new Error('Please setup server to application.');
+      return;
+    }
+
+		this.server.on('stream', this.callback());
+		this.server.listen(...args); // 开启服务
+  }
+
+
+  /**
 	 * app-level error handler
    *
    * @param {Error} err
@@ -105,7 +117,9 @@ export default class Application extends EventEmitter {
    */
 
   onerror(err) {
-    if (!(err instanceof Error)) throw new TypeError(util.format('non-error thrown: %j', err));
+    if (!(err instanceof Error)) {
+      throw new TypeError(util.format('non-error thrown: %j', err));
+    }
 
     if (404 == err.status || err.expose) return;
     if (this.silent) return;
@@ -113,4 +127,7 @@ export default class Application extends EventEmitter {
     const msg = err.stack || err.toString();
     debug(msg.replace(/^/gm, '  '));
   }
+
 }
+
+Application.prototype.compose = compose;

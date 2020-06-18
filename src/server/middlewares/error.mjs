@@ -13,7 +13,7 @@ import path from 'path';
 import util from 'util';
 
 import ISODate from '../../utils/date.mjs';
-import HttpError from '../kernel/http-errors.mjs';
+import HttpError from '../../utils/HttpError.mjs';
 const debug = util.debuglog('debug:middleware.error');
 
 export default function (logPath) {

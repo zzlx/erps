@@ -3,12 +3,12 @@
  *
  * Http error
  *
+ *
+ *
  * *****************************************************************************
  */
 
-import util from 'util';
 import http from 'http';
-const debug = util.debuglog('debug:http-errors');
 
 export default class HttpError extends Error {
   constructor() {
@@ -40,20 +40,18 @@ export default class HttpError extends Error {
     }
 
     this.checkErrorCode();
-
-    if (!http.STATUS_CODES[this.status] && (this.status < 400 || this.status >= 600)) {
-      this.status = 500
-    }
   }
 
   /**
-   *
    * 检查错误代码
-   *
    */
 
   checkErrorCode () {
     // ENOENT support
     if ('ENOENT' == this.code) this.status = 404;
+
+    if (!http.STATUS_CODES[this.status] && (this.status < 400 || this.status >= 600)) {
+      this.status = 500
+    }
   }
 }

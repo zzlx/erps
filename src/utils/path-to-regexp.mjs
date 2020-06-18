@@ -1,15 +1,45 @@
-import test from './test.mjs';
+/**
+ * 定义路径匹配正则表达式
+ * The main path matching regexp utility.
+ *
+ * Match Express-style parameters and un-named parameters with a prefix
+ * and optional suffixes. Matches appear as:
+ * "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
+ * "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
+ * "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
+ *
+ * @type {RegExp}
+ */
 
-test.then(() => {
-  // test
-  let r = pathToRegexp('/abc/:id');
-  console.log(r);
-});
+export const PATH_REGEXP = new RegExp([
+  // Match escaped characters that would otherwise appear in future matches.
+  // This allows the user to escape special characters that won't transform.
+  '(\\\\.)',                        // [1]
+  '|',
+  '([\\/.])?',                      // [2]:匹配路径前导符号
+  '(?:',
+    '(?:',
+      '\\:(\\w+)',                  // [3]:匹配到的项目
+      '(?:',
+        '\\(',
+          '((?:\\\\.|[^\\\\()])+)', // [4]:匹配捕获
+        '\\)',
+      ')?',
+      '|',
+      '\\(',
+        '((?:\\\\.|[^\\\\()])+)',   // [5]:匹配分组
+      '\\)',
+    ')', // 结束非捕获括号
+    '([+*?])?',                     // [6]:匹配修饰符
+    '|',
+    '(\\*)',                        // [7]: 匹配星号
+  ')',
+].join(''), 'g');
 
 /**
  * *****************************************************************************
  *
- * 规范化路径字符串,返回正则表达式
+ * 规范路径字符串,返回正则表达式
  * Normalize the given path string, and returning a regular expression.
  *
  * 传入空数组
@@ -45,28 +75,7 @@ export function pathToRegexp (path, keys, options = {}) {
 }
 
 /**
- * 定义路径匹配正则表达式
- * The main path matching regexp utility.
- *
- * @type {RegExp}
- */
-
-export const PATH_REGEXP = new RegExp([
-  // Match escaped characters that would otherwise appear in future matches.
-  // This allows the user to escape special characters that won't transform.
-  '(\\\\.)',
-
-  // Match Express-style parameters and un-named parameters with a prefix
-  // and optional suffixes. Matches appear as:
-  //
-  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
-  // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
-  // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
-
-  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^\\\\()])+)\\))?|\\(((?:\\\\.|[^\\\\()])+)\\))([+*?])?|(\\*))'
-].join('|'), 'g');
-
-/**
+ * 解析字符串为tokens
  * Parse a string for the raw tokens.
  *
  * @param  {string}  str
@@ -84,31 +93,37 @@ export function parse (str, options) {
   let res;
 
   while ((res = PATH_REGEXP.exec(str)) != null) {
-    const m = res[0];
-    const escaped = res[1];
+
+    const m = res[0];       // 匹配
+    const escaped = res[1]; // 匹配
     const offset = res.index;
     path += str.slice(index, offset);
     index = offset + m.length;
 
     // Ignore already escaped sequences.
+    // 忽略顺序
     if (escaped) { path += escaped[1]; continue; }
 
-    const next = str[index]
-    const prefix = res[2]
-    const name = res[3]
-    const capture = res[4]
-    const group = res[5]
-    const modifier = res[6]
-    const asterisk = res[7]
+    const next = str[index];
+
+    const prefix   = res[2]; // 匹配前缀
+    const name     = res[3]; // 匹配name
+    const capture  = res[4]; // 匹配捕获
+    const group    = res[5]; // 匹配分组
+    const modifier = res[6]; // 匹配修饰符
+    const asterisk = res[7]; // 匹配* 0次或多次 
 
     // Push the current path onto the tokens.
-    if (path) { tokens.push(path); path = ''; }
+    if (path) { 
+      tokens.push(path); 
+      path = ''; 
+    }
 
     const partial = prefix != null && next != null && next !== prefix;
-    const repeat = modifier === '+' || modifier === '*';
-    const optional = modifier === '?' || modifier === '*';
-    const delimiter = res[2] || defaultDelimiter;
-    const pattern = capture || group;
+    const repeat = modifier === '+' || modifier === '*';   // 重复
+    const optional = modifier === '?' || modifier === '*'; // 可选
+    const delimiter = res[2] || defaultDelimiter; // 分隔符
+    const pattern = capture || group; // 模式匹配
 
     tokens.push({
       name: name || key++,
@@ -120,56 +135,61 @@ export function parse (str, options) {
       asterisk: !!asterisk,
       pattern: pattern 
         ? escapeGroup(pattern) 
-        : (asterisk ? '.*' : '[^' + escapeString(delimiter) + ']+?')
+        : asterisk 
+          ? '.*' 
+          : '[^' + escapeString(delimiter) + ']+?'
     });
   }
 
   // Match any characters still remaining.
-  if (index < str.length) {
-    path += str.substr(index)
-  }
-
+  if (index < str.length) path += str.substr(index);
   // If the path exists, push it onto the end.
-  if (path) { tokens.push(path) }
+  if (path) tokens.push(path);
 
   return tokens;
 }
 
-//console.log(parse('/test/user/:module(.+)/:id(\d+)', {}));
+// test
+//console.log(parse('/test/:id(\\d+)/:name(\w+)/haha:ha'));
+//console.log(parse('/test/:id'));
+//console.log(parse('/(\d+)/:qr(\w+)'));
 
 /**
+ * 编译路径字符串为模版函数
  * Compile a string to a template function for the path.
  *
  * @param  {string}             str
  * @param  {Object=}            options
  * @return {!function(Object=, Object=)}
  */
+
 export function compile (str, options) {
   return tokensToFunction(parse(str, options));
 }
 
 /**
+ *
  * Prettier encoding of URI path segments.
  *
  * @param  {string}
  * @return {string}
  */
+
 function encodeURIComponentPretty (str) {
   return encodeURI(str).replace(/[\/?#]/g, c => {
     return '%' + c.charCodeAt(0).toString(16).toUpperCase();
   });
 }
 
-//test
-//const test = encodeURIComponentPretty('http://test.com/home?test=hhahah&hahah=ttt#tt');
-//console.log(test);
-
 /**
- * Encode the asterisk parameter. Similar to `pretty`, but allows slashes.
+ *
+ * Encode the asterisk parameter. 
+ * Similar to `pretty`, but allows slashes.
  *
  * @param  {string}
  * @return {string}
  */
+
 function encodeAsterisk (str) {
   return encodeURI(str).replace(/[?#]/g, c => {
     return '%' + c.charCodeAt(0).toString(16).toUpperCase();
@@ -177,11 +197,12 @@ function encodeAsterisk (str) {
 }
 
 /**
+ *
  * Transforming tokens into the path function.
  *
+ * @param {array} tokens
+ * @return {function}
  */
-//const test = tokensToFunction(['']);
-//console.log(test);
 
 export function tokensToFunction (tokens) {
   // Compile all the tokens into regexps.
@@ -198,7 +219,9 @@ export function tokensToFunction (tokens) {
     let path = '';
     let data = obj || {};
     let options = opts || {};
-    let encode = options.pretty ? encodeURIComponentPretty : window.encodeURIComponent;
+    let encode = options.pretty 
+      ? encodeURIComponentPretty 
+      : window.encodeURIComponent;
 
     for (let i = 0; i < tokens.length; i++) {
       let token = tokens[i]
@@ -270,8 +293,10 @@ export function tokensToFunction (tokens) {
 }
 
 /**
+ * 转义正则表达式字符串
  * Escape a regular expression string.
  *
+ * 
  * @param  {string} str
  * @return {string}
  */
@@ -280,9 +305,8 @@ function escapeString (str) {
   return str.replace(/([.+*?=^!:${}()[\]|\/\\])/g, '\\$1');
 }
 
-//console.log(escapeString('/test\/+'));
-
 /**
+ * 转义捕获括号
  * Escape the capturing group by escaping special characters and meaning.
  *
  * @param  {string} group
@@ -293,40 +317,44 @@ function escapeGroup (group) {
   return group.replace(/([=!:$\/()])/g, '\\$1');
 }
 
-//console.log(escapeGroup('(:?hello)'));
-
 /**
+ * 附加关键字到正则表达式
  * Attach the keys as a property of the regexp.
  *
  * @param  {!RegExp} re
  * @param  {Array}   keys
  * @return {!RegExp}
  */
+
 function attachKeys (re, keys) {
   re.keys = keys;
   return re;
 }
 
 /**
+ *
  * Get the flags for a regexp from the options.
  *
  * @param  {Object} options
  * @return {string}
  */
+
 function flags (options) {
   return options.sensitive ? '' : 'i';
 }
 
 /**
+ * 从正则表达式中分析关键字
  * Pull out keys from a regexp.
  *
  * @param  {!RegExp} path
  * @param  {!Array}  keys
  * @return {!RegExp}
  */
+
 function regexpToRegexp (path, keys) {
   // Use a negative lookahead to match only capturing groups.
-  const groups = path.source.match(/\((?!\?)/g); // 匹配group
+  const groups = path.source.match(/\((?!\?)/g);
 
   if (groups) {
     for (let i = 0; i < groups.length; i++) {
@@ -346,9 +374,8 @@ function regexpToRegexp (path, keys) {
   return attachKeys(path, keys);
 }
 
-//console.log(regexpToRegexp(/\/(tst*)\/(:\d+)/, []));
-
 /**
+ *
  * Transform an array into a regexp.
  *
  * @param  {!Array}  path
@@ -369,8 +396,6 @@ function arrayToRegexp (path, keys, options) {
   return attachKeys(regexp, keys);
 }
 
-//console.log(arrayToRegexp(['/test', '/ttt'], [], {}));
-
 /**
  * Create a path regexp from string input.
  *
@@ -379,13 +404,14 @@ function arrayToRegexp (path, keys, options) {
  * @param  {!Object} options
  * @return {!RegExp}
  */
+
 function stringToRegexp (path, keys, options) {
   return tokensToRegExp(parse(path, options), keys, options)
 }
 
-//console.log(stringToRegexp('/:module(.+)/:id(\\d+)', [], {}));
 
 /**
+ *
  * Taking tokens and returning a RegExp.
  *
  * @param  {!Array}          tokens
@@ -393,6 +419,7 @@ function stringToRegexp (path, keys, options) {
  * @param  {Object=}         options
  * @return {!RegExp}
  */
+
 export function tokensToRegExp (tokens, keys, options) {
   if (!Array.isArray(keys)) {
     options = keys || options;

@@ -16,7 +16,7 @@ import accepts from 'accepts';
 import contentType from 'content-type';
 
 import MimeTypes from './mime-types.mjs';
-import HttpError from './http-errors.mjs';
+import HttpError from '../../utils/HttpError.mjs';
 import MemCache from '../../utils/memCache.mjs';
 import { 
 	EMPTY_CODE,
@@ -27,17 +27,18 @@ import {
 const debug = util.debuglog('debug:application.context'); // 调试工具
 
 // 常量
+const ACCEPT = Symbol('context#accept');
+const REQ_BODY = Symbol('context#request-body');
 const REQ_URL = Symbol('context#request-URL');
 const REQ_IP = Symbol('context#request-ip');
-const ACCEPT = Symbol('accept');
-const RES_HEADERS = Symbol.for('context#response-headers');
 const RES_BODY = Symbol('context#response-body');
-const REQ_BODY = Symbol('context#request-body');
+const RES_HEADERS = Symbol.for('context#response-headers');
 
 const mimeTypes = new MimeTypes();
 const typeCache = new MemCache(100);
 
 export default class Context {
+
   /**
    * check field from response header
    *
@@ -153,9 +154,10 @@ export default class Context {
    */
 
   get status() {
-    return this.httpVersion === 2
-      ? this[RES_HEADERS][http2.constants.HTTP2_HEADER_STATUS]
-      : this[RES_HEADERS]['status'];
+    return this[RES_HEADERS][this.httpVersion == 2 
+      ? http2.constants.HTTP2_HEADER_STATUS 
+      : 'status'
+    ]
   }
 
   /**
@@ -177,7 +179,7 @@ export default class Context {
     if (!http.STATUS_CODES[sc]) throw new Error('Invalid status code: ' + code)
 
     this.set(
-      this.httpVersion === 2 ? http2.constants.HTTP2_HEADER_STATUS : 'status',
+      this.httpVersion == 2 ? http2.constants.HTTP2_HEADER_STATUS : 'status',
       sc
     );
   }

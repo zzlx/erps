@@ -3,12 +3,13 @@
  *
  * @param {number} start
  * @param {number} end
- *
+ * @returns {number} random
  */
 
 export default function randomNumber (start = 0, end = 100) {
-  return Math.floor(Math.random() * (end - start)) + start;
+  let random = Math.floor(Math.random() * (end - start)) + start;
+  return random;
 }
 
 // test
-//console.log(randomNumber(0, 500));
+//console.log(randomNumber(0, 10));

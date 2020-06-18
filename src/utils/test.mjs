@@ -15,8 +15,6 @@
  */
 
 export default new Promise((resolve, reject) => {
-  console.log(process.env);
-
   if (process && process.env.NODE_ENV === 'test') {
     resolve(true);
     //reject('生产环境');

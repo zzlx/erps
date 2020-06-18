@@ -34,7 +34,6 @@ export default function respond (ctx, error = null) {
     if ('development' === ctx.app.env) {
       // string
       body = error.stack;
-      debug(error);
     } else {
       body = http.STATUS_CODES[ctx.status];
     }
@@ -88,6 +87,7 @@ export default function respond (ctx, error = null) {
 	// send response headers
   if (!ctx.headersSent) {
 		compress(500); // compress content bigger than 500kb
+    debug(ctx.response.headers);
 		ctx.stream.respond(ctx.response.headers);
   }
 
