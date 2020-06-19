@@ -15,9 +15,9 @@ import util from 'util';
 import accepts from 'accepts';
 import contentType from 'content-type';
 
-import MimeTypes from './mime-types.mjs';
 import HttpError from '../../utils/HttpError.mjs';
 import MemCache from '../../utils/memCache.mjs';
+import MimeTypes from '../../utils/MimeTypes.mjs';
 import { 
 	EMPTY_CODE,
 	RETRY_CODE,

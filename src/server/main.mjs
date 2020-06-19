@@ -16,6 +16,9 @@ import createServer from './http2-server.mjs';
 
 const debug = util.debuglog('debug:process');
 
+// 设置计数器
+let restart_attempt = 25; // 尝试重启25次
+
 // 进程管理
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 初始化系统环境 
 process.title = 'org.zzlx' + '.' + 'httpd'; // 设置进程名称

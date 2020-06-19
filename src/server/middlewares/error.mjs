@@ -12,8 +12,8 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import ISODate from '../../utils/date.mjs';
 import HttpError from '../../utils/HttpError.mjs';
+import ISODate from '../../utils/date.mjs';
 const debug = util.debuglog('debug:middleware.error');
 
 export default function (logPath) {
@@ -26,6 +26,7 @@ export default function (logPath) {
       await next();
     } catch (err) {  
       debug(new HttpError(err));
+
       let error = err instanceof HttpError ? err : new HttpError(err);
 
 			// write log to error_log

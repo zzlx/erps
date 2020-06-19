@@ -1,12 +1,12 @@
 /**
  * *****************************************************************************
  *
- * 路由中间件
+ * 服务端路由管理器
  *
- * RESTful resource routing middleware
+ * RESTful resource routing manager.
  *
  * @param {array} routes
- *@return {function} middleware function
+ * @return {function} middleware function
  * @api public
  *
  * @file router.mjs
@@ -14,7 +14,7 @@
  */
 
 import http from 'http';
-import { compile, parse, pathToRegexp, } from '../utils/path-to-regexp.mjs';
+import { compile, parse, pathToRegexp, } from './path-to-regexp.mjs';
 import HttpError from './HttpError.mjs';
 
 export default class Router {

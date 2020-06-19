@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import db from '../../data/mime-types.json';
+import db from '../data/mime-types.json';
 
 const EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/
 const TEXT_TYPE_REGEXP = /^text\//i
