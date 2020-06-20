@@ -1155,7 +1155,8 @@ _parse_argv() {
 				_ACME_API=${_ACME_API_STAGING}
 				;;
 
-			--git-commit )
+			# 用于提交代码变更
+			--commit )
 				shift
 				_commit_and_push $1; break
 				;;
@@ -1165,7 +1166,7 @@ _parse_argv() {
 				_get_pid_by_name $1; break
 				;;
 
-			--git-log )
+			--gitlog )
 				_show_git_log;
 				;;
 
@@ -1177,6 +1178,7 @@ _parse_argv() {
 				_npm_install; break
 				;;
 
+			# 打包代码
 			--package )
 				_package_app; break
 				;;
