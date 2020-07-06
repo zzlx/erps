@@ -13,7 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// third-part modules
+// third modules
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');

@@ -15,7 +15,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import date from '../../utils/date.mjs'; // @todo: 
+import NewDate from '../../utils/Date.mjs'; // @todo: 
 const debug = util.debuglog('debug:middleware.log');
 
 export default function logMiddleware (logPath, format) {
@@ -39,7 +39,7 @@ export default function logMiddleware (logPath, format) {
   return function logMiddleware (ctx, next) {
 
     const log = new Array(
-			date.toLocaleISOString(),
+			NewDate.prototype.toLocaleISOString(),
       ctx.method, 
 			ctx.href,
 			'"' + ctx.headers['user-agent'] + '"', // 记录用户代理
@@ -49,7 +49,7 @@ export default function logMiddleware (logPath, format) {
     debug(log);
 
     // 写入request日志后再执行后续中间件
-		const dateSN = date.format('yyyymmdd');
+		const dateSN = NewDate.prototype.format('yyyymmdd');
     return fs.promises.open(path.join(logPath, `request_${dateSN}.log`), 'a+')
 			.then(fd => fs.promises.appendFile(fd, log + os.EOL).then(() => fd.close()))
 			.then(() => next())

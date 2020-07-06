@@ -196,8 +196,9 @@ export default class Context {
   }
 
   /**
-   * Method
+   * Return request method
    *
+   * @return method
    * @api public
    */
 
@@ -222,7 +223,9 @@ export default class Context {
   }
 
   /**
-   * PATH
+   * return request path
+   *
+   * @return
    */
 
   get path() {
@@ -449,6 +452,31 @@ export default class Context {
     const hostname = this.hostname;
     if (net.isIP(hostname)) return [];
     return hostname.split('.').reverse().slice(offset);
+  }
+
+  /**
+   *
+   *
+   */
+
+  redirect(url, alt) {
+    // location
+    if ('back' === url) url = this.ctx.get('Referrer') || alt || '/';
+    this.set('Location', encodeURL(url));
+
+    // status
+    if (!REDIRECT_CODE[this.status]) this.status = 302;
+
+    // html
+    if (this.accepts('html')) {
+      //url = escape(url);
+      url = url;
+      this.type = 'text/html; charset=utf-8';
+      this.body = `Redirecting to <a href="${url}">${url}</a>.`;
+      return;
+    }
+
+    this.type = 'text/plain; charset=utf-8';
   }
 
   /**

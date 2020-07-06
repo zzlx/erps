@@ -1,23 +1,20 @@
+#!/usr/bin/env node
+
 /**
  * *****************************************************************************
  *
- * 服务器端路由配置
- *
+ * 处理中行CTIS系统交易流水
  *
  * *****************************************************************************
  */
 
+// internal modules
+import cp from 'child_process';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import util from 'util';
-import Router from '../utils/Router.mjs';
 
-const debug = util.debuglog('debug:routes'); // debug function
+process.stdout.write('处理中行CTIS系统交易流水');
 
-export default function routes () {
-
-  return (ctx, next) => {
-
-    ctx.body = {test: 'ttt'};
-  }
-} 
+// 

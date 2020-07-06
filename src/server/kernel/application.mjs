@@ -1,9 +1,12 @@
 /**
  * *****************************************************************************
  *
- * A onion kernel service application.
+ * Stream response application.
  *
- * @file application.mjs
+ * Usage:
+ *
+ * const app = new Application();
+ *
  * *****************************************************************************
  */
 
@@ -14,8 +17,8 @@ import path from 'path';
 import util from 'util';
 
 // modules
-import compose from './compose.mjs';
 import Context from './context.mjs';
+import compose from './compose.mjs';
 import respond from './respond.mjs';
 
 const debug = util.debuglog('debug:application'); // debug function
@@ -23,6 +26,7 @@ const debug = util.debuglog('debug:application'); // debug function
 export default class Application extends EventEmitter {
   constructor(props) {
     super();
+
     this.props = props ? props : Object.create(null);
     this.env = this.props.env || process.env.NODE_ENV || 'production';
     this.protocol = this.props.protocol ? this.props.protocol : 'http2';
@@ -34,15 +38,28 @@ export default class Application extends EventEmitter {
     if (util.inspect.custom) {
       this[util.inspect.custom] = this.inspect;
     }
+
   }
 
   /**
    * inspect
-   *
    */
 
   inspect () {
+    return this.toJSON();
+  }
 
+  /**
+   *
+   *
+   */
+
+  toJSON () {
+    return {
+      'env': this.env,
+      'subdomainOffset': this.subdomainOffset,
+      'proxy': this.proxy,
+    };
   }
 
   /**
@@ -71,8 +88,8 @@ export default class Application extends EventEmitter {
     if (!this.listenerCount('error')) this.on('error', this.onerror);
 
     return (stream, headers, flags) => {
-			// 创建context对象
-      const ctx = new Context();
+
+      const ctx = new Context(); // 新建context对象
       ctx.stream = stream;
       ctx.headers = headers;
       ctx.flags = flags;
@@ -80,7 +97,8 @@ export default class Application extends EventEmitter {
       ctx.state = {};
 
       return this.handleRequest(ctx, fn);
-    };
+    }
+
   }
 
   /**
@@ -96,6 +114,7 @@ export default class Application extends EventEmitter {
 
   /**
    * listen
+   *
    */
 
   listen (...args) {

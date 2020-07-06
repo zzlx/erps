@@ -13,7 +13,7 @@ import path from 'path';
 import util from 'util';
 
 import HttpError from '../../utils/HttpError.mjs';
-import ISODate from '../../utils/date.mjs';
+import ISODate from '../../utils/Date.mjs';
 const debug = util.debuglog('debug:middleware.error');
 
 export default function (logPath) {
@@ -31,7 +31,7 @@ export default function (logPath) {
 
 			// write log to error_log
       const log = error.message + ' ' + new Date().toString() + os.EOL; 
-      const sn = ISODate.toLocaleISOString().substr(0, 10).replace(/[-\/]/g, '');
+      const sn = ISODate.prototype.toLocaleISOString().substr(0, 10).replace(/[-\/]/g, '');
       const logFile = path.join(logPath, `error_log_${sn}`); 
       await fs.promises.open(logFile, 'a+')
 				.then(fd => fd.appendFile(log).then(() => fd.close()));

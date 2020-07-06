@@ -1,17 +1,20 @@
 #!/bin/sh
 # ------------------------------------------------------------------------------
 #
-# EPR服务管理脚本
+# ERP服务启动脚本管理程序
+#
+# 系统环境要求:Linux、MacOS等类Unix系统环境
 #
 # 功能列表:
 #
 # * 服务启动、停止、重启等操作
 # * 提供源代码库版本管理及变更提交
 # * 服务器证书申请或自签名证书等签发
+# * 自动安装nvm并管理node版本
 #
-# 运行环境:
-# OS: Linux、MacOS等类Unix系统环境
-# Node.js: v14.4.0
+# @todos:
+# 1. 每5秒遍历一次src目录,检测文件变动
+# 2. 
 #
 # ------------------------------------------------------------------------------
 
@@ -44,6 +47,9 @@ declare -r _RESTART_INT=15     # 设置开发模式下重启服务间隔时间
 # Letsencrypt`s ACME service API address
 declare -r _ACME_API="https://acme-v02.api.letsencrypt.org"
 declare -r _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
+
+# nvm install script address
+declare -r _NVM_INSTALL_SCRIPT="https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh"
 
 declare -r _PREFIX="org.zzlx.erps"
 declare -r _PIDFILE="$HOME/.erps/${_PREFIX}.httpd.pid"
@@ -131,6 +137,23 @@ _rm() {
 	done
 
 	unset trash_dir
+}
+
+_read_dir() {
+  _debug "循环读取目录"
+
+  if [[ ! -d $1 ]]; then echo $1; fi
+
+  for file in `ls $1`
+  do
+    if [[ -d ${1}/$file ]]; then
+      _read_dir ${1}/$file
+    else
+      printf ${1}/$file
+    fi
+  done
+
+  unset dir
 }
 
 _show_help_message() { 
@@ -448,8 +471,14 @@ _create_order() {
 	REQUEST="${REQUEST} ] }"
 	RESPONSE="$(_acme_api_request "${API}/acme/new-order" "${REQUEST}")"
 	ORDER_URL=$(echo "${RESPONSE}" | grep -i '^location: ' | sed 's/^location: //i' | flatstring)
-	IFS=" " read -r -a AUTHORIZATION_URLS <<< "$(echo "${RESPONSE}" | flatstring | sed 's/^.*"authorizations"\:\ \[\ \(.*\)\ \].*$/\1/' | tr -d ',"')"
-	debug "authorization_urls=${AUTHORIZATION_URLS[*]}"
+
+	IFS=" " read -r -a AUTHORIZATION_URLS <<< "$(echo "${RESPONSE}"  \
+    | flatstring  \
+    | sed 's/^.*"authorizations"\:\ \[\ \(.*\)\ \].*$/\1/'  \
+    | tr -d ',"')"
+
+  _debug "authorization_urls=${AUTHORIZATION_URLS[*]}"
+
 	if [ ${#DOMAINS[@]} -ne ${#AUTHORIZATION_URLS[@]} ];
 	then
 		debug "${RESPONSE}"
@@ -636,23 +665,27 @@ _is_zsh() {
   [ -n "${ZSH_VERSION-}" ]
 }
 
-# check if required function is available
+# check if the function is available
 _require() {
   local res;
+  local cmd=$1
+
+  #res=$(command -v $cmd 2>/dev/null)
+  #res=$(type ${cmd-} 2>&1 | awk '{print $2}')
+  res=$(type ${cmd} 2>&1)
+
+  if [[ -z $res ]]; then
+    echo "程序执行依赖${cmd}, 请安装.";
+    _exit
+  fi
+
+  unset res
+}
+
+_requires() {
   for cmd in $@; do
-    if [[ $cmd == "_require" ]]; then continue; fi
-
-    res=$(command -v $cmd 2>/dev/null)
-    #res=$(type "${1-}" >/dev/null 2>&1)
-
-    if [[ -n $res ]]; then
-      continue;
-    else
-      echo "脚本程序运行前请安装$cmd";
-    fi
+    _require $cmd
   done
-
-  unset res;
 }
 
 # Sends a request to the ACME server, signed with private key.
@@ -1212,11 +1245,10 @@ _parse_argv() {
 # 设定程序执行流程
 _main() { 
 	# @todo: 仅在必要时检测shell工具是否可用
-	_require git host openssl
+	_requires git host openssl
 
 	# 解析命令行参数
 	_parse_argv $_ORIG_ARGV
 }
 
-# 执行主程序 
-_main 
+_main # 执行主程序 

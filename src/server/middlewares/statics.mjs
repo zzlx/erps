@@ -1,13 +1,15 @@
 /**
  * *****************************************************************************
  *
- * Statics middlewares 
- *
  * 静态资源服务
+ * Statics resource service.
+ *
  * 支持内容协商
  * 支持压缩版本
  *
- * @file homepage.mjs
+ * @param {object|string} opts
+ * @return {function} middleware function
+ *
  * *****************************************************************************
  */
 
@@ -15,18 +17,25 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-import { PUBLIC_HTML } from '../../config.mjs';
+const debug = util.debuglog('debug:statics.middleware'); // 调试信息打印工具
 
-const debug = util.debuglog('debug:middleware.static');
+// Default options
+const defaultOptions = {
+  index: 'index.html',
+  directoryIndex: ['index.html'],
+  immutable: false,
+  maxage: 0,
+  compress: false,
+}
 
-export default function (opts = {}) {
+export default function statics (opts = {}) {
 
-  opts.root = path.join(PUBLIC_HTML, 'dist');
-  opts.index = 'index.html';
-  opts.directoryIndex = ['index.html'];
-  opts.immutable = false;
-  opts.maxage = 0;
-  opts.compress = false;
+  // 处理参数
+  const options = Object.assign({}, defaultOptions, opts);
+  if (typeof opts === 'string') options.root = opts;
+  if (options.root == null) throw new Error('options.root is unconfigured.');
+
+  debug(options);
 
   return async function staticsMiddleware (ctx, next) {
 
@@ -38,11 +47,12 @@ export default function (opts = {}) {
     }
 
     // 相对目录
+    //
     const relativePath = path.relative('/', ctx.pathname);
-    let realPath = path.resolve(opts.root, relativePath);
+    let realPath = path.resolve(options.root, relativePath);
     let url = null;
 
-    if (realPath === opts.root) {
+    if (realPath === options.root) {
       realPath = path.join(realPath, 'index.html');
     }
 
@@ -71,8 +81,8 @@ export default function (opts = {}) {
     }
 
     // set content-type
-    if (null === url || url === opts.root) {
-      url = path.join(opts.root, 'index.html');
+    if (null === url || url === options.root) {
+      url = path.join(options.root, 'index.html');
       ctx.type = path.extname(url);
     } else {
       ctx.type = path.extname(realPath);

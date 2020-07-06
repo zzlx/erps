@@ -10,8 +10,10 @@
 
 import cp from 'child_process';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import util from 'util';
+
 import createServer from './http2-server.mjs';
 
 const debug = util.debuglog('debug:process');
@@ -84,7 +86,8 @@ startApp();
 
 function startApp () {
   // get hostname
-  const hostname = cp.execSync("hostname | awk '{printf $1}'");
+  //const hostname = cp.execSync("hostname | awk '{printf $1}'");
+  const hostname = os.hostname();
 
   // 服务器server配置
   const server = createServer({

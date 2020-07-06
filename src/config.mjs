@@ -1,16 +1,12 @@
 /**
  * *****************************************************************************
- * -----------------------------------------------------------------------------
  *
- * 配置项目管理
+ * 配置管理器
  *
  * 配置项来源: 1. .env文件；2.config.json文件 3. 系统默认配置项目
  *
  * 约定:
  * 模块输出项目均为文本字符串类型数据
- *
- * @file: config.mjs
- * -----------------------------------------------------------------------------
  * *****************************************************************************
  */
 
@@ -19,53 +15,52 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-const debug = util.debuglog('debug:config'); // debug
 const __dirname = path.dirname(import.meta.url).substr(7); // __dirname
+const debug = util.debuglog('debug:config'); // debug
 
-// 定位代码库根目录
-export const APP_ROOT = path.dirname(__dirname);
-export const APP_PATH = APP_ROOT;
+class Config {
 
-// 获取package.json配置信息
-export const PACKAGE_JSON_FILE  = path.join(APP_ROOT, 'package.json');
-const PACKAGE_JSON = JSON.parse(fs.readFileSync(PACKAGE_JSON_FILE));
-export const APP_NAME     = PACKAGE_JSON.name;
-export const APP_LICENSE  = PACKAGE_JSON.license;
-export const APP_VERSION  = 'v' + PACKAGE_JSON.version;
+  /**
+   *
+   *
+   *
+   */
 
-// 配置系统常用目录
-export const HOME_DIR    = os.homedir(); // process.env.HOME 
-export const CONFIG_DIR  = path.join(HOME_DIR, `.${APP_NAME}`);
-export const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
-export const LOG_DIR     = path.join(CONFIG_DIR, 'log'); // 日志目录
+  constructor (config = {}) {
 
-export const DOT_ENV_FILE = path.join(APP_ROOT, '.env');
-export const VIMRC_FILE   = path.join(APP_ROOT, '.vimrc');
-export const DIST_DIR     = path.join(APP_ROOT, 'dist');
-export const README_FILE  = path.join(APP_ROOT, 'README.md');
-export const HELP_FILE    = path.join(APP_ROOT, 'doc', 'help.txt');
+    // 配置系统常用目录
+    this.appRoot = path.dirname(__dirname);
 
-export const TEMP_DIR     = os.tmpdir();
-export const PUBLIC_HTML = '/';
+    // 获取package.json配置信息
+    const PACKAGE_JSON_FILE  = path.join(this.appRoot, 'package.json');
+    const PACKAGE_JSON = JSON.parse(fs.readFileSync(PACKAGE_JSON_FILE));
 
-// 获取APP配置信息
-let AppConfig = {};
+    this.appName = PACKAGE_JSON.name;
+    this.appVersion = PACKAGE_JSON.version;
+    this.appHome = path.join(os.homedir(), this.appName);
+    this.logDir = path.join(this.appHome, 'log');
+    this.appTempDir = os.tmpdir();
+  }
 
-if (fs.existsSync(CONFIG_FILE)) {
-  AppConfig = JSON.parse(fs.readFileSync(CONFIG_FILE));
+  /**
+   *
+   */
+
+  toJSON () {
+  }
+
+  /**
+   *
+   */
+
+  readConfig () {
+    // 获取APP配置信息
+    let AppConfig = {};
+
+    if (fs.existsSync(CONFIG_FILE)) {
+      AppConfig = JSON.parse(fs.readFileSync(CONFIG_FILE));
+    }
+  }
 }
 
-export const APP_CONFIG = AppConfig; 
-
-// 执行目录准备任务,创建系统需要的目录路径
-(function readyDir () {
-  const mkdir = (dir) => fs.promises.mkdir(dir, {recursive: true})
-    .then(() => true)
-    .catch(() => false); 
-
-  return Promise.all([
-    mkdir(CONFIG_DIR),
-    mkdir(LOG_DIR),
-    //mkdir(DIST_DIR),
-  ]);
-})();
+export default new Config();
