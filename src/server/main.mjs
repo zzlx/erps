@@ -1,9 +1,13 @@
 /**
  * *****************************************************************************
  *
- * 服务端主程序
+ * Backend services application
  *
- * 管理服务进程，处理异常
+ * 程序功能:
+ *
+ * 服务进程管理
+ * 异常及错误管理
+ *
  *
  * *****************************************************************************
  */
@@ -25,8 +29,6 @@ let restart_attempt = 25; // 尝试重启25次
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 初始化系统环境 
 process.title = 'org.zzlx' + '.' + 'httpd'; // 设置进程名称
 
-
-// 定义pidFile文件路径
 const pidFile = `${process.env.HOME}/.erps/.${process.title}.pid`;
 
 // 将process.pid写入PID文件

@@ -18,7 +18,7 @@ import util from 'util';
 const __dirname = path.dirname(import.meta.url).substr(7); // __dirname
 const debug = util.debuglog('debug:config'); // debug
 
-class Config {
+export default class Config {
 
   /**
    *
@@ -26,10 +26,10 @@ class Config {
    *
    */
 
-  constructor (config = {}) {
+  constructor (opts = {}) {
 
     // 配置系统常用目录
-    this.appRoot = path.dirname(__dirname);
+    this.appRoot = path.dirname(path.dirname(__dirname));
 
     // 获取package.json配置信息
     const PACKAGE_JSON_FILE  = path.join(this.appRoot, 'package.json');
@@ -62,5 +62,3 @@ class Config {
     }
   }
 }
-
-export default new Config();

@@ -10,7 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import Router from '../utils/Router.mjs';
+import Router from './kernel/Router.mjs';
 
 const debug = util.debuglog('debug:routes'); // debug function
 

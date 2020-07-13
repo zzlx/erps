@@ -12,7 +12,6 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import HttpError from '../../utils/HttpError.mjs';
 import ISODate from '../../utils/Date.mjs';
 const debug = util.debuglog('debug:middleware.error');
 
@@ -25,9 +24,7 @@ export default function (logPath) {
     try { 
       await next();
     } catch (err) {  
-      debug(new HttpError(err));
-
-      let error = err instanceof HttpError ? err : new HttpError(err);
+      debug(err);
 
 			// write log to error_log
       const log = error.message + ' ' + new Date().toString() + os.EOL; 
@@ -37,7 +34,7 @@ export default function (logPath) {
 				.then(fd => fd.appendFile(log).then(() => fd.close()));
 
       // 将捕获到的错误转发,并执行系统错误处理程序
-      return Promise.reject(error);
+      return Promise.reject(err);
     } 
   }
 }

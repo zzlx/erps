@@ -17,8 +17,7 @@ import path from 'path';
 import util from 'util';
 
 // modules
-import Context from './context.mjs';
-import compose from './compose.mjs';
+import Context from './Context.mjs';
 import respond from './respond.mjs';
 
 const debug = util.debuglog('debug:application'); // debug function
@@ -109,7 +108,8 @@ export default class Application extends EventEmitter {
    */
 
   handleRequest (ctx, fn) {
-		return fn(ctx).then(() => respond(ctx)).catch(err => respond(ctx, err));
+		return fn(ctx).then(() => respond(ctx))
+      .catch(err => respond(ctx, err));
   }
 
   /**
@@ -147,6 +147,38 @@ export default class Application extends EventEmitter {
     debug(msg.replace(/^/gm, '  '));
   }
 
-}
+  /**
+   * Compose `middleware` returning a fully valid middleware.
+   *
+   * @param {Array} middleware
+   * @return {Function}
+   */
 
-Application.prototype.compose = compose;
+  compose(middleware) {
+    if (!Array.isArray(middleware)) {
+      throw new TypeError('Middleware must be an array!');
+    }
+
+    return function middlewareFn (context, next) {
+      let index = -1;
+      return dispatch(0);
+
+      function dispatch (i) {
+        if (i <= index) {
+          return Promise.reject(new Error('next() called multiple times'));
+        }
+
+        index = i;
+        let fn = (i === middleware.length) ? next : middleware[i];
+        if (!fn) return Promise.resolve();
+
+        try {
+          // 给中间件绑定this对象
+          return Promise.resolve(fn.call(context, context, dispatch.bind(null, ++i)));
+        } catch (err) {
+          return Promise.reject(err);
+        }
+      }
+    }
+  }
+}

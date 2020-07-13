@@ -16,9 +16,14 @@ import http2 from 'http2';
 import Stream from 'stream';
 import zlib from 'zlib';
 import util from 'util';
-import { EMPTY_CODE } from './constants.mjs';
 
 const debug = util.debuglog('debug:application.respond'); // debug function
+const EMPTY_CODE = [
+	204, // no content
+	205, // reset content
+	304, // not modified
+];
+
 
 export default function respond (ctx, error = null) {
   if (false === ctx.respond) {

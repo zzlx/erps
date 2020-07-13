@@ -15,16 +15,26 @@ import util from 'util';
 import accepts from 'accepts';
 import contentType from 'content-type';
 
-import HttpError from '../../utils/HttpError.mjs';
+import HttpError from './HttpError.mjs';
 import MemCache from '../../utils/memCache.mjs';
 import MimeTypes from '../../utils/MimeTypes.mjs';
-import { 
-	EMPTY_CODE,
-	RETRY_CODE,
-	REDIRECT_CODE,
-} from './constants.mjs';
 
 const debug = util.debuglog('debug:application.context'); // 调试工具
+const EMPTY_CODE = [
+	204, // no content
+	205, // reset content
+	304, // not modified
+];
+
+const REDIRECT_CODE = [
+	300,  // MULTIPLE_CHOICES 
+	301,  // MOVED_PERMANENTLY
+	302,  // FOUND
+	303,  // SEE_OTHER
+	305,  // USE_PROXY
+	307,  // TEMPORARY_REDIRECT
+	308,  // PERMANENT_REDIRECT
+];
 
 // 常量
 const ACCEPT = Symbol('context#accept');

@@ -1,30 +1,32 @@
 /**
  * *****************************************************************************
  *
- * 路由管理器
+ * RESTful resource routing manager.
  *
  * *****************************************************************************
  */
 
-import { compile, parse, pathToRegexp, } from './path-to-regexp.mjs';
 import HttpError from './HttpError.mjs';
-import methods from './http2-methods.mjs'; // http methods
-
-/**
- * RESTful resource routing manager.
- *
- * @param {array} routes
- * @return {function} middleware function
- * @api public
- */
+import { compile, parse, pathToRegexp, } from '../../utils/path-to-regexp.mjs';
+import methods from '../../constants/http2-methods.json';
 
 export default class Router {
+
+  /**
+   * constructor
+   *
+   * @param {array} routes
+   * @return {function} middleware function
+   * @api public
+   */
+
   constructor (props = {}) {
-    this.opts = props ? props : {};
+    this.opts = props;
     this.methods = props.methods || methods;
     this.params = {};
-    this.stack  = []; // stack
+    this.stack  = []; // stacks
   }
+
 }
 
 /**
@@ -38,6 +40,7 @@ export default class Router {
  */
 
 Router.prototype.use = function () {
+  const router = this;
   const args = Array.prototype.slice.call(arguments);
 
   // paths 
@@ -57,37 +60,46 @@ Router.prototype.use = function () {
 
   if (hashPath) path = args.shift(); 
 
-  // 遍历中间价函数
+  // iterator middleware arguments
   for (let i = 0; i < args.length; i++) {
+
+    // get middleware
     const middleware = args[i];
 
+    // whether router middleware
     if (middleware.router) {
 
-      const cloneRouter = Object.assign(Object.create(Router.prototype), 
+      //
+      const cloneRouter = Object.assign(
+        Object.create(Router.prototype), 
         middleware.router, 
-        { stack: middleware.router.stack.slice(0), }
+        { stack: middleware.router.stack.slice(0) }
       );
 
+      // 
       for (let j = 0; j < cloneRouter.stack.length; j++) {
-        const nestedLayer = cloneRouter.stack[j];
+        const nestedLayer = cloneRouter.stack[j]; // nested layer
         const cloneLayer = Object.assign(
           Object.create(Layer.prototype),
           nestedLayer
         );
 
+        // layer添加前缀
         if (path) cloneLayer.setPrefix(path);
         if (router.opts.prefix) cloneLayer.setPrefix(router.opts.prefix);
-        router.stack.push(cloneLayer);
+
+        router.stack.push(cloneLayer); // 
         cloneRouter.stack[j] = cloneLayer;
 
-      } // end of for loop block
+      } // end of for j
 
       if (router.params) {
         const routerParams = Object.keys(router.params);
+
         for (let k = 0; k < routerParams.length; k++) {
           const key = routerParams[k];
           cloneRouter.param(key, router.params[key]);
-        }
+        } // end of for k
       }
 
     } else {
@@ -97,27 +109,35 @@ Router.prototype.use = function () {
       });
     } 
 
-  } // end of iterat
+  } // end of for
 
   return this;
 }
 
 /**
- * Set the path prefix for a Router instance that was already initialized.
+ * Set the path prefix for a Router instance
+ *
+ * Example:
+ * router.prefix('/users')
+ * router.get('/:id', ...)  => "/users/:id"
  *
  * @param {String} prefix
- *
  * @returns {Router}
  */
 
 Router.prototype.prefix = function (prefix) {
+  if (typeof prefix !== 'string') {
+    throw new Error('prefix paramater must be string.');
+  }
+
   prefix = prefix.replace(/\/$/, '');
 
   this.opts.prefix = prefix;
 
+  // stack layer
   for (let i = 0; i < this.stack.length; i++) {
-    const route = this.stack[i];
-    route.setPrefix(prefix);
+    const layer = this.stack[i];
+    layer.setPrefix(prefix);
   }
 
   return this;
@@ -134,6 +154,7 @@ Router.prototype.routes = function () {
   const router = this;
   
   function dispatch(ctx, next) {
+
     const path = router.opts.routerPath || ctx.routerPath || ctx.path;
     const matched = router.match(path, ctx.method);
 
@@ -150,13 +171,15 @@ Router.prototype.routes = function () {
     if (!matched.route) return next();
 
     const matchedLayers = matched.pathAndMethod;
+
+    // most specific layer
     const mostSpecificLayer = matchedLayers[matchedLayers.length - 1];
 
     ctx._matchedRoute = mostSpecificLayer.path;
 
     if (mostSpecificLayer.name) ctx._matchedRouteName = mostSpecificLayer.name;
 
-    layerChain = matchedLayers.reduce((mem, layer) => {
+    layerChain = matchedLayers.reduce((memo, layer) => {
       memo.push((ctx, next) => {
         ctx.captures = layer.captures(path, ctx.captures);
         ctx.params = layer.params(path, ctx.captures, ctx.params);
@@ -197,15 +220,19 @@ Router.prototype.allowedMethods = function (options = {}) {
   return async function allowedMethods(ctx, next) {
     await next();
 
+    const allowed = {};
+
     if (!ctx.status || ctx.status === 404) {
 
       for (let i = 0; i < ctx.matched.length; i++) {
         const route = ctx.matched[i];
+
         for (let j = 0; j < route.methods.length; j++) {
           const method = route.methods[j];
           allowed[method] = method;
         }
-      } // end of for loop
+
+      } // end for matched
 
       const allowedArr = Object.keys(allowed);
 
@@ -213,26 +240,26 @@ Router.prototype.allowedMethods = function (options = {}) {
         if (options.throw) {
           let notImplementedThrowable = (typeof options.notImplemented === 'function')
             ? options.notImplemented()
-            : new HttpError(501);
+            : new HttpError(http2.constants.HTTP_STATUS_NOT_IMPLEMENTED);
 
           throw notImplementedThrowable;
         } else {
-          ctx.status = 501;
+          ctx.status = http2.constants.HTTP_STATUS_NOT_IMPLEMENTED;
           ctx.set('Allow', allowedArr.join(', '));
         }
       } else if (allowedArr.length) {
         if (ctx.method === 'OPTIONS') {
-          ctx.status = 200;
+          ctx.status = http2.constants.HTTP_STATUS_OK;
           ctx.body = '';
           ctx.set('Allow', allowedArr.join(', '));
         } else if (!allowed[ctx.method]) {
           if (options.throw) {
             let notAllowedThrowable = typeof options.methodNotAllowed === 'function'
               ? options.methodNotAllowed()
-              : new HttpError(405);
+              : new HttpError(http2.constants.HTTP_STATUS_METHOD_NOT_ALLOWED);
             throw notAllowedThrowable;
           } else {
-            ctx.status = 405; // METHOD_NOT_ALLOWED
+            ctx.status = http2.constants.HTTP_STATUS_METHOD_NOT_ALLOWED
             ctx.set('Allow', allowedArr.join(', '));
           }
         }
@@ -255,7 +282,6 @@ Router.prototype.allowedMethods = function (options = {}) {
  */
 
 Router.prototype.all = function (name, path, middleware) {
-
   if (typeof path === 'string') {
     middleware = Array.prototype.slice.call(arguments, 2);
   } else {
@@ -460,7 +486,7 @@ Router.url = function (path) {
  */
 
 for (let i = 0; i < methods.length; i++) {
-  const method = methods[i].toLowerCase(); // http method
+  const method = methods[i].toLowerCase().replace('-', '_'); // http method
 
   // @todo: 完善name逻辑
   Router.prototype[method] = function (name, path, middleware) {

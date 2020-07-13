@@ -3,8 +3,6 @@
 #
 # ERP服务启动脚本管理程序
 #
-# 系统环境要求:Linux、MacOS等类Unix系统环境
-#
 # 功能列表:
 #
 # * 服务启动、停止、重启等操作
@@ -36,8 +34,8 @@ declare -r _ORIG_PWD=$(pwd)     # 记录执行当前命令所在目录
 declare -r _ORIG_UMASK=$(umask) # 记录原始umask值
 
 declare -r _FILE=${0##*/}                           # 获取文件名称
-declare -r _BIN=$(cd $(dirname $0) || exit; pwd -P) # 获取目录路径
-declare -r _ROOT=$(dirname $_BIN)                   # 获取脚本根目录路径
+declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P) # 获取目录路径
+declare -r _ROOT=$(dirname $_DIR)                   # 获取脚本根目录路径
 
 declare +r _ENV="production"   # 生产环境
 declare +r _DEBUG=false        # 默认关闭调试
@@ -57,10 +55,11 @@ declare -r _PIDFILE="$HOME/.erps/${_PREFIX}.httpd.pid"
 # 定义子shell中可用的变量
 declare -rx CHECK_UPGRADE=true # 默认检查更新
 declare -rx QUITE=false        # 静默模式
-declare -x  PATH=$PATH:${_BIN} # 添加PATH路径
+declare -x  PATH=$PATH:${_DIR} # 添加PATH路径
 
 # ------------------------------------------------------------------------------
 # shell函数定义
+# 函数定义关键字function不作强制要求
 # 实现原则:简单、一次仅做一项任务
 # 函数命名规则: 脚本函数均以“_”作为前缀及单词连接符
 # @todo: 按函数首字母顺序排列
@@ -98,6 +97,7 @@ _httpd_start() {
 
 	_debug "尝试后台运行httpd..."
 
+	#(${_ROOT}/bin/start.mjs)&
 	(node --no-warnings --experimental-json-modules ${_ROOT}/src/server/main.mjs)&
 
   local pid=$! # 记录httpd进程pid
@@ -111,13 +111,13 @@ _httpd_stop() {
 	if [[ -n $pid ]]; then
 		if [[ $(_is_pid_process $pid) == "true" ]]; then
 			_debug "kill给进程发送KILL信号"
-			kill -KILL $httpdPid
+			kill -KILL $httpdPid 2>/dev/null
 		fi
 
 		_rm ${_PIDFILE} >/dev/null 2>&1
 	else
 		_debug "pkill给进程名称发送结束信号"
-		pkill -KILL org.zzlx.httpd
+		pkill -KILL org.zzlx.httpd 2>/dev/null
 	fi
 }
 
@@ -193,6 +193,16 @@ _show_version_message() {
 	GitVersion: $(_get_git_commit_hash)
 	GitBranch: $(_get_git_branch_name)
 	EOF
+}
+
+_generatePricateKey() {
+  _debug "Generate private key."
+  openssl genrsa -out ca.key 2048
+}
+
+_generateCSR() {
+  _debug "Generate CSR file."
+  openssl req -new -key ca.key -out ca.csr
 }
 
 _get_agreement() {
@@ -1240,10 +1250,21 @@ _parse_argv() {
 	done
 }
 
-# ------------------------------------------------------------------------------
-# 定义主程序
-# 设定程序执行流程
+_readDotEnv() {
+	# 读入.env环境变量
+	dotEnvFile=${_ROOT}/.env
+	if [[ -e $dotEnvFile ]]; then
+		source $dotEnvFile
+	fi
+
+	if [[ $debug ]]; then _DEBUG=$debug; fi
+	if [[ $app_env ]]; then _ENV=$app_env; fi
+}
+
 _main() { 
+	# 载入dotenv配置
+	_readDotEnv
+
 	# @todo: 仅在必要时检测shell工具是否可用
 	_requires git host openssl
 
