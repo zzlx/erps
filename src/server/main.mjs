@@ -3,11 +3,8 @@
  *
  * Backend services application
  *
- * 程序功能:
- *
- * 服务进程管理
- * 异常及错误管理
- *
+ * 管理HTTP服务进程
+ * 管理异常及错误处理
  *
  * *****************************************************************************
  */
@@ -17,17 +14,9 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
+const debug = util.debuglog('debug:main');
 
-import createServer from './http2-server.mjs';
-
-const debug = util.debuglog('debug:process');
-
-// 设置计数器
-let restart_attempt = 25; // 尝试重启25次
-
-// 进程管理
-process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 初始化系统环境 
-process.title = 'org.zzlx' + '.' + 'httpd'; // 设置进程名称
+process.title = 'org.zzlx' + '.' + 'httpd'; // set process title
 
 const pidFile = `${process.env.HOME}/.erps/.${process.title}.pid`;
 
@@ -49,12 +38,72 @@ process.on('uncaughtException', (err, origin) => {
 process.on('unhandledRejection', (reason, promise) => {
 	debug('rejection reason: ', reason);
 	debug('promise: ', promise);
+
+  restart();
 });
+
+process.on('SIGINT', signalHandler);
+process.on('SIGTERM', signalHandler);
+
+// 被重定向时触发进程信号
+process.on('SIGPIPE', (code) => {
+	debug('Received SIGPIPE');
+})
+
+// Set beforeExit event handler
+process.on('beforeExit', (code) => {
+  console.log('beforeExit event code: ', code);
+	deletePidFile();
+});
+
+// Set exit event handler
+process.on('exit', (code) => { 
+  debug('Service is running ', process.uptime(), 's ', 'before exit.');
+});
+
+start();
+
+let restart_attempt = 10000; // 尝试重启10000次,后台通知开发人员进行关注并处理
+
+function restart () {
+  if (restart_attempt === 0) {
+    retstart_attempt = 10000;
+    return;
+  }
+
+  restart_attempt--;
+}
+
+async function start () {
+  // get hostname
+  //const hostname = cp.execSync("hostname | awk '{printf $1}'");
+  const hostname = os.hostname();
+
+  const createServer = await import('./http2-server.mjs').then(m => m.default);
+
+  // 服务器server配置
+  const server = createServer({
+    // @todo: read configuration from cofig file
+    cert: fs.readFileSync(`/etc/ssl/${hostname}-cert.pem`),
+    key: fs.readFileSync(`/etc/ssl/${hostname}-key.pem`),
+  }); 
+
+  return import('./services.mjs').then(m => m.default).then((app) => {
+    app.server = server;
+
+    app.listen({
+      ipv6Only: false, // 是否仅开启IPV6
+      host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
+      port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
+      exclusive: false, // false 可接受进程共享端口
+    });
+  });
+}
 
 // SIGINT计数器
 let sigintCount = 0;
 
-const signalHandler = (code) => {
+function signalHandler (code) {
 	debug('Process signal: ', code);
 
 	if (code === 'SIGINT') {
@@ -65,47 +114,4 @@ const signalHandler = (code) => {
 			console.log('Press Control-C twice to exit.');
 		}
 	}
-}
-
-process.on('SIGINT', signalHandler);
-process.on('SIGTERM', signalHandler);
-
-// 被重定向时触发进程信号
-process.on('SIGPIPE', (code) => {
-	debug('Received SIGPIPE');
-})
-
-process.on('beforeExit', (code) => {
-  console.log('beforeExit event code: ', code);
-});
-
-process.on('exit', (code) => { 
-	debug('任务1: 进程正常退出前,删除掉pid文件');
-	deletePidFile();
-});
-
-startApp();
-
-function startApp () {
-  // get hostname
-  //const hostname = cp.execSync("hostname | awk '{printf $1}'");
-  const hostname = os.hostname();
-
-  // 服务器server配置
-  const server = createServer({
-    // @todo: read configuration from cofig file
-    cert: fs.readFileSync(`/etc/ssl/${hostname}-cert.pem`),
-    key: fs.readFileSync(`/etc/ssl/${hostname}-key.pem`),
-  }); 
-
-  return import('./app.mjs').then(m => m.default).then((app) => {
-    app.server = server;
-
-    app.listen({
-      ipv6Only: false, // 是否仅开启IPV6
-      host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
-      port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
-      exclusive: false, // false 可接受进程共享端口
-    });
-  });
 }

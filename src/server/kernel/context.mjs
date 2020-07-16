@@ -20,6 +20,7 @@ import MemCache from '../../utils/memCache.mjs';
 import MimeTypes from '../../utils/MimeTypes.mjs';
 
 const debug = util.debuglog('debug:application.context'); // 调试工具
+
 const EMPTY_CODE = [
 	204, // no content
 	205, // reset content
@@ -807,17 +808,29 @@ export default class Context {
     // set type
     const setType = !this.has('Content-Type');
 
-    // string
+    // if set string body, 
+    // set type and length header
     if ('string' == typeof val) {
-      if (setType) this.type = /^\s*</.test(val) ? 'html' : 'text';
+
+      if (setType) {
+        this.type = /^\s*<xml/.test(val) 
+          ? 'xml' 
+          : /^\s*<(:?html)?/.test(val) 
+            ? 'html' 
+            : 'text';
+      }
+
       this.length = Buffer.byteLength(val);
+
       return;
     }
 
     // buffer
     if (Buffer.isBuffer(val)) {
       if (setType) this.type = 'bin';
+
       this.length = val.length;
+
       return;
     }
 

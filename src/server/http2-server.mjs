@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * HTTP2服务器
+ * HTTP2服务配置
  *
  * @todos:
  * session支持
@@ -78,7 +78,7 @@ function resumeSessionEventHandler (sessionId, cb) {
 
 function errorEventHandler (err) {
   if (err.code == 'EADDRINUSE') {
-    console.warn('端口%s被占用, 请更换端口后重试...', err.port);
+    console.warn('Port %s is used, try again later...', err.port);
 		process.exit();
 	}
 }
@@ -88,9 +88,10 @@ function listeningEventHandler () {
 	//let time = cp.execSync('date "+%Y%m%d"').toString().replace(/\s/, '');
 	const address = this.address();
 
-  debug('PID %s %s运行在%s模式,监听地址%s:%s',
-		process.pid,
+  debug('%s %s(PID %s) is running in %s mode, and listening address %s:%s.',
+    new Date(),
 		process.title,
+		process.pid,
 		process.env.NODE_ENV,
 		address.address,
 		address.port,

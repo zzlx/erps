@@ -84,6 +84,11 @@ export function pathToRegexp (path, keys, options = {}) {
   return stringToRegexp(path, keys, options); 
 }
 
+// test
+//let keys = [];
+//let regexp = pathToRegexp('/abc/:id', keys);
+//console.log(regexp);
+
 /**
  * 解析字符串为tokens
  * Parse a string for the raw tokens.

@@ -4,7 +4,6 @@
  * Stream response application.
  *
  * Usage:
- *
  * const app = new Application();
  *
  * *****************************************************************************

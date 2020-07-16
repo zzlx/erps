@@ -18,12 +18,6 @@ import zlib from 'zlib';
 import util from 'util';
 
 const debug = util.debuglog('debug:application.respond'); // debug function
-const EMPTY_CODE = [
-	204, // no content
-	205, // reset content
-	304, // not modified
-];
-
 
 export default function respond (ctx, error = null) {
   if (false === ctx.respond) {
@@ -32,7 +26,7 @@ export default function respond (ctx, error = null) {
 	}
 
   let body = ctx.body;
-  debug('ctx.body=', body);
+  debug('ctx.body =', body);
 
   if (error != null) {
     ctx.status = error.status || 500; // 设置错误码
@@ -49,6 +43,12 @@ export default function respond (ctx, error = null) {
 		debug('Can not write to stream, because ctx.writable is false.');
 		return;
 	}
+
+  const EMPTY_CODE = [
+    204, // no content
+    205, // reset content
+    304, // not modified
+  ];
 
   if (EMPTY_CODE.includes(ctx.status)) {
     ctx.body = null;
@@ -70,24 +70,19 @@ export default function respond (ctx, error = null) {
   // null body
   if (null == body || false === body || true === body) {
     ctx.status = 404;
-    body = ctx.message;
-  }
-
-  // 响应文本内容
-  if (Buffer.isBuffer(body) || 'string' == typeof body) {
-    if (!ctx.headersSent) contentNegotiation(ctx);
+    ctx.body = ctx.message
   }
 
 	// stream body
-  if (body instanceof Stream) {
-    ctx.stream.respond(body);
-    return body.pipe(ctx.stream);
+  if (ctx.body instanceof Stream) {
+    ctx.stream.respond(ctx.body);
+    return ctx.body.pipe(ctx.stream);
   }
 
   // Assume body is a json value
-	if (typeof body === 'object') {
+	if (typeof ctx.body === 'object') {
 		ctx.type = 'json';
-		ctx.body = JSON.stringify(body);
+		ctx.body = JSON.stringify(ctx.body);
 	}
 
 	// send response headers
@@ -112,7 +107,7 @@ export default function respond (ctx, error = null) {
 
 function compress (ctx, size = 500) {
 	// compress content
-  const body = ctx.body;
+  const body = ctx.body || '';
 
   ctx.length = Buffer.byteLength(body);
 
@@ -138,25 +133,3 @@ function compress (ctx, size = 500) {
     ctx.length = Buffer.byteLength(ctx.body); // 重新计算内容大小
   }
 } // end of comporess function
-
-/**
- *
- *
- */
-
-function contentNegotiation (ctx) {
-	// 内容协商规则
-
-  if (ctx.type !== '') return;
-  const body = ctx.body;
-
-	if (ctx.accepts('html') && /<\/html>/.test(body)) {
-		ctx.type = 'html';
-	} else if (ctx.accepts('json') && /^{/.test(body)) {
-		ctx.type = 'json';
-	} else if (ctx.accepts('xml') && /<\/xml>/.test(body)) {
-		ctx.type = 'xml';
-	} else {
-		ctx.type = 'text';
-	}
-} // end of content negotiation

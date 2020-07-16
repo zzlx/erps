@@ -14,10 +14,11 @@ import Router from './kernel/Router.mjs';
 
 const debug = util.debuglog('debug:routes'); // debug function
 
-export default function routes () {
+const router = new Router();
 
-  return (ctx, next) => {
+router.get('/', (ctx, next) => {
+  // ctx.router available
+  ctx.body = 'test';
+});
 
-    ctx.body = {test: 'ttt'};
-  }
-} 
+export default router;

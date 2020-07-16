@@ -1,43 +1,38 @@
 #!/bin/sh
 # ------------------------------------------------------------------------------
 #
-# ERP服务启动脚本管理程序
+# ERPS管理程序
+# ===========
 #
-# 功能列表:
+# # 功能描述
 #
-# * 服务启动、停止、重启等操作
 # * 提供源代码库版本管理及变更提交
 # * 服务器证书申请或自签名证书等签发
 # * 自动安装nvm并管理node版本
 #
-# @todos:
-# 1. 每5秒遍历一次src目录,检测文件变动
-# 2. 
-#
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
 # 执行环境设定
 # set -e # 执行过程中返回值为非零，退出执行
 # trap exit EXIT
 
-# ------------------------------------------------------------------------------
 # shell变量定义
 # 命名规则:全局变量以"_"开头或连接大写命名字母
 # defined readonly variables `declear -r` equivalent to "readonly variable"
 # defined exported variables `declear -x` equivalent to `export variable`
 
-declare -r _ORIG_ARGV=$@        # 记录原始的参数
-declare -r _ORIG_CMD="$0"       # 记录原始命令 
-declare -r _ORIG_TASK="$0 $*"   # 记录原始命令任务
-declare -r _ORIG_PWD=$(pwd)     # 记录执行当前命令所在目录
-declare -r _ORIG_UMASK=$(umask) # 记录原始umask值
+
+declare -r _ORIG_PWD=$(pwd)               # 记录执行当前命令所在目录
+declare -r _ORIG_ARGV=$@                  # 记录原始的参数
+declare -r _ORIG_CMD="${_ORIG_PWD}${0}"   # 记录原始命令 
+declare -r _ORIG_TASK="${_ORIG_CMD} $*"   # 记录原始命令任务
+declare -r _ORIG_UMASK=$(umask)           # 记录原始umask值
 
 declare -r _FILE=${0##*/}                           # 获取文件名称
-declare -r _DIR=$(cd $(dirname $0) || exit; pwd -P) # 获取目录路径
+declare -r _S_FILE=$(ls -l $0 |awk '{print $NF}')   # 获取文件物理地址
+declare -r _DIR=$(cd $(dirname $_S_FILE) || exit; pwd -P) # 获取目录路径
 declare -r _ROOT=$(dirname $_DIR)                   # 获取脚本根目录路径
 
-declare +r _ENV="production"   # 生产环境
 declare +r _DEBUG=false        # 默认关闭调试
 declare -r _RENEW_ALLOW=30
 declare -r _RESTART_INT=15     # 设置开发模式下重启服务间隔时间
@@ -49,13 +44,12 @@ declare -r _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
 # nvm install script address
 declare -r _NVM_INSTALL_SCRIPT="https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh"
 
-declare -r _PREFIX="org.zzlx.erps"
-declare -r _PIDFILE="$HOME/.erps/${_PREFIX}.httpd.pid"
-
 # 定义子shell中可用的变量
 declare -rx CHECK_UPGRADE=true # 默认检查更新
 declare -rx QUITE=false        # 静默模式
-declare -x  PATH=$PATH:${_DIR} # 添加PATH路径
+
+# 临时容器 key value database
+declare -a _KVDB
 
 # ------------------------------------------------------------------------------
 # shell函数定义
@@ -69,56 +63,6 @@ _build_ui() {
   cd $_ROOT
   npm run build
   cd $_ORIG_PWD
-}
-
-_httpd_restart() {
-	_debug "尝试重启httpd..."
-
-	# _httpd_stop && _httpd_start
-	_httpd_stop
-	_httpd_start
-}
-
-_httpd_start() {
-	local pid=$(_get_httpd_pid)
-	if [[ -n $pid ]]; then
-		if [[ $(_is_pid_process $pid) == "true" ]]; then
-			printf "检测到服务正在运行,请使用'--restart'参数启动服务.\n"
-			return;
-		fi
-	fi
-
-	export NODE_ENV=$(_get_env_setting)
-	export IPV6=true
-
-	if [[ $(_get_debug_setting) == 'true' ]]; then
-		export NODE_DEBUG="debug*"
-	fi
-
-	_debug "尝试后台运行httpd..."
-
-	#(${_ROOT}/bin/start.mjs)&
-	(node --no-warnings --experimental-json-modules ${_ROOT}/src/server/main.mjs)&
-
-  local pid=$! # 记录httpd进程pid
-}
-
-_httpd_stop() {
-	# 获取httpd pid
-	local pid=$(_get_httpd_pid)
-
-	# kill httpdPid
-	if [[ -n $pid ]]; then
-		if [[ $(_is_pid_process $pid) == "true" ]]; then
-			_debug "kill给进程发送KILL信号"
-			kill -KILL $httpdPid 2>/dev/null
-		fi
-
-		_rm ${_PIDFILE} >/dev/null 2>&1
-	else
-		_debug "pkill给进程名称发送结束信号"
-		pkill -KILL org.zzlx.httpd 2>/dev/null
-	fi
 }
 
 _rm() {
@@ -140,7 +84,7 @@ _rm() {
 }
 
 _read_dir() {
-  _debug "循环读取目录"
+  _debug "循环读取目录中的文件"
 
   if [[ ! -d $1 ]]; then echo $1; fi
 
@@ -149,17 +93,23 @@ _read_dir() {
     if [[ -d ${1}/$file ]]; then
       _read_dir ${1}/$file
     else
-      printf ${1}/$file
+      echo ${1}/$file
     fi
   done
 
   unset dir
 }
 
+_setup() {
+	mkdir -p $HOME/.bin \
+		&& ln -s $_DIR/$_FILE $HOME/.bin/${_FILE%.*} 2>/dev/null \
+		&& echo "OK create symbol link to erpsctl."
+}
+
+
 _show_help_message() { 
-	_debug "显示帮助信息"
   cat <<- EOF
-	Usage: $(_print_red $(_get_package_name | _toLowerCase)) [options...]
+	Usage: $(_print_red ${_FILE%.*}) [options...]
 
 	Options:
 		-h, --help        显示帮助信息
@@ -167,8 +117,6 @@ _show_help_message() {
 
 		环境参数
 		--debug           调试环境
-		--development     开发环境
-		--production      生产环境
 
 		服务管理参数
 		--start           启动服务
@@ -187,7 +135,6 @@ _show_help_message() {
 }
 
 _show_version_message() {
-	_debug "显示版本信息"
   cat <<- EOF
 	Version: $(_get_package_version)
 	GitVersion: $(_get_git_commit_hash)
@@ -239,19 +186,6 @@ _get_pid_by_name() {
 	local name=$1
 	ps -ef | grep "$name" | grep -v "$_ORIG_TASK\|grep" | awk '{print $2}'
 	unset name
-}
-
-_get_httpd_pid() {
-	_debug "尝试获取httpd PID进程号..."
-
-	if [[ -r $_PIDFILE ]]; then
-		pid=$(head -n 1 $_PIDFILE | sed 's/\n//g')
-		if [[ -n $pid ]]; then 
-			echo $pid 
-		else
-			rm -f $_PIDFILE
-		fi
-	fi	
 }
 
 _issue_self_signed_certificate() {
@@ -1143,8 +1077,6 @@ _is_root() {
 }
 
 _parse_argv() {
-	_debug "解析命令行参数,执行指令"
-
 	# 未提供参数时执行的任务
 	if [ ${#} -eq 0 ]; then _show_help_message; fi
 
@@ -1161,36 +1093,13 @@ _parse_argv() {
 				_show_version_message; break
 				;;
 
-			--development )
-				_ENV='development'
-				;;
-
 			--debug )
 		    _DEBUG='true'
 				;;
 
-			--start )
-				_httpd_start
-
-				if [[ $(_get_env_setting) == 'development' ]]; then
-					_debug "当前为开发环境"
-					for ((i=1; i < 10000; i++))
-					do
-						sleep ${_RESTART_INT}; _httpd_restart;
-					done
-				fi 
-				break 
-				;;
-
-			--stop )
-				_httpd_stop;    # 停止服务
-				break 
-				;;
-
-			--restart )
-				_httpd_restart; # 重启服务
-				break 
-				;;
+      --setup )
+				_setup
+        ;;
 
 			-t | --test )
 				_DEBUG="true"
@@ -1259,6 +1168,19 @@ _readDotEnv() {
 
 	if [[ $debug ]]; then _DEBUG=$debug; fi
 	if [[ $app_env ]]; then _ENV=$app_env; fi
+}
+
+_watcher() {
+  files_sha1=()
+  files=($(_read_dir $_ROOT/src | tr '\n' ' '));
+
+  count=${#files[@]}
+  for (( i=0; i < 10; i++ ));
+  do
+    sha1=$(shasum ${files[$i]})
+    _KVDB[$i]=$sha1
+    echo ${_KVDB[$i]};
+  done
 }
 
 _main() { 

@@ -1,9 +1,7 @@
-LICENSE
+版权声明
 =======
 
-# 版权声明
-
-The MIT License (MIT)
+# The MIT License (MIT)
 
 Copyright (c) 2019-present
 

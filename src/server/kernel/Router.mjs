@@ -1,32 +1,176 @@
+import HttpError from './HttpError.mjs'; // @todo:
+
+import { compile, parse, pathToRegexp, } from '../../utils/path-to-regexp.mjs';
+import methods from '../../constants/http2-methods.json';
+
 /**
  * *****************************************************************************
  *
+ * Router
+ *
  * RESTful resource routing manager.
+ *
  *
  * *****************************************************************************
  */
-
-import HttpError from './HttpError.mjs';
-import { compile, parse, pathToRegexp, } from '../../utils/path-to-regexp.mjs';
-import methods from '../../constants/http2-methods.json';
 
 export default class Router {
 
   /**
    * constructor
    *
-   * @param {array} routes
-   * @return {function} middleware function
-   * @api public
+   * @param {object} props
+   * @param {string} props.prefix
+   * @param {array} props.methods
+   * @param {object} props.params
+   *
    */
 
   constructor (props = {}) {
-    this.opts = props;
-    this.methods = props.methods || methods;
+    this.opts = Object.assign({}, props);
+    this.methods = this.opts.methods || methods;
     this.params = {};
     this.stack  = []; // stacks
+
+     // this.get|put|post|patch|delete|del ⇒ Router
+    for (let i = 0; i < this.methods.length; i++) {
+      const method = this.methods[i].toLowerCase().replace('-', '_');
+
+      // @todo: 完善name逻辑
+      this[method] = function (name, path, middleware) {
+
+        if (typeof path === "string" || path instanceof RegExp) {
+          middleware = Array.prototype.slice.call(arguments, 2);
+        } else {
+          middleware = Array.prototype.slice.call(arguments, 1);
+          path = name;
+          name = null;
+        }
+
+        this.register(path, [method], middleware, { name: name });
+
+        return this;
+      }
+    }
   }
 
+  /**
+   * Run middleware for named route parameters. 
+   * useful for auto-loading or validation
+   *
+   * @param {string} param
+   * @param {function} middleware
+   * @returns {Router}
+   */
+
+  param (param, middleware) {
+    this.params[param] = middleware;
+
+    for (let i = 0; i < this.stack.length; i++) {
+      const route = this.stack[i];
+      route.param(param, middleware);
+    }
+
+    return this;
+  }
+
+  /**
+   * Register route with all methods
+   *
+   * @param {string} name optional
+   * @param {string} path
+   * @param {function} middleware support multiple middlewares
+   * @param {function} callback
+   * @returns {Router}
+   * @private
+   */
+
+  all (name, path, middleware) {
+    if (typeof path === 'string') {
+      middleware = Array.prototype.slice.call(arguments, 2);
+    } else {
+      middleware = Array.prototype.slice.call(arguments, 1);
+      path = name;
+      name = null;
+    }
+
+    this.register(path, methods, middleware, { name });
+
+    return this;
+  }
+
+  /**
+   * Lookup route with given name.
+   *
+   * Usage:
+   * router.route(namedRoute);  => namedRoute
+   *
+   * @param {string} name
+   * @returns {Layer|false}
+   */
+
+  route (name) {
+    const routes = this.stack;
+
+    for (let i = 0; i < routes.length; i++) {
+      if (routes[i].name && routes[i].name === name) return routes[i];
+    }
+
+    return false;
+  }
+
+  /**
+   * Generate URL for route. 
+   *
+   * Takes a route name and map of named params
+   *
+   *
+   * @param {string} name route name
+   * @param {object} params url parameters
+   * @param {object} [options]
+   * @param {object|string} [options.query] query options
+   * @returns {string|error}
+   */
+
+  url (name, params) {
+    const route = this.route(name);
+
+    if (route) {
+      const args = Array.prototype.slice.call(arguments, 1);
+      return route.url.apply(route, args);
+    }
+
+    return new Error(`No route found for name: ${name}`);
+  }
+
+  /**
+   * Set the path prefix for a Router instance
+   *
+   * Example:
+   * router.prefix('/users')
+   * router.get('/:id', ...)  => "/users/:id"
+   *
+   * @param {String} prefix
+   * @returns {Router}
+   */
+
+  prefix (prefix) {
+    if (typeof prefix !== 'string') {
+      throw new Error('prefix paramater must be string.');
+    }
+
+    prefix = prefix.replace(/\/$/, '');
+
+    this.opts.prefix = prefix;
+
+    // stack layer
+    for (let i = 0; i < this.stack.length; i++) {
+      const layer = this.stack[i];
+      layer.setPrefix(prefix);
+    }
+
+    return this;
+  }
 }
 
 /**
@@ -110,35 +254,6 @@ Router.prototype.use = function () {
     } 
 
   } // end of for
-
-  return this;
-}
-
-/**
- * Set the path prefix for a Router instance
- *
- * Example:
- * router.prefix('/users')
- * router.get('/:id', ...)  => "/users/:id"
- *
- * @param {String} prefix
- * @returns {Router}
- */
-
-Router.prototype.prefix = function (prefix) {
-  if (typeof prefix !== 'string') {
-    throw new Error('prefix paramater must be string.');
-  }
-
-  prefix = prefix.replace(/\/$/, '');
-
-  this.opts.prefix = prefix;
-
-  // stack layer
-  for (let i = 0; i < this.stack.length; i++) {
-    const layer = this.stack[i];
-    layer.setPrefix(prefix);
-  }
 
   return this;
 }
@@ -271,31 +386,6 @@ Router.prototype.allowedMethods = function (options = {}) {
 
 
 /**
- * Register route with all methods
- *
- * @param {string} name optional
- * @param {string} path
- * @param {function} middleware support multiple middlewares
- * @param {function} callback
- * @returns {Router}
- * @private
- */
-
-Router.prototype.all = function (name, path, middleware) {
-  if (typeof path === 'string') {
-    middleware = Array.prototype.slice.call(arguments, 2);
-  } else {
-    middleware = Array.prototype.slice.call(arguments, 1);
-    path = name;
-    name = null;
-  }
-
-  this.register(path, methods, middleware, { name });
-
-  return this;
-}
-
-/**
  * Redirect source to destination URL with optional 3xx status code.
  *
  * @param {string} source URL or route name.
@@ -329,19 +419,16 @@ Router.prototype.redirect = function (source, destination, code = 301) {
  */
 
 Router.prototype.register = function (path, methods, middleware, opts = {}) {
-  const router = this; // 路由器实例
-  const stack = this.stack; // 路由堆栈
-
   if (Array.isArray(path)) {
     for (let i = 0; i < path.length; i++) {
       const curPath = path[i];
-      router.register.call(router, curPath, methods, middleware, opts);
+      this.register(curPath, methods, middleware, opts);
     }
 
     return this;
   }
 
-  const route = new Layer(path, methods, middlware, {
+  const route = new Layer(path, methods, middleware, {
     end: opts.end === false ? opts.end : true,
     name: opts.name,
     sensitive: opts.sensitive || this.opts.sensitive || false,
@@ -360,48 +447,9 @@ Router.prototype.register = function (path, methods, middleware, opts = {}) {
     route.param(param, this.params[param]);
   }
 
-  stack.push(route);
+  this.stack.push(route);
 
   return route;
-}
-
-/**
- * Lookup route with given name.
- *
- * @param {string} name
- * @returns {Layer|false}
- */
-
-Router.prototype.route = function (name) {
-  const routes = this.stack;
-
-  for (let i = 0; i < routes.length; i++) {
-    if (routes[i].name && routes[i].name === name) return routes[i];
-  }
-
-  return false;
-}
-
-/**
- * Generate URL for route. Takes a route name and map of named params
- *
- * @param {string} name route name
- * @param {object} params url parameters
- * @param {object} [options]
- * @param {object|string} [options.query] query options
- * @returns {string|error}
- */
-
-Router.prototype.url = function (name, params) {
-  const route = this.route(name);
-
-  if (route) {
-    const args = Array.prototype.slice.call(arguments, 1);
-    return route.url.apply(route, args);
-  }
-
-  return new Error(`No route found for name: ${name}`);
-
 }
 
 /**
@@ -412,12 +460,10 @@ Router.prototype.url = function (name, params) {
  * @param {string} method
  * @returns {Object.<path, pathAndMethod> returns layers that matched path and method
  * @private
- *
  */
 
 Router.prototype.match = function (path, method) {
   const layers = this.stack;
-  let layer;
 
   const matched = {
     path: [],
@@ -425,8 +471,8 @@ Router.prototype.match = function (path, method) {
     route: false,
   };
 
-  for  (let len = layers.length, i = 0; i < len; i++) {
-    layer = layers[i];
+  for  (let i = 0; i < layers.length; i++) {
+    let layer = layers[i];
 
     if (layer.match(path)) {
       matched.path.push(layer);
@@ -439,25 +485,6 @@ Router.prototype.match = function (path, method) {
   }
 
   return matched;
-}
-
-/**
- * Run middleware for named route parameters. useful for auto-loading or validation
- *
- * @param {string} param
- * @param {function} middleware
- * @returns {Router}
- */
-
-Router.prototype.param = function (param, middleware) {
-  this.params[param] = middleware;
-
-  for (let i = 0; i < this.stack.length; i++) {
-    const route = this.stack[i];
-    route.param(param, middleware);
-  }
-
-  return this;
 }
 
 /**
@@ -480,33 +507,10 @@ Router.url = function (path) {
 }
 
 /**
+ * *****************************************************************************
  *
- * 路由器方法
+ * Route layer
  *
- */
-
-for (let i = 0; i < methods.length; i++) {
-  const method = methods[i].toLowerCase().replace('-', '_'); // http method
-
-  // @todo: 完善name逻辑
-  Router.prototype[method] = function (name, path, middleware) {
-
-    if (typeof path === "string" || path instanceof RegExp) {
-      middleware = Array.prototype.slice.call(arguments, 2);
-    } else {
-      middleware = Array.prototype.slice.call(arguments, 1);
-      path = name;
-      name = null;
-    }
-
-    this.register(path, [method], middleware, { name: name });
-
-    return this;
-  }
-}
-
-
-/**
  * Initialize a new routing Layer with given `method`, `path`, and `middleware`.
  *
  * @param {String|RegExp} path Path string or regular expression.
@@ -518,11 +522,12 @@ for (let i = 0; i < methods.length; i++) {
  * @param {String=} opts.strict require the trailing slash (default: false)
  * @returns {Layer}
  * @private
+ * *****************************************************************************
  */
 
 class Layer {
   constructor (path, methods, middleware, opts = {}) {
-    this.opts = opts;
+    this.opts = Object.assign({}, opts);
     this.name = this.opts.name || null;
     this.methods = [];
     this.paramNames = [];
@@ -543,179 +548,183 @@ class Layer {
     this.path = path;
     this.regexp = pathToRegexp(path, this.paramNames, this.opts);
   }
-}
 
+  /**
+   * Prefix route path.
+   *
+   * @param {String} prefix
+   * @returns {Layer}
+   * @private
+   */
 
-/**
- * Returns whether request `path` matches route.
- *
- * @param {String} path
- * @returns {Boolean}
- * @private
- */
+  setPrefix (prefix) {
+    if (this.path) {
+      this.path = (this.path !== '/' || this.opts.strict === true)
+        ? `${prefix}${this.path}` 
+        : prefix;
 
-Layer.prototype.match = function (path) {
-  return this.regexp.test(path);
-}
-
-/**
- * Returns map of URL parameters for given `path` and `paramNames`.
- *
- * @param {String} path
- * @param {Array.<String>} captures
- * @param {Object=} existingParams
- * @returns {Object}
- * @private
- */
-
-Layer.prototype.params = function (path, captures, existingParams) {
-  const params = existingParams || {};
-
-  for (let i = 0; i < captures.length; i++) {
-    if (this.paramNames[i]) {
-      const c = captures[i];
-      params[this.paramNames[i].name] = c ? safeDecodeURIComponent(c) : c;
-    }
-  }
-
-  return params;
-}
-
-/**
- * Returns array of regexp url path captures.
- *
- * @param {String} path
- * @returns {Array.<String>}
- * @private
- */
-
-Layer.prototype.captures = function (path) {
-  return this.opts.ignoreCaptures ? [] : path.match(this.regexp).slice(1);
-}
-
-/**
- * Generate URL for route using given `params`.
- *
- * @param {Object} params url parameters
- * @returns {String}
- * @private
- *
- */
-
-Layer.prototype.url = function (params, options) {
-  let args = params;
-  const url = this.path.replace(/\(\.\*\)/g, '');
-
-  if (typeof(params) !== 'object') {
-    args = Array.prototype.slice.call(arguments);
-
-    if (typeof args[args.length - 1] === 'object') {
-      options = args[args.length -1];
-      args = args.slice(0, args.length -1);
-    }
-  }
-
-  const toPath = compile(url, options);
-  let replaced;
-
-  const tokens = parse(url);
-  let replace = {};
-
-  if (args instanceof Array) {
-    for (let i = 0, j = 0, len = tokens.length; i < len; i++) {
-      if (tokens[i].name) replace[tokens[i].name] = args[j++]
-    }
-  } else if (tokens.some(token => token.name)) {
-    replace = params;
-  } else {
-    options = params;
-  }
-
-  replaced = toPath(replace);
-
-  if (options && options.query) {
-    replaced = parseUrl(replaced);
-    if (typeof options.query === 'string') {
-      replaced.search = options.query;
-    } else {
-      replaced.search = undefined;
-      replaced.query = options.query;
+      this.paramNames = []; // reset this.paramNames
+      this.regexp = pathToRegexp(this.path, this.paramNames, this.opts);
     }
 
-    return formatUrl(replaced);
+    return this;
   }
 
-  return replaced;
-} // end of this.url
+  /**
+   * Returns map of URL parameters for given `path` and `paramNames`.
+   *
+   * @param {String} path
+   * @param {Array.<String>} captures
+   * @param {Object=} existingParams
+   * @returns {Object}
+   * @private
+   */
 
-/**
- * Run validations on route named parameters
- *
- * @param {string} param
- * @param {function} middleware
- * @returns {Layer}
- * @private
- */
+  params (path, captures, existingParams) {
+    const params = existingParams || {};
 
-Layer.prototype.param = function (param, fn) {
-  const stack = this.stack;
-  const params = this.paramNames;
-  const middleware = function (ctx, next) {
-    console.log(this);
-    return fn.call(this, ctx.params[param], ctx, next);
-  }
-
-  middleware.param = param;
-
-  const names = params.map(p => p.name);
-
-  const x = names.indexOf(param);
-
-  if (x > -1) {
-    stack.some((fn, i) => {
-      if (!fn.param || names.indexOf(fn.param) > x) {
-        stack.splice(i, 0, middleware);
-        return true;
+    for (let i = 0; i < captures.length; i++) {
+      if (this.paramNames[i]) {
+        const c = captures[i];
+        params[this.paramNames[i].name] = c ? decodeURIComponent(c) : c;
       }
-    });
+    }
+
+    return params;
   }
 
-  return this;
-} // end of this.param
+  /**
+   *
+   * Run validations on route named parameters
+   *
+   * @example
+   *
+   * ```javascript
+   * router
+   *   .param('user', function (id, ctx, next) {
+   *     ctx.user = users[id];
+   *     if (!user) return ctx.status = 404;
+   *     next();
+   *   })
+   *   .get('/users/:user', function (ctx, next) {
+   *     ctx.body = ctx.user;
+   *   });
+   * ```
+   *
+   * @param {string} param
+   * @param {function} middleware
+   * @returns {Layer}
+   * @private
+   */
 
-/**
- * Prefix route path.
- *
- * @param {String} prefix
- * @returns {Layer}
- * @private
- */
+  param (param, fn) {
+    const stack = this.stack;
+    const params = this.paramNames;
 
-Layer.prototype.setPrefix = function (prefix) {
-  if (this.path) {
-    this.path = (this.path !== '/' || this.opts.strict === true)
-      ? `${prefix}${this.path}` 
-      : prefix;
-    this.paramNames = [];
-    this.regexp = pathToRegexp(this.path, this.paramNames, this.opts);
+    const middleware = function (ctx, next) {
+      return fn.call(this, ctx.params[param], ctx, next);
+    }
+
+    middleware.param = param;
+
+    const names = params.map(p => p.name);
+
+    const x = names.indexOf(param);
+
+    if (x > -1) {
+      stack.some((fn, i) => {
+        if (!fn.param || names.indexOf(fn.param) > x) {
+          stack.splice(i, 0, middleware);
+          return true;
+        }
+      });
+    }
+
+    return this;
   }
 
-  return this;
-}
+  /**
+   * Returns whether request `path` matches route.
+   *
+   * @param {String} path
+   * @returns {Boolean}
+   * @private
+   */
 
-/**
- * Safe decodeURIComponent
- *
- * @param {String} text
- * @returns {String} URL decode original string.
- * @private
- */
+  match (path) {
+    return this.regexp.test(path);
+  }
 
-function safeDecodeURIComponent(text) {
-  try {
-    return decodeURIComponent(text);
-  } catch (e) {
-    // If `decodeURIComponent` error happen, just return the original value.
-    return text;
+  /**
+   * Returns array of regexp url path captures.
+   *
+   * @param {String} path
+   * @returns {Array.<String>}
+   * @private
+   */
+
+  captures (path) {
+
+    // ignore capture
+    // or return the matched key
+    return this.opts.ignoreCaptures 
+      ? [] 
+      : path.match(this.regexp).slice(1);
+  }
+
+  /**
+   * Generate URL for route using given `params`.
+   *
+   *
+   * @param {Object} params url parameters
+   * @returns {String} url string
+   * @private
+   *
+   */
+
+  url (params, options) {
+    let args = params;
+    const url = this.path.replace(/\(\.\*\)/g, '');
+
+    if (typeof(params) !== 'object') {
+      args = Array.prototype.slice.call(arguments);
+
+      if (typeof args[args.length - 1] === 'object') {
+        options = args[args.length -1];
+        args = args.slice(0, args.length -1);
+      }
+    }
+
+    const toPath = compile(url, options);
+    let replaced;
+
+    const tokens = parse(url);
+    let replace = {};
+
+    if (args instanceof Array) {
+      for (let i = 0, j = 0, len = tokens.length; i < len; i++) {
+        if (tokens[i].name) replace[tokens[i].name] = args[j++]
+      }
+    } else if (tokens.some(token => token.name)) {
+      replace = params;
+    } else {
+      options = params;
+    }
+
+    replaced = toPath(replace);
+
+    if (options && options.query) {
+      replaced = parseUrl(replaced);
+      if (typeof options.query === 'string') {
+        replaced.search = options.query;
+      } else {
+        replaced.search = undefined;
+        replaced.query = options.query;
+      }
+
+      return formatUrl(replaced);
+    }
+
+    return replaced;
   }
 }

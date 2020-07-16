@@ -3,7 +3,10 @@
  *
  * 配置管理器
  *
- * 配置项来源: 1. .env文件；2.config.json文件 3. 系统默认配置项目
+ * 配置项来源: 
+ * 1. .env文件；
+ * 2.config.json文件 
+ * 3. 系统默认配置项目
  *
  * 约定:
  * 模块输出项目均为文本字符串类型数据
@@ -27,9 +30,7 @@ export default class Config {
    */
 
   constructor (opts = {}) {
-
-    // 配置系统常用目录
-    this.appRoot = path.dirname(path.dirname(__dirname));
+    this.appRoot = path.dirname(path.dirname(__dirname)); // 配置系统常用目录
 
     // 获取package.json配置信息
     const PACKAGE_JSON_FILE  = path.join(this.appRoot, 'package.json');
@@ -37,7 +38,7 @@ export default class Config {
 
     this.appName = PACKAGE_JSON.name;
     this.appVersion = PACKAGE_JSON.version;
-    this.appHome = path.join(os.homedir(), this.appName);
+    this.appHome = path.join(os.homedir(), '.' + this.appName);
     this.logDir = path.join(this.appHome, 'log');
     this.appTempDir = os.tmpdir();
   }
@@ -47,6 +48,7 @@ export default class Config {
    */
 
   toJSON () {
+
   }
 
   /**
