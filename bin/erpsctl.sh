@@ -115,15 +115,12 @@ _show_help_message() {
 		-h, --help        显示帮助信息
 		--version         显示版本号
 
-		环境参数
 		--debug           调试环境
 
-		服务管理参数
 		--start           启动服务
 		--stop            停止服务
 		--restart         重启服务
 
-		代码库管理参数
 		--build           重建前端程序
 		--commit          提交一次代码库改动
 		--git-log    显示git版本日志
