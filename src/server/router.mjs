@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * 服务器端路由配置
+ * 服务路由配置
  *
  *
  * *****************************************************************************
@@ -20,5 +20,11 @@ router.get('/', (ctx, next) => {
   // ctx.router available
   ctx.body = 'test';
 });
+
+router.get('/homePage\/?', (ctx, next) => {
+  // ctx.router available
+  ctx.body = 'HomePage';
+});
+
 
 export default router;

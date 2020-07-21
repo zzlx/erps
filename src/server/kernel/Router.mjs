@@ -266,9 +266,7 @@ Router.prototype.use = function () {
  */
 
 Router.prototype.routes = function () {
-  const router = this;
-  
-  function dispatch(ctx, next) {
+  function routerMiddleware (ctx, next) {
 
     const path = router.opts.routerPath || ctx.routerPath || ctx.path;
     const matched = router.match(path, ctx.method);
@@ -309,9 +307,9 @@ Router.prototype.routes = function () {
     return compose(layerChain)(ctx, next);
   }
 
-  dispatch.router = this;
+  routerMiddleware.router = this;
 
-  return dispatch;
+  return routerMiddleware;
 }
 
 /**
@@ -478,7 +476,7 @@ Router.prototype.match = function (path, method) {
       matched.path.push(layer);
 
       if (layer.methods.length === 0 || ~layer.methods.indexOf(method)) {
-        matched.pathAndMethods.push(layer);
+        matched.pathAndMethod.push(layer);
         if (layer.methods.length) matched.route = true;
       }
     }

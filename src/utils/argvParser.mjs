@@ -15,12 +15,13 @@
  * *****************************************************************************
  */
 
-export default function argvParser (argvs, validArgvs = []) {
+export default function argvParser (argvs) {
 
   // 如果提供的参数列表为字符,则先转为数组后再解析
   if ('string' === typeof argvs) argvs = argvs.split(/\s+/);
 
   const params = {};
+
 	const it = argvs[Symbol.iterator]();
 
 	let argv = null;

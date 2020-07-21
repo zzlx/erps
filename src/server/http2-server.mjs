@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * HTTP2服务配置
+ * HTTP2服务器配置
  *
  * @todos:
  * session支持
@@ -10,48 +10,68 @@
  * *****************************************************************************
  */
 
+import fs from 'fs';
 import http2 from 'http2';
+import os from 'os';
 import util from 'util';
 const debug = util.debuglog('debug:server.http2');
 
 // server session缓存
 const tlsSessionStore = {};
+const hostname = os.hostname();
 
-export default function http2Server (opts) {
-	const server = http2.createSecureServer({
-		cert: opts.cert,
-		key: opts.key,
-		allowHTTP1: true,
-		//ca: [fs.readFileSync('client-cert.pem')],
-		//sigalgs: 
-		//ciphers: 
-		//clientCertEngine: 
-		//dhparam
-		//ecdhCurve
-		//privateKeyEngine
-		//passphrase: 'sample',
-		//pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-    
-		// This is necessary only if using client certificate authentication.
-		//requestCert: true,
-	});
+const server = http2.createSecureServer({
+  cert: fs.readFileSync(`/etc/ssl/${hostname}-cert.pem`),
+  key: fs.readFileSync(`/etc/ssl/${hostname}-key.pem`),
+	allowHTTP1: true,
+	//ca: [fs.readFileSync('client-cert.pem')],
+	//sigalgs: 
+	//ciphers: 
+	//clientCertEngine: 
+	//dhparam
+	//ecdhCurve
+	//privateKeyEngine
+	//passphrase: 'sample',
+	//pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+  
+	// This is necessary only if using client certificate authentication.
+	//requestCert: true,
+});
 
-  server.on('keylog', keylogEventHandler);
-  server.on('newSession', newSessionEventHandler);
-  server.on('OCSPRequest', OCSPRequestEventHandler);
-  server.on('resumeSession', resumeSessionEventHandler);
-  server.on('error', errorEventHandler);
-  server.on('listening', listeningEventHandler);
-
-	return server
-}
-
-function keylogEventHandler (line, socket) {
+server.on('keylog', function (line, socket) {
   const info = {
     line: line.toString(),
     address: socket.remoteAddress,
   };
-}
+});
+
+server.on('newSession', newSessionEventHandler);
+server.on('OCSPRequest', OCSPRequestEventHandler);
+server.on('resumeSession', resumeSessionEventHandler);
+
+server.on('error', function (err) {
+
+  if (err.code == 'EADDRINUSE') {
+    console.warn('port %s is used, try again later...', err.port);
+		process.exit();
+	}
+});
+
+server.on('listening', function () {
+	//let time = cp.execSync('date "+%Y%m%d"').toString().replace(/\s/, '');
+	const address = this.address();
+
+  debug('%s %s(with PID %s) is running in %s mode and at address %s:%s.',
+    new Date(),
+		process.title,
+		process.pid,
+		process.env.NODE_ENV,
+		address.address,
+		address.port,
+	);
+});
+
+export default server;
 
 function newSessionEventHandler (sessionId, sessionData, cb) {
 	debug('newSessionEvent');
@@ -76,24 +96,6 @@ function resumeSessionEventHandler (sessionId, cb) {
   cb(null, tlsSessionStore[id] || null );
 }
 
-function errorEventHandler (err) {
-  if (err.code == 'EADDRINUSE') {
-    console.warn('Port %s is used, try again later...', err.port);
-		process.exit();
-	}
-}
-
 function listeningEventHandler () {
 
-	//let time = cp.execSync('date "+%Y%m%d"').toString().replace(/\s/, '');
-	const address = this.address();
-
-  debug('%s %s(PID %s) is running in %s mode, and listening address %s:%s.',
-    new Date(),
-		process.title,
-		process.pid,
-		process.env.NODE_ENV,
-		address.address,
-		address.port,
-	);
 }

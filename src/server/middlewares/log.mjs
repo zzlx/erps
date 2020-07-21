@@ -36,22 +36,25 @@ export default function logMiddleware (logPath, format) {
   // {referer}
   // {status}
 
-  return function logMiddleware (ctx, next) {
+  return async function logMiddleware (ctx, next) {
+
+    await next();
 
     const log = new Array(
 			NewDate.prototype.toLocaleISOString(),
+      ctx.socket.remoteAddress + ':' + ctx.socket.remotePort,
+      ctx.get('referer'),
+			'"' + ctx.get('user-agent') + '"', // 记录用户代理
       ctx.method, 
 			ctx.href,
-			'"' + ctx.headers['user-agent'] + '"', // 记录用户代理
-      ctx.socket.remoteAddress + ':' + ctx.socket.remotePort,
-		).join(' ');
+      ctx.status,
+		).join('\t'); // 使用制表符作为分隔符
 
     debug(log);
 
-    // 写入request日志后再执行后续中间件
+    // write request log to file
 		const dateSN = NewDate.prototype.format('yyyymmdd');
-    return fs.promises.open(path.join(logPath, `request_${dateSN}.log`), 'a+')
-			.then(fd => fs.promises.appendFile(fd, log + os.EOL).then(() => fd.close()))
-			.then(() => next())
+    fs.promises.open(path.join(logPath, `request_${dateSN}.log`), 'a+')
+			.then(fd => fs.promises.appendFile(fd, log + os.EOL).then(() => fd.close()));
   } 
 }

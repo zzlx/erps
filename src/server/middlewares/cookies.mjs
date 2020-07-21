@@ -27,8 +27,8 @@ export default (opts) => function cookieMiddleware (ctx, next) {
 
       return  this[COOKIES];
     },
-    enumerable: true, // 可枚举属性
-    configurable: true, // 可配置属性
+    enumerable: true,
+    configurable: true,
   });
 
   return next();

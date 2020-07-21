@@ -37,7 +37,7 @@ const REDIRECT_CODE = [
 	308,  // PERMANENT_REDIRECT
 ];
 
-// 常量
+// define symbol attributes
 const ACCEPT = Symbol('context#accept');
 const REQ_BODY = Symbol('context#request-body');
 const REQ_URL = Symbol('context#request-URL');
@@ -45,11 +45,11 @@ const REQ_IP = Symbol('context#request-ip');
 const RES_BODY = Symbol('context#response-body');
 const RES_HEADERS = Symbol.for('context#response-headers');
 
+// define constants
 const mimeTypes = new MimeTypes();
 const typeCache = new MemCache(100);
 
 export default class Context {
-
   /**
    * check field from response header
    *
@@ -645,6 +645,7 @@ export default class Context {
         return this.headers[field] || '';
     }
   }
+
 
   /**
    * Check if the given `type(s)` is acceptable, returning

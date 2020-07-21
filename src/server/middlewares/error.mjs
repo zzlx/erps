@@ -23,8 +23,7 @@ export default function (logPath) {
   return async function errorMiddleware (ctx, next) { 
     try { 
       await next();
-    } catch (err) {  
-      debug(err);
+    } catch (error) {  
 
 			// write log to error_log
       const log = error.message + ' ' + new Date().toString() + os.EOL; 
@@ -34,7 +33,7 @@ export default function (logPath) {
 				.then(fd => fd.appendFile(log).then(() => fd.close()));
 
       // 将捕获到的错误转发,并执行系统错误处理程序
-      return Promise.reject(err);
+      return Promise.reject(error);
     } 
   }
 }

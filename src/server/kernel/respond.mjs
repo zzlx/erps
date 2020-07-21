@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Response处理器
+ * Response
  *
  * 支持特性:
  * 内容协商
@@ -19,28 +19,23 @@ import util from 'util';
 
 const debug = util.debuglog('debug:application.respond'); // debug function
 
-export default function respond (ctx, error = null) {
+/**
+ * response
+ *
+ *
+ * @param {object} ctx
+ * @return 
+ */
+
+export default function respond (ctx) {
+
   if (false === ctx.respond) {
-		debug('Bypassing respond, (ctx.respond === false)');
+		debug('Respond is bypassed, ctx.respond was set to false.');
 		return; 
 	}
 
-  let body = ctx.body;
-  debug('ctx.body =', body);
-
-  if (error != null) {
-    ctx.status = error.status || 500; // 设置错误码
-
-    if ('development' === ctx.app.env) {
-      // string
-      body = error.stack;
-    } else {
-      body = http.STATUS_CODES[ctx.status];
-    }
-  }
-
   if (!ctx.writable) {
-		debug('Can not write to stream, because ctx.writable is false.');
+		debug('Can not write to stream, ctx.writable is false.');
 		return;
 	}
 
@@ -68,9 +63,9 @@ export default function respond (ctx, error = null) {
   }
 
   // null body
-  if (null == body || false === body || true === body) {
-    ctx.status = 404;
-    ctx.body = ctx.message
+  if (null == ctx.body || false === ctx.body || true === ctx.body) {
+    ctx.status = ctx.status || 404;
+    ctx.body = ctx.message;
   }
 
 	// stream body
@@ -88,7 +83,6 @@ export default function respond (ctx, error = null) {
 	// send response headers
   if (!ctx.headersSent) {
 		compress(ctx, 500); // compress content bigger than 500kb
-    debug(ctx.response.headers);
 		ctx.stream.respond(ctx.response.headers);
   }
 

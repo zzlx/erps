@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 #
 # ERPS管理程序
-# ===========
+# ============
 #
 # # 功能描述
 #
@@ -28,10 +28,10 @@ declare -r _ORIG_CMD="${_ORIG_PWD}${0}"   # 记录原始命令
 declare -r _ORIG_TASK="${_ORIG_CMD} $*"   # 记录原始命令任务
 declare -r _ORIG_UMASK=$(umask)           # 记录原始umask值
 
-declare -r _FILE=${0##*/}                           # 获取文件名称
-declare -r _S_FILE=$(ls -l $0 |awk '{print $NF}')   # 获取文件物理地址
-declare -r _DIR=$(cd $(dirname $_S_FILE) || exit; pwd -P) # 获取目录路径
-declare -r _ROOT=$(dirname $_DIR)                   # 获取脚本根目录路径
+declare -r _FILE=${0##*/}                                 # 获取文件名称
+declare -r _S_FILE=$(ls -l $0 |awk '{print $NF}')         # 获取文件物理地址
+declare -r _BIN=$(cd $(dirname $_S_FILE) || exit; pwd -P) # 获取目录路径
+declare -r _ROOT=$(dirname $_BIN)                         # 获取脚本根目录路径
 
 declare +r _DEBUG=false        # 默认关闭调试
 declare -r _RENEW_ALLOW=30
@@ -102,7 +102,7 @@ _read_dir() {
 
 _setup() {
 	mkdir -p $HOME/.bin \
-		&& ln -s $_DIR/$_FILE $HOME/.bin/${_FILE%.*} 2>/dev/null \
+		&& ln -s $_BIN/$_FILE $HOME/.bin/${_FILE%.*} 2>/dev/null \
 		&& echo "OK create symbol link to erpsctl."
 }
 
@@ -1094,6 +1094,11 @@ _parse_argv() {
 		    _DEBUG='true'
 				;;
 
+
+      --start )
+        node --experimental-json-modules $_ROOT/src/server/erpsd.mjs --start
+        ;;
+
       --setup )
 				_setup
         ;;
@@ -1110,9 +1115,14 @@ _parse_argv() {
 				_commit_and_push $1; break
 				;;
 
-			--get-pid )
+			--get-pid-by-name )
 				shift
 				_get_pid_by_name $1; break
+				;;
+
+			--get-pid-by-port )
+				shift
+				_get_pid_by_port $1; break
 				;;
 
 			--gitlog )
@@ -1178,6 +1188,10 @@ _watcher() {
     _KVDB[$i]=$sha1
     echo ${_KVDB[$i]};
   done
+}
+
+_get_pid_by_port () {
+  echo $(lsof -i:${1} | awk '{print $2}');
 }
 
 _main() { 

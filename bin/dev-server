@@ -1,0 +1,103 @@
+#!/usr/bin/env node --no-warnings --experimental-json-modules
+/**
+ * *****************************************************************************
+ *
+ * 以开发模式启动服务器
+ *
+ * 功能介绍
+ *
+ * * 监听源代码变动,重启服务器
+ *
+ * *****************************************************************************
+ */
+
+const cp = require('child_process');
+const crypto = require('crypto');
+const EventEmitter = require('events'); 
+const fs = require('fs');
+const path = require('path');
+
+process.env.NODE_ENV = 'development'; // set development environment
+process.env.NODE_DEBUG = 'debug*';
+
+let sub_process = null;
+
+const STORE = {
+} 
+
+const APP_ROOT = path.dirname(__dirname);
+const Args = [
+  '--experimental-json-modules',
+  path.join(APP_ROOT, 'src', 'server', 'erpsd.mjs'),
+];
+
+options = {
+  //cwd: APP_ROOT,
+  env: process.env,
+  detached: process.env.FORK ? true : false, // to dtach subprocess from main process
+  stdio: process.env.FORK ? ['ignore', log, log] : [0, 1, 2], 
+};
+
+let changed = false;
+
+sub_process = cp.spawn('node', Args.concat(['--start']), options);
+
+const interval = setInterval(() => {
+  readdir(path.join(APP_ROOT, 'src')).then(() => {
+    if (changed == true) {
+      //process.kill(sub_process.pid, 'SIGHUP');
+      sub_process.kill('SIGHUP');
+      sub_process = cp.spawn('node', Args.concat(['--restart']), options);
+      changed = false;
+    }
+  });
+}, 1500);
+
+// clear interval befor exit
+process.on('beforeExit', () => { 
+  clearInterval(interval); 
+});
+
+/**
+ * 监控文件夹内容变动,变动时出发事件
+ *
+ */
+
+class PathWatcher extends EventEmitter {
+  constructor() {
+  }
+
+}
+
+
+function shasum (filePath) {
+  return new Promise((resolve, reject) => {
+    fs.createReadStream(filePath).pipe(crypto.createHash('sha1')).on('readable', function () {
+      let chunk;
+      while (chunk = this.read()) {
+        const sha1 = chunk.toString('hex');
+        resolve(sha1);
+      }
+    });
+ });
+}
+
+async function readdir (dir) {
+  await fs.promises.readdir(dir, {withFileTypes: true}).then(files => {
+    files.forEach(async function (file) {
+      if (file.isFile()) {
+        const filePath = path.join(dir, file.name);
+
+        await shasum(filePath).then(c => {
+          if (STORE[filePath] && STORE[filePath] !== c) {
+            changed = true;
+          }
+
+          STORE[filePath] = c;
+        });
+      }
+
+      if (file.isDirectory()) await readdir(path.join(dir, file.name));
+    });
+  });
+}

@@ -4,6 +4,7 @@
  * Stream response application.
  *
  * Usage:
+ *
  * const app = new Application();
  *
  * *****************************************************************************
@@ -22,16 +23,27 @@ import respond from './respond.mjs';
 const debug = util.debuglog('debug:application'); // debug function
 
 export default class Application extends EventEmitter {
-  constructor(props) {
+  constructor(opts) {
     super();
 
-    this.props = props ? props : Object.create(null);
-    this.env = this.props.env || process.env.NODE_ENV || 'production';
-    this.protocol = this.props.protocol ? this.props.protocol : 'http2';
-    this.proxy = this.props.proxy ? this.props.proxy : false;
-    this.subdomainOffset = this.props.subdomainOffset ? this.props.subdomainOffset : 2;
-    this.keys = this.props.keys ? this.props.keys : ['services'];
+    this.opts = Object.assign({}, { 
+      // default options
+      env: null,
+      keys: ['org.zzlx'],
+      protocol: 'http2',
+      proxy: false,
+      server: null,
+      subdomainOffset: 2, // xxxx.xx
+    }, opts);
+
+    this.env = this.opts.env || process.env.NODE_ENV || 'production';
+    this.protocol = this.opts.protocol || 'http2';
+    this.proxy = this.opts.proxy || false;
+    this.subdomainOffset = this.opts.subdomainOffset || 2;
+    this.keys = this.opts.keys || ['services'];
+
     this.middlewares = []; // configured middlewares
+    this.server = this.opts.server;
 
     if (util.inspect.custom) {
       this[util.inspect.custom] = this.inspect;
@@ -69,11 +81,28 @@ export default class Application extends EventEmitter {
    */
 
   use (fn) {
-    if (typeof fn !== 'function') throw new TypeError('middleware must be a function!');
+    if (typeof fn !== 'function') {
+      throw new TypeError('Middleware must be a function!');
+    }
 
-		debug('use %s', fn._name || fn.name || 'anonymous function');
+		debug('use %s', fn._name || fn.name || "unnamed function");
+
     this.middlewares.push(fn);
+
     return this;
+  }
+
+  /**
+   *
+   *
+   */
+
+  listen () {
+    if (this.server == null) return;
+
+    this.server.on('stream', this.callback());
+
+    this.server.listen(...arguments);
   }
 
   /**
@@ -86,8 +115,8 @@ export default class Application extends EventEmitter {
     if (!this.listenerCount('error')) this.on('error', this.onerror);
 
     return (stream, headers, flags) => {
+      const ctx = new Context(); // create context object
 
-      const ctx = new Context(); // 新建context对象
       ctx.stream = stream;
       ctx.headers = headers;
       ctx.flags = flags;
@@ -96,7 +125,6 @@ export default class Application extends EventEmitter {
 
       return this.handleRequest(ctx, fn);
     }
-
   }
 
   /**
@@ -107,25 +135,13 @@ export default class Application extends EventEmitter {
    */
 
   handleRequest (ctx, fn) {
-		return fn(ctx).then(() => respond(ctx))
-      .catch(err => respond(ctx, err));
+		return fn(ctx).then(() => respond(ctx)).catch(err => {
+      debug(err);
+      ctx.status = 500;
+      if (this.env != 'production') ctx.body = err.message;
+      respond(ctx);
+    });
   }
-
-  /**
-   * listen
-   *
-   */
-
-  listen (...args) {
-    if (null == this.server) {
-      throw new Error('Please setup server to application.');
-      return;
-    }
-
-		this.server.on('stream', this.callback());
-		this.server.listen(...args); // 开启服务
-  }
-
 
   /**
 	 * app-level error handler
