@@ -10,21 +10,34 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import Router from './kernel/Router.mjs';
+import Router from '../kos/Router.mjs';
 
 const debug = util.debuglog('debug:routes'); // debug function
 
-const router = new Router();
+const r = new Router(); // router
 
-router.get('/', (ctx, next) => {
+r.get('/', (ctx, next) => {
   // ctx.router available
   ctx.body = 'test';
 });
 
-router.get('/homePage\/?', (ctx, next) => {
+r.get('/homePage', (ctx, next) => {
   // ctx.router available
   ctx.body = 'HomePage';
 });
 
+r.get('/homePage/:module', (ctx, next) => {
+  // ctx.router available
+  ctx.body = 'HomePage-module';
+  console.log(ctx);
+});
 
-export default router;
+r.post('/api/graphql', (ctx, next) => {
+  ctx.body = 'graphql-api';
+});
+
+r.get('/api/graphql', (ctx, next) => {
+  ctx.body = 'graphql-api';
+});
+
+export default r;

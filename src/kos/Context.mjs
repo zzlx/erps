@@ -16,10 +16,10 @@ import accepts from 'accepts';
 import contentType from 'content-type';
 
 import HttpError from './HttpError.mjs';
-import MemCache from '../../utils/memCache.mjs';
-import MimeTypes from '../../utils/MimeTypes.mjs';
+import MemCache from '../utils/memCache.mjs';
+import MimeTypes from '../utils/MimeTypes.mjs';
 
-const debug = util.debuglog('debug:application.context'); // 调试工具
+const debug = util.debuglog('debug:application.context');
 
 const EMPTY_CODE = [
 	204, // no content
@@ -37,13 +37,16 @@ const REDIRECT_CODE = [
 	308,  // PERMANENT_REDIRECT
 ];
 
-// define symbol attributes
+// define symbol constants
 const ACCEPT = Symbol('context#accept');
-const REQ_BODY = Symbol('context#request-body');
-const REQ_URL = Symbol('context#request-URL');
-const REQ_IP = Symbol('context#request-ip');
-const RES_BODY = Symbol('context#response-body');
-const RES_HEADERS = Symbol.for('context#response-headers');
+
+const REQ_BODY    = Symbol('context#request-body');
+const REQ_HEADERS = Symbol('context#request-headers');
+const REQ_URL     = Symbol('context#request-URL');
+const REQ_IP      = Symbol('context#request-ip');
+
+const RES_BODY    = Symbol('context#response-body');
+const RES_HEADERS = Symbol('context#response-headers');
 
 // define constants
 const mimeTypes = new MimeTypes();
@@ -736,9 +739,10 @@ export default class Context {
 
   get fresh () {
     const CACHE_CONTROL_NO_CACHE_REGEXP = /(?:^|,)\s*?no-cache\s*?(?:,|$)/
-    const noneMatch = this.headers[https.constants.HTTP2_HEADER_IF_NONE_MATCH];
-    const modifiedSince = this.headers[https.constants.HTTP2_HEADER_IF_MODIFIED_SINCE];
-    const cache_control = this.headers[https.constants.HTTP2_HEADER_CACHE_CONTROL];
+
+    const cache_control = this.headers[http2.constants.HTTP2_HEADER_CACHE_CONTROL];
+    const modifiedSince = this.headers[http2.constants.HTTP2_HEADER_IF_MODIFIED_SINCE];
+    const noneMatch     = this.headers[http2.constants.HTTP2_HEADER_IF_NONE_MATCH];
 
     const method = this.method;
     const s = this.status;

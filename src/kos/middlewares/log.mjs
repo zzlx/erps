@@ -35,6 +35,7 @@ export default function logMiddleware (logPath, format) {
   // {user-agent}
   // {referer}
   // {status}
+  let rc = 0; // request_counter
 
   return async function logMiddleware (ctx, next) {
 
@@ -50,6 +51,7 @@ export default function logMiddleware (logPath, format) {
       ctx.status,
 		).join('\t'); // 使用制表符作为分隔符
 
+    debug(`Request count ${++rc}.`);
     debug(log);
 
     // write request log to file

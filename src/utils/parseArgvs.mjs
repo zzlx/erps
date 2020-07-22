@@ -1,26 +1,22 @@
 /**
  * *****************************************************************************
  *
- * 参数解析器
+ * Argv Parser
  *
- * 解析获取到的命令行参数列表，返回参数对象
- *
- * @todo: 添加对无效参数的处理
+ * parser arguments and value, return param map.
  *
  * @params {array|string} argvs
  * @return {object} state
  * @api public
  *
- * @file: argvParser.mjs
  * *****************************************************************************
  */
 
 export default function argvParser (argvs) {
-
-  // 如果提供的参数列表为字符,则先转为数组后再解析
+  // convert string to array;
   if ('string' === typeof argvs) argvs = argvs.split(/\s+/);
 
-  const params = {};
+  const params = new Map();
 
 	const it = argvs[Symbol.iterator]();
 
@@ -41,21 +37,28 @@ export default function argvParser (argvs) {
 		const commands = match[3];
 		
     if (key) {
-      params[key] = value ? value : true;
-      if (true === params[key] && argvs[i+1] && null == matcher(argvs[i+1])) {
-        params[key] = argvs[i+1];
+      params.set(key, value ? value : true);
+      
+      if (true === params.get(key) && argvs[i+1] && null == matcher(argvs[i+1])) {
+        params.set(key, argvs[i+1]);
       }
     }
 
 		if (commands) {
       // 单参数情况时, eg. -o /home/test.txt
 			if (commands.length === 1 && argvs[i+1] && null == matcher(argvs[i+1])) {
-				params[commands] = argvs[i+1];
+				params.set(commands, argvs[i+1]);
 			} else {
-        for (let v of commands ) params[v] = true; // 多参数情况时，eg. -abc
+        for (let v of commands ) params.set(v, true); // multi params, eg. -abc
       }
 		}
   }
 
   return params;
+}
+
+// Test
+if (process && process.env.NODE_ENV === 'test') {
+  const pMap = argvParser('-abc --test --ttt=test');
+  console.log(pMap);
 }

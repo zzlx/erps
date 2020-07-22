@@ -1,22 +1,18 @@
 /**
  * *****************************************************************************
  *
- * Main services application
- *
+ * A backend services application
  *
  * *****************************************************************************
  */
 
-import App from './kernel/Application.mjs';
+import App from '../kos/Application.mjs';
 import Config from '../utils/Config.mjs';
-import * as m from './middlewares/index.mjs';
+import * as m from '../kos/middlewares/index.mjs';
 
 import router from './router.mjs';
-import server from './http2-server.mjs';
 
-const app = new App({
-  server: server,
-});
+const app = new App();
 
 const config = new Config();
 
@@ -28,5 +24,5 @@ app.use(m.cors());                  // 跨域访问响应
 app.use(m.dba(config));             // 数据库管理
 app.use(router.routes());           // 路由配置
 
-export default app; // 
+export default app; 
 

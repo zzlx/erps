@@ -2,11 +2,7 @@
 /**
  * *****************************************************************************
  *
- * 以开发模式启动服务器
- *
- * 功能介绍
- *
- * * 监听源代码变动,重启服务器
+ * Dev server
  *
  * *****************************************************************************
  */
@@ -22,13 +18,10 @@ process.env.NODE_DEBUG = 'debug*';
 
 let sub_process = null;
 
-const STORE = {
-} 
-
 const APP_ROOT = path.dirname(__dirname);
 const Args = [
   '--experimental-json-modules',
-  path.join(APP_ROOT, 'src', 'server', 'erpsd.mjs'),
+  path.join(APP_ROOT, 'src', 'erpsd.mjs'),
 ];
 
 options = {
@@ -38,18 +31,15 @@ options = {
   stdio: process.env.FORK ? ['ignore', log, log] : [0, 1, 2], 
 };
 
-let changed = false;
-
 sub_process = cp.spawn('node', Args.concat(['--start']), options);
 
 const interval = setInterval(() => {
-  readdir(path.join(APP_ROOT, 'src')).then(() => {
-    if (changed == true) {
-      //process.kill(sub_process.pid, 'SIGHUP');
-      sub_process.kill('SIGHUP');
-      sub_process = cp.spawn('node', Args.concat(['--restart']), options);
-      changed = false;
-    }
+
+  readdir(path.join(APP_ROOT, 'src')).then((changed) => {
+		if (changed) {
+			console.log('Change has been detected.');
+			sub_process = cp.spawn('node', Args.concat(['--restart']), options);
+		}
   });
 }, 1500);
 
@@ -82,22 +72,39 @@ function shasum (filePath) {
  });
 }
 
-async function readdir (dir) {
-  await fs.promises.readdir(dir, {withFileTypes: true}).then(files => {
-    files.forEach(async function (file) {
+const storeMap = new Map();
+
+function readdir (dir) {
+  return fs.promises.readdir(dir, {withFileTypes: true}).then(async files => {
+		let hasChanged = false;
+
+		for (let file of files) {
+      if (/~$/.test(file)) continue;
+
       if (file.isFile()) {
         const filePath = path.join(dir, file.name);
 
-        await shasum(filePath).then(c => {
-          if (STORE[filePath] && STORE[filePath] !== c) {
-            changed = true;
+        hasChanged = await shasum(filePath).then(c => {
+					let changed = false;
+          if (storeMap.has(filePath) && storeMap.get(filePath) !== c) {
+						changed = true;
           }
 
-          STORE[filePath] = c;
+          storeMap.set(filePath, c);
+
+					return changed;
         });
+
+				if (hasChanged) break;
       }
 
-      if (file.isDirectory()) await readdir(path.join(dir, file.name));
-    });
+      if (file.isDirectory()) hasChanged = await readdir(path.join(dir, file.name));
+    }
+
+		return hasChanged;
+  }).catch(err => {
+    if (err.code === 'ENOENT') {
+      const filePath = err.path;
+    }
   });
 }

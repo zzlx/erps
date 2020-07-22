@@ -1,6 +1,7 @@
 /**
  * *****************************************************************************
  *
+ * Kernel of service
  * Stream response application.
  *
  * Usage:
@@ -52,6 +53,17 @@ export default class Application extends EventEmitter {
   }
 
   /**
+   *
+   *
+   */
+
+  listen () {
+    if (this.server == null) throw new Error('Application.server was not set.');
+    this.server.on('stream', this.callback());
+    this.server.listen(...arguments);
+  }
+
+  /**
    * inspect
    */
 
@@ -90,19 +102,6 @@ export default class Application extends EventEmitter {
     this.middlewares.push(fn);
 
     return this;
-  }
-
-  /**
-   *
-   *
-   */
-
-  listen () {
-    if (this.server == null) return;
-
-    this.server.on('stream', this.callback());
-
-    this.server.listen(...arguments);
   }
 
   /**

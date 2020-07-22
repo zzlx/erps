@@ -1,7 +1,7 @@
 import HttpError from './HttpError.mjs'; // @todo:
 
-import { compile, parse, pathToRegexp, } from '../../utils/path-to-regexp.mjs';
-import methods from '../../constants/http2-methods.json';
+import { compile, parse, pathToRegexp, } from '../utils/path-to-regexp.mjs';
+import methods from '../constants/http2-methods.json';
 
 /**
  * *****************************************************************************
@@ -266,6 +266,8 @@ Router.prototype.use = function () {
  */
 
 Router.prototype.routes = function () {
+  const router = this;
+
   function routerMiddleware (ctx, next) {
 
     const path = router.opts.routerPath || ctx.routerPath || ctx.path;
