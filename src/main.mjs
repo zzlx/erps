@@ -6,15 +6,13 @@
  * *****************************************************************************
  */
 
-import App from '../kos/Application.mjs';
-import Config from '../utils/Config.mjs';
-import * as m from '../kos/middlewares/index.mjs';
+import App from './koas/Application.mjs';
+import config from './config.mjs';
+import * as m from './koas/middlewares/index.mjs';
 
 import router from './router.mjs';
 
 const app = new App();
-
-const config = new Config();
 
 app.use(m.error(config.logDir));    // 捕获中间件级错误
 app.use(m.xResponse());             // 记录中间件响应时间
@@ -25,4 +23,3 @@ app.use(m.dba(config));             // 数据库管理
 app.use(router.routes());           // 路由配置
 
 export default app; 
-

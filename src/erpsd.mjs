@@ -3,16 +3,13 @@
  *
  * ERPSD(ERP Services Daemon)
  *
- * ## Tasks:
  *
- * * restart service
- * * start service
- * * stop service
+ * # Usage:
  *
- * ## Process
+ * ```sh
+ * erpsd.mjs --help
+ * ```
  *
- * process control
- * exception
  *
  * *****************************************************************************
  */
@@ -38,23 +35,29 @@ process.title = `org.zzlx.${FILE_NAME}`;
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 let http2server = null;
+let pidFromPidFile = null;
 
 // Task: Save pid number to pid file. 
 const pidFile = path.join(os.homedir(), '.erps', `${process.title}.pid`);
 
-if (fs.existsSync(pidFile)) {
-  const pid = fs.readFileSync(pidFile);
+// record pid to pidFile
+function recordPid () {
+  debug('Record pid to pidFile.')
 
-  try {
-    process.kill(pid, 0);
-  } catch (e) {
-    debug(e);
+  if (fs.existsSync(pidFile)) {
+    pidFromPidFile = fs.readFileSync(pidFile);
+
+    try {
+      process.kill(pidFromPidFile, 0);
+    } catch (e) {
+      debug(e);
+    }
   }
-}
 
-fs.promises.writeFile(pidFile, String(process.pid), 'utf8').catch(err => {
-  debug('write pid file error: ', err);
-});
+  fs.promises.writeFile(pidFile, String(process.pid), 'utf8').catch(err => {
+    debug('write pid file error: ', err);
+  });
+}
 
 // Task: caught exceptions
 // 被此事件捕获的exception,需要进行妥善处理
@@ -70,8 +73,6 @@ process.on('uncaughtException', (err, origin) => {
 process.on('unhandledRejection', (reason, promise) => {
 	debug('rejection reason: ', reason);
 	debug('promise: ', promise);
-
-  restart();
 });
 
 
@@ -118,22 +119,45 @@ process.on('exit', (code) => {
  *
  */
 
-function detectPidProcess () {
+function getPid () {
   let pid = null;
 
   if (fs.existsSync(pidFile)) {
     pid = fs.readFileSync(pidFile, 'utf8');
-    console.log(pid);
-
-
+    return pid;
+  } else {
+    debug('pid file is not found');
   }
+
+  // 仅在unix环境下有效
+  // @todo
+  pid = cp.execSync('lsof -i:3000 | awk \'NR==2{print $2}\'').toString('utf8');
+
+  if (pid) {
+    debug(pid);
+  }
+
+
+  return pid;
 }
 
 function restart () {
-  debug('Restart service...');
+  debug('%s is restarting...', process.title);
 
-  // check pid process
-  detectPidProcess();
+  stop();
+  start();
+}
+
+function stop () {
+  if (http2server == null) {
+    // check pid process
+    const pid = getPid();
+    if (pid) cp.execSync(`kill -9 ${pid}`);
+    return;
+  }
+
+
+  http2server.stop();
 }
 
 async function start () {
@@ -142,18 +166,16 @@ async function start () {
   const hostname = os.hostname();
 
   const HttpServer = await import('./HttpServer.mjs').then(m => m.default);
-  const httpServer = new HttpServer();
+  http2server = new HttpServer();
 
-  httpServer.listen({
-    ipv6Only: false, // 是否仅开启IPV6
-    host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
-    port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
-    exclusive: false, // false 可接受进程共享端口
+  http2server.on('listening', () => {
+    recordPid(); //
   });
+
+  http2server.start();
 }
 
 // Task: Parse argvs
-//
 const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
 const paramMap = parseArgvs(ARGVS);
 

@@ -81,6 +81,7 @@ export default class Application extends EventEmitter {
       'env': this.env,
       'subdomainOffset': this.subdomainOffset,
       'proxy': this.proxy,
+      'keys': this.keys,
     };
   }
 
@@ -93,9 +94,7 @@ export default class Application extends EventEmitter {
    */
 
   use (fn) {
-    if (typeof fn !== 'function') {
-      throw new TypeError('Middleware must be a function!');
-    }
+    if (typeof fn !== 'function') throw new TypeError('Middleware must a function!');
 
 		debug('use %s', fn._name || fn.name || "unnamed function");
 

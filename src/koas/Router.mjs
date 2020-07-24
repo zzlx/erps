@@ -26,9 +26,13 @@ export default class Router {
    *
    */
 
-  constructor (props = {}) {
-    this.opts = Object.assign({}, props);
-    this.methods = this.opts.methods || methods;
+  constructor (opts = {}) {
+    this.opts = Object.assign({}, {
+      // default options
+      methods: methods,
+    }, opts);
+
+    this.methods = this.opts.methods;
     this.params = {};
     this.stack  = []; // stacks
 

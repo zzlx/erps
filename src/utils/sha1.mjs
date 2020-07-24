@@ -1,15 +1,7 @@
-function f(s, x, y, z) {
-  switch (s) {
-    case 0: return (x & y) ^ (~x & z);
-    case 1: return x ^ y ^ z;
-    case 2: return (x & y) ^ (x & z) ^ (y & z);
-    case 3: return x ^ y ^ z;
-  }
-}
-
-function ROTL(x, n) {
-  return (x << n) | (x >>> (32 - n));
-}
+/**
+ *
+ *
+ */
 
 export default function sha1 (bytes) {
   var K = [0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6];
@@ -80,4 +72,17 @@ export default function sha1 (bytes) {
     H[3] >> 24 & 0xff, H[3] >> 16 & 0xff, H[3] >> 8 & 0xff, H[3] & 0xff,
     H[4] >> 24 & 0xff, H[4] >> 16 & 0xff, H[4] >> 8 & 0xff, H[4] & 0xff
   ];
+}
+
+function f(s, x, y, z) {
+  switch (s) {
+    case 0: return (x & y) ^ (~x & z);
+    case 1: return x ^ y ^ z;
+    case 2: return (x & y) ^ (x & z) ^ (y & z);
+    case 3: return x ^ y ^ z;
+  }
+}
+
+function ROTL(x, n) {
+  return (x << n) | (x >>> (32 - n));
 }

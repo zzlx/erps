@@ -43,12 +43,12 @@ export default function logMiddleware (logPath, format) {
 
     const log = new Array(
 			NewDate.prototype.toLocaleISOString(),
-      ctx.socket.remoteAddress + ':' + ctx.socket.remotePort,
-      ctx.get('referer'),
-			'"' + ctx.get('user-agent') + '"', // 记录用户代理
+      `${ctx.socket.remoteAddress}:${ctx.socket.remotePort}`,
+			`"${ctx.get('user-agent')}"`,
       ctx.method, 
 			ctx.href,
       ctx.status,
+      ctx.get('referer'),
 		).join('\t'); // 使用制表符作为分隔符
 
     debug(`Request count ${++rc}.`);
