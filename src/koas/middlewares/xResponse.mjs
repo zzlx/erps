@@ -19,18 +19,9 @@ import util from 'util';
 const debug = util.debuglog('debug:x-response-middleware');
 
 export default function xResponse(opts = {}) {
-
 	return async function xResponseMiddleware (ctx, next) {
-    let timer= process.hrtime(); // use process.uptime can be efficient
-
-    await next();
-
-    timer = process.hrtime(timer); // hrtime is an array like [s, ns]
-
-    // count micro secont time 
-    const interval = Math.round(timer[0] * 1000 + timer[1] / 1000000);
-
-    ctx.set('X-Response-Time', `${interval}ms`);
+    //let timer= process.hrtime(); // use process.uptime can be efficient
+    const start = Date.now();
 
     if (ctx.app.env !== 'production') {
       const platform = `${os.platform()}_${os.arch()}`;
@@ -38,5 +29,15 @@ export default function xResponse(opts = {}) {
 
       ctx.set('X-Powered-By', `${nodejs} (${platform})`); 
     }
+
+    await next();
+
+    //timer = process.hrtime(timer); // hrtime is an array like [s, ns]
+
+    // count micro secont time 
+    //const interval = Math.round(timer[0] * 1000 + timer[1] / 1000000);
+    const ms = Date.now() - start;
+
+    ctx.set('X-Response-Time', `${ms}ms`);
   }
 }

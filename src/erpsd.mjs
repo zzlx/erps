@@ -1,3 +1,4 @@
+#!/usr/bin/env node --no-warnings --experimental-json-modules
 /**
  * *****************************************************************************
  *
@@ -20,10 +21,11 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import parseArgvs from './utils/parseArgvs.mjs';
+import parseArgvs from '../src/utils/parseArgvs.mjs';
 
 const __filename = import.meta.url.substr(7);
-const ROOT_PATH = path.dirname(path.dirname(__filename));
+const __dirname = path.dirname(__filename);
+const ROOT_PATH = path.dirname(__dirname);
 const FILE_NAME = path.basename(__filename, path.extname(__filename));
 
 const debug = util.debuglog(`debug:${FILE_NAME}`);
@@ -165,7 +167,7 @@ async function start () {
   //const hostname = cp.execSync("hostname | awk '{printf $1}'");
   const hostname = os.hostname();
 
-  const HttpServer = await import('./HttpServer.mjs').then(m => m.default);
+  const HttpServer = await import('../src/HttpServer.mjs').then(m => m.default);
   http2server = new HttpServer();
 
   http2server.on('listening', () => {

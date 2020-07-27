@@ -18,19 +18,15 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-const __dirname = path.dirname(import.meta.url).substr(7); // __dirname
+const __filename = import.meta.url.substr(7);
+const __dirname  = path.dirname(__filename); // __dirname
+const APP_ROOT   = path.dirname(__dirname);
+
 const debug = util.debuglog('debug:config'); // debug
 
 class Config {
-
-  /**
-   *
-   *
-   *
-   */
-
   constructor (opts = {}) {
-    this.appRoot = path.dirname(__dirname); // 配置系统常用目录
+    this.appRoot = APP_ROOT;
 
     // 获取package.json配置信息
     const PACKAGE_JSON_FILE  = path.join(this.appRoot, 'package.json');
@@ -48,6 +44,7 @@ class Config {
    */
 
   toJSON () {
+
 
   }
 

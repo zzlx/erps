@@ -3,10 +3,20 @@
  *
  * Response
  *
+ * built-in response handling,
+ *
  * 支持特性:
- * 内容协商
+ *
+ * content-negotiation
+ *
  * 内容压缩
  * 系统错误
+ * @todos: 
+ * cache freshness
+ *
+ *
+ * @param {object} ctx
+ * @return 
  *
  * *****************************************************************************
  */
@@ -18,14 +28,6 @@ import zlib from 'zlib';
 import util from 'util';
 
 const debug = util.debuglog('debug:application.respond'); // debug function
-
-/**
- * response
- *
- *
- * @param {object} ctx
- * @return 
- */
 
 export default function respond (ctx) {
 

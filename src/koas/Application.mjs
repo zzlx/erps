@@ -1,8 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Kernel of service
- * Stream response application.
+ * Kernel of application service
  *
  * Usage:
  *
@@ -22,6 +21,7 @@ import Context from './Context.mjs';
 import respond from './respond.mjs';
 
 const debug = util.debuglog('debug:application'); // debug function
+const REQ_HEADERS = Symbol.for('context#request-headers');
 
 export default class Application extends EventEmitter {
   constructor(opts) {
@@ -29,38 +29,26 @@ export default class Application extends EventEmitter {
 
     this.opts = Object.assign({}, { 
       // default options
-      env: null,
+      env: 'production',
       keys: ['org.zzlx'],
       protocol: 'http2',
       proxy: false,
-      server: null,
+      silent: false,
       subdomainOffset: 2, // xxxx.xx
     }, opts);
 
-    this.env = this.opts.env || process.env.NODE_ENV || 'production';
-    this.protocol = this.opts.protocol || 'http2';
-    this.proxy = this.opts.proxy || false;
+    this.env = this.opts.env || 'production';
+    this.protocol = this.opts.protocol ? 'http2' : 'http2';
+    this.proxy = this.opts.proxy ? 'true' : false;
     this.subdomainOffset = this.opts.subdomainOffset || 2;
     this.keys = this.opts.keys || ['services'];
 
     this.middlewares = []; // configured middlewares
-    this.server = this.opts.server;
 
     if (util.inspect.custom) {
       this[util.inspect.custom] = this.inspect;
     }
 
-  }
-
-  /**
-   *
-   *
-   */
-
-  listen () {
-    if (this.server == null) throw new Error('Application.server was not set.');
-    this.server.on('stream', this.callback());
-    this.server.listen(...arguments);
   }
 
   /**
@@ -115,11 +103,11 @@ export default class Application extends EventEmitter {
     return (stream, headers, flags) => {
       const ctx = new Context(); // create context object
 
-      ctx.stream = stream;
+      ctx.app = this;
       ctx.headers = headers;
       ctx.flags = flags;
-      ctx.app = this;
-      ctx.state = {};
+      ctx.state = new Map(); // store states
+      ctx.stream = stream;
 
       return this.handleRequest(ctx, fn);
     }
@@ -148,7 +136,7 @@ export default class Application extends EventEmitter {
    * @api private
    */
 
-  onerror(err) {
+  onerror(err, ctx) {
     if (!(err instanceof Error)) {
       throw new TypeError(util.format('non-error thrown: %j', err));
     }

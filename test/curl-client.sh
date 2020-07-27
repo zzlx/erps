@@ -1199,10 +1199,6 @@ _get_pid_by_port () {
   echo $(lsof -i:${1} | awk '{print $2}');
 }
 
-_curl_request () {
-	curl --http2 -X POST -k --data '{test}' https://macair2013:3000/homePage
-}
-
 _main() { 
 	# 载入dotenv配置
 	_readDotEnv

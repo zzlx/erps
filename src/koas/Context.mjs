@@ -21,6 +21,17 @@ import MimeTypes from '../utils/MimeTypes.mjs';
 
 const debug = util.debuglog('debug:application.context');
 
+// define symbol constants
+const ACCEPT = Symbol('context#accept');
+
+const REQ_BODY    = Symbol('context#request-body');
+const REQ_HEADERS = Symbol('context#request-headers');
+const REQ_URL     = Symbol('context#request-URL');
+const REQ_IP      = Symbol('context#request-ip');
+
+const RES_BODY    = Symbol('context#response-body');
+const RES_HEADERS = Symbol('context#response-headers');
+
 const EMPTY_CODE = [
 	204, // no content
 	205, // reset content
@@ -37,23 +48,57 @@ const REDIRECT_CODE = [
 	308,  // PERMANENT_REDIRECT
 ];
 
-// define symbol constants
-const ACCEPT = Symbol('context#accept');
-
-const REQ_BODY    = Symbol('context#request-body');
-const REQ_HEADERS = Symbol('context#request-headers');
-const REQ_URL     = Symbol('context#request-URL');
-const REQ_IP      = Symbol('context#request-ip');
-
-const RES_BODY    = Symbol('context#response-body');
-const RES_HEADERS = Symbol('context#response-headers');
-
 // define constants
 const mimeTypes = new MimeTypes();
 const typeCache = new MemCache(100);
 
 export default class Context {
   /**
+   * get request raw body
+   */
+  getRawBody () {
+    if (this[REQ_BODY] != null) return this[REQ_BODY];
+
+    return new Promise(async (resolve, reject) => {
+      if (!this.stream.readable) return null;
+      this.stream.setEncoding('utf8');
+      let data = '';
+
+      for await (const chunk of this.stream) {
+        data += chunk;
+      }
+
+      this[REQ_BODY] = data;
+      resolve(data);
+    });
+  } 
+
+  /**
+   * Request
+   *
+   */
+
+  get request () {
+    return {
+      headers: this.headers,
+      method: this.method,
+      body: this.requestBody,
+    }
+  }
+
+  /**
+   * Response
+   */
+
+  get response () {
+    return {
+      headers: this[RES_HEADERS],
+      body: this[RES_BODY],
+    }
+  }
+
+  /**
+   *
    * check field from response header
    *
    * @return {Bool}
@@ -94,30 +139,6 @@ export default class Context {
     }
 
     return true; // set header success
-  }
-
-  /**
-   * Request
-   *
-   */
-
-  get request () {
-    return {
-      headers: this.headers,
-      method: this.method,
-      body: this[REQ_BODY], // @TODO: 增加读取post body逻辑
-    }
-  }
-
-  /**
-   * Response
-   */
-
-  get response () {
-    return {
-      headers: this[RES_HEADERS],
-      body: this[RES_BODY],
-    }
   }
 
   /**
@@ -218,6 +239,15 @@ export default class Context {
 
   get method() {
     return this.headers[http2.constants.HTTP2_HEADER_METHOD];
+  }
+
+  /**
+   * Set request method, 
+   * useful for implementing middleware such as methodOverride().
+   */
+
+  set method(method) {
+    this.headers[http2.constants.HTTP2_HEADER_METHOD] = method;
   }
 
   /**
@@ -462,10 +492,8 @@ export default class Context {
    */
 
   get subdomains() {
-    const offset = this.app.subdomainOffset;
-    const hostname = this.hostname;
-    if (net.isIP(hostname)) return [];
-    return hostname.split('.').reverse().slice(offset);
+    if (net.isIP(this.hostname)) return [];
+    return hostname.split('.').reverse().slice(this.app.subdomainOffset);
   }
 
   /**
@@ -730,6 +758,17 @@ export default class Context {
   }
 
   /**
+   * Return accepted language
+   *
+   * @param {String|Array} language(s)...
+   * @return {String|Array}
+   * @api public
+   */
+
+  acceptsLanguage(...args) {
+    return this.accept.language(...args);
+  }
+  /**
    * Check if the request is fresh, aka
    * Last-Modified and/or the ETag still match.
    *
@@ -786,6 +825,9 @@ export default class Context {
 
   /**
    * Set response body.
+   *
+   * If ctx.status has not been set, 
+   * will automatically set the status to 200 or 204.
    *
    * @param {String|Buffer|Object|Stream} val
    * @api public
@@ -859,6 +901,10 @@ export default class Context {
   }
 
   /**
+   * user-level errors
+   *
+   * ctx.throw([status], [msg], [properties])
+   *
    * Throw an error with `status` (default 500) and `msg`. 
    * Note that these are user-level errors, 
    * and the message may be exposed to the client.
@@ -875,7 +921,7 @@ export default class Context {
    *
    * @param {String|Number|Error} err, msg or status
    * @param {String|Number|Error} [err, msg or status]
-   * @param {Object} [props]
+   * @param {Object} [properties]
    * @api public
    */
 

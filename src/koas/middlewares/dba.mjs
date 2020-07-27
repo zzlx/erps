@@ -17,6 +17,7 @@ import util from 'util';
 
 import MongoDBA from '../../utils/mongodb.mjs';
 const debug = util.debuglog('debug:middleware.mongodb');
+const MongoClient = Symbol('mongoClient');
 
 export default function (opts = null) {
 
@@ -28,8 +29,8 @@ export default function (opts = null) {
 
     Object.defineProperty(ctx, 'mongodb', {
       get: function() {
-        if (this._mongoClient == null) {
-          this._mongoClient = new MongoDBA(mongodbURL.href, {
+        if (this[MongoClient] == null) {
+          this[MongoClient] = new MongoDBA(mongodbURL.href, {
             useNewUrlParser: true,
             //sslValidate: true,
             //sslCA: fs.readFileSync(),
@@ -37,7 +38,7 @@ export default function (opts = null) {
           });
         }
 
-        return this._mongoClient;
+        return this[MongoClient];
       },
       enumerable : true,
       configurable : true,

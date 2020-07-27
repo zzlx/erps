@@ -1,8 +1,3 @@
-import HttpError from './HttpError.mjs'; // @todo:
-
-import { compile, parse, pathToRegexp, } from '../utils/path-to-regexp.mjs';
-import methods from '../constants/http2-methods.json';
-
 /**
  * *****************************************************************************
  *
@@ -13,6 +8,9 @@ import methods from '../constants/http2-methods.json';
  *
  * *****************************************************************************
  */
+
+import HttpError from './HttpError.mjs'; // @todo:
+import { compile, parse, pathToRegexp, } from '../utils/path-to-regexp.mjs';
 
 export default class Router {
 
@@ -29,7 +27,7 @@ export default class Router {
   constructor (opts = {}) {
     this.opts = Object.assign({}, {
       // default options
-      methods: methods,
+      methods: [ 'GET', 'HEAD', 'OPTIONS', 'POST' ],
     }, opts);
 
     this.methods = this.opts.methods;

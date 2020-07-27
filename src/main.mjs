@@ -12,14 +12,17 @@ import * as m from './koas/middlewares/index.mjs';
 
 import router from './router.mjs';
 
-const app = new App();
+const app = new App({
+  env: process.env.NODE_ENV || 'production',
+});
 
 app.use(m.error(config.logDir));    // 捕获中间件级错误
+app.use(m.log(config.logDir));      // request log
 app.use(m.xResponse());             // 记录中间件响应时间
 app.use(m.cookies());               // cookie读写及签名
-app.use(m.log(config.logDir));      // request log
 app.use(m.cors());                  // 跨域访问响应
 app.use(m.dba(config));             // 数据库管理
 app.use(router.routes());           // 路由配置
 
 export default app; 
+

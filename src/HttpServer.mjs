@@ -15,6 +15,7 @@ import fs from 'fs';
 import http2 from 'http2';
 import os from 'os';
 import util from 'util';
+import app from './main.mjs';
 
 const debug = util.debuglog('debug:http2-server');
 // server session缓存
@@ -92,7 +93,7 @@ export default class HttpServer extends EventEmitter {
       //let time = cp.execSync('date "+%Y%m%d"').toString().replace(/\s/, '');
       const address = this.address();
 
-      debug('%s %s(with PID %s) is running in %s mode and at address %s:%s.',
+      debug('%s %s(with PID %s) is running in %s mode, address %s:%s.',
         new Date(),
         process.title,
         process.pid,
@@ -104,16 +105,13 @@ export default class HttpServer extends EventEmitter {
   }
 
   start () {
+    this.server.on('stream', app.callback());
+
     this.server.listen({
       ipv6Only: false, // 是否仅开启IPV6
       host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
       port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
       exclusive: false, // false 可接受进程共享端口
-    });
-
-    // 服务启动后注册监听
-    import('./main.mjs').then(m => m.default).then(app => {
-      this.server.on('stream', app.callback());
     });
   }
 
