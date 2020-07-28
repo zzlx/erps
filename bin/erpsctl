@@ -1096,11 +1096,11 @@ _parse_argv() {
 
 
       --start )
-        node $_ROOT/src/erpsd.mjs --start
+        $_ROOT/bin/erpsd.mjs --start
         ;;
 
       --restart )
-        node $_ROOT/src/erpsd.mjs --restart
+        $_ROOT/bin/erpsd.mjs --restart
         ;;
 
 

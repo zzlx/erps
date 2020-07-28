@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Kernel of application service
+ * Kernel of services
  *
  * Usage:
  *
@@ -20,7 +20,9 @@ import util from 'util';
 import Context from './Context.mjs';
 import respond from './respond.mjs';
 
-const debug = util.debuglog('debug:application'); // debug function
+const __filename = import.meta.url.substr(7);
+const __basename = path.basename(__filename);
+const debug = util.debuglog(`debug:${__basename}`); // debug function
 const REQ_HEADERS = Symbol.for('context#request-headers');
 
 export default class Application extends EventEmitter {

@@ -70,9 +70,15 @@ export default function respond (ctx) {
     ctx.body = ctx.message;
   }
 
+
+  if (Buffer.isBuffer(ctx.body)) {
+		ctx.stream.respond(ctx.response.headers);
+    return ctx.stream.end(ctx.body);
+  }
+
 	// stream body
   if (ctx.body instanceof Stream) {
-    ctx.stream.respond(ctx.body);
+    ctx.stream.respond(ctx.response.headers);
     return ctx.body.pipe(ctx.stream);
   }
 

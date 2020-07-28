@@ -14,7 +14,6 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import getRawBody from '../koas/getRawBody.mjs'; // @todo: 放入context
 import { graphql, buildASTSchema, parse, Source } from '../graphql/index.mjs';
 import getResolvers from '../utils/getModulesFromPath.mjs';
 import { APP_PATH } from '../config.mjs';
@@ -78,7 +77,7 @@ export default async function graphqlAPI (ctx) {
     });
 
     */
-    const body = await getRawBody(ctx.stream);
+    const body = await ctx.getRawBody();
     request = body && JSON.parse(body);
   }
 

@@ -874,6 +874,7 @@ export default class Context {
 
     // buffer
     if (Buffer.isBuffer(val)) {
+
       if (setType) this.type = 'bin';
 
       this.length = val.length;

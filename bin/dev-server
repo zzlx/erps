@@ -1,8 +1,10 @@
-#!/usr/bin/env node --no-warnings --experimental-json-modules
+#!/usr/bin/env node
 /**
  * *****************************************************************************
  *
  * Dev server
+ *
+ * watch resource code
  *
  * *****************************************************************************
  */
@@ -20,9 +22,10 @@ let sub_process = null;
 
 const APP_ROOT = path.dirname(__dirname);
 const Args = [
-  '--experimental-json-modules',
   '--trace-warnings',
-  path.join(APP_ROOT, 'src', 'erpsd.mjs'),
+  '--experimental_top_level_await',
+  '--experimental-json-modules',
+  path.join(APP_ROOT, 'bin', 'erpsd.mjs'),
 ];
 
 options = {
@@ -52,6 +55,14 @@ process.on('beforeExit', () => {
   //clearInterval();
 });
 
+let sigintCount = 0; // SIGINT计数器
+process.on('SIGINT', (code) => {
+  if (sigintCount >= 1) {
+    process.exit();
+  }
+  sigintCount++;
+});
+
 process.on('exit', () => {
   console.log('******************************************');
   console.log('Dev server is exit.');
@@ -59,7 +70,7 @@ process.on('exit', () => {
 });
 
 process.nextTick(() => {
-  console.log('正在执行开发任务...');
+  console.log('开始执行开发服务程序...');
 });
 
 const storeMap = new Map();

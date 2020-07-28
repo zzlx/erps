@@ -43,7 +43,7 @@ module.exports = (opts = {}) => {
 
     entry: {
       main: path.join(paths.appPath, 'src', 'web-client.mjs'),
-      styles: path.join(paths.appPath, 'src', 'scss', 'index.scss'),
+      //styles: path.join(paths.appPath, 'src', 'scss', 'index.scss'),
     },
 
     output: {

@@ -17,16 +17,14 @@ import util from 'util';
 import ISODate from '../../utils/Date.mjs';
 const debug = util.debuglog('debug:middleware.error');
 
-export default function (logPath) {
+export default function () {
+  const logPath = path.join(os.homedir(), '.erps', 'log');
   if (null == logPath) throw new Error('You must provide a valid logPath.'); 
-  // if logPath already exists, that can be no side effect
-  fs.promises.mkdir(logPath, {recursive: true}).catch(err => { debug(err); });
 
   return async function errorMiddleware (ctx, next) { 
     try { 
       await next();
     } catch (error) {  
-
 			// write log to error_log
       const log = error.message + ' ' + new Date().toString() + os.EOL; 
       const sn = ISODate.prototype.toLocaleISOString().substr(0, 10).replace(/[-\/]/g, '');
@@ -35,7 +33,9 @@ export default function (logPath) {
 				.then(fd => fd.appendFile(log).then(() => fd.close()));
 
       // 将捕获到的错误转发,并执行系统错误处理程序
+      //
       return Promise.reject(error);
     } 
   }
 }
+

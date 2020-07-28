@@ -1,4 +1,4 @@
-#!/usr/bin/env node --no-warnings --experimental-json-modules
+#!/usr/bin/env node --no-warnings --experimental-json-modules --experimental_top_level_await
 /**
  * *****************************************************************************
  *
@@ -11,7 +11,6 @@
  * erpsd.mjs --help
  * ```
  *
- *
  * *****************************************************************************
  */
 
@@ -21,14 +20,15 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
+
+import config from '../src/config.js';
 import parseArgvs from '../src/utils/parseArgvs.mjs';
 
 const __filename = import.meta.url.substr(7);
-const __dirname = path.dirname(__filename);
-const ROOT_PATH = path.dirname(__dirname);
 const FILE_NAME = path.basename(__filename, path.extname(__filename));
+const pidFile = config.paths.pidFile;
 
-const debug = util.debuglog(`debug:${FILE_NAME}`);
+const debug = util.debuglog(`debug:${path.basename(__filename)}`);
 
 // Task: Set process title
 process.title = `org.zzlx.${FILE_NAME}`;
@@ -39,26 +39,14 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 let http2server = null;
 let pidFromPidFile = null;
 
-// Task: Save pid number to pid file. 
-const pidFile = path.join(os.homedir(), '.erps', `${process.title}.pid`);
-
 // record pid to pidFile
 function recordPid () {
   debug('Record pid to pidFile.')
 
-  if (fs.existsSync(pidFile)) {
-    pidFromPidFile = fs.readFileSync(pidFile);
-
-    try {
-      process.kill(pidFromPidFile, 0);
-    } catch (e) {
-      debug(e);
-    }
-  }
-
-  fs.promises.writeFile(pidFile, String(process.pid), 'utf8').catch(err => {
-    debug('write pid file error: ', err);
-  });
+  fs.promises.writeFile(pidFile, String(process.pid), 'utf8')
+    .catch(err => { 
+      debug('write pid file error: ', err); 
+    });
 }
 
 // Task: caught exceptions
@@ -158,8 +146,7 @@ function stop () {
     return;
   }
 
-
-  http2server.stop();
+  http2server.close();
 }
 
 async function start () {
@@ -167,14 +154,18 @@ async function start () {
   //const hostname = cp.execSync("hostname | awk '{printf $1}'");
   const hostname = os.hostname();
 
-  const HttpServer = await import('../src/HttpServer.mjs').then(m => m.default);
-  http2server = new HttpServer();
+  http2server = await import(config.paths.serverPath).then(m => m.default);
 
   http2server.on('listening', () => {
     recordPid(); //
   });
 
-  http2server.start();
+  http2server.listen({
+      ipv6Only: false, // 是否仅开启IPV6
+      host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
+      port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
+      exclusive: false, // false 可接受进程共享端口
+  });
 }
 
 // Task: Parse argvs
@@ -206,7 +197,6 @@ for (let param of paramMap.keys()) {
     case 'help':
       //showHelp();
       break;
-
     case 'start':
       start();
       break;

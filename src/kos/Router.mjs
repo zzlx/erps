@@ -204,7 +204,8 @@ Router.prototype.use = function () {
   // path
   const hasPath = typeof arguments[0] === 'string';
 
-  if (hashPath) path = args.shift(); 
+  let path;
+  if (hasPath) path = args.shift(); 
 
   // iterator middleware arguments
   for (let i = 0; i < args.length; i++) {

@@ -234,9 +234,7 @@ export function tokensToFunction (tokens) {
     let path = '';
     let data = obj || {};
     let options = opts || {};
-    let encode = options.pretty 
-      ? encodeURIComponentPretty 
-      : window.encodeURIComponent;
+    let encode = options.pretty ? encodeURIComponentPretty : encodeURIComponent;
 
     for (let i = 0; i < tokens.length; i++) {
       let token = tokens[i]
