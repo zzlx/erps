@@ -149,7 +149,8 @@ export default class Context {
    */
 
   get httpVersion () {
-    return this.stream.session.alpnProtocol === 'h2' ? '2' : '1';
+    return '2';
+    //return this.stream.session.alpnProtocol === 'h2' ? '2' : '1';
   }
 
   /**
@@ -870,7 +871,6 @@ export default class Context {
       }
 
       this[RES_BODY] = this.compress(val);
-
       return;
     }
 

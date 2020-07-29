@@ -31,7 +31,7 @@ const Args = [
 options = {
   //cwd: APP_ROOT,
   env: process.env,
-  detached: true,
+  detached: false,
   stdio: process.env.FORK ? ['ignore', 1, 2] : [0, 1, 2], 
 };
 
@@ -48,6 +48,10 @@ const clearInterval = setInterval(() => {
 
 process.on('uncaughtException', (err, origin) => {
   console.log(err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+	debug('promise: ', promise);
 });
 
 // clear interval befor exit

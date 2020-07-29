@@ -39,6 +39,8 @@ class Config {
       mainApp: path.join(APP_ROOT, 'src', 'main.mjs'),
       buildPath: path.join(APP_HOME, 'build'), // 用于存储生成的前端文件
       scssEntryPoint: path.join(APP_ROOT, 'scss', 'main.scss'),
+      public: path.join(APP_ROOT, 'public'),
+      templateHtml: path.join(APP_ROOT, 'public', 'index.html'),
     };
 
     // @task: 准备必要的目录

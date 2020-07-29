@@ -38,7 +38,6 @@ export default function logMiddleware (logPath, format) {
   let rc = 0; // request_counter
 
   return async function logMiddleware (ctx, next) {
-
     await next();
 
     const log = new Array(

@@ -37,16 +37,12 @@ process.title = `org.zzlx.${FILE_NAME}`;
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 let http2server = null;
-let pidFromPidFile = null;
 
 // record pid to pidFile
 function recordPid () {
-  debug('Record pid to pidFile.')
-
-  fs.promises.writeFile(pidFile, String(process.pid), 'utf8')
-    .catch(err => { 
-      debug('write pid file error: ', err); 
-    });
+  return fs.promises.writeFile(pidFile, String(process.pid), 'utf8').catch(err => { 
+    debug('write pid file error: ', err); 
+  });
 }
 
 // Task: caught exceptions
@@ -61,10 +57,8 @@ process.on('uncaughtException', (err, origin) => {
 // 被此事件捕获的rejection,需要进行妥善处理
 // 系统不应出现未经管理的rejection
 process.on('unhandledRejection', (reason, promise) => {
-	debug('rejection reason: ', reason);
 	debug('promise: ', promise);
 });
-
 
 // Task: signal events
 process.on('SIGHUP', () => {
@@ -102,6 +96,8 @@ process.on('exit', (code) => {
   }).catch((err) => {
     debug(`delete ${pidFile} failure. reason:`, err);
   }); 
+
+  debug(`${process.title}(PID:${process.pid}) is exit.`);
 });
 
 /**
@@ -111,22 +107,18 @@ process.on('exit', (code) => {
 
 function getPid () {
   let pid = null;
+  let pidFromFile = null;
+  let pidFromPort = null;
 
   if (fs.existsSync(pidFile)) {
-    pid = fs.readFileSync(pidFile, 'utf8');
-    return pid;
-  } else {
-    debug('pid file is not found');
+    pidFromFile = fs.readFileSync(pidFile, 'utf8');
   }
 
   // 仅在unix环境下有效
   // @todo
-  pid = cp.execSync('lsof -i:3000 | awk \'NR==2{print $2}\'').toString('utf8');
+  pidFromPort = cp.execSync('lsof -i:3000 | awk \'NR==2{print $2}\'').toString('utf8');
 
-  if (pid) {
-    debug(pid);
-  }
-
+  if (pidFromPort) pid = pidFromPort
 
   return pid;
 }
@@ -135,6 +127,7 @@ function restart () {
   debug('%s is restarting...', process.title);
   if (getPid() == '' || getPid() == null) {
     console.log(`${process.title} is not started, use '--start' have a try.`);
+    start();
     return;
   }
 
@@ -160,8 +153,19 @@ async function start () {
 
   http2server = await import(config.paths.mainApp).then(m => m.default);
 
+  http2server.on('error', (err) => {
+    debug(err);
+    if (err.code === 'EADDRINUSE') {
+      if (err.port) {
+        console.info(`Address ${err.address}:${err.port} is in use, try it later.`)
+      }
+    }
+  });
+
   http2server.on('listening', () => {
-    recordPid(); //
+    recordPid().then(() => {
+      debug('process id is write to pidfile.');
+    }); //
   });
 
   http2server.listen({

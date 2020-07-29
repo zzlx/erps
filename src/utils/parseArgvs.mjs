@@ -27,7 +27,7 @@ export default function argvParser (argvs) {
 		i++; 
 
     // @todo: 是否有必要改正则匹配逻辑为字串匹配? 对性能影响极小,暂时不作修改.
-    const matcher = argv => /^(?:--(\w+)(?:=(.+))?)|(?:-(\w+))/g.exec(argv);
+    const matcher = argv => /^(?:--(\w+)(?:=(.+))?)|(?:-(\w+))|(\w+)/g.exec(argv);
 
 		const match = matcher(argv);
 		if (null == match) continue; // bypass if no match
@@ -35,6 +35,7 @@ export default function argvParser (argvs) {
     const key = match[1];
     const value = match[2];
 		const commands = match[3];
+    const command = match[4];
 		
     if (key) {
       params.set(key, value ? value : true);
@@ -52,6 +53,8 @@ export default function argvParser (argvs) {
         for (let v of commands ) params.set(v, true); // multi params, eg. -abc
       }
 		}
+
+    if (command) params.set(command, true);
   }
 
   return params;

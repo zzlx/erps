@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Kernel of services
+ * kernel of application.
  *
  * Usage:
  *
@@ -14,9 +14,11 @@
 import EventEmitter from 'events'; 
 import cp from 'child_process';
 import path from 'path';
+import Stream from 'stream';
 import util from 'util';
 
 // modules
+import Router from './Router.mjs';
 import Context from './Context.mjs';
 
 const __filename = import.meta.url.substr(7);
@@ -123,11 +125,11 @@ export default class Application extends EventEmitter {
    */
 
   handleRequest (ctx, fn) {
-		return fn(ctx).then(() => respond(ctx)).catch(err => {
+		return fn(ctx).then(() => this.respond(ctx)).catch(err => {
       debug(err);
       ctx.status = 500;
       if (this.env != 'production') ctx.body = err.message;
-      respond(ctx);
+      this.respond(ctx);
     });
   }
 
@@ -186,16 +188,23 @@ export default class Application extends EventEmitter {
   }
 }
 
+// 附加路由
+Application.Router = Router;
+
 /**
  * Response stream
  *
  */
 
-function respond (ctx) {
-  if (false === ctx.respond) {
-		debug('Respond is bypassed, ctx.respond was set to false.');
-		return; 
-	}
+Application.prototype.respond = function (ctx) {
+  if (false === ctx.respond) return; 
+
+  let body = ctx.body;
+
+  if (null == body) {
+    ctx.status = ctx.status || 404;
+    body = ctx.message;
+  }
 
   if (!ctx.headerSent) {
 	  ctx.stream.respond(ctx.response.headers);
@@ -207,12 +216,10 @@ function respond (ctx) {
 	}
 
   // buffer body
-  if (Buffer.isBuffer(ctx.body) || typeof ctx.body === 'string') {
-    return ctx.stream.end(ctx.body);
+  if (Buffer.isBuffer(body) || typeof body === 'string') {
+    return ctx.stream.end(body);
   }
 
 	// stream body
-  if (ctx.body instanceof Stream) return ctx.body.pipe(ctx.stream);
-
-  ctx.throw('respond error');
-} // end of respond
+  if (body instanceof Stream) return body.pipe(ctx.stream);
+}
