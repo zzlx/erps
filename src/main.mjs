@@ -7,6 +7,10 @@
  * *****************************************************************************
  */
 
+import fs from 'fs';
+import http2 from 'http2';
+import os from 'os';
+
 import Kos from './kos/Application.mjs';
 
 import error from './kos/middlewares/error.mjs';
@@ -34,4 +38,21 @@ app.use(reactDOM());         // react dom server
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-export default app;
+const server = http2.createSecureServer({
+  key: fs.readFileSync(`/etc/ssl/${os.hostname()}-key.pem`),
+  cert: fs.readFileSync(`/etc/ssl/${os.hostname()}-cert.pem`),
+  allowHTTP1: true,
+  //ca: [fs.readFileSync('client-cert.pem')],
+  //sigalgs: 
+  //ciphers: 
+  //clientCertEngine: 
+  //dhparam
+  //ecdhCurve
+  //privateKeyEngine
+  //passphrase: 'sample',
+  //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+});
+
+server.on('stream', app.callback());
+
+export default server;

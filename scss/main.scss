@@ -1,12 +1,12 @@
 /**
  * SCSS样式系统
  *
+ * 🌿此样式表使用node-sass工具编译生成.
  */
 
-// 配置主题
-@import "theme";
+@import "theme"; // theme
 
-// Bootstrap样式系统
+// bootstrap styles
 @import "../node_modules/bootstrap/scss/functions";
 @import "../node_modules/bootstrap/scss/variables";
 @import "../node_modules/bootstrap/scss/mixins";
@@ -45,9 +45,11 @@
 @import "../node_modules/bootstrap/scss/utilities";
 @import "../node_modules/bootstrap/scss/print";
 
-// 增加的组件样式
+// component styless
+@import "components/markdown";
+
+//  
 @import "animations";
 @import "gitter";
 @import "placeholder";
-@import "markdown";
 @import "custom";

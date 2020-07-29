@@ -1095,8 +1095,12 @@ _parse_argv() {
 				;;
 
 
+      --stop )
+        $_ROOT/bin/erpsd.mjs --stop
+        ;;
+
       --start )
-        $_ROOT/bin/erpsd.mjs --start
+        $_ROOT/bin/erpsd.mjs --start &
         ;;
 
       --restart )

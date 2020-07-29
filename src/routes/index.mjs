@@ -29,9 +29,14 @@ index.get('/', (ctx, next) => {
 });
 
 index.get('/styles.css', async (ctx, next) => {
-  const data = await sass(config.paths.scssEntryPoint);
   ctx.type = 'css'
-  ctx.body = data.css;
+
+  const data = await sass({
+    file: config.paths.scssEntryPoint,
+    outputStyle: ctx.app.env === 'production' ? 'compressed': 'nested',
+  });
+
+  ctx.body = data.css.toString('utf8');
 });
 
 index.get('/homePage', (ctx, next) => {

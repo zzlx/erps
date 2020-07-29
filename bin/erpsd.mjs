@@ -133,6 +133,10 @@ function getPid () {
 
 function restart () {
   debug('%s is restarting...', process.title);
+  if (getPid() == '' || getPid() == null) {
+    console.log(`${process.title} is not started, use '--start' have a try.`);
+    return;
+  }
 
   stop();
   start();
@@ -154,7 +158,7 @@ async function start () {
   //const hostname = cp.execSync("hostname | awk '{printf $1}'");
   const hostname = os.hostname();
 
-  http2server = await import(config.paths.serverPath).then(m => m.default);
+  http2server = await import(config.paths.mainApp).then(m => m.default);
 
   http2server.on('listening', () => {
     recordPid(); //
@@ -196,6 +200,9 @@ for (let param of paramMap.keys()) {
   switch(param) {
     case 'help':
       //showHelp();
+      break;
+    case 'stop':
+      stop();
       break;
     case 'start':
       start();

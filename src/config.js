@@ -36,7 +36,7 @@ class Config {
       logPath: path.join(APP_HOME, 'log'),
       configJsonFile: path.join(APP_HOME, 'config.json'),
       pidFile: path.join(APP_HOME, `${process.title}.pid`),
-      serverPath: path.join(APP_ROOT, 'src', 'server.mjs'),
+      mainApp: path.join(APP_ROOT, 'src', 'main.mjs'),
       buildPath: path.join(APP_HOME, 'build'), // 用于存储生成的前端文件
       scssEntryPoint: path.join(APP_ROOT, 'scss', 'main.scss'),
     };

@@ -18,7 +18,6 @@ import util from 'util';
 
 // modules
 import Context from './Context.mjs';
-import respond from './respond.mjs';
 
 const __filename = import.meta.url.substr(7);
 const __basename = path.basename(__filename);
@@ -36,6 +35,7 @@ export default class Application extends EventEmitter {
       protocol: 'http2',
       proxy: false,
       silent: false,
+      compressThreshold: 128, // unit kb,超出此阈值后启用压缩
       subdomainOffset: 2, // xxxx.xx
     }, opts);
 
@@ -185,3 +185,34 @@ export default class Application extends EventEmitter {
     }
   }
 }
+
+/**
+ * Response stream
+ *
+ */
+
+function respond (ctx) {
+  if (false === ctx.respond) {
+		debug('Respond is bypassed, ctx.respond was set to false.');
+		return; 
+	}
+
+  if (!ctx.headerSent) {
+	  ctx.stream.respond(ctx.response.headers);
+  }
+
+  if (!ctx.writable) {
+		debug('Can not write to stream, ctx.writable is false.');
+		return this.stream.end();
+	}
+
+  // buffer body
+  if (Buffer.isBuffer(ctx.body) || typeof ctx.body === 'string') {
+    return ctx.stream.end(ctx.body);
+  }
+
+	// stream body
+  if (ctx.body instanceof Stream) return ctx.body.pipe(ctx.stream);
+
+  ctx.throw('respond error');
+} // end of respond

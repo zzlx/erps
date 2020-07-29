@@ -10,6 +10,7 @@ import http from 'http';
 import http2 from 'http2';
 import net from 'net';
 import util from 'util';
+import zlib from 'zlib';
 
 // @todo: 本地化第三方模块
 import accepts from 'accepts';
@@ -424,6 +425,7 @@ export default class Context {
    */
 
   set length(n) {
+
     this.set('content-length', Number(n));
   }
 
@@ -838,7 +840,7 @@ export default class Context {
     this[RES_BODY] = val;
 
     // no content
-    if (null == val) {
+    if (null == val || val === false || true === val) {
       if (!EMPTY_CODE.includes(this.status)) {
         this.status = http2.constants['HTTP_STATUS_NO_CONTENT']; // 204
       }
@@ -850,14 +852,14 @@ export default class Context {
     }
 
     // set a proper status
-    if (this.status == null) this.status = http2.constants['HTTP_STATUS_OK'];
+    if (this.status == null) this.status = http2.constants['HTTP_STATUS_OK']; // 200
 
     // set type
     const setType = !this.has('Content-Type');
 
     // if set string body, 
     // set type and length header
-    if ('string' == typeof val) {
+    if ('string' === typeof val) {
 
       if (setType) {
         this.type = /^\s*<xml/.test(val) 
@@ -867,23 +869,20 @@ export default class Context {
             : 'text';
       }
 
-      this.length = Buffer.byteLength(val);
+      this[RES_BODY] = this.compress(val);
 
       return;
     }
 
     // buffer
     if (Buffer.isBuffer(val)) {
-
       if (setType) this.type = 'bin';
-
       this.length = val.length;
-
       return;
     }
 
     // stream
-    if ('function' == typeof val.pipe) {
+    if ('function' === typeof val.pipe) {
 
       const handler = err => this.onerror(err);
       if (!~val.listeners('error').indexOf(handler)) {
@@ -899,6 +898,7 @@ export default class Context {
     // json
     this.remove('Content-Length');
     this.type = 'json';
+    this[RES_BODY] = this.compress(JSON.string(val));
   }
 
   /**
@@ -930,4 +930,44 @@ export default class Context {
     const error = new HttpError(...args);
 		throw error;
   }
+
 }
+
+/**
+ * compress content
+ *
+ */
+
+Context.prototype.compress  = function (value) {
+  this.length = Buffer.byteLength(value); // 计算内容大小
+
+  let retval = null;
+
+	// less than size
+  const size = this.app.opts.compressThreshold * 1024;
+	if (this.length == null || this.length <= size) {
+    return value;
+  }
+
+	const encoding = this.get('accept-encoding');
+
+	if (/\bbr\b/.test(encoding)) {
+		this.set('content-encoding', 'br');
+		this.set('vary', 'accept-encoding');
+		retval = zlib.brotliCompressSync(value);
+    //retval = zlib.createBrotliCompress();
+	} else if (/\bdeflate\b/.test(encoding)) {
+		this.set('content-encoding', 'deflate');
+	  this.set('vary', 'accept-encoding');
+		retval = zlib.deflateCompressSync(value);
+    //retval = stream.pipline(value, zlib.createDeflate())
+	} else if (/\bgzip\b/.test(encoding)) {
+		this.set('content-encoding', 'gzip');
+		this.set('vary', 'accept-encoding');
+		retval = zlib.gzipSync(value);
+    //retval = stream.pipline(value, zlib.createGzip())
+  }
+
+  this.length = Buffer.byteLength(retval); // 重新计算内容大小
+  return retval;
+} // end of comporess function
