@@ -21,8 +21,8 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import config from '../src/config.js';
-import parseArgvs from '../src/utils/parseArgvs.mjs';
+import config from '../server/config.js';
+import parseArgvs from '../server/utils/parseArgvs.mjs';
 
 const __filename = import.meta.url.substr(7);
 const FILE_NAME = path.basename(__filename, path.extname(__filename));

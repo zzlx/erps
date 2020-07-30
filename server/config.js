@@ -36,12 +36,15 @@ class Config {
       logPath: path.join(APP_HOME, 'log'),
       configJsonFile: path.join(APP_HOME, 'config.json'),
       pidFile: path.join(APP_HOME, `${process.title}.pid`),
-      mainApp: path.join(APP_ROOT, 'src', 'main.mjs'),
+      mainApp: path.join(APP_ROOT, 'server', 'main.mjs'),
       buildPath: path.join(APP_HOME, 'build'), // 用于存储生成的前端文件
       scssEntryPoint: path.join(APP_ROOT, 'scss', 'main.scss'),
       public: path.join(APP_ROOT, 'public'),
       templateHtml: path.join(APP_ROOT, 'public', 'index.html'),
     };
+
+    // configurable
+    this.configurable = {};
 
     // @task: 准备必要的目录
     this.readyPaths(
@@ -51,6 +54,8 @@ class Config {
 
     this.readConfigFile();
   }
+
+
 
   /**
    * read config file

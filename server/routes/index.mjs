@@ -26,6 +26,20 @@ const paths = config.paths;
 
 const index = new Router(); // index router
 
+const modules = new Router({
+  methods: ['GET'],
+});
+
+modules.get('/:category/:module', (ctx, next) => {
+  debug(ctx.params);
+  const category = ctx.params.category;
+  const module = ctx.params.module
+  const jsPath = path.join(paths.appRoot, 'src', category, module);
+  const js = fs.readFileSync(jsPath, 'utf8');
+  ctx.type = 'text/javascript';
+  ctx.body = js
+})
+
 const statics = new Router({
   methods: ['GET'],
   prefix: '',
@@ -70,17 +84,33 @@ const api = new Router({
 
 index.use('/api', api.routes(), api.allowedMethods());
 index.use('/statics', statics.routes(), statics.allowedMethods());
+index.use('/modules', modules.routes(), modules.allowedMethods());
 
 index.get('/*', async (ctx, next) => {
-  const template = await fs.promises.readFile(paths.templateHtml, 'utf8');
+  let template = await fs.promises.readFile(paths.templateHtml, 'utf8');
   const renderedString = ReactDOMServer.renderToString(Test);
 
   // ctx.router available
-  ctx.body = template.replace(
+  template.replace(
     '<div id="root"></div>', 
     `<div id="root">${renderedString}</div>`
   );
+
+  ctx.body = template;
 });
 
 
 export default index;
+
+class Template {
+  constructor(t) {
+    this.template = t
+  }
+
+  replace () {
+  }
+
+  render () {
+    return this.template;
+  }
+}
