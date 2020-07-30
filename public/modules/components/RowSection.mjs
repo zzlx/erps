@@ -5,8 +5,6 @@
  *
  */
 
-import React from 'react';
-
 export default function RowSection (props) {
   const { className, children, ...rests } = props;
   const cn = [];

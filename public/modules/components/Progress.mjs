@@ -3,8 +3,6 @@
  * @props striped bool 是否显示条纹样式
  */
 
-import React from 'react';
-
 export default class Progress extends React.PureComponent {
   render() {
     const {min, now, max, label,striped, animated} = this.props;

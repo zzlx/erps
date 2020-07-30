@@ -9,18 +9,11 @@
  * *****************************************************************************
  */
 
-import React from "react";
-import PropTypes from "prop-types";
 import Context from './Context.mjs';
 import matchPath from '../utils/matchPath.mjs';
 
 export default class Switch extends React.Component {
   static contextType = Context;
-
-  static propTypes = {
-    children: PropTypes.node,
-    location: PropTypes.object,
-  };
 
   render() {
     const location = this.props.location 

@@ -5,11 +5,8 @@
  *
  * 轮播(走马灯)组件,用于播放幻灯片放映效果
  *
- * @file Carousel.mjs
  * *****************************************************************************
  */
-
-import React from 'react';
 
 export default class Carousel extends React.PureComponent {
   static defaultProps = {

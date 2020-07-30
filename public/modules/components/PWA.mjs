@@ -5,8 +5,6 @@
  *
  */
 
-import React from 'react';
-
 export default function Layout (props) {
   const { 
     aside, // 侧边栏

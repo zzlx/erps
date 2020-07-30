@@ -3,9 +3,8 @@
  *
  * Card is a flexible and extensible content container.
  *
+ * *****************************************************************************
  */
-
-import React from 'react';
 
 export default class Canvas extends React.PureComponent {
   constructor(props) {

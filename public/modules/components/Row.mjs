@@ -7,8 +7,6 @@
  * *****************************************************************************
  */
 
-import React from 'react';
-
 export default function Row (props) {
   const { className, children, ...rests } = props;
 

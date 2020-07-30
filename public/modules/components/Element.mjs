@@ -6,11 +6,8 @@
  * 操作React Element对象
  * 提供添加、删除 、toggle className功能
  *
- * @file Element.mjs
  * *****************************************************************************
  */
-
-import React from 'react';
 
 export default class Element {
   constructor (element) {

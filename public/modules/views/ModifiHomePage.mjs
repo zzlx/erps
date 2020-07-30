@@ -4,8 +4,6 @@
  * 
  */
 
-import React from 'react';
-
 import {
   Button,
   RootContext as Context,

@@ -1,4 +1,3 @@
-#!/usr/bin/env node --no-warnings --experimental-json-modules --experimental_top_level_await
 /**
  * *****************************************************************************
  *
@@ -21,12 +20,14 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import config from '../server/config.js';
+import config from '../server/config.mjs';
 import parseArgvs from '../server/utils/parseArgvs.mjs';
+import sass from '../server/utils/sass.mjs';
 
 const __filename = import.meta.url.substr(7);
 const FILE_NAME = path.basename(__filename, path.extname(__filename));
-const pidFile = config.paths.pidFile;
+const paths = config.paths;
+const pidFile = paths.pidFile;
 
 const debug = util.debuglog(`debug:${path.basename(__filename)}`);
 
@@ -147,32 +148,31 @@ function stop () {
 }
 
 async function start () {
+  // Task1: 构建styles.css
+  // 每次启动均重建styles.css文件,以保证代码最新
+  await sass({
+    file: config.paths.scssEntryPoint,
+    outputStyle: process.env.NODE_ENV === 'production' ? 'compressed': 'nested',
+  }).then(data => fs.promises.writeFile(paths.stylesCss, data.css));
+
+  // Task2: 生成index.html文件
+
   // get hostname
   //const hostname = cp.execSync("hostname | awk '{printf $1}'");
   const hostname = os.hostname();
 
   http2server = await import(config.paths.mainApp).then(m => m.default);
 
-  http2server.on('error', (err) => {
-    debug(err);
-    if (err.code === 'EADDRINUSE') {
-      if (err.port) {
-        console.info(`Address ${err.address}:${err.port} is in use, try it later.`)
-      }
-    }
-  });
-
-  http2server.on('listening', () => {
-    recordPid().then(() => {
-      debug('process id is write to pidfile.');
-    }); //
+  // after the server started successfully, record pid to pidfile.
+  http2server.on('listening', function () {
+    recordPid().catch((err) => debug(err));
   });
 
   http2server.listen({
       ipv6Only: false, // 是否仅开启IPV6
       host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
       port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
-      exclusive: false, // false 可接受进程共享端口
+      exclusive: false, // false 可接受进程共享端口, 支持集群服务器配置
   });
 }
 

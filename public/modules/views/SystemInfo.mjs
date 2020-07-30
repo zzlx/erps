@@ -4,8 +4,6 @@
  *
  */
 
-import React from 'react';
-
 export default class SystemInfo extends React.PureComponent {
   render() {
     const el = React.createElement;

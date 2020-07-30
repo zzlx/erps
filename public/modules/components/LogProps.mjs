@@ -3,8 +3,6 @@
  *
  */
 
-import React from 'react';
-
 export default function logProps(Component) {
 
   // Note the second param "ref" provided by React.forwardRef.

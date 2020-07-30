@@ -3,8 +3,6 @@
  *
  */
 
-import React from "react";
-import PropTypes from "prop-types";
 import ReactContext from "./Context.mjs";
 import { types } from '../store/actions/index.mjs';
 
@@ -44,12 +42,4 @@ export default class Redirect extends React.PureComponent {
   componentWillUnmount() {
     clearTimeout(this.timer);
   }
-}
-
-if (process.env.NODE_ENV === 'development') {
-  Redirect.propTypes = {
-    from: PropTypes.string,
-    to: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
-    push: PropTypes.bool,
-  };
 }

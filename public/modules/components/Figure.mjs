@@ -5,8 +5,6 @@
  *
  */
 
-import React from 'react';
-
 export default function Figure (props) {
   const { className, ...rests } = props;
   const cn = [

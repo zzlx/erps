@@ -3,10 +3,6 @@
  * 
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import Popper from 'popper.js';
-
 export default function tooltip (props) {
   return React.createElement(Tooltip, props);
 }
@@ -52,13 +48,5 @@ class Tooltip extends React.PureComponent { constructor(props) {
       onMouseOver: this.handleMouseOver,
       onMouseLeave: this.handleMouseOut,
     });
-  }
-}
-
-if (process.env.NODE_ENV === 'development') {
-  Tooltip.propTypes = {
-    tips: PropTypes.string,
-    children: PropTypes.element,
-    position: PropTypes.string,
   }
 }

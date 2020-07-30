@@ -3,8 +3,6 @@
  *
  */
 
-import React from 'react';
-
 export default function (props) {
   const { data, fill, stroke, strokeWidth, cx, ...rests } = props;
 

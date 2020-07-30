@@ -3,6 +3,7 @@
  * SCSS样式系统
  *
  * 🌿基于bootstrap开发.
+ * 🌿添加了自定义的theme、组件等文件.
  * 🌿使用node-sass编译生成.
  *
  */
@@ -49,7 +50,7 @@
 @import "../node_modules/bootstrap/scss/print";
 
 // component styless
-@import "components/markdown";
+@import "markdown";
 
 //  
 @import "animations";

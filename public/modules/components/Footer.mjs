@@ -4,8 +4,6 @@
  * 结构化组件
  */
 
-import React from 'react';
-
 export default function Footer (props) {
   const { className, ...rests } = props;
 
@@ -14,7 +12,6 @@ export default function Footer (props) {
     'footer', // 与组件同名的样式类名
     'd-print-none',
     'p-2',
-    'text-center',
     'font-weight-light',
     'bg-gradient-primary',
     className,

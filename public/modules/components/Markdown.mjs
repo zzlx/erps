@@ -8,7 +8,6 @@
  * @api public
  */
 
-import React from 'react';
 import Markable from 'remarkable';
 
 export default function Markdown (opts = {}) {

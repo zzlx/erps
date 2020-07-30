@@ -9,8 +9,6 @@
  * *****************************************************************************
  */
 
-import React from 'react';
-
 export default class Barcode extends React.PureComponent { 
   constructor(props) {
     super(props);

@@ -7,7 +7,6 @@
  * *****************************************************************************
  */
 
-import React from 'react';
 import Alert from '../components/Alert.mjs';
 import Placeholder from '../components/Placeholder.mjs';
 import Context from '../components/Context.mjs';

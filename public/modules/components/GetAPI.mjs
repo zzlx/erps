@@ -3,7 +3,7 @@
  *
  */
 
-import { types } from './index.mjs';
+import { types } from '../store/actions/index.mjs';
 
 export default (path) => ({
   type: types.GET_API_ADDRESS,

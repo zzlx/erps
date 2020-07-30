@@ -5,8 +5,6 @@
  * @api public
  */
 
-import React from 'react';
-
 export default function Sprite (props = {}) {
   const { 
     showAll, 

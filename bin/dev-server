@@ -25,7 +25,7 @@ const Args = [
   '--trace-warnings',
   '--experimental_top_level_await',
   '--experimental-json-modules',
-  path.join(APP_ROOT, 'bin', 'erpsd.mjs'),
+  path.join(APP_ROOT, 'server', 'erpsd.mjs'),
 ];
 
 options = {

@@ -6,8 +6,6 @@
  *
  */
 
-import React from 'react';
-
 export default function spinner (props) {
   return React.createElement(Spinner, props);
 }

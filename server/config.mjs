@@ -15,13 +15,15 @@
  * *****************************************************************************
  */
 
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const util = require('util');
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import util from 'util';
 
-const PackageJSON = require('../package.json');
+import PackageJSON from '../package.json';
 
+const __filename = import.meta.url.substr(7);
+const __dirname = path.dirname(__filename);
 const __basename = path.basename(__filename);
 const debug = util.debuglog(`debug:${__basename}`);
 const APP_ROOT = path.dirname(__dirname);
@@ -41,6 +43,7 @@ class Config {
       scssEntryPoint: path.join(APP_ROOT, 'scss', 'main.scss'),
       public: path.join(APP_ROOT, 'public'),
       templateHtml: path.join(APP_ROOT, 'public', 'index.html'),
+      stylesCss: path.join(APP_ROOT, 'public', 'statics', 'styles.css'),
     };
 
     // configurable
@@ -102,4 +105,4 @@ class Config {
   }
 }
 
-module.exports = new Config();
+export default new Config();

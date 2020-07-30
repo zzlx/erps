@@ -8,8 +8,6 @@
  *
  */
 
-import React from 'react';
-
 export default function Picture (props) {
   const { src, sources, ...rests } = props;
 

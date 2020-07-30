@@ -3,8 +3,6 @@
  * 
  */
 
-import React from 'react';
-
 // 引入UI组件
 import {
   Spinner,

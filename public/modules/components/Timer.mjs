@@ -4,8 +4,6 @@
  *
  */
 
-import React from 'react';
-
 export default class Timer extends React.PureComponent {
   constructor(props) {
     super(props);

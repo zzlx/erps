@@ -8,11 +8,8 @@
  * Indicate the current page’s location within a navigational hierarchy 
  * that automatically adds separators via CSS.
  *
- * @file Breadcrumb.mjs
  * *****************************************************************************
  */
-
-import React from 'react';
 
 export default function Breadcrumb(props) {
   const { data, children, ...rests } = props;

@@ -1,4 +1,4 @@
-[
+export default [
   { 
     "app": "HomePage",
     "path": "/settings/:module(\\w+)?", 

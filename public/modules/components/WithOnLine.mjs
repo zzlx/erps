@@ -3,8 +3,6 @@
  * 
  */
 
-import React from 'react';
-
 export default function withOnLine(Component) {
   return class extends React.Component {
     constructor(props) {

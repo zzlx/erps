@@ -5,7 +5,6 @@
  *
  */
 
-import React from 'react';
 import Clock from '../components/Clock.mjs';
 import Redirect from '../components/Redirect.mjs';
 

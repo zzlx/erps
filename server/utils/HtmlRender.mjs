@@ -40,9 +40,11 @@ export default class HtmlRender {
     <script src="/statics/react.production.min.js"></script>
     <script src="/statics/react-dom.production.min.js"></script>
     <script type="module" src="/modules/main.mjs"></script>
-    <!--
 		<script nomodule src="/modules/fallback.js"></script>
-    -->
+    <!-- 设置全局变量 -->
+    <script>
+      const ENV="${process.env.NODE_ENV}"
+    </script>
     <title>${this.title}</title>
   </head>
   <body>

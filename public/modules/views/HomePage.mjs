@@ -7,7 +7,6 @@
  * *****************************************************************************
  */
 
-import React from 'react';
 import Placeholder from '../components/Placeholder.mjs';
 import Context from '../components/Context.mjs';
 import Container from '../components/Container.mjs';

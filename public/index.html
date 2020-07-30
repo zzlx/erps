@@ -7,13 +7,12 @@
     <script src="/statics/react.production.min.js"></script>
     <script src="/statics/react-dom.production.min.js"></script>
     <script type="module" src="/modules/main.mjs"></script>
-    <!--
+    <!-- 浏览器不支持es module时进行提醒⏰ -->
 		<script nomodule src="/modules/fallback.js"></script>
-    -->
     <title>test</title>
   </head>
   <body>
-    <noscript>请确认已启用javascript支持.</noscript>
+    <noscript>请确认已启用javascript.</noscript>
     <div id="root"></div>
   </body>
 </html>

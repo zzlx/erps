@@ -13,8 +13,7 @@
  * *****************************************************************************
  */
 
-import React from 'react';
-import randomInt from '../utils/randomInt.mjs';
+const random = (start = 0, end = 100) => Math.floor(Math.random() * (end - start)) + start;
 
 const sizes = ['xsmall', 'small', 'medium', 'large', 'full'];
 

@@ -3,7 +3,6 @@
  *
  */
 
-import React from 'react';
 import Context from './RootContext.mjs';
 import { historyPushState } from '../store/actions/index.mjs';
 

@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * kernel of application.
+ * kernel of service application.
  *
  * Usage:
  *
@@ -32,7 +32,7 @@ export default class Application extends EventEmitter {
 
     this.opts = Object.assign({}, { 
       // default options
-      env: 'production',
+      env: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
       keys: ['org.zzlx'],
       protocol: 'http2',
       proxy: false,
@@ -41,7 +41,7 @@ export default class Application extends EventEmitter {
       subdomainOffset: 2, // xxxx.xx
     }, opts);
 
-    this.env = this.opts.env || 'production';
+    this.env = this.opts.env;
     this.protocol = this.opts.protocol ? 'http2' : 'http2';
     this.proxy = this.opts.proxy ? 'true' : false;
     this.subdomainOffset = this.opts.subdomainOffset || 2;
@@ -52,8 +52,7 @@ export default class Application extends EventEmitter {
     if (util.inspect.custom) {
       this[util.inspect.custom] = this.inspect;
     }
-
-  }
+  } // end of constructor
 
   /**
    * inspect
@@ -86,9 +85,9 @@ export default class Application extends EventEmitter {
    */
 
   use (fn) {
-    if (typeof fn !== 'function') throw new TypeError('Middleware must a function!');
-
-		debug('use %s', fn._name || fn.name || "unnamed function");
+    if (typeof fn !== 'function') {
+      throw new TypeError('The middleware you provided must be a function!');
+    }
 
     this.middlewares.push(fn);
 

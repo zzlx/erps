@@ -18,18 +18,17 @@ import util from 'util';
 
 const debug = util.debuglog('debug:statics-middleware');
 
-export default function statics (opts = {}) {
-  if (typeof opts === 'string') opts = { root: opts };
-
-  const options = Object.assign({}, {
-    index: 'index.html',
+export default function statics (options = {}) {
+  const opts = Object.assign({}, {
+    compress: false,
     directoryIndex: ['index.html'],
     immutable: false,
+    index: 'index.html',
     maxage: 0,
-    compress: false,
-  }, opts);
+    root: null,
+  }, typeof options === 'string' ? { root: options } : options);
 
-  if (options.root == null) throw new Error('options.root is unconfigured.');
+  if (opts.root == null) throw new Error('opts.root is unconfigured.');
 
   return async function staticsMiddleware (ctx, next) {
 
@@ -40,12 +39,11 @@ export default function statics (opts = {}) {
       return await next();
     }
 
-    // 相对目录
     const relativePath = path.relative('/', ctx.pathname);
-    let realPath = path.resolve(options.root, relativePath);
+    let realPath = path.resolve(opts.root, relativePath);
     let url = null;
 
-    if (realPath === options.root) {
+    if (realPath === opts.root) {
       realPath = path.join(realPath, 'index.html');
     }
 
@@ -75,8 +73,8 @@ export default function statics (opts = {}) {
     }
 
     // set content-type
-    if (null === url || url === options.root) {
-      url = path.join(options.root, 'index.html');
+    if (null === url || url === opts.root) {
+      url = path.join(opts.root, 'index.html');
       ctx.type = path.extname(url);
     } else {
       ctx.type = path.extname(realPath);
@@ -93,6 +91,7 @@ export default function statics (opts = {}) {
     }
 
     ctx.set('last-modified', new Date(stats.mtimeMs).toUTCString());
+
     ctx.body = fs.createReadStream(url);
   }
 }

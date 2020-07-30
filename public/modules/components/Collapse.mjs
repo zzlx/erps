@@ -8,7 +8,6 @@
  * *****************************************************************************
  */
 
-import React from 'react';
 export default function Collapse (props) {
   const { className, ...rests} = props;
 

@@ -3,7 +3,6 @@
  *
  */
 
-import React from 'react';
 import Button from './Button.mjs';
 const _ = React.createElement;
 

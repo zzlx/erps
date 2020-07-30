@@ -2,11 +2,11 @@
  * 数据表格
  *
  * 直接从关联数组生成表格
+ *
  */
 
-import React from 'react';
-import String from '../utils/strings.mjs';
-
+const isNumber = (value) => typeof value === 'number' || 
+		typeof value === 'string' && Number.isFinite(Number(value.replace(/[,?]/g, '')));
 export default function Table (props) {
   const { 
     data, 
@@ -50,7 +50,7 @@ function Tbody(props) {
       // 自动格式化单元格
       const cn = [];
       // 数字格式右对齐 
-      const isNum = String.isNumber(v);
+      const isNum = isNumber(v);
       if (isNum) {
         cn.push('text-right');
         cn.push('text-nowrap');

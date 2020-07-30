@@ -14,9 +14,6 @@
  * *****************************************************************************
  */
 
-import React from 'react';
-import propTypes from 'prop-types';
-
 const breakpoints = ['sm', 'md', 'lg', 'xl'];
 
 export default function Jumbotron (props) {

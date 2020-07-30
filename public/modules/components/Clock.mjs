@@ -8,11 +8,8 @@
  * @todo: 
  * 目前仅可以显示本地时间, 需要实现服务器时间同步显示
  *
- * @file Clock.mjs
  * *****************************************************************************
  */
-
-import React from 'react';
 
 export default class Clock extends React.PureComponent {
   constructor(props) {

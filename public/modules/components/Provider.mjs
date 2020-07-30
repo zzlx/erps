@@ -6,21 +6,9 @@
  * *****************************************************************************
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import Context from './Context.mjs';
 
 export default class Provider extends React.Component {
-  static propTypes = {
-    store: PropTypes.shape({
-      subscribe: PropTypes.func.isRequired,
-      dispatch: PropTypes.func.isRequired,
-      getState: PropTypes.func.isRequired
-    }).isRequired,
-    context: PropTypes.object,
-    children: PropTypes.any
-  };
-
   constructor(props) {
     super(props);
     this.state = {

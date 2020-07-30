@@ -9,12 +9,8 @@
  * @param {string} props.breakpoint
  * @return {obj} React element
  * @api public
- * @file Container.mjs
  * *****************************************************************************
  */
-
-import React from 'react';
-import propTypes from 'prop-types';
 
 const breakpoints = ['sm', 'md', 'lg', 'xl'];
 

@@ -2,14 +2,10 @@
  * *****************************************************************************
  *
  * Badge component
- *
  * 徽章
  *
- * @file Badge.mjs
  * *****************************************************************************
  */
-
-import React from 'react';
 
 export default function Badge (props) {
   const { theme, pill, className, ...rests } = props;

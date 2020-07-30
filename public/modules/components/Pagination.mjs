@@ -8,7 +8,6 @@
  *
  */
 
-import React from 'react';
 import Anchor from './Anchor.mjs';
 
 export default function Pagination (props) {

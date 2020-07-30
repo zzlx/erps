@@ -2,8 +2,6 @@
  * Popover 
  */
 
-import React from 'react';
-
 export default function popover (props) {
   const {type, children, onClick} = props;
 
