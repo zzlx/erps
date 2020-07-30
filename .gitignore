@@ -18,8 +18,8 @@ node_modules
 package-lock.json
 yarn.lock
 
-# Package
-dist
+# files
+public/statics/styles.css
 .env
 *.log
 *.local
