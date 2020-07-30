@@ -1,15 +1,14 @@
 /**
  * *****************************************************************************
  *
- * 静态资源服务
  * Statics resource service.
  *
- * 支持内容协商
- * 支持压缩版本
+ * 内容协商
+ * 缓存策略支持
+ * 压缩版本支持
  *
  * @param {object|string} opts
  * @return {function} middleware function
- *
  * *****************************************************************************
  */
 
@@ -17,25 +16,20 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-const debug = util.debuglog('debug:statics.middleware'); // 调试信息打印工具
-
-// Default options
-const defaultOptions = {
-  index: 'index.html',
-  directoryIndex: ['index.html'],
-  immutable: false,
-  maxage: 0,
-  compress: false,
-}
+const debug = util.debuglog('debug:statics-middleware');
 
 export default function statics (opts = {}) {
+  if (typeof opts === 'string') opts = { root: opts };
 
-  // 处理参数
-  const options = Object.assign({}, defaultOptions, opts);
-  if (typeof opts === 'string') options.root = opts;
+  const options = Object.assign({}, {
+    index: 'index.html',
+    directoryIndex: ['index.html'],
+    immutable: false,
+    maxage: 0,
+    compress: false,
+  }, opts);
+
   if (options.root == null) throw new Error('options.root is unconfigured.');
-
-  debug(options);
 
   return async function staticsMiddleware (ctx, next) {
 
@@ -47,7 +41,6 @@ export default function statics (opts = {}) {
     }
 
     // 相对目录
-    //
     const relativePath = path.relative('/', ctx.pathname);
     let realPath = path.resolve(options.root, relativePath);
     let url = null;
@@ -57,6 +50,7 @@ export default function statics (opts = {}) {
     }
 
     if (fs.existsSync(realPath)) url = realPath;
+
 
     // @todo: 完善资源最后修改时间戳对比逻辑
     const lastModified = ctx.get('if-modified-since');
@@ -92,6 +86,12 @@ export default function statics (opts = {}) {
 
     // 读取文件
     stats = fs.lstatSync(url);
+
+    if (ctx.app.env === 'development') {
+      // set no cache in development mode.
+      ctx.set('cache-control', 'no-cache');
+    }
+
     ctx.set('last-modified', new Date(stats.mtimeMs).toUTCString());
     ctx.body = fs.createReadStream(url);
   }

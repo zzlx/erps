@@ -15,8 +15,6 @@ import ReactDOMServer from 'react-dom/server.js';
 
 import sass from '../utils/sass.mjs';
 
-import Test from '../views/Test.mjs';
-
 import Router from '../koa/Router.mjs';
 import config from '../config.js';
 
@@ -31,13 +29,7 @@ const modules = new Router({
 });
 
 modules.get('/:category/:module', (ctx, next) => {
-  debug(ctx.params);
-  const category = ctx.params.category;
-  const module = ctx.params.module
-  const jsPath = path.join(paths.appRoot, 'src', category, module);
-  const js = fs.readFileSync(jsPath, 'utf8');
-  ctx.type = 'text/javascript';
-  ctx.body = js
+  next();
 })
 
 const statics = new Router({

@@ -19,7 +19,7 @@ import xResponse from './koa/middlewares/xResponse.mjs';
 import cookies from './koa/middlewares/cookies.mjs';
 import cors from './koa/middlewares/cors.mjs';
 import dba from './koa/middlewares/dba.mjs';
-import reactDOM from './koa/middlewares/reactDOM.mjs';
+import statics from './koa/middlewares/statics.mjs';
 
 import config from './config.js';
 import router from './routes/index.mjs';
@@ -35,8 +35,10 @@ app.use(xResponse());        // 记录中间件响应时间
 app.use(cookies());          // cookie读写及签名
 app.use(cors());             // 跨域访问响应
 app.use(dba(config));        // 数据库管理
-app.use(router.routes());
-app.use(router.allowedMethods());
+app.use(statics(config.paths.public));
+
+//app.use(router.routes());
+//app.use(router.allowedMethods());
 
 const server = http2.createSecureServer({
   key: fs.readFileSync(`/etc/ssl/${os.hostname()}-key.pem`),

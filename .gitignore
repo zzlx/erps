@@ -19,7 +19,6 @@ package-lock.json
 yarn.lock
 
 # files
-public/statics/styles.css
 .env
 *.log
 *.local

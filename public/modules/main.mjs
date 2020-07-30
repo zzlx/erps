@@ -11,7 +11,7 @@
 
 import App from './views/index.mjs';
 
-const element = React.createElement(Nav,null);
+const element = React.createElement(App,null);
 let container = window.document.getElementById('root');
 
 if (null == container) {

@@ -1,0 +1,8 @@
+# 忽略动态生成的文件及第三方框架
+index.html
+statics/styles.css
+statics/styles.css.*
+statics/react.development.js
+statics/react.production.min.js
+statics/react-dom.development.js
+statics/react-dom.production.min.js
