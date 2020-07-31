@@ -17,7 +17,8 @@ Email: wangxuemin@zzlx.org.`);
   //
   // 1. 测试import动态加载模块功能
   import('./views/routes.mjs').then(m => m.default).then(routes => {
-    console.log(routes);
+    console.log('task1:success');
+    //console.log(routes);
   });
 
   // 2. 

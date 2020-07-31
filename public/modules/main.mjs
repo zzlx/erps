@@ -3,20 +3,20 @@
  *
  * 前端主程序
  *
- * 主要任务:
+ * 功能:
  *
  * * 集成UI及客户端路由
- * * 为UI程序提供store对象
- *
+ * * 提供store对象给UI
  *
  * Email: wangxuemin@zzlx.org
  * *****************************************************************************
  */
 
-import UI from './views/index.mjs';
+import App from './views/index.mjs';
 import callback from './callback.mjs';
+import store from './store/index.mjs';
 
-const element = React.createElement(UI, {});
+const element = App(store);
 
 // 准备container
 let container = window.document.getElementById('root');

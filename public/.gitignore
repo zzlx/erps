@@ -2,8 +2,11 @@
 # 忽略动态更新、自动生成的文件及目录
 index.html
 statics/styles.css
+statics/styles.css*
 statics/styles.css.*
 statics/react.development.js
 statics/react.production.min.js
 statics/react-dom.development.js
 statics/react-dom.production.min.js
+*.br
+*.zip

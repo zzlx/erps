@@ -8,7 +8,7 @@
  * @file: matchPath.mjs 
  */
 
-import pathToRegExp from './pathToRegexp.mjs';
+import { pathToRegexp } from './path-to-regexp.mjs';
 
 export default function matchPath(pathname, options = {}) {
   options = typeof options === 'string' ? { path: options } : options;
@@ -65,7 +65,7 @@ function compilePath(path, options) {
   if (pathCache.has(path)) return pathCache.get(path);
 
   const keys = [];
-  const regexp = pathToRegExp(path, keys, options);
+  const regexp = pathToRegexp(path, keys, options);
   const result = { regexp, keys };
 
   if (pathCache.size < cacheLimit) {

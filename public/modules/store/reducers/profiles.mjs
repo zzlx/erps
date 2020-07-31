@@ -2,7 +2,7 @@
  *
  */
 
-import object from '../../utils/object.mjs';
+import getIn from '../../utils/getIn.mjs';
 import { types } from '../actions/index.mjs';
 
 const profiles = {
@@ -28,7 +28,7 @@ export default (state = profiles, action) => {
     case types.LOGOUT:
     case types.GRAPHQL_API_QUERY:
       if (!action.payload) return state;
-      if (object.getIn.apply(action.payload.data, ['docs'])) {
+      if (getIn.apply(action.payload.data, ['docs'])) {
         return Object.assign({}, state, {
           welcome: action.payload.data.docs,
         });

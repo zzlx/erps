@@ -36,6 +36,7 @@ export default class Route extends React.PureComponent {
       }
 
       if (children === undefined) {
+        /*
         if (process.env.NODE_ENV === 'development') {
           const { path } = this.props;
           warning(false,
@@ -44,6 +45,7 @@ export default class Route extends React.PureComponent {
               "should have returned a React element or `null`"
           );
         }
+        */
 
         children = null;
       }
@@ -55,6 +57,7 @@ export default class Route extends React.PureComponent {
 
 Route.contextType = Context;
  
+/*
 if (process.env.NODE_ENV === 'development') {
   Route.propTypes = {
     children: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
@@ -110,3 +113,4 @@ if (process.env.NODE_ENV === 'development') {
     );
   };
 }
+*/

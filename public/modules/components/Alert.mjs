@@ -16,8 +16,6 @@
  * 使用方法：
  * 给Alert一个fixed定位的透明背景容器(比如通知中心),Alert可以悬浮在主界面上
  *
- * @param {object} props
- * @return {object} react element
  * *****************************************************************************
  */
 
@@ -100,7 +98,6 @@ export default class Alert extends React.PureComponent {
   }
 }
 
-// 
 function handleCloseClick (e) {
   this.setState(state => ({disappear: true}));
 }

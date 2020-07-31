@@ -19,6 +19,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
+import zlib from 'zlib';
 
 import config from '../server/config.mjs';
 import parseArgvs from '../server/utils/parseArgvs.mjs';
@@ -153,7 +154,12 @@ async function start () {
   await sass({
     file: config.paths.scssEntryPoint,
     outputStyle: process.env.NODE_ENV === 'production' ? 'compressed': 'nested',
-  }).then(data => fs.promises.writeFile(paths.stylesCss, data.css));
+  }).then(data => {
+    return Promise.all([
+      fs.promises.writeFile(paths.stylesCss, data.css),
+      fs.promises.writeFile(paths.stylesCss + '.br', zlib.brotliCompressSync(data.css)),
+    ]);
+  });
 
   // Task2: 生成index.html文件
 

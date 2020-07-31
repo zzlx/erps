@@ -39,9 +39,9 @@ export default function configureStore (opts) {
     middlewares.timeoutScheduler,
   ];
 
-  if (process.env.NODE_ENV === 'development') {
+  //if (process.env.NODE_ENV === 'development') {
     middlewareArray.push(middlewares.logger)
-  }
+  //}
 
   const middlewareEnhancer = applyMiddleware(middlewareArray); 
 

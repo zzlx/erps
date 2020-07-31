@@ -24,8 +24,8 @@
  */
 
 import { types } from './actions/index.mjs';
-import object from '../utils/object.mjs';
 import isPlainObject from '../utils/isPlainObject.mjs';
+import getIn from '../utils/getIn.mjs';
 
 const $$observable = Symbol('observable');
 
@@ -88,8 +88,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
     }
 
     // read value from currentState
-    // @todo: 
-    return object(currentState).getIn(arguments);
+    return getIn.apply(currentState, arguments);
   }
 
   /**

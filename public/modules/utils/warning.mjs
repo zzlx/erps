@@ -1,4 +1,5 @@
 /**
+ *
  * Prints a warning in the console if it exists.
  *
  * @param {Boolean} condition .

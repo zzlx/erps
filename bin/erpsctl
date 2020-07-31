@@ -796,7 +796,7 @@ _commit_and_push() {
 		if [[ -z $1 ]]; then
 			read -p "变更提交说明:" message
 			if [[ -n ${message} ]]; then
-				git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") ${message}"
+				git -C $_ROOT commit -m "${message}"
 			else
 				git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
 			fi
