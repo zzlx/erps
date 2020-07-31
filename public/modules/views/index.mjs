@@ -18,7 +18,7 @@ import Button from '../components/Button.mjs';
 import Container from '../components/Container.mjs';
 import Footer from '../components/Footer.mjs';
 
-import routes from '../routes.mjs'; 
+import routes from '../routes/index.mjs'; 
 
 // App
 export default function (store) {
