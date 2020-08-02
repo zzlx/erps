@@ -44,6 +44,7 @@ class Config {
       public: path.join(APP_ROOT, 'public'),
       templateHtml: path.join(APP_ROOT, 'public', 'index.html'),
       stylesCss: path.join(APP_ROOT, 'public', 'statics', 'styles.css'),
+      nodeModules: path.join(APP_ROOT, 'node_modules'),
     };
 
     // configurable

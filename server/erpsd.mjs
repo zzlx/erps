@@ -24,6 +24,7 @@ import zlib from 'zlib';
 import config from '../server/config.mjs';
 import parseArgvs from '../server/utils/parseArgvs.mjs';
 import sass from '../server/utils/sass.mjs';
+import HtmlParser from './utils/HtmlParser.mjs';
 
 const __filename = import.meta.url.substr(7);
 const FILE_NAME = path.basename(__filename, path.extname(__filename));
@@ -162,6 +163,41 @@ async function start () {
   });
 
   // Task2: 生成index.html文件
+  await new Promise((resolve, reject) => {
+    const html = new HtmlParser()
+      .setTitle('Home')
+      .render();
+
+    fs.promises.writeFile(paths.templateHtml, html).then(()=> {
+      resolve();
+    }).catch(err => { reject(err); });
+  });
+
+  // Task3: 拷贝react、react-dom
+  await Promise.all([
+    fs.promises.copyFile(
+      path.join(
+        paths.nodeModules, 
+        'react-dom', 
+        'umd', 
+        `react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js`),
+      path.join(
+        paths.public, 
+        'statics', 
+        `react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js`),
+    ), 
+    fs.promises.copyFile(
+      path.join(
+        paths.nodeModules, 
+        'react', 
+        'umd', 
+        `react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js`),
+      path.join(
+        paths.public, 
+        'statics', 
+        `react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js`),
+    ), 
+  ]);
 
   // get hostname
   //const hostname = cp.execSync("hostname | awk '{printf $1}'");

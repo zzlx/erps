@@ -167,8 +167,8 @@ if match_url:
     print 'open URL : %s' % url
 elif match_path:
     path = match_path.group()
-    vim.command('open ' + path)
-    print 'open path : %s' % path
+    vim.command('tabnew ' + path)
+    print 'tabnew path : %s' % path
 else:
     print 'fialed! : open URL'
 

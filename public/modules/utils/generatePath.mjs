@@ -1,14 +1,15 @@
 /**
+ * *****************************************************************************
+ *
  * Public API for generating a URL pathname from a path and parameters.
  *
- *
- *
- *
- *
- *
+ * *****************************************************************************
  */
 
-import pathToRegexp, { compile } from "./pathToRegexp.mjs";
+import { 
+  pathToRegexp, 
+  compile 
+} from "./path-to-regexp.mjs";
 
 const cache = {};
 const cacheLimit = 10000;

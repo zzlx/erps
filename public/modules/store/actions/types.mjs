@@ -1,4 +1,5 @@
 /**
+ *
  * Action types
  *
  */
@@ -147,6 +148,7 @@ const types = [
 ];
 
 const randomString = Math.random().toString(16).substring(7);
+
 const randomTypes = {};
 
 // add random string with types

@@ -1,6 +1,10 @@
 /**
+ * *****************************************************************************
+ *
  * Route component
  *
+ *
+ * *****************************************************************************
  */
 
 import Context from './Context.mjs';
@@ -10,10 +14,11 @@ import warning from '../utils/warning.mjs';
 export default class Route extends React.PureComponent {
   render() {
     if (this.props.title) {
-      window.document.title = this.props.title;
+      if (window && window.document) window.document.title = this.props.title;
     }
 
     const location = this.props.location ? this.props.location : window.location;
+
     const match = this.props.match
       ? this.props.match
       : this.props.path

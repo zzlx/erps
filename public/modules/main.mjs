@@ -3,33 +3,42 @@
  *
  * 前端主程序
  *
- * 功能:
+ * * 集成前端UI视图及客户端路由
+ * * store状态管理
+ * * 判断是否存在服务器端渲染内容,使用响应render方法
+ * * 执行渲染完成后任务
  *
- * * 集成UI及客户端路由
- * * 提供store对象给UI
- *
- * Email: wangxuemin@zzlx.org
  * *****************************************************************************
  */
 
-import App from './views/index.mjs';
-import callback from './callback.mjs';
+import Provider from './components/Provider.mjs';
+import Switcher from './Switcher.mjs';
+import routes from './routes/index.mjs';
 import store from './store/index.mjs';
+import callback from './callback.mjs';
 
-const element = App(store);
+// get element 
+const element = React.createElement(Provider, {
+  store: store
+}, Switcher(routes));
 
-// 准备container
+// get container
 let container = window.document.getElementById('root');
+
+// null container
 if (null == container) {
   container = window.document.createElement('div');
   container.id = 'root';
   window.document.body.appendChild(container);
 }
 
-// 判断container是否存在服务端渲染的内容
-// 需要使用hydrate方法合成页面
+// render optional
 if (container.innerHTML) {
+  // 判断container是否存在内容，服务端渲染后会
+  // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
+  // 使用hydrate方法合成页面
   ReactDOM.hydrate(element, container, callback);  
 } else {
+  // 在空的容器对象上渲染
   ReactDOM.render(element, container, callback);  
 }

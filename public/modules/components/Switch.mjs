@@ -13,9 +13,7 @@ import Context from './Context.mjs';
 import matchPath from '../utils/matchPath.mjs';
 
 export default class Switch extends React.Component {
-  static contextType = Context;
-
-  render() {
+  render () {
     const location = this.props.location 
       ? this.props.location 
       : { pathname: window.location.pathname };
@@ -45,10 +43,13 @@ export default class Switch extends React.Component {
   shouldComponentUpdate (nextProps, nextState) {
     return true;
   }
+}
 
-  componentDidUpdate (prevProps) {
-    if (process.env.NODE_ENV !== 'development') return;
+Switch.contextType = Context;
 
+/*
+if (process.env.NODE_ENV === 'development') {
+  Switch.prototype.componentDidUpdate = function (prevProps) {
     if (this.props.location && !prevProps.location) {
       console.warn(
         '<Switch> elements should not change from uncontrolled to controlled (or vice versa).' + 
@@ -64,3 +65,4 @@ export default class Switch extends React.Component {
     }
   }
 }
+*/
