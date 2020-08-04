@@ -1,11 +1,20 @@
 /**
+ * *****************************************************************************
+ *
+ * Html Parser
+ *
+ * @todo: 
+ * html字串解析、修改、再输出等功能
+ * 读取html模版并解析\插入服务端渲染内容
  *
  *
- *
+ * *****************************************************************************
  */
 
-export default class HtmlRender {
+export default class HtmlParser {
   constructor() {
+
+    this.sourceHtml = arguments[0];
     this.title = 'Undefined-Title';
     this.charset = 'UTF-8';
     this.body = null;
@@ -15,12 +24,15 @@ export default class HtmlRender {
 
     this.keywords = null;
 
-  }
+    // 解析html
+    if (this.sourceHtml) this.parse();
 
+  }
 
   setKeywords () {
     const keys = Array.prototype.slice.call(arguments);
     this.keywords = keys;
+    return this;
   }
 
   setCharset (value) {
@@ -41,8 +53,16 @@ export default class HtmlRender {
     return this;
   }
 
+  parse () {
+
+    return this
+  }
+
+  toHTML () {
+  }
+
   render () {
-    return `<!DOCTYPE html>
+    this.html = `<!DOCTYPE html>
 <html lang="zh-cmn-Hans">
   <head>
     <meta charset="${this.charset}" />
@@ -53,6 +73,9 @@ export default class HtmlRender {
     <script type="module" src="/modules/main.mjs"></script>
     <!-- 浏览器不支持es module时进行提醒⏰ -->
 		<script nomodule src="/modules/fallback.js"></script>
+    <script>
+      window.env = '${process.env.NODE_ENV}'
+    </script>
     <title>${this.title}</title>
   </head>
   <body>
@@ -60,5 +83,7 @@ export default class HtmlRender {
     <div id="root">${this.body || ''}</div>
   </body>
 </html>`;
+
+    return this.html; 
   }
 }

@@ -47,8 +47,7 @@ export default class Switch extends React.Component {
 
 Switch.contextType = Context;
 
-/*
-if (process.env.NODE_ENV === 'development') {
+if (env && env === 'development') {
   Switch.prototype.componentDidUpdate = function (prevProps) {
     if (this.props.location && !prevProps.location) {
       console.warn(
@@ -65,4 +64,3 @@ if (process.env.NODE_ENV === 'development') {
     }
   }
 }
-*/

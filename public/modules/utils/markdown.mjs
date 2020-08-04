@@ -1,10 +1,12 @@
 /**
- * Markdown工具库
+ *
+ * Markdown
  *
  */
 
-export default new Proxy({}, {
-});
+export default class Markdown {
+
+}
 
 /**
  * 流程图

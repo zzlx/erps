@@ -1,10 +1,42 @@
 /**
+ * *****************************************************************************
+ *
+ * CSV processor
+ *
  * 转换关联数组为csv字符串数组
  * Convert array object to csv string
  * @todo: 增加buffer\stream支持
+ *
+ * *****************************************************************************
  */
 
-export default function toCSV (value) {
+export default new Proxy({
+  toCSV,
+},{
+  /**
+   * getter
+   *
+   * @param {obj} target
+   * @param {string} property
+   * @param {obj} receiver
+   * @return {function}
+   */
+
+	get: function (target, property, receiver) {
+
+    if (target[property] == null) {
+      if (console && console.warn) {
+        console.warn(`The property '${property}' is not defined, please confirmed.`)
+      }
+
+      return () => {};
+    }
+
+		return Reflect.get(target, property, receiver);
+  },
+});
+
+function toCSV (value) {
 
 	if (!Array.isArray(value)) throw new TypeError('仅支持将数组对象转为CSV.');
 

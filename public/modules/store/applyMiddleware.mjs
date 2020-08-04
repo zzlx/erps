@@ -29,6 +29,7 @@ export default function applyMiddleware(middlewares) {
     };
 
     const middlewareAPI = {
+      getTypes: store.getTypes,
       getState: store.getState,
       dispatch: (...args) => _dispatch(...args)
     };

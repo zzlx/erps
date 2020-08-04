@@ -28,6 +28,7 @@ import isPlainObject from '../utils/isPlainObject.mjs';
 import getIn from '../utils/getIn.mjs';
 
 const $$observable = Symbol('observable');
+const Types = new Set(Object.values(types));
 
 export default function createStore(reducer, preloadedState, enhancer) {
   if (
@@ -193,6 +194,10 @@ export default function createStore(reducer, preloadedState, enhancer) {
       );
     }
 
+    if (!Types.has(action.type)) {
+      console.warn(`${action.type} is not a valid action.`);
+    }
+
     if (isDispatching) {
       throw new Error('Reducers may not dispatch actions.');
     }
@@ -280,21 +285,10 @@ export default function createStore(reducer, preloadedState, enhancer) {
   dispatch({ type: types.INIT });
 
   return _ref2 = {
-    actionTypes: types,
     dispatch: dispatch,
     subscribe: subscribe,
     getState: getState,
+    getTypes: () => types,
     replaceReducer: replaceReducer
   }, _ref2[$$observable] = observable, _ref2;
-}
-
-/**
- *
- *
- */
-
-class Store {
-  constructor() {
-
-  }
 }

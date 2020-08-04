@@ -2,6 +2,8 @@
  * *****************************************************************************
  *
  * 客户端路由交换机
+ * 
+ * 根据路由路径选择需要渲染的view
  *
  *
  *
@@ -12,18 +14,17 @@ import Redirect from './components/Redirect.mjs';
 import Route from './components/Route.mjs';
 import Switch from './components/Switch.mjs';
 
-export default function (routes) {
-  return React.createElement(Switch, null, routes.map((v, k) => {
-    const { view, ...rests } = v;
+export default class Switcher extends React.PureComponent {
+  render () {
+    let routeArray = [];
+    let i = 0;
 
-    const ViewPromise = import(`./views/${view}.mjs`);
-    const View = React.createElement(React.Suspense, {
-      fallback: () => 'Loading...'
-    }, React.lazy(() => ViewPromise));
+    for (let route of this.props.routes) {
+      routeArray.push(React.createElement(Route, { key: i++, ...route }));
+    }
 
-    return React.createElement(v.from ? Redirect : Route, { 
-      key: k,
-      ...rests,
-    }, View);
-  }));
+    return React.createElement(React.Suspense, {
+      fallback: 'Loading...',
+    }, React.createElement(Switch, null, routeArray));
+  }
 }

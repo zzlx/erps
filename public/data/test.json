@@ -1,0 +1,142 @@
+[
+  {
+    "type": "GET_CONFIGURATION",
+    "desc": "..."
+  },
+  {
+    "type": "GET_API_ADDRESS",
+    "desc": "获取API地址"
+  },
+  {
+    "type": "GRAPHQL_QUERY",
+    "desc": "执行一次graphql查询"
+  },
+  {
+    "type": "GRAPHQL_QUERY_RESULT",
+    "desc": "获取到graphql结果"
+  },
+  {
+    "type": "SET_API_ADDRESS",
+    "desc": "设置API地址"
+  },
+  {
+    "type": "REPLACE",
+    "desc": "Replace reducer action"
+  },
+  {
+    "type": "SET_PAGE_FOOTER",
+    "desc": "设置页脚数据"
+  },
+  {
+    "type": "SAVE_DATA",
+    "desc": "保存数据"
+  },
+  {
+    "type": "ACTION_ERROR",
+    "desc": "动作错误"
+  },
+  {
+    "type": "ACTION_TYPE_ERROR",
+    "desc": "动作类型错误"
+  },
+  {
+    "type": "DATA_READ_FROM_FILE",
+    "desc": "DATA_READ_FROM_FILE"
+  },
+  {
+    "type": "DATA_UPDATE",
+    "desc": "数据更新"
+  },
+  {
+    "type": "DRAG",
+    "desc": "拖动操作"
+  },
+  {
+    "type": "DROP",
+    "desc": "放入操作"
+  },
+  {
+    "type": "GRAPHQL_API_QUERY",
+    "desc": "执行GRAPHQL API查询."
+  },
+  {
+    "type": "GRAPHQL_API_REVEIVE_DATA",
+    "desc": "收到GRAPHQL_API返回数据."
+  },
+  {
+    "type": "HISTORY_PUSH_STATE",
+    "desc": "无状态刷新"
+  },
+  {
+    "type": "HISTORY_REDIRECT",
+    "desc": "页面重定向"
+  },
+  {
+    "type": "INIT",
+    "desc": "系统初始化."
+  },
+  {
+    "type": "LOCK_SCREEN",
+    "desc": "锁屏"
+  },
+  {
+    "type": "LOGOUT",
+    "desc": "退出登录"
+  },
+  {
+    "type": "MATRIX",
+    "desc": "MATRIX"
+  },
+  {
+    "type": "MODAL_CLOSE",
+    "desc": "MODAL_CLOSE"
+  },
+  {
+    "type": "MODAL_OPEN",
+    "desc": "MODAL_OPEN"
+  },
+  {
+    "type": "MOVE_BLOCK",
+    "desc": "MOVE_BLOCK"
+  },
+  {
+    "type": "MUTATION",
+    "desc": "MUTATION"
+  },
+  {
+    "type": "NEXT_BLOCK",
+    "desc": "NEXT_BLOCK"
+  },
+  {
+    "type": "PROBE_UNKNOWN_ACTION",
+    "desc": "PROBE_UNKNOWN_ACTION"
+  },
+  {
+    "type": "PROFILES_THEME_UPDATE",
+    "desc": "更新主题"
+  },
+  {
+    "type": "PROMISE_ACTION_PROCESS",
+    "desc": "PROMISE_ACTION_PROCESS"
+  },
+  {
+    "type": "PROMISE_ACTION_SUCCESS",
+    "desc": "PROMISE_ACTION_SUCCESS"
+  },
+  {
+    "type": "READ_DATA_FORM_CSV",
+    "desc": "READ_DATA_FROM_CSV"
+  },
+  {
+    "type": "RECEIVE_DATA",
+    "desc": "RECEIVE_DATA"
+  },
+  {
+    "type": "SET_VISIBILITY_FILTER",
+    "desc": "SET_VISIBILITY_FILTER"
+  },
+  {
+    "type": "ZZZ",
+    "desc": "休眠"
+  }
+]

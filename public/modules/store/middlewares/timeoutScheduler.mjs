@@ -6,11 +6,13 @@
 
 export default store => next => action => {
   if (action && action.meta && action.meta.delay) {
-    const timeoutId = setTimeout(
+
+    const timeout = setTimeout(
       () => next(action),
       action.meta.delay
     );
-    return () => clearTimeout(timeoutId);
+
+    return () => clearTimeout(timeout);
   }
 
   return next(action);

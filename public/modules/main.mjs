@@ -13,14 +13,14 @@
 
 import Provider from './components/Provider.mjs';
 import Switcher from './Switcher.mjs';
-import routes from './routes/index.mjs';
+import routes from './routes.mjs';
 import store from './store/index.mjs';
 import callback from './callback.mjs';
 
 // get element 
 const element = React.createElement(Provider, {
   store: store
-}, Switcher(routes));
+}, React.createElement(Switcher, { routes }));
 
 // get container
 let container = window.document.getElementById('root');

@@ -1,7 +1,14 @@
 // private modules
 import applyMiddleware from './applyMiddleware.mjs';
 import combineReducers from './combineReducers.mjs';
-import * as middlewares from './middlewares/index.mjs';
+
+import crashReporter from './middlewares/crashReporter.mjs';
+import thunk from './middlewares/thunk.mjs';
+import promise from './middlewares/promise.mjs';
+import timestamp from './middlewares/timestamp.mjs';
+import timeoutScheduler from './middlewares/timeoutScheduler.mjs';
+import logger from './middlewares/logger.mjs';
+
 import monitorReducers from './enhancers/monitorReducers.mjs';
 import createStore from './createStore.mjs';
 import compose from './compose.mjs';
@@ -32,16 +39,14 @@ export default function configureStore (opts) {
 
   // middleware enhancer
   const middlewareArray = [
-    middlewares.crashReporter, 
-    middlewares.thunk,
-    middlewares.promise,
-    middlewares.timestamp,
-    middlewares.timeoutScheduler,
+    crashReporter, 
+    thunk,
+    promise,
+    timestamp,
+    timeoutScheduler,
   ];
 
-  //if (process.env.NODE_ENV === 'development') {
-    middlewareArray.push(middlewares.logger)
-  //}
+  if (env && env === 'development') middlewareArray.push(logger);
 
   const middlewareEnhancer = applyMiddleware(middlewareArray); 
 
@@ -53,6 +58,7 @@ export default function configureStore (opts) {
 
   const store = createStore(reducerObj, preloadedState, enhancer);
 
+  // 客户端存储数据
   store.subscribe(() => {
     window.localStorage.setItem(opts.storeKey, JSON.stringify(store.getState()));
   });

@@ -12,6 +12,7 @@ import matchPath from '../utils/matchPath.mjs';
 import warning from '../utils/warning.mjs';
 
 export default class Route extends React.PureComponent {
+
   render() {
     if (this.props.title) {
       if (window && window.document) window.document.title = this.props.title;
@@ -29,56 +30,35 @@ export default class Route extends React.PureComponent {
 
     const props = { location, match };
 
+    // 优先级 children >>
     let { children, component, render } = this.props;
 
-    if (Array.isArray(children) && children.length === 0) children = null;
+    if (children && React.isValidElement(children)) {
+      return React.cloneElement(children, props);
+    }
 
-    if ('function' === typeof children) {
-      if ('function' === typeof children.constructor) {
-        children = React.createElement(children, props);
-      } else {
-        children = children(props);
+    if (component) {
+      if (typeof component === 'function') {
+        return component(props);
       }
 
-      if (children === undefined) {
-        /*
-        if (process.env.NODE_ENV === 'development') {
-          const { path } = this.props;
-          warning(false,
-            "You returned `undefined` from the `children` function of " +
-              `<Route${path ? ` path="${path}"` : ""}>, but you ` +
-              "should have returned a React element or `null`"
-          );
-        }
-        */
-
-        children = null;
+      if (typeof component.constructor === 'function') {
+        return React.createElement(component, props);
       }
     }
 
-    return children && React.Children.count(children) !== 0 ? children : null;
+    if (render && typeof render === 'function') {
+      return render(props);
+    }
+
+    // @todo: 组合输出所有配置的组件 
+    return null;
   }
 }
 
 Route.contextType = Context;
  
-/*
-if (process.env.NODE_ENV === 'development') {
-  Route.propTypes = {
-    children: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
-    component: PropTypes.any,
-    exact: PropTypes.bool,
-    location: PropTypes.object,
-    path: PropTypes.oneOfType([
-      PropTypes.object,
-      PropTypes.string,
-      PropTypes.arrayOf(PropTypes.string)
-    ]),
-    render: PropTypes.func,
-    sensitive: PropTypes.bool,
-    strict: PropTypes.bool
-  };
-
+if (env && env === 'development') {
   Route.prototype.componentDidMount = function() {
     const isEmptyChildren = (children) => React.Children.count(children) === 0;
 
@@ -118,4 +98,3 @@ if (process.env.NODE_ENV === 'development') {
     );
   };
 }
-*/

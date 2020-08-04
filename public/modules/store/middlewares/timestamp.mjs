@@ -1,17 +1,16 @@
 /**
+ * *****************************************************************************
+ *
  * add timestamp to action.meta.timestamp
  *
- *
- *
- *
- *
- *
+ * *****************************************************************************
  */
 
 export default store => next => action => {
   if (action) {
+
     const newAction = Object.assign({}, action, {
-      meta: Object.assign({}, action.meta, {timestamp: Date.now()})
+      meta: Object.assign({}, action.meta, { timestamp: Date.now() })
     });
 
     return next(newAction);

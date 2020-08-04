@@ -24,7 +24,7 @@ import zlib from 'zlib';
 import config from '../server/config.mjs';
 import parseArgvs from '../server/utils/parseArgvs.mjs';
 import sass from '../server/utils/sass.mjs';
-import HtmlParser from './utils/HtmlParser.mjs';
+import HtmlParser from '../public/modules/utils/HtmlParser.mjs';
 
 const __filename = import.meta.url.substr(7);
 const FILE_NAME = path.basename(__filename, path.extname(__filename));

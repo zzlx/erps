@@ -6,24 +6,15 @@
  * *****************************************************************************
  */
 
+import store from './store/index.mjs';
+import path from './utils/path.mjs';
+
 export default function () {
-
   console.info(
-  `前端程序已准备就绪...
-操作使用过程中如遇到问题,请通知管理员进行处理. 
-Email: wangxuemin@zzlx.org.`);
+    `UI程序已就绪,使用过程中如遇到问题,请通知系统管理员. 
+Email: wangxuemin@zzlx.org.`
+  );
 
-  //return; // bypass the rest tasks
-
-  // Tasks:
-  //
-  // 1. 测试import动态加载模块功能
-  import('./routes/index.mjs').then(m => m.default).then(routes => {
-    console.log('task1:success');
-    //console.log(routes);
-  });
-
-  // 2. 测试模块url地址
-  console.log('当前模块url:', import.meta.url);
+  if (env && env === 'development') console.warn(`当前环境为: ${env}.`); 
 
 }
