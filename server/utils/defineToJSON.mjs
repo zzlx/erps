@@ -2,15 +2,7 @@
  * The `defineToJSON()` defines toJSON() and inspect() prototype methods,
  * if no function provided they become aliases for toString().
  *
- *
- *
- *
- *
  */
-
-const nodejsCustomInspectSymbol = typeof Symbol === 'function' 
-  ? Symbol.for('nodejs.util.inspect.custom') 
-  : undefined;
 
 // eslint-disable-next-line flowtype/no-weak-types
 export default function defineToJSON(classObject) {
@@ -20,6 +12,10 @@ export default function defineToJSON(classObject) {
 
   classObject.prototype.toJSON = fn;
   classObject.prototype.inspect = fn;
+
+  const nodejsCustomInspectSymbol = typeof Symbol === 'function' 
+    ? Symbol.for('nodejs.util.inspect.custom') 
+    : undefined;
 
   if (nodejsCustomInspectSymbol) {
     classObject.prototype[nodejsCustomInspectSymbol] = fn;

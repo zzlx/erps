@@ -72,7 +72,6 @@ export class Lexer {
 
 /**
  * A helper function to describe a token as a string for debugging
- *
  */
 
 export function getTokenDesc(token) {

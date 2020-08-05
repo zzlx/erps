@@ -60,7 +60,9 @@ function graphqlImpl(
   // Validate
   const validationErrors = validate(schema, document);
 
-  if (validationErrors.length > 0) return { errors: validationErrors };
+  if (validationErrors.length > 0) {
+    return { errors: validationErrors };
+  }
 
   // Execute
   return execute(

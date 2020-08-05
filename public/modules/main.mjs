@@ -15,7 +15,6 @@ import Provider from './components/Provider.mjs';
 import Switcher from './Switcher.mjs';
 import routes from './routes.mjs';
 import store from './store/index.mjs';
-import callback from './callback.mjs';
 
 // get element 
 const element = React.createElement(Provider, {
@@ -32,6 +31,9 @@ if (null == container) {
   window.document.body.appendChild(container);
 }
 
+// add className to container
+container.classList.add('d-flex', 'flex-column', 'w-100', 'h-100', 'mx-auto');
+
 // render optional
 if (container.innerHTML) {
   // 判断container是否存在内容，服务端渲染后会
@@ -41,4 +43,13 @@ if (container.innerHTML) {
 } else {
   // 在空的容器对象上渲染
   ReactDOM.render(element, container, callback);  
+}
+
+function callback () {
+  console.info(
+    `UI程序已就绪,使用过程中如遇到问题,请通知系统管理员. 
+Email: wangxuemin@zzlx.org.`
+  );
+
+  if (env && env === 'development') console.warn(`当前环境为: ${env}.`); 
 }

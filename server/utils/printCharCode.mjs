@@ -15,5 +15,4 @@ export default function printCharCode(code) {
   );
 }
 
-// test
-//console.log(printCharCode(900));
+//console.log(printCharCode(900)); // test
