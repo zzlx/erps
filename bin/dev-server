@@ -39,7 +39,11 @@ options = {
 sub_process = cp.spawn('node', Args.concat(['--start']), options);
 
 const clearInterval = setInterval(() => {
-  const changed = readdir(path.join(APP_ROOT, 'server'));
+  const changed = readdir(
+    path.join(APP_ROOT, 'public'),
+    path.join(APP_ROOT, 'server'),
+    path.join(APP_ROOT, 'scss'),
+  );
 	if (changed) {
 		sub_process = cp.spawn('node', Args.concat(['--restart']), options);
 	}
@@ -79,8 +83,24 @@ process.nextTick(() => {
 
 const storeMap = new Map();
 
-function readdir (dir) {
+function readdir () {
 	let hasChanged = false;
+
+  const dir = arguments.length === 1 
+    ? arguments[0]
+    : Array.prototype.slice.call(arguments);
+
+  if (Array.isArray(dir)) {
+    for (let d of dir) {
+      hasChanged = readdir(d);
+      if (hasChanged) break;
+    }
+
+    return hasChanged;
+  }
+
+  if (typeof dir !== 'string') throw Error('Please provide a directory path.');
+
   const files = fs.readdirSync(dir, {withFileTypes: true});
 
 	for (let file of files) {

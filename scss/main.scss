@@ -5,10 +5,9 @@
  * 🌿基于bootstrap开发.
  * 🌿添加了自定义的theme、组件等文件.
  * 🌿使用node-sass编译生成.
- *
  */
 
-@import "theme"; // theme
+@import "settings"; // theme
 
 // bootstrap styles
 @import "../node_modules/bootstrap/scss/functions";
@@ -57,3 +56,4 @@
 @import "gitter";
 @import "placeholder";
 @import "custom";
+@import "page";

@@ -8,25 +8,18 @@
  * @api public
  */
 
-import Markable from 'remarkable';
+import markdown from '../utils/markdown.mjs';
 
-export default function Markdown (opts = {}) {
-  const markdown = new Markable('commonmark');
-  const $$typeof = Symbol.for('react.element');
-  let type = 'div';
-  let props = opts;
+export default function Markdown (props) {
+  const { className, children, ...rests} = props;
 
-  if (opts.$$typeof === $$typeof) {
-    type = opts.type
-    props = opts.props;
-  }
+  const cn = [
+    className,
+  ].filter(Boolean).join(' ');
 
-  const { calssName, children, ...rests} = props;
-  const cn = ['markdown', className].filter(Boolean);
-
-  return React.createElement(type, {
-    className: cn.join(' '),
+  return React.createElement('div', {
+    className: cn,
     ...rests,
-    dangerouslySetInnerHTML: {__html: markdown.render(children)},
+    dangerouslySetInnerHTML: { __html: markdown(children) },
   });
 } 

@@ -1,24 +1,35 @@
 /**
+ *
  * 页脚组件
  *
  * 结构化组件
+ *
  */
 
 export default function Footer (props) {
-  const { className, ...rests } = props;
+  const { 
+    fluid,
+    className, ...rests } = props;
 
   // 应用footer类名 
-  const cn = [
-    'footer', // 与组件同名的样式类名
+  const footerCN = [
+    'footer',
     'd-print-none',
-    'p-2',
-    'font-weight-light',
-    'bg-gradient-primary',
     className,
   ].filter(Boolean).join(' ');
 
-  return React.createElement('footer', {
-    className: cn,
-    ...rests,
+  const innerCN = [
+    fluid ? 'container-fluid' : 'container',
+    'font-weight-light',
+    'p-2',
+  ].filter(Boolean).join(' ');
+
+  const inner = React.createElement('div', {
+    className: innerCN,
+    ...rests
   });
+
+  return React.createElement('footer', {
+    className: footerCN,
+  }, inner);
 }

@@ -1,16 +1,19 @@
 /**
  * *****************************************************************************
  *
- * 首页面前端程序
+ * 主页面程序
  *
- * @file HomePage.mjs
+ *
  * *****************************************************************************
  */
 
+// 
 import Context from '../components/Context.mjs';
-import Container from '../components/Container.mjs';
+import Cover from '../components/Cover.mjs';
+import Circular from '../components/Circular.mjs';
+import Footer from '../components/Footer.mjs';
+import Markdown from '../components/Markdown.mjs';
 import Placeholder from '../components/Placeholder.mjs';
-import debug from '../utils/debug.mjs';
 
 export default class HomePage extends React.PureComponent {
   constructor(props, context) {
@@ -23,10 +26,18 @@ export default class HomePage extends React.PureComponent {
 
   render () {
     const { store } = this.context;
+    const header = React.createElement('header', {
+      className: 'mb-auto'
+    }, 'HomePage');
 
-    return React.createElement(Container, {
+    const circular = React.createElement(Circular, {size: "45"});
+    const footer_inner = React.createElement(Markdown, null, 'Copyritht All rights reserved.');
+    const footer = React.createElement(Footer, {
+      className: 'mt-auto bg-gradient-default text-white',
       fluid: true,
-    }, 'Homepage');
+    }, footer_inner); 
+
+    return React.createElement(Cover, { }, header, circular, footer); 
   }
 
   componentDidMount() {

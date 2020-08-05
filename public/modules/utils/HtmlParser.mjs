@@ -13,7 +13,6 @@
 
 export default class HtmlParser {
   constructor() {
-
     this.sourceHtml = arguments[0];
     this.title = 'Undefined-Title';
     this.charset = 'UTF-8';
@@ -22,7 +21,8 @@ export default class HtmlParser {
       { crossorigin: false },
     ];
 
-    this.keywords = null;
+    this.keywords = ["HomePage", "ERP"];
+    this.description = "HomePage";
 
     // 解析html
     if (this.sourceHtml) this.parse();
@@ -66,7 +66,10 @@ export default class HtmlParser {
 <html lang="zh-cmn-Hans">
   <head>
     <meta charset="${this.charset}" />
+    <meta name="keywords" content="${this.keywords.join(',')}" />
+    <meta name="description" content="${this.description || ''}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>${this.title}</title>
     <link rel="stylesheet" href="/statics/styles.css" />
     <script src="/statics/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js"></script>
     <script src="/statics/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js"></script>
@@ -76,7 +79,6 @@ export default class HtmlParser {
     <script>
       window.env = '${process.env.NODE_ENV}'
     </script>
-    <title>${this.title}</title>
   </head>
   <body>
     <noscript>请确认已启用javascript支持.</noscript>

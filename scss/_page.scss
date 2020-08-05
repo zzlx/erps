@@ -1,0 +1,10 @@
+// page layout
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+.footer p:last-child {
+  margin-bottom: 0;
+}

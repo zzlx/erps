@@ -24,7 +24,7 @@ export default function Container (props) {
 
   if (bp && breakpoints.indexOf(bp) === -1) {
     console.warn(bp + ' is not a valid breakpoint for Container component!');
-    bp = null;
+    bp = 'md';
   }
 
   // 根据props属性构造className
