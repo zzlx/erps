@@ -1,12 +1,16 @@
 /**
+ * *****************************************************************************
+ *
+ * Ellipse
  * 圆形组件
  *
+ * *****************************************************************************
  */
 
-export default function (props) {
+export default function Ellipse (props) {
   const { data, fill, stroke, strokeWidth, cx, ...rests } = props;
 
-  const Ellipse = React.createElement('ellipse', {
+  const ellipse = React.createElement('ellipse', {
     ...rests,
     fill: fill || 'snow',
     stroke: stroke || 'red',
@@ -22,5 +26,5 @@ export default function (props) {
     width: "100%",
     height: "100%",
     xmlns: "http://www.w3.org/2000/svg",
-  }, Ellipse);
+  }, ellipse);
 }

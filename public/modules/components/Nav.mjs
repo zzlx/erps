@@ -1,9 +1,12 @@
 /**
- * Nav 组件
+ *
+ * Nav
+ *
+ * 导航组件
  *
  */
 
-import Context from './RootContext.mjs';
+import Context from './Context.mjs';
 import { historyPushState } from '../store/actions/index.mjs';
 
 export default class Nav extends React.PureComponent {

@@ -14,6 +14,7 @@ import os from 'os';
 import util from 'util';
 
 import Koa from './koa/Application.mjs';
+import cors from './koa/middlewares/cors.mjs';
 import cookies from './koa/middlewares/cookies.mjs';
 import error from './koa/middlewares/error.mjs';
 import log from './koa/middlewares/log.mjs';
@@ -28,6 +29,7 @@ const app = new Koa();
 app.use(error());            // 捕获中间件级错误
 app.use(log());              // request log
 app.use(xResponse());        // 记录中间件响应时间
+app.use(cors());             // 跨域访问
 app.use(cookies());          // cookie读写及签名
 app.use(router.routes());
 app.use(router.allowedMethods());

@@ -19,8 +19,6 @@
  * *****************************************************************************
  */
 
-import Element from './Element.mjs';
-
 export default class Alert extends React.PureComponent {
   constructor (props) {
     super(props);
@@ -66,9 +64,16 @@ export default class Alert extends React.PureComponent {
 			if (!React.isValidElement(child)) return child;
 
       if (i === 0 && /^h[1-6]$/.test(child.type)) {
-        const el = new Element(child);
-        el.classList.add('alert-heading');
-        child = el.element;
+
+        const className = child.props.className;
+        const cn = [
+          'alert-heading',
+          child.props.className,
+        ].filter(Boolean).join(' ');
+
+        child = React.cloneElement(child, {
+          className: cn,
+        });
       }
 
       return child;

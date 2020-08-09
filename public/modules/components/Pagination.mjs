@@ -1,5 +1,8 @@
 /**
- * Pagination component
+ *
+ * Pagination
+ *
+ * 分页组件
  *
  * @todos: 能根据显示项目进行自动分页,
  * 1页显示完的不显示分页栏,

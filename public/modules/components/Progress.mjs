@@ -1,11 +1,15 @@
 /**
+ *
  * Progress 
  * @props striped bool 是否显示条纹样式
+ *
  */
 
 export default class Progress extends React.PureComponent {
   render() {
-    const {min, now, max, label,striped, animated} = this.props;
+    const { 
+      min, now, max, label,striped, animated
+    } = this.props;
 
     return React.createElement('div', { className: 'progress' }, 
       React.createElment('div', {

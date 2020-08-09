@@ -1,12 +1,13 @@
 /**
- * 数据表格
+ * *****************************************************************************
  *
- * 直接从关联数组生成表格
+ * Table
  *
+ * 表格组件: 直接从关联数组生成表格
+ *
+ * *****************************************************************************
  */
 
-const isNumber = (value) => typeof value === 'number' || 
-		typeof value === 'string' && Number.isFinite(Number(value.replace(/[,?]/g, '')));
 export default function Table (props) {
   const { 
     data, 
@@ -50,7 +51,10 @@ function Tbody(props) {
       // 自动格式化单元格
       const cn = [];
       // 数字格式右对齐 
-      const isNum = isNumber(v);
+      
+      const isNum = typeof v === 'number' || typeof v === 'string' && Number.isFinite(Number(v.replace(/[,?]/g, '')));
+
+
       if (isNum) {
         cn.push('text-right');
         cn.push('text-nowrap');

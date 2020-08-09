@@ -1,8 +1,7 @@
 /**
  * *****************************************************************************
  *
- * 主页面程序
- *
+ * 登陆页面
  *
  * *****************************************************************************
  */
@@ -14,7 +13,7 @@ import Markdown from '../components/Markdown.mjs';
 import Placeholder from '../components/Placeholder.mjs';
 import Picture from '../components/Picture.mjs';
 
-export default class HomePage extends React.Component {
+export default class Login extends React.PureComponent {
   constructor(props, context) {
     super(props);
     this.state = { };
@@ -24,7 +23,7 @@ export default class HomePage extends React.Component {
     const { store } = this.context;
     const header = React.createElement('header', {
       className: 'mb-auto'
-    }, 'HomePage');
+    }, 'login');
 
     const circular = React.createElement(Circular, {size: "145"});
     const footer_inner = React.createElement(Markdown, null,'Copyritht All rights reserved.');
@@ -35,8 +34,6 @@ export default class HomePage extends React.Component {
 
     return React.createElement(React.Fragment, { }, 
       header, 
-      circular, 
-      circular, 
       footer
     ); 
   }
@@ -46,12 +43,6 @@ export default class HomePage extends React.Component {
     const types = store.getTypes();
 
     store.dispatch({type: types.ZZZ});
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return false;
-    if (this.props == nextProps) return false;
-    else return true;
   }
 }
 

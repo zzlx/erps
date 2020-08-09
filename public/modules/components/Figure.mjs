@@ -1,8 +1,11 @@
 /**
+ * *****************************************************************************
+ *
  * Figure component
  *
  * for displaying related images and text 
  *
+ * *****************************************************************************
  */
 
 export default function Figure (props) {

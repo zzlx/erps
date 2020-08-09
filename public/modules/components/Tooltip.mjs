@@ -1,6 +1,9 @@
 /**
- * Tooltip组件
+ *
+ * Tooltip
+ * 工具提示组件
  * 
+ *
  */
 
 export default function tooltip (props) {

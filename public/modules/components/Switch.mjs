@@ -1,11 +1,10 @@
 /**
  * *****************************************************************************
  *
- * Switch component
+ * Switch
  *
  * 路由交换组件: 用于匹配路由,最快速的渲染匹配的子组件
  *
- * @file Switch.mjs
  * *****************************************************************************
  */
 
@@ -37,11 +36,12 @@ export default class Switch extends React.Component {
     if (match == null) return null;
 
     // 渲染匹配到的子组件
-    return React.cloneElement(element, { location, match, });
+    return React.cloneElement(element, { location, match });
   }
 
   shouldComponentUpdate (nextProps, nextState) {
     return true;
+    //return false;
   }
 }
 

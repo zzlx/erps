@@ -1,9 +1,11 @@
 /**
+ *
  * withOnLine
  * 
  */
 
 export default function withOnLine(Component) {
+
   return class extends React.Component {
     constructor(props) {
       super(props);

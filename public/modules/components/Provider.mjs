@@ -1,12 +1,15 @@
 /**
  * *****************************************************************************
+ *
  * Provider
  * 
  * 为子组件提供context数据
+ *
  * *****************************************************************************
  */
 
 import Context from './Context.mjs';
+import shallowEqual from '../utils/shallowEqual.mjs';
 
 export default class Provider extends React.Component {
   constructor(props) {
@@ -26,7 +29,7 @@ export default class Provider extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.subscribe();
+    this.subscribe(); // 订阅store更新
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -47,9 +50,10 @@ export default class Provider extends React.Component {
   }
 
   subscribe() {
-    const { store } = this.props;
+    const store = this.props.store;
 
     this.unsubscribe = store.subscribe(() => {
+
       const newState = store.getState();
 
       // 防止unMount后，继续订阅store变化
@@ -57,7 +61,10 @@ export default class Provider extends React.Component {
 
       this.setState(prevState => {
         // If the value is the same, skip the unnecessary state update.
-        if (prevState.storeState === newState) return null;
+        if (shallowEqual(prevState.storeState, newState)) {
+          return null;
+        }
+
         return { storeState: newState };
       });
     });

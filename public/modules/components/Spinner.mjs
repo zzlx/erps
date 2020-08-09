@@ -1,16 +1,14 @@
 /**
+ * *****************************************************************************
+ *
  * Spinner
+ *
  * Indicate the loading state of a component or page 
  *
- *
- *
+ * *****************************************************************************
  */
 
-export default function spinner (props) {
-  return React.createElement(Spinner, props);
-}
-
-class Spinner extends React.PureComponent {
+export default class Spinner extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = { 
@@ -57,7 +55,7 @@ class Spinner extends React.PureComponent {
     }, 1000);
 
     // 10秒种后设置隐藏状态
-    window.setTimeout(() => {
+    this.timeout = setTimeout(() => {
       this.setState(state => ({display: false }));
     }, 10 * 1000);
 
@@ -65,6 +63,7 @@ class Spinner extends React.PureComponent {
 
   componentWillUnmount() {
     if (this.timer) clearInterval(this.timer);
+    if (this.timeout) clearTimeout(this.timeout);
   }
 }
 

@@ -1,9 +1,5 @@
-React 组件
-===========
+Components
+==========
 
-展示型组件(Presentational Components)
-
-
-# 生命周期
-
-# 生命周期
+展示型组件(Presentational Component)
+容器组件(Container Component)

@@ -1,4 +1,6 @@
 /**
+ *
+ * PictureCollection
  * 图片采集器
  *
  *
@@ -6,7 +8,7 @@
 
 import Button from '../components/Button.mjs';
 
-export default class MHome extends React.PureComponent {
+export default class PictureCollection extends React.PureComponent {
   constructor (props) {
     super(props);
     this.state = { 
@@ -87,7 +89,7 @@ export default class MHome extends React.PureComponent {
   }
 }
 
-MHome.prototype.componentDidMount = function () {
+PictureCollection.prototype.componentDidMount = function () {
   // 异步获取视频设备列表
   window.navigator.mediaDevices.enumerateDevices().then(devices => {
     let vedioDevices = [];
@@ -116,7 +118,7 @@ MHome.prototype.componentDidMount = function () {
 
 }
 
-MHome.prototype.photo = function (deviceId) {
+PictureCollection.prototype.photo = function (deviceId) {
   const video = document.querySelector("#video_a4");
   const constraints = window.navigator.mediaDevices.getSupportedConstraints();
   console.log(constraints);

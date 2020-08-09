@@ -1,7 +1,7 @@
 README
 ======
 
-此目录用于存放前端资源
+前端资源目录用于存放html\css\js等资源
 
 > ⚠️ 注意
 > 部署UI前端程序时此目录会暴露于互联网，
@@ -25,5 +25,6 @@ README
 
 # 版权说明
 
+MIT License
 Copyright (c) 2019-present zzlx.org
 All rights reserved.

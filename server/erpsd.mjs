@@ -23,7 +23,9 @@ import zlib from 'zlib';
 import config from '../server/config.mjs';
 import parseArgvs from '../server/utils/parseArgvs.mjs';
 import sass from '../server/utils/sass.mjs';
-import HtmlParser from '../public/modules/utils/HtmlParser.mjs';
+
+// @todo: 服务器端渲染支持
+import HtmlParser from './utils/HtmlParser.mjs';
 
 const __filename = import.meta.url.substr(7);
 const FILE_NAME = path.basename(__filename, path.extname(__filename));
@@ -210,10 +212,12 @@ async function start () {
   });
 
   http2server.listen({
-      ipv6Only: false, // 是否仅开启IPV6
-      host: process.env.IPV6 ? '::' : '0.0.0.0', // 绑定服务器主机名
-      port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000,
-      exclusive: false, // false 可接受进程共享端口, 支持集群服务器配置
+    ipv6Only: false, // 是否仅开启IPV6
+    host: '::',      // '::'/'0.0.0.0'/绑定服务器主机名或IP地址
+    port: process.env.PORT 
+      ? Number.parseInt(process.env.PORT, 10) 
+      : process.env.NODE_ENV === 'development' ? 3000 : 8000,
+    exclusive: false, // false 可接受进程共享端口, 支持集群服务器配置
   });
 }
 

@@ -1,199 +1,343 @@
 /**
  * *****************************************************************************
  *
- * md5算法
+ * MD5 (Message-Digest Algorithm)
+ * ==============================
+ *
+ * 一种密码散列函数,产生出一个128位的散列值,用于确保信息传输完整一致.
+ *
+ * # MD5算法的原理
+ *
+ * MD5码以512位分组来处理输入的信息，且每一分组又被划分为16个32位子分组，
+ * 经过处理后，输出由四个32位即128位散列值。
+ *
+ * # 算法步骤
+ *
+ * ## 1. 按位补充数据
+ *
+ * 在MD5算法中，首先需要对信息进行填充，这个数据按位(bit)补充，
+ * 要求最终的位数对512求模的结果为448。
+ * 也就是说数据补位后，其位数长度只差64位(bit)就是512的整数倍。
+ * 即便是这个数据的位数对512求模的结果正好是448也必须进行补位。
+ * 补位的实现过程：首先在数据后补一个1 bit； 接着在后面补上一堆0 bit,
+ * 直到整个数据的位数对512求模的结果正好为448。总之，至少补1位，而最多可能补512位
+ *
+ * ## 2. 扩展长度 
+ *
+ * 在完成补位后，又将一个表示数据原始长度的64 bit数补在最后。
+ * 这是对原始数据没有补位前长度的描述，用二进制来表示。 
+ * 当完成补位及补充数据的描述后，得到的结果数据长度正好是512的整数倍。
+ * 也就是说长度正好是16个(32bit) 字的整数倍
+ *
+ * ## 3. 初始化MD缓存器
+ *
+ * MD5运算要用到一个128位的MD5缓存器，用来保存中间变量和最终结果。
+ * 该缓存器又可看成是4个32位的寄存器A、B、C、D，初始化为:
+ *
+ * * A： 01 23 45 67
+ * * B： 89 ab cd ef
+ * * C： fe dc ba 98
+ * * D： 76 54 32 10
+ *
+ * ## 4. 处理数据段
+ *
+ * 首先定义4个非线性函数F、G、H、I，对输入的报文运算以512位数据段为单位进行处理。
+ * 对每个数据段都要进行4轮的逻辑处理，在4轮中分别使用4个不同的函数F、G、H、I。
+ * 每一轮以ABCD和当前的512位的块为输入，处理后送入ABCD(128位)。
+ *
+ * ## 5. 输出
+ *
+ * 信息摘要最终处理成以A, B, C, D 的形式输出。
+ * 也就是开始于A的低位在前的顺序字节，结束于D的高位在前的顺序字节。
  *
  * *****************************************************************************
  */
 
-export default function md5_browser (bytes) {
-  if (typeof(bytes) == 'string') {
-    var msg = unescape(encodeURIComponent(bytes)); // UTF8 escape
-    bytes = new Array(msg.length);
-    for (var i = 0; i < msg.length; i++) bytes[i] = msg.charCodeAt(i);
+console.log(md5('18039105900')); // test
+
+export default function md5(string) {
+
+  function md5_RotateLeft(lValue, iShiftBits) {
+    // 左移iShift bits
+    // 右移32-iShift bits
+    // 按位或前2步结果
+    return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
   }
 
-  return md5ToHexEncodedArray(
-    wordsToMd5(
-      bytesToWords(bytes)
-      , bytes.length * 8)
-  );
-}
+  function md5_AddUnsigned(lX, lY) {
+    // 32位操作数
+    // 二进制1后跟0或1的数量
+    const b31z   = 0b10000000000000000000000000000000;
+    const b30z   = 0b01000000000000000000000000000000;
+    const b30o   = 0b00111111111111111111111111111111;
+    const b1130z = 0b11000000000000000000000000000000;
 
-/*
-* Convert an array of little-endian words to an array of bytes
-*/
-function md5ToHexEncodedArray(input) {
-  var i;
-  var x;
-  var output = [];
-  var length32 = input.length * 32;
-  var hexTab = '0123456789abcdef';
-  var hex;
+    const lX8 = (lX & b31z),
+          lY8 = (lY & b31z),
+          lX4 = (lX & b30z),
+          lY4 = (lY & b30z),
+          lResult = (lX & b30o) + (lY & b30o);
 
-  for (i = 0; i < length32; i += 8) {
-    x = (input[i >> 5] >>> (i % 32)) & 0xFF;
+    if (lX4 & lY4) {
+      return (lResult ^ b31z ^ lX8 ^ lY8);
+    }
 
-    hex = parseInt(hexTab.charAt((x >>> 4) & 0x0F) + hexTab.charAt(x & 0x0F), 16);
-
-    output.push(hex);
-  }
-  return output;
-}
-
-/*
-* Calculate the MD5 of an array of little-endian words, and a bit length.
-*/
-function wordsToMd5(x, len) {
-  /* append padding */
-  x[len >> 5] |= 0x80 << (len % 32);
-  x[(((len + 64) >>> 9) << 4) + 14] = len;
-
-  var i;
-  var olda;
-  var oldb;
-  var oldc;
-  var oldd;
-  var a = 1732584193;
-  var b = -271733879;
-  var c = -1732584194;
-
-  var d = 271733878;
-
-  for (i = 0; i < x.length; i += 16) {
-    olda = a;
-    oldb = b;
-    oldc = c;
-    oldd = d;
-
-    a = md5ff(a, b, c, d, x[i], 7, -680876936);
-    d = md5ff(d, a, b, c, x[i + 1], 12, -389564586);
-    c = md5ff(c, d, a, b, x[i + 2], 17, 606105819);
-    b = md5ff(b, c, d, a, x[i + 3], 22, -1044525330);
-    a = md5ff(a, b, c, d, x[i + 4], 7, -176418897);
-    d = md5ff(d, a, b, c, x[i + 5], 12, 1200080426);
-    c = md5ff(c, d, a, b, x[i + 6], 17, -1473231341);
-    b = md5ff(b, c, d, a, x[i + 7], 22, -45705983);
-    a = md5ff(a, b, c, d, x[i + 8], 7, 1770035416);
-    d = md5ff(d, a, b, c, x[i + 9], 12, -1958414417);
-    c = md5ff(c, d, a, b, x[i + 10], 17, -42063);
-    b = md5ff(b, c, d, a, x[i + 11], 22, -1990404162);
-    a = md5ff(a, b, c, d, x[i + 12], 7, 1804603682);
-    d = md5ff(d, a, b, c, x[i + 13], 12, -40341101);
-    c = md5ff(c, d, a, b, x[i + 14], 17, -1502002290);
-    b = md5ff(b, c, d, a, x[i + 15], 22, 1236535329);
-
-    a = md5gg(a, b, c, d, x[i + 1], 5, -165796510);
-    d = md5gg(d, a, b, c, x[i + 6], 9, -1069501632);
-    c = md5gg(c, d, a, b, x[i + 11], 14, 643717713);
-    b = md5gg(b, c, d, a, x[i], 20, -373897302);
-    a = md5gg(a, b, c, d, x[i + 5], 5, -701558691);
-    d = md5gg(d, a, b, c, x[i + 10], 9, 38016083);
-    c = md5gg(c, d, a, b, x[i + 15], 14, -660478335);
-    b = md5gg(b, c, d, a, x[i + 4], 20, -405537848);
-    a = md5gg(a, b, c, d, x[i + 9], 5, 568446438);
-    d = md5gg(d, a, b, c, x[i + 14], 9, -1019803690);
-    c = md5gg(c, d, a, b, x[i + 3], 14, -187363961);
-    b = md5gg(b, c, d, a, x[i + 8], 20, 1163531501);
-    a = md5gg(a, b, c, d, x[i + 13], 5, -1444681467);
-    d = md5gg(d, a, b, c, x[i + 2], 9, -51403784);
-    c = md5gg(c, d, a, b, x[i + 7], 14, 1735328473);
-    b = md5gg(b, c, d, a, x[i + 12], 20, -1926607734);
-
-    a = md5hh(a, b, c, d, x[i + 5], 4, -378558);
-    d = md5hh(d, a, b, c, x[i + 8], 11, -2022574463);
-    c = md5hh(c, d, a, b, x[i + 11], 16, 1839030562);
-    b = md5hh(b, c, d, a, x[i + 14], 23, -35309556);
-    a = md5hh(a, b, c, d, x[i + 1], 4, -1530992060);
-    d = md5hh(d, a, b, c, x[i + 4], 11, 1272893353);
-    c = md5hh(c, d, a, b, x[i + 7], 16, -155497632);
-    b = md5hh(b, c, d, a, x[i + 10], 23, -1094730640);
-    a = md5hh(a, b, c, d, x[i + 13], 4, 681279174);
-    d = md5hh(d, a, b, c, x[i], 11, -358537222);
-    c = md5hh(c, d, a, b, x[i + 3], 16, -722521979);
-    b = md5hh(b, c, d, a, x[i + 6], 23, 76029189);
-    a = md5hh(a, b, c, d, x[i + 9], 4, -640364487);
-    d = md5hh(d, a, b, c, x[i + 12], 11, -421815835);
-    c = md5hh(c, d, a, b, x[i + 15], 16, 530742520);
-    b = md5hh(b, c, d, a, x[i + 2], 23, -995338651);
-
-    a = md5ii(a, b, c, d, x[i], 6, -198630844);
-    d = md5ii(d, a, b, c, x[i + 7], 10, 1126891415);
-    c = md5ii(c, d, a, b, x[i + 14], 15, -1416354905);
-    b = md5ii(b, c, d, a, x[i + 5], 21, -57434055);
-    a = md5ii(a, b, c, d, x[i + 12], 6, 1700485571);
-    d = md5ii(d, a, b, c, x[i + 3], 10, -1894986606);
-    c = md5ii(c, d, a, b, x[i + 10], 15, -1051523);
-    b = md5ii(b, c, d, a, x[i + 1], 21, -2054922799);
-    a = md5ii(a, b, c, d, x[i + 8], 6, 1873313359);
-    d = md5ii(d, a, b, c, x[i + 15], 10, -30611744);
-    c = md5ii(c, d, a, b, x[i + 6], 15, -1560198380);
-    b = md5ii(b, c, d, a, x[i + 13], 21, 1309151649);
-    a = md5ii(a, b, c, d, x[i + 4], 6, -145523070);
-    d = md5ii(d, a, b, c, x[i + 11], 10, -1120210379);
-    c = md5ii(c, d, a, b, x[i + 2], 15, 718787259);
-    b = md5ii(b, c, d, a, x[i + 9], 21, -343485551);
-
-    a = safeAdd(a, olda);
-    b = safeAdd(b, oldb);
-    c = safeAdd(c, oldc);
-    d = safeAdd(d, oldd);
-  }
-  return [a, b, c, d];
-}
-
-/*
-* Convert an array bytes to an array of little-endian words
-* Characters >255 have their high-byte silently ignored.
-*/
-function bytesToWords(input) {
-  var i;
-  var output = [];
-  output[(input.length >> 2) - 1] = undefined;
-  for (i = 0; i < output.length; i += 1) {
-    output[i] = 0;
-  }
-  var length8 = input.length * 8;
-  for (i = 0; i < length8; i += 8) {
-    output[i >> 5] |= (input[(i / 8)] & 0xFF) << (i % 32);
+    if (lX4 | lY4) {
+      if (lResult & b30z) {
+        return (lResult ^ b1130z ^ lX8 ^ lY8);
+      } else {
+        return (lResult ^ b30z ^ lX8 ^ lY8);
+      }
+    } else {
+      return (lResult ^ lX8 ^ lY8);
+    }
   }
 
-  return output;
-}
+  function md5_F(x, y, z) {
+    // 按位与xy
+    // 按位非x后按位与z 
+    // 按位或以上两步的结果
+    return (x & y) | ((~x) & z);
+  }
 
-/*
-* Add integers, wrapping at 2^32. This uses 16-bit operations internally
-* to work around bugs in some JS interpreters.
-*/
-function safeAdd(x, y) {
-  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-  return (msw << 16) | (lsw & 0xFFFF);
-}
+  function md5_G(x, y, z) {
+    // 按位与xz
+    // 按位非z后按位与y 
+    // 按位或以上两步的结果
+    return (x & z) | (y & (~z));
+  }
 
-/*
-* Bitwise rotate a 32-bit number to the left.
-*/
-function bitRotateLeft(num, cnt) {
-  return (num << cnt) | (num >>> (32 - cnt));
-}
+  function md5_H(x, y, z) {
+    // 按位亦或xyz
+    return (x ^ y ^ z);
+  }
 
-/*
-* These functions implement the four basic operations the algorithm uses.
-*/
+  function md5_I(x, y, z) {
+    // 按位非z后按位或x 
+    // 按位异或y
+    return (y ^ (x | (~z)));
+  }
 
-function md5cmn(q, a, b, x, s, t) {
-  return safeAdd(bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b);
-}
-function md5ff(a, b, c, d, x, s, t) {
-  return md5cmn((b & c) | ((~b) & d), a, b, x, s, t);
-}
-function md5gg(a, b, c, d, x, s, t) {
-  return md5cmn((b & d) | (c & (~d)), a, b, x, s, t);
-}
-function md5hh(a, b, c, d, x, s, t) {
-  return md5cmn(b ^ c ^ d, a, b, x, s, t);
-}
-function md5ii(a, b, c, d, x, s, t) {
-  return md5cmn(c ^ (b | (~d)), a, b, x, s, t);
+  function md5_FF(a, b, c, d, x, s, ac) {
+    a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_F(b, c, d), x), ac));
+    return md5_AddUnsigned(md5_RotateLeft(a, s), b);
+  }
+  
+  function md5_GG(a, b, c, d, x, s, ac) {
+    a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_G(b, c, d), x), ac));
+    return md5_AddUnsigned(md5_RotateLeft(a, s), b);
+  }
+  
+  function md5_HH(a, b, c, d, x, s, ac) {
+    a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_H(b, c, d), x), ac));
+    return md5_AddUnsigned(md5_RotateLeft(a, s), b);
+  }
+  
+  function md5_II(a, b, c, d, x, s, ac) {
+    a = md5_AddUnsigned(a, md5_AddUnsigned(md5_AddUnsigned(md5_I(b, c, d), x), ac));
+    return md5_AddUnsigned(md5_RotateLeft(a, s), b);
+  }
+
+  /**
+   *
+   *
+   */
+
+  function md5_ConvertToWordArray(string) {
+    var lWordCount;
+    var lMessageLength = string.length;
+    var lNumberOfWords_temp1 = lMessageLength + 8;
+    var lNumberOfWords_temp2 = (
+      lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)
+    ) / 64;
+    var lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
+    var lWordArray = Array(lNumberOfWords - 1);
+    var lBytePosition = 0;
+    var lByteCount = 0;
+
+    while (lByteCount < lMessageLength) {
+      lWordCount = (lByteCount - (lByteCount % 4)) / 4;
+      lBytePosition = (lByteCount % 4) * 8;
+      lWordArray[lWordCount] = (lWordArray[lWordCount] | 
+        (string.charCodeAt(lByteCount) << lBytePosition));
+      lByteCount++;
+    }
+
+    lWordCount = (lByteCount - (lByteCount % 4)) / 4;
+    lBytePosition = (lByteCount % 4) * 8;
+    lWordArray[lWordCount] = lWordArray[lWordCount] | (128 << lBytePosition);
+    lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
+    lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
+    return lWordArray;
+  }
+
+  function md5_WordToHex(lValue) {
+    let HexValue = "";
+
+    for (let i = 0; i <= 3; i++) {
+      const lByte = (lValue >>> (i << 3)) & 0b11111111; // 右移、按位与取出1字节
+      const HexValue_temp = "0" + lByte.toString(16);
+      HexValue = HexValue + HexValue_temp.substr(HexValue_temp.length - 2, 2);
+    }
+
+    return HexValue;
+  }
+
+  /**
+   *
+   * ASCII字符占用7位字长
+   * 一个ASCIl字符只需1字节编码（Unicode范围由U+0000~U+007F)
+   * 带有变音符号的拉丁文、希腊文、西里尔字母、
+   * 亚美尼亚语、希伯来文、阿拉伯文、叙利亚文等字母则需要2字节编码
+   * 其他语言字符（包括中日韩文字、东南亚文字、中东文字等）包含了大部分常用字，
+   * 使用3字节编码
+   *
+   * 字符编码对应表
+   *
+   * | Unicode | UTF-8 | Byte | 备注 |
+   * | ------- | ----- | ---- | ---- |
+   * | 0000~007F | 0XXX XXXX | 1 |  |
+   * | 0080~07FF | 110X XXXX 10XX XXXX | 2 |  |
+   * | 0800~FFFF | 110X XXXX 10XX XXXX 10XX XXXX | 3 | 0~FFFF |
+   * | 1 0000~10 FFFF | 110X XXXX 10XX XXXX 10XX XXXX | 4 | 0~10 FFFF |
+   *
+   */
+
+  function md5_Utf8Encode(string) {
+    const string_u = String.prototype.replace.call(string, /\r\n/g, "\n");
+    let utftext = "";
+
+    for (let n = 0; n < string_u.length; n++) {
+      const c = string_u.charCodeAt(n);
+
+      if (c < 0b10000000) {
+        utftext += String.fromCharCode(c);
+      } else if ((c > 0b01111111) && (c < 0b100000000000)) { 
+        utftext += String.fromCharCode((c >> 6)              | 0b11000000);
+        utftext += String.fromCharCode((c & 0b111111)        | 0b10000000);
+      } else if ((c > 0b11111111111) && (c < 0b10000000000000000)) {
+        utftext += String.fromCharCode((c >> 12)             | 0b11100000);
+        utftext += String.fromCharCode(((c >> 6) & 0b111111) | 0b10000000);
+        utftext += String.fromCharCode((c & 0b111111)        | 0b10000000);
+      } else {
+        throw new Error('Char:', string_u[n], 'is not a valid unicode char.');
+      }
+    }
+
+    return utftext;
+  }
+
+  // step_1: 数据补位
+  // step_2: 扩展长度
+  let x = md5_ConvertToWordArray(md5_Utf8Encode(string));
+
+  // step_3: 初始化寄存器
+  let a = 0b01100111010001010010001100000001,
+      b = 0b11101111110011011010101110001001,
+      c = 0b10011000101110101101110011111110,
+      d = 0b00010000001100100101010001110110;
+
+  const S11 = 7, S12 = 12, S13 = 17, S14 = 22, 
+        S21 = 5, S22 = 9,  S23 = 14, S24 = 20,
+        S31 = 4, S32 = 11, S33 = 16, S34 = 23,
+        S41 = 6, S42 = 10, S43 = 15, S44 = 21; 
+
+  // step_4: 处理数据
+  for (let k = 0; k < x.length; k += 16) {
+      let AA = a,
+          BB = b,
+          CC = c,
+          DD = d;
+
+      a = md5_FF(a, b, c, d, x[k + 0], S11, 0xD76AA478);
+      d = md5_FF(d, a, b, c, x[k + 1], S12, 0xE8C7B756);
+      c = md5_FF(c, d, a, b, x[k + 2], S13, 0x242070DB);
+      b = md5_FF(b, c, d, a, x[k + 3], S14, 0xC1BDCEEE);
+
+      a = md5_FF(a, b, c, d, x[k + 4], S11, 0xF57C0FAF);
+      d = md5_FF(d, a, b, c, x[k + 5], S12, 0x4787C62A);
+      c = md5_FF(c, d, a, b, x[k + 6], S13, 0xA8304613);
+      b = md5_FF(b, c, d, a, x[k + 7], S14, 0xFD469501);
+
+      a = md5_FF(a, b, c, d, x[k + 8], S11, 0x698098D8);
+      d = md5_FF(d, a, b, c, x[k + 9], S12, 0x8B44F7AF);
+      c = md5_FF(c, d, a, b, x[k + 10], S13, 0xFFFF5BB1);
+      b = md5_FF(b, c, d, a, x[k + 11], S14, 0x895CD7BE);
+
+      a = md5_FF(a, b, c, d, x[k + 12], S11, 0x6B901122);
+      d = md5_FF(d, a, b, c, x[k + 13], S12, 0xFD987193);
+      c = md5_FF(c, d, a, b, x[k + 14], S13, 0xA679438E);
+      b = md5_FF(b, c, d, a, x[k + 15], S14, 0x49B40821);
+
+      a = md5_GG(a, b, c, d, x[k + 1], S21, 0xF61E2562);
+      d = md5_GG(d, a, b, c, x[k + 6], S22, 0xC040B340);
+      c = md5_GG(c, d, a, b, x[k + 11], S23, 0x265E5A51);
+      b = md5_GG(b, c, d, a, x[k + 0], S24, 0xE9B6C7AA);
+
+      a = md5_GG(a, b, c, d, x[k + 5], S21, 0xD62F105D);
+      d = md5_GG(d, a, b, c, x[k + 10], S22, 0x2441453);
+      c = md5_GG(c, d, a, b, x[k + 15], S23, 0xD8A1E681);
+      b = md5_GG(b, c, d, a, x[k + 4], S24, 0xE7D3FBC8);
+
+      a = md5_GG(a, b, c, d, x[k + 9], S21, 0x21E1CDE6);
+      d = md5_GG(d, a, b, c, x[k + 14], S22, 0xC33707D6);
+      c = md5_GG(c, d, a, b, x[k + 3], S23, 0xF4D50D87);
+      b = md5_GG(b, c, d, a, x[k + 8], S24, 0x455A14ED);
+
+      a = md5_GG(a, b, c, d, x[k + 13], S21, 0xA9E3E905);
+      d = md5_GG(d, a, b, c, x[k + 2], S22, 0xFCEFA3F8);
+      c = md5_GG(c, d, a, b, x[k + 7], S23, 0x676F02D9);
+      b = md5_GG(b, c, d, a, x[k + 12], S24, 0x8D2A4C8A);
+
+      a = md5_HH(a, b, c, d, x[k + 5], S31, 0xFFFA3942);
+      d = md5_HH(d, a, b, c, x[k + 8], S32, 0x8771F681);
+      c = md5_HH(c, d, a, b, x[k + 11], S33, 0x6D9D6122);
+      b = md5_HH(b, c, d, a, x[k + 14], S34, 0xFDE5380C);
+
+      a = md5_HH(a, b, c, d, x[k + 1], S31, 0xA4BEEA44);
+      d = md5_HH(d, a, b, c, x[k + 4], S32, 0x4BDECFA9);
+      c = md5_HH(c, d, a, b, x[k + 7], S33, 0xF6BB4B60);
+      b = md5_HH(b, c, d, a, x[k + 10], S34, 0xBEBFBC70);
+
+      a = md5_HH(a, b, c, d, x[k + 13], S31, 0x289B7EC6);
+      d = md5_HH(d, a, b, c, x[k + 0], S32, 0xEAA127FA);
+      c = md5_HH(c, d, a, b, x[k + 3], S33, 0xD4EF3085);
+      b = md5_HH(b, c, d, a, x[k + 6], S34, 0x4881D05);
+
+      a = md5_HH(a, b, c, d, x[k + 9], S31, 0xD9D4D039);
+      d = md5_HH(d, a, b, c, x[k + 12], S32, 0xE6DB99E5);
+      c = md5_HH(c, d, a, b, x[k + 15], S33, 0x1FA27CF8);
+      b = md5_HH(b, c, d, a, x[k + 2], S34, 0xC4AC5665);
+
+      a = md5_II(a, b, c, d, x[k + 0], S41, 0xF4292244);
+      d = md5_II(d, a, b, c, x[k + 7], S42, 0x432AFF97);
+      c = md5_II(c, d, a, b, x[k + 14], S43, 0xAB9423A7);
+      b = md5_II(b, c, d, a, x[k + 5], S44, 0xFC93A039);
+
+      a = md5_II(a, b, c, d, x[k + 12], S41, 0x655B59C3);
+      d = md5_II(d, a, b, c, x[k + 3], S42, 0x8F0CCC92);
+      c = md5_II(c, d, a, b, x[k + 10], S43, 0xFFEFF47D);
+      b = md5_II(b, c, d, a, x[k + 1], S44, 0x85845DD1);
+
+      a = md5_II(a, b, c, d, x[k + 8], S41, 0x6FA87E4F);
+      d = md5_II(d, a, b, c, x[k + 15], S42, 0xFE2CE6E0);
+      c = md5_II(c, d, a, b, x[k + 6], S43, 0xA3014314);
+      b = md5_II(b, c, d, a, x[k + 13], S44, 0x4E0811A1);
+
+      a = md5_II(a, b, c, d, x[k + 4], S41, 0xF7537E82);
+      d = md5_II(d, a, b, c, x[k + 11], S42, 0xBD3AF235);
+      c = md5_II(c, d, a, b, x[k + 2], S43, 0x2AD7D2BB);
+      b = md5_II(b, c, d, a, x[k + 9], S44, 0xEB86D391);
+
+      a = md5_AddUnsigned(a, AA);
+      b = md5_AddUnsigned(b, BB);
+      c = md5_AddUnsigned(c, CC);
+      d = md5_AddUnsigned(d, DD);
+  }
+
+  // setp_5: 输出
+  return (md5_WordToHex(a) + 
+          md5_WordToHex(b) + 
+          md5_WordToHex(c) + 
+          md5_WordToHex(d)).toLowerCase();
 }

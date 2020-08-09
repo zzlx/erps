@@ -1,8 +1,13 @@
 /**
  * *****************************************************************************
  *
- * Route component
+ * # Route
  *
+ * 路由组件,用于渲染匹配到的路由组件
+ *
+ *
+ * @param {object} props
+ * @return {object} element
  *
  * *****************************************************************************
  */
@@ -11,8 +16,7 @@ import Context from './Context.mjs';
 import matchPath from '../utils/matchPath.mjs';
 import warning from '../utils/warning.mjs';
 
-export default class Route extends React.PureComponent {
-
+export default class Route extends React.Component {
   render() {
     if (this.props.title) {
       if (window && window.document) window.document.title = this.props.title;
@@ -53,6 +57,11 @@ export default class Route extends React.PureComponent {
 
     // @todo: 组合输出所有配置的组件 
     return null;
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props == nextProps) return false;
+    else return true;
   }
 }
 

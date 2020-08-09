@@ -32,11 +32,11 @@ export default function combineReducers(reducers) {
   for (let i = 0; i < reducerKeys.length; i++) {
     const key = reducerKeys[i];
 
-    //if (process.env.NODE_ENV !== 'production') {
+    if (env && env === 'development') {
       if (typeof reducers[key] === 'undefined') {
         warning("No reducer provided for key \"" + key + "\"");
       }
-    //}
+    }
 
     if (typeof reducers[key] === 'function') {
       finalReducers[key] = reducers[key];
@@ -44,11 +44,12 @@ export default function combineReducers(reducers) {
   }
 
   const finalReducerKeys = Object.keys(finalReducers);
+
   let unexpectedKeyCache;
 
-  //if (process.env.NODE_ENV !== 'production') {
+  if (env && env !== 'production') {
     unexpectedKeyCache = {};
-  //}
+  }
 
   let shapeAssertionError;
 
@@ -58,16 +59,12 @@ export default function combineReducers(reducers) {
     shapeAssertionError = e;
   }
 
-  return function combination (state, action) {
-    if (state === void 0) {
-      state = {};
-    }
-
+  return function combination (state = Object.create(null), action) {
     if (shapeAssertionError) {
       throw shapeAssertionError;
     }
 
-    //if (process.env.NODE_ENV !== 'production') {
+    if (env && env !== 'production') {
       const warningMessage = getUnexpectedStateShapeWarningMessage(
         state, 
         finalReducers, 
@@ -78,7 +75,7 @@ export default function combineReducers(reducers) {
       if (warningMessage) {
         warning(warningMessage);
       }
-    //}
+    }
 
     let hasChanged = false;
     const nextState = {};

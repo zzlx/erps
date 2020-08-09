@@ -1,16 +1,15 @@
 /**
  * *****************************************************************************
  *
- * Jumbotron component
+ * Jumbotron
  *
  * 大屏幕组件
- * Lightweight, flexible component for showcasing hero unit style content.
+ * A lightweight, flexible component for showcasing hero unit style content.
  *
  * @param {obj} props
  * @return {obj} React element
  * @api public
  *
- * @file Jumbotron.mjs
  * *****************************************************************************
  */
 

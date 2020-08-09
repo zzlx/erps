@@ -12,8 +12,6 @@
  * *****************************************************************************
  */
 
-const breakpoints = ['sm', 'md', 'lg', 'xl'];
-
 export default function Container (props) {
   const { 
     breakpoint, fluid, 
@@ -21,6 +19,8 @@ export default function Container (props) {
   } = props;
 
   let bp = breakpoint; // breakpoint需要进行检查
+
+  const breakpoints = ['sm', 'md', 'lg', 'xl'];
 
   if (bp && breakpoints.indexOf(bp) === -1) {
     console.warn(bp + ' is not a valid breakpoint for Container component!');

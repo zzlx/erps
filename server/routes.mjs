@@ -13,7 +13,6 @@ import path from 'path';
 import util from 'util';
 import ReactDOMServer from 'react-dom/server.js';
 
-import cors from './koa/middlewares/cors.mjs';
 import dba from './koa/middlewares/dba.mjs';
 import statics from './koa/middlewares/statics.mjs';
 import sass from './utils/sass.mjs';
@@ -37,7 +36,7 @@ const api = new Router({
   
 });
 
-api.use('/', cors(), dba(config));
+api.use('/', dba(config));
 
 api.post('/graphql', '/graphql/:state', async (ctx, next) => {
   ctx.body = await ctx.getRawBody();

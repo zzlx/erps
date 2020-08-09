@@ -17,7 +17,7 @@
  */
 
 import util from 'util';
-const debug = util.debuglog('debug:middleware.cors');
+const debug = util.debuglog('debug:corsmiddleware');
 
 export default function (options) {
 
@@ -49,9 +49,9 @@ export default function (options) {
   return function corsMiddleware(ctx, next) {
 
     // get origin
-    const requestOrigin = ctx.get('Origin');
+    const requestOrigin = ctx.get('origin');
 
-    ctx.set('Origin', '*');
+    ctx.set('origin', '*');
 
     if (!requestOrigin) { return next(); }
 
@@ -76,10 +76,7 @@ export default function (options) {
       return next();
 
     } else {
-      // 
-      if (!ctx.get('Access-Control-Request-Method')) {
-        return next();
-      }
+      if (!ctx.get('Access-Control-Request-Method')) return next();
 
       ctx.set('Access-Control-Allow-Origin', origin);
 

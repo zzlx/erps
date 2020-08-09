@@ -10,3 +10,4 @@ statics/react-dom.development.js
 statics/react-dom.production.min.js
 *.br
 *.zip
+data

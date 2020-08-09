@@ -3,7 +3,7 @@
  *
  * Card
  *
- * is a flexible and extensible content container.
+ * A flexible and extensible content container.
  *
  * *****************************************************************************
  */

@@ -12,6 +12,7 @@ export default new Proxy({
   dirname,
   isURLPath,
   join,
+  createLocation,
 }, { 
   /**
    * getter
