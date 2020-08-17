@@ -5,15 +5,10 @@
  */
 
 let counter = 0;
-import { types } from '../actions/types.mjs';
 
 export default store => next => action => {
 
-  const actionType = action.type 
-    ? action.type.replace(/\.\w+$/, '')
-    : 'UNKNOWN_ACTION_TYPE';
-
-  const actionName = `${actionType}:${types[actionType]}` 
+  const actionName =  action.type || 'UNKNOWN_ACTION_TYPE';
 
   console.groupCollapsed(actionName);
   console.log('prevState:', store.getState());

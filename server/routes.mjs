@@ -1,8 +1,7 @@
 /**
  * *****************************************************************************
  *
- * 服务路由配置
- *
+ * 服务器端路由配置
  *
  *
  * *****************************************************************************
@@ -15,7 +14,6 @@ import ReactDOMServer from 'react-dom/server.js';
 
 import dba from './koa/middlewares/dba.mjs';
 import statics from './koa/middlewares/statics.mjs';
-import sass from './utils/sass.mjs';
 
 import Router from './koa/Router.mjs';
 import config from './config.mjs';
@@ -31,29 +29,27 @@ const s = new Router({
   prefix: '',
 });
 
-const api = new Router({ 
+const graphql = new Router({ 
   //prefix: '/api'
-  
 });
 
-api.use('/', dba(config));
+graphql.use(dba(config));
 
-api.post('/graphql', '/graphql/:state', async (ctx, next) => {
-  ctx.body = await ctx.getRawBody();
-
-}).get('/graphql', '/graphql/:state', async (ctx, next) => {
-
-  debug(ctx.params);
-  debug('ctx._matchedRoute', ctx._matchedRoute);
-  debug(ctx.router.url('graphql', 'tttt'));
+graphql.all('graphql', '/graphql', async (ctx, next) => {
+  //ctx.body = await ctx.getRawBody();
+  //debug(ctx.params);
+  //debug('ctx._matchedRoute', ctx._matchedRoute);
+  //debug(ctx.router.url('graphql', 'tttt'));
   ctx.body = 'graphql';
 });
 
 //index.use('/', statics(paths.public));
-//index.use('/api', api.routes(), api.allowedMethods());
 //index.use('/statics', statics.routes(), statics.allowedMethods());
 //index.use('/modules', modules.routes(), modules.allowedMethods());
 
+index.use('/api', graphql.routes(), graphql.allowedMethods());
 index.get('/*', statics(paths.public));
+index.get('/*', () => {
+})
 
 export default index;

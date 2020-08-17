@@ -8,40 +8,38 @@
  * *****************************************************************************
  */
 
-
 export default function bytesToUUID(buf, offset) {
-  let byteToHex = [];
+  const byteToHex = [];
 
   for (let i = 0; i < 256; ++i) {
     byteToHex[i] = (i + 0x100).toString(16).substr(1);
   }
 
   let i = offset || 0;
-  let bth = byteToHex;
 
   return ([
-    bth[buf[i++]], 
-    bth[buf[i++]], 
-    bth[buf[i++]], 
-    bth[buf[i++]], 
+    byteToHex[buf[i++]], 
+    byteToHex[buf[i++]], 
+    byteToHex[buf[i++]], 
+    byteToHex[buf[i++]], 
     '-',
-    bth[buf[i++]], 
-    bth[buf[i++]], 
+    byteToHex[buf[i++]], 
+    byteToHex[buf[i++]], 
     '-',
-    bth[buf[i++]], 
-    bth[buf[i++]], 
+    byteToHex[buf[i++]], 
+    byteToHex[buf[i++]], 
     '-',
-    bth[buf[i++]], 
-    bth[buf[i++]], 
+    byteToHex[buf[i++]], 
+    byteToHex[buf[i++]], 
     '-',
-    bth[buf[i++]], 
-    bth[buf[i++]],
-    bth[buf[i++]], 
-    bth[buf[i++]],
-    bth[buf[i++]], 
-    bth[buf[i++]]
+    byteToHex[buf[i++]], 
+    byteToHex[buf[i++]],
+    byteToHex[buf[i++]], 
+    byteToHex[buf[i++]],
+    byteToHex[buf[i++]], 
+    byteToHex[buf[i++]]
   ]).join('');
 }
 
 // test
-//console.log('Test bytesToUUID: ', bytesToUUID(Buffer.from('abcdefghigklmnnnnnn')));
+//console.log(bytesToUUID(Buffer.from('abcdefghigklmnnnnnn')));

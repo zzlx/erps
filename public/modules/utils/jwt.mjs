@@ -4,16 +4,15 @@
  * JWT -- JSON WEB TOKEN
  * =====================
  * 
- * # JWT
- *
- * Json web token (JWT),
- * 是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519).
- * 该token被设计为紧凑且安全的，特别适用于分布式站点的单点登录（SSO）场景。
- * JWT的声明一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息，
- * 以便于从资源服务器获取资源，也可以增加一些额外的其它业务逻辑所必须的声明信息，
- * 该token也可直接被用于认证，也可被加密。
+ * JSON Web Tokens are an open, industry standard 
+ * [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519.txt)
+ * method for representing claims securely between two parties.
  *
  * # 格式构成
+ *
+ * ```
+ * XXX.YYY.ZZZ
+ * ```
  *
  * JWT是由三段信息构成的，将这三段信息文本用.链接一起就构成了Jwt字符串.
  * 第一部分我们称它为头部（header),
@@ -22,13 +21,11 @@
  *
  * ## header
  *
- *
  * jwt的头部承载两部分信息：
  *
  * * 声明类型，这里是jwt
  * * 声明加密的算法,通常直接使用 HMAC SHA256
  *
- * 
  * ```json
  * {
  *   'typ': 'JWT',
@@ -156,12 +153,28 @@
  * *****************************************************************************
  */ 
 
-export default new Proxy({
+import base64 from './base64.mjs'; 
+
+export default () => new Proxy({
+  header: { 
+    "alg": "HS256", // algorithm HS256: HMAC sha256
+    "typ": "JWT"    // token type
+  },
+  payload: {
+    "iss": "zzlx", // issuer
+    "sub": "1234567890", // subject
+    "aud": "", // audience
+    "exp": "", // expiration time 
+    "nbf": "", // Not Before
+    "iat": "",  // Issued At
+    "jti": null, // JWT ID
+
+    "name": "John Doe",
+    "admin": true
+  },
+  signature: null
 }, {
 	get: function (target, property, receiver) {
 		return Reflect.get(target, property, receiver);
   }
 });
-
-function parse () {
-}

@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * CSV processor
+ * CSV processor -- CSV处理函数
  *
  * 转换关联数组为csv字符串数组
  * Convert array object to csv string

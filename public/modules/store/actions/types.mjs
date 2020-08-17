@@ -1,57 +1,96 @@
 /**
  * *****************************************************************************
  *
- * Action types
+ * Action Types
+ * ====================
+ *
+ * 预定义Actions, 描述动作及用途
+ *
+ * ## Actions分类
+ *
+ * * State更新类Action: 包括state数据的增加、减少、修改、排序等
+ * * UI Action类
+ *
  *
  * *****************************************************************************
  */
 
-export const types = {
-  "GET_CONFIGURATION": "...",
-  "GET_API_ADDRESS": "获取API地址",
-  "GRAPHQL_QUERY": "执行graphql查询",
-  "GRAPHQL_QUERY_RESULT": "获取到graphql结果",
-  "SET_API_ADDRESS": "设置API地址",
-  "REPLACE": "Replace reducer action",
-  "SET_PAGE_FOOTER": "设置页脚数据",
-  "SAVE_DATA": "保存数据",
-  "ACTION_ERROR": "动作错误",
-  "ACTION_TYPE_ERROR": "动作类型错误",
-  "DATA_READ_FROM_FILE": "DATA_READ_FROM_FILE",
-  "DATA_UPDATE": "数据更新",
-  "DRAG": "拖动操作",
-  "DROP": "放入操作",
-  "GRAPHQL_API_QUERY": "执行GRAPHQL API查询.",
-  "GRAPHQL_API_REVEIVE_DATA": "收到GRAPHQL_API返回数据.",
-  "HISTORY_PUSH_STATE": "无状态刷新",
-  "HISTORY_REDIRECT": "页面重定向",
-  "INIT": "系统初始化.",
-  "LOCK_SCREEN": "锁屏",
-  "LOGOUT": "退出登录",
-  "MATRIX": "MATRIX",
-  "MODAL_CLOSE": "MODAL_CLOSE",
-  "MODAL_OPEN": "MODAL_OPEN",
-  "MOVE_BLOCK": "MOVE_BLOCK",
-  "MUTATION": "MUTATION",
-  "NEXT_BLOCK": "NEXT_BLOCK",
-  "PROBE_UNKNOWN_ACTION": "PROBE_UNKNOWN_ACTION",
-  "PROFILES_THEME_UPDATE": "更新主题",
-  "PROMISE_ACTION_PROCESS": "PROMISE_ACTION_PROCESS",
-  "PROMISE_ACTION_SUCCESS": "PROMISE_ACTION_SUCCESS",
-  "READ_DATA_FORM_CSV": "READ_DATA_FROM_CSV",
-  "RECEIVE_DATA": "RECEIVE_DATA",
-  "SET_VISIBILITY_FILTER": "SET_VISIBILITY_FILTER",
-  "ZZZ": "休眠"
-}
+const types = [
+  { name: 'API_QUERY', desc: '执行API查询' },
+  { name: 'DRAG', desc: '拖动操作' },
+  { name: 'DROP', desc: '放入操作' },
+  { name: 'ERROR_MESSAGE', desc: '错误消息' },
+  { name: 'HISTORY_PUSH_STATE', desc: '无状态刷新' },
+  { name: 'HISTORY_REDIRECT', desc: '页面重定向' },
+  { name: 'INIT', desc: '系统初始化.' },
+  { name: 'INITIAL_STATE', desc: '.' },
+  { name: 'LOCK_SCREEN', desc: '锁屏' },
+  { name: 'LOGOUT', desc: '退出登录' },
+  { name: 'MATRIX', desc: '矩阵' },
+  { name: 'MODAL_CLOSE', desc: 'MODAL_CLOSE' },
+  { name: 'MODAL_OPEN', desc: 'MODAL_OPEN' },
+  { name: 'MOVE_BLOCK', desc: 'MOVE_BLOCK' },
+  { name: 'MUTATION', desc: 'MUTATION' },
+  { name: 'NEXT_BLOCK', desc: 'NEXT_BLOCK' },
+  { name: 'PROBE_UNKNOWN_ACTION', desc: 'PROBE_UNKNOWN_ACTION' },
+  { name: 'PROFILES_THEME_UPDATE', desc: '更新主题' },
+  { name: 'PROMISE_ACTION_PROCESS', desc: 'PROMISE_ACTION_PROCESS' },
+  { name: 'PROMISE_ACTION_SUCCESS', desc: 'PROMISE_ACTION_SUCCESS' },
+  { name: 'READ_DATA_FORM_CSV', desc: 'READ_DATA_FROM_CSV' },
+  { name: 'RECEIVE_DATA', desc: 'RECEIVE_DATA' },
+  { name: 'REPLACE', desc: 'Replace reducer action' },
+  { name: 'SAVE_DATA', desc: '保存数据' },
+  { name: 'SAVE_JWT', desc: '保存JWT' },
+  { name: 'SET_API_ADDRESS', desc: '设置API地址' },
+  { name: 'SET_PAGE_FOOTER', desc: '设置页脚数据' },
+  { name: 'SET_VISIBILITY_FILTER', desc: 'SET_VISIBILITY_FILTER' },
+  { name: 'ZZZ', desc: '休眠' }
+];
 
-// 
-const SN = Math.random().toString(16).substring(7);
+export default new Proxy(types, {
+  get: function(target, property, receiver) {
 
-const randomTypes = {};
+    if (property === 'toString') {
+      return JSON.stringify(target);
+    }
 
-// add random string with types
-for (let action of Object.keys(types)) { 
-  randomTypes[action] = `${action}.${SN}`;
-} 
+    if (property === 'has') {
+      return name => {
+        let retval = false
 
-export default randomTypes;
+        for (let type of target) {
+          if (type.name === name) {
+            retval = true; 
+            break;
+          }
+        }
+
+        return retval;
+      }
+    }
+
+    if (property === 'getType') {
+      return name => {
+        let retval = null;
+
+        for (let type of target) {
+          if (type.name === name) {
+            retval = type;
+            break;
+          }
+        }
+
+        return retval;
+      }
+    }
+
+    // 直接访问name, 若存在则返回name
+    for (let type of target) {
+      if (type.name === property) {
+        return type.name;
+      }
+    }
+
+		return Reflect.get(target, property, receiver);
+  }
+});

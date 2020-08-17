@@ -1,10 +1,12 @@
 /**
+ * *****************************************************************************
  *
  * Prints a warning in the console if it exists.
  *
  * @param {Boolean} condition .
  * @param {String} message The warning message.
  * @returns {void}
+ * *****************************************************************************
  */
 
 export default function warning () {
@@ -18,12 +20,6 @@ export default function warning () {
   }
 
   if (!!condition) return; 
-
-  if (typeof console !== 'undefined' && typeof console.warn === 'function') {
-    console.warn(message)
-  } else {
-    try {
-      throw new Error(message)
-    } catch (e) {} // eslint-disable-line no-empty
-  }
+  if (console && console.warn) console.warn(message)
+  else console.log('Warning! ', message);
 }

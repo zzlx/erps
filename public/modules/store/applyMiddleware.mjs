@@ -17,6 +17,7 @@
 import compose from './compose.mjs';
 
 export default function applyMiddleware(middlewares) {
+
   return createStore => (...args) => {
 
     const store = createStore(...args);
@@ -29,7 +30,7 @@ export default function applyMiddleware(middlewares) {
     };
 
     const middlewareAPI = {
-      getTypes: store.getTypes,
+      types: store.types,
       getState: store.getState,
       dispatch: (...args) => _dispatch(...args)
     };

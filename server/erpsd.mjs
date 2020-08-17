@@ -20,9 +20,10 @@ import path from 'path';
 import util from 'util';
 import zlib from 'zlib';
 
+import sass from 'node-sass';
+
 import config from '../server/config.mjs';
 import parseArgvs from '../server/utils/parseArgvs.mjs';
-import sass from '../server/utils/sass.mjs';
 
 // @todo: 服务器端渲染支持
 import HtmlParser from './utils/HtmlParser.mjs';
@@ -152,22 +153,21 @@ function stop () {
 
 async function start () {
   // Task1: 构建styles.css
-  // 每次启动均重建styles.css文件,以保证代码最新
-  await sass({
+  // 启动时均重建styles.css文件,以保证代码最新
+  await sass.render({
     file: config.paths.scssEntryPoint,
     outputStyle: process.env.NODE_ENV === 'production' ? 'compressed': 'nested',
-  }).then(data => {
+  }, (err, result) => {
+
     return Promise.all([
-      fs.promises.writeFile(paths.stylesCss, data.css),
-      fs.promises.writeFile(paths.stylesCss + '.br', zlib.brotliCompressSync(data.css)),
+      fs.promises.writeFile(paths.stylesCss, result.css),
+      fs.promises.writeFile(paths.stylesCss + '.br', zlib.brotliCompressSync(result.css)),
     ]);
   });
 
   // Task2: 生成index.html文件
   await new Promise((resolve, reject) => {
-    const html = new HtmlParser()
-      .setTitle('Home')
-      .render();
+    const html = new HtmlParser().setTitle('Home').render();
 
     fs.promises.writeFile(paths.templateHtml, html).then(()=> {
       resolve();
@@ -216,7 +216,8 @@ async function start () {
     host: '::',      // '::'/'0.0.0.0'/绑定服务器主机名或IP地址
     port: process.env.PORT 
       ? Number.parseInt(process.env.PORT, 10) 
-      : process.env.NODE_ENV === 'development' ? 3000 : 8000,
+      : 3000,
+      //: process.env.NODE_ENV === 'development' ? 3000 : 8000,
     exclusive: false, // false 可接受进程共享端口, 支持集群服务器配置
   });
 }

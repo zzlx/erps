@@ -2,22 +2,22 @@
 <html lang="zh-cmn-Hans">
   <head>
     <meta charset="UTF-8" />
-    <meta name="keywords" content="HomePage,ERP" />
-    <meta name="description" content="HomePage" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
     <title>Home</title>
     <link rel="stylesheet" href="/statics/styles.css" />
     <script src="/statics/react.development.js"></script>
     <script src="/statics/react-dom.development.js"></script>
-    <script type="module" src="/modules/main.mjs"></script>
-    <!-- 浏览器不支持es module时进行提醒⏰ -->
-		<script nomodule src="/modules/fallback.js"></script>
-    <script>
-      window.env = 'development'
-    </script>
+    <script src="/modules/main.mjs" type="module"></script>
+    <script src="/modules/fallback.js" nomodule></script>
   </head>
   <body>
     <noscript>请确认已启用javascript支持.</noscript>
     <div id="root"></div>
+    <script>
+      window.env = 'development';
+      window.__INITIAL_STATE__ = {};
+    </script>
   </body>
 </html>

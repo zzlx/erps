@@ -2,9 +2,9 @@
  *
  */
 
-const isPromise = fn => Boolean(fn && typeof fn.then === 'function');
-
 export default store => next => action => {
+  const isPromise = fn => Boolean(fn && typeof fn.then === 'function');
+
   // promise action
   if (isPromise(action)) return action.then(result => next(result)); 
 

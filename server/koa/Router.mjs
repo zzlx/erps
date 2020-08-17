@@ -88,6 +88,7 @@ export default class Router {
    */
 
   all (name, path, middleware) {
+
     if (typeof path === 'string') {
       middleware = Array.prototype.slice.call(arguments, 2);
     } else {
@@ -96,7 +97,7 @@ export default class Router {
       name = null;
     }
 
-    this.register(path, methods, middleware, { name });
+    this.register(path, this.methods, middleware, { name });
 
     return this;
   }

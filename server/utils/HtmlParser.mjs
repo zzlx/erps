@@ -12,80 +12,91 @@
  */
 
 export default class HtmlParser {
-  constructor() {
-    this.sourceHtml = arguments[0];
-    this.title = 'Undefined-Title';
-    this.charset = 'UTF-8';
-    this.body = null;
-    this.scriptTags = [
-      { crossorigin: false },
-    ];
+  constructor(props) {
 
-    this.keywords = ["HomePage", "ERP"];
-    this.description = "HomePage";
+    this.state = Object.assign({}, {
+      title: 'Untitled',
+      charset: 'UTF-8',
+      body: null,
+      initialState: Object.create(null),
+      scriptTags: [],
+      keywords: [],
+      viewport: "width=device-width, initial-scale=1.0, shrink-to-fit=no",
+      description: '',
+      scripts: [
+        { src: `/statics/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+        { src: `/statics/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+        { src: "/modules/main.mjs", module: true },
+        { src: "/modules/fallback.js", nomodule: true},
+      ],
+      styleLinks: [ 
+        "/statics/styles.css"
+      ],
+    }, props);
 
     // 解析html
-    if (this.sourceHtml) this.parse();
+    //this.sourceHtml = arguments[0];
+    //if (this.sourceHtml) this.parse();
 
   }
 
   setKeywords () {
     const keys = Array.prototype.slice.call(arguments);
-    this.keywords = keys;
+    this.state.keywords = keys;
     return this;
   }
 
   setCharset (value) {
     if (typeof value !== 'string') throw new TypeError('Value must be string.');
-    this.charset = value;
+    this.state.charset = value;
     return this;
   }
 
   setTitle (value) {
     if (typeof value !== 'string') throw new TypeError('Value must be string.');
-    this.title = value;
+    this.state.title = value;
     return this;
   }
 
   setBody (value) {
     if (typeof value !== 'string') throw new TypeError('Value must be string.');
-    this.body = value;
+    this.state.body = value;
     return this;
   }
 
   parse () {
-
     return this
   }
 
-  toHTML () {
+  toString () {
+    return this.render();
   }
 
   render () {
     this.html = `<!DOCTYPE html>
 <html lang="zh-cmn-Hans">
   <head>
-    <meta charset="${this.charset}" />
-    <meta name="keywords" content="${this.keywords.join(',')}" />
-    <meta name="description" content="${this.description || ''}" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
-    <title>${this.title}</title>
-    <link rel="stylesheet" href="/statics/styles.css" />
-    <script src="/statics/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js"></script>
-    <script src="/statics/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js"></script>
-    <script type="module" src="/modules/main.mjs"></script>
-    <!-- 浏览器不支持es module时进行提醒⏰ -->
-		<script nomodule src="/modules/fallback.js"></script>
-    <script>
-      window.env = '${process.env.NODE_ENV}'
-    </script>
+    <meta charset="${this.state.charset}" />
+    <meta name="keywords" content="${this.state.keywords.join(',')}" />
+    <meta name="description" content="${this.state.description}" />
+    <meta name="viewport" content="${this.state.viewport}" />
+    <title>${this.state.title}</title>
+    ${ this.state.styleLinks && this.state.styleLinks.map(href => 
+      `<link rel="stylesheet" href="${href}" />`).join('\n    ') }
+    ${ this.state.scripts && this.state.scripts.map(v => 
+      `<script src="${v.src}"${v.module === true ? ' type="module"' : v.nomodule === true ? ' nomodule' : ''}></script>`
+    ).join('\n    ')}
   </head>
   <body>
     <noscript>请确认已启用javascript支持.</noscript>
-    <div id="root">${this.body || ''}</div>
+    <div id="root">${this.state.body || ''}</div>
+    <script>
+      window.env = '${process.env.NODE_ENV}';
+      window.__INITIAL_STATE__ = ${JSON.stringify(this.state.initialState)};
+    </script>
   </body>
 </html>`;
 
-    return this.html; 
+    return this.html;
   }
 }

@@ -86,5 +86,3 @@ function f(s, x, y, z) {
 function ROTL(x, n) {
   return (x << n) | (x >>> (32 - n));
 }
-
-//console.log(sha1('18039105900'));

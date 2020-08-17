@@ -28,7 +28,6 @@ import isPlainObject from '../utils/isPlainObject.mjs';
 import getIn from '../utils/getIn.mjs';
 
 const $$observable = Symbol('observable');
-const Types = new Set(Object.values(types));
 
 export default function createStore(reducer, preloadedState, enhancer) {
   if (
@@ -194,7 +193,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
       );
     }
 
-    if (!Types.has(action.type)) {
+    if (!types.has(action.type)) {
       console.warn(`${action.type} is not a valid action.`);
     }
 
@@ -288,7 +287,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
     dispatch: dispatch,
     subscribe: subscribe,
     getState: getState,
-    getTypes: () => types,
+    types: types,
     replaceReducer: replaceReducer
   }, _ref2[$$observable] = observable, _ref2;
 }

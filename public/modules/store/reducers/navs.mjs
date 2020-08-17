@@ -10,7 +10,10 @@
 
 import { types } from '../actions/index.mjs';
 
-const initialState = [];
+const initialState = [
+  {name: 'HomePage', url: '/HomePage', active: true},
+  {name: 'About', url: '/HomePage', active: false},
+];
 
 export default (state = initialState, action) => {
   switch (action.type) {
@@ -30,6 +33,5 @@ export default (state = initialState, action) => {
 function setActive (state) {
   // 获取active项目
   for (let item of state) {
-
   }
 }

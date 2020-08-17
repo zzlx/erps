@@ -9,9 +9,7 @@
  */
 
 export default function Footer (props) {
-  const { 
-    fluid,
-    className, ...rests } = props;
+  const { fluid, className, ...rests } = props; 
 
   // 应用footer类名 
   const footerCN = [
@@ -26,12 +24,10 @@ export default function Footer (props) {
     'p-2',
   ].filter(Boolean).join(' ');
 
-  const inner = React.createElement('div', {
-    className: innerCN,
-    ...rests
-  });
-
   return React.createElement('footer', {
     className: footerCN,
-  }, inner);
+  }, React.createElement('div', {
+    className: innerCN,
+    ...rests
+  }));
 }

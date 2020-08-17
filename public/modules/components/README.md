@@ -1,5 +1,3 @@
-Components
-==========
+UI组件库
+========
 
-展示型组件(Presentational Component)
-容器组件(Container Component)

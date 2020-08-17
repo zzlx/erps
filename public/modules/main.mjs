@@ -1,7 +1,6 @@
 /**
  * *****************************************************************************
  *
- * Main program
  * 客户端主程序
  *
  * 将前端UI程序渲染至客户端浏览器DOM
@@ -14,23 +13,7 @@
 
 import configureStore from './store/configureStore.mjs';
 
-// 异步载入前端App
-const AppModule = import('./ReactApp.mjs');
-
-const preloadState = (window && window.localStorage)  
-  ? window.localStorage.getItem('anonymous')
-    ? JSON.parse(window.localStorage.getItem('anonymous')) 
-    : Object.create(null)
-  : Object.create(null);
-
-const store = configureStore(preloadState); 
-
-// 客户端存储数据
-store.subscribe(() => {
-  if (window) {
-    window.localStorage.setItem('anonymous', JSON.stringify(store.getState()));
-  }
-});
+const preloadedState = window.__INITIAL_STATE__
 
 // get container
 let container = window.document.getElementById('root');
@@ -50,14 +33,12 @@ if (null == container) {
 // algorithmic
 const isServerRendered = container.innerHTML ? true : false;
 
-AppModule.then(m => {
-  const App = m.default;
-
+import('./App.mjs').then(m => m.default).then(App => {
+  const store = configureStore(preloadedState); 
   const element = App(store);
 
   // 存在服务端渲染等页面使用hydrate方法渲染
   // 空的容器对象上使用render方法渲染
-  //
   if (isServerRendered) {
     ReactDOM.hydrate(element, container, callback);
   } else {
@@ -65,12 +46,19 @@ AppModule.then(m => {
   }
 });
 
+/**
+ * 前端渲染完成后提示系统信息
+ */
+
 function callback () {
-  if (env && env !== 'production') {
-    if (console && console.warn) console.warn(`当前为${env}环境.`); 
+  console.groupCollapsed('系统信息');
+  console.info(`就绪时间: ${new Date()}`);
+
+  if (globalThis.env && globalThis.env !== 'production') {
+    console.info(`当前环境:${env}`);
   }
 
-  if (console && console.info) {
-    console.info(`UI程序已就绪, 如遇使用问题请联系管理员. Email: wangxuemin@zzlx.org.`);
-  }
+  console.info(`使用说明:${window.location.origin}/manual`);
+  console.info(`联系我们: ${window.location.origin}/contact`);
+  console.groupEnd();
 }

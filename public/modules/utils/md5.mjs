@@ -1,10 +1,23 @@
 /**
  * *****************************************************************************
  *
- * MD5 (Message-Digest Algorithm)
- * ==============================
+ * MD5 Algorithm 
+ * =============
  *
- * 一种密码散列函数,产生出一个128位的散列值,用于确保信息传输完整一致.
+ * MD5(Message-Digest Algorithm 5 信息摘要算法版本5),
+ * 一种密码散列函数,产生出一个16字节(128位)的校验值,用于确保信息传输完整一致.
+ *
+ * # 主要特点
+ *
+ * * 稳定、运算速度快;
+ * * 压缩性：输入任意长度的数据，输出长度固定（128 比特位);
+ * * 运算不可逆：已知运算结果的情况下，无法通过通过逆运算得到原始字符串;
+ * * 高度离散：输入的微小变化，可导致运算结果差异巨大;
+ *
+ * # 主要用途
+ *
+ * * 防止数据篡改
+ * * 信息保密 
  *
  * # MD5算法的原理
  *
@@ -50,10 +63,11 @@
  * 信息摘要最终处理成以A, B, C, D 的形式输出。
  * 也就是开始于A的低位在前的顺序字节，结束于D的高位在前的顺序字节。
  *
+ *
  * *****************************************************************************
  */
 
-console.log(md5('18039105900')); // test
+import md5_Utf8Encode from './utf8.mjs';
 
 export default function md5(string) {
 
@@ -65,12 +79,10 @@ export default function md5(string) {
   }
 
   function md5_AddUnsigned(lX, lY) {
-    // 32位操作数
-    // 二进制1后跟0或1的数量
-    const b31z   = 0b10000000000000000000000000000000;
-    const b30z   = 0b01000000000000000000000000000000;
+    const b31z   = 0b10000000000000000000000000000000; // 1<<31>>>0
+    const b30z   = 0b01000000000000000000000000000000; // 1<<30>>>0
     const b30o   = 0b00111111111111111111111111111111;
-    const b1130z = 0b11000000000000000000000000000000;
+    const b1130z = 0b11000000000000000000000000000000; // 0b11<<30>>>0
 
     const lX8 = (lX & b31z),
           lY8 = (lY & b31z),
@@ -159,7 +171,7 @@ export default function md5(string) {
       lWordCount = (lByteCount - (lByteCount % 4)) / 4;
       lBytePosition = (lByteCount % 4) * 8;
       lWordArray[lWordCount] = (lWordArray[lWordCount] | 
-        (string.charCodeAt(lByteCount) << lBytePosition));
+        (string[lByteCount] << lBytePosition));
       lByteCount++;
     }
 
@@ -181,50 +193,6 @@ export default function md5(string) {
     }
 
     return HexValue;
-  }
-
-  /**
-   *
-   * ASCII字符占用7位字长
-   * 一个ASCIl字符只需1字节编码（Unicode范围由U+0000~U+007F)
-   * 带有变音符号的拉丁文、希腊文、西里尔字母、
-   * 亚美尼亚语、希伯来文、阿拉伯文、叙利亚文等字母则需要2字节编码
-   * 其他语言字符（包括中日韩文字、东南亚文字、中东文字等）包含了大部分常用字，
-   * 使用3字节编码
-   *
-   * 字符编码对应表
-   *
-   * | Unicode | UTF-8 | Byte | 备注 |
-   * | ------- | ----- | ---- | ---- |
-   * | 0000~007F | 0XXX XXXX | 1 |  |
-   * | 0080~07FF | 110X XXXX 10XX XXXX | 2 |  |
-   * | 0800~FFFF | 110X XXXX 10XX XXXX 10XX XXXX | 3 | 0~FFFF |
-   * | 1 0000~10 FFFF | 110X XXXX 10XX XXXX 10XX XXXX | 4 | 0~10 FFFF |
-   *
-   */
-
-  function md5_Utf8Encode(string) {
-    const string_u = String.prototype.replace.call(string, /\r\n/g, "\n");
-    let utftext = "";
-
-    for (let n = 0; n < string_u.length; n++) {
-      const c = string_u.charCodeAt(n);
-
-      if (c < 0b10000000) {
-        utftext += String.fromCharCode(c);
-      } else if ((c > 0b01111111) && (c < 0b100000000000)) { 
-        utftext += String.fromCharCode((c >> 6)              | 0b11000000);
-        utftext += String.fromCharCode((c & 0b111111)        | 0b10000000);
-      } else if ((c > 0b11111111111) && (c < 0b10000000000000000)) {
-        utftext += String.fromCharCode((c >> 12)             | 0b11100000);
-        utftext += String.fromCharCode(((c >> 6) & 0b111111) | 0b10000000);
-        utftext += String.fromCharCode((c & 0b111111)        | 0b10000000);
-      } else {
-        throw new Error('Char:', string_u[n], 'is not a valid unicode char.');
-      }
-    }
-
-    return utftext;
   }
 
   // step_1: 数据补位

@@ -29,6 +29,7 @@ export default function statics (options = {}) {
     index: 'index.html',
     maxage: 0,
     root: null,
+    rewrite: true, // 重定向
   }, typeof options === 'string' ? { root: options } : options);
 
   if (opts.root == null) throw new Error('opts.root is unconfigured.');
@@ -64,7 +65,7 @@ export default function statics (options = {}) {
 
     if (ctx.app.env === 'development') {
       // set no cache in development mode.
-      ctx.set('cache-control', 'no-cache');
+      ctx.set('cache-control', 'no-cache'); // 开发模式下no cache
     }
 
     // content negotiation

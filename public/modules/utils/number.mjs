@@ -1,7 +1,27 @@
 /**
- * Numerical data 
+ * *****************************************************************************
  *
+ * Numerical utils
+ * ===============
+ *
+ *
+ * *****************************************************************************
  */
+
+export default new Proxy({
+}, {
+	get: function (target, property, receiver) {
+    if (target[property] == null) {
+      if (console && console.warn) {
+        console.warn(`The property '${property}' is not defined, please confirmed.`)
+      }
+
+      return () => {};
+    }
+
+		return Reflect.get(target, property, receiver);
+  }
+});
 
 const formatDecimalsRegExp = /(?:\.0*|(\.[^0]+)0+)$/;
 const formatThousandsRegExp = /\B(?=(\d{3})+(?!\d))/g;
@@ -15,7 +35,7 @@ const map = {
   pb: Math.pow(1024, 5),
 }
 
-export default function Numerical (opts) {
+function Numerical (opts) {
   // 参数处理
   const decimalPlaces = (opts && opts.decimalPlaces !== undefined) ? opts.decimalPlaces : 2;
   const fixedDecimals = Boolean(opts && opts.fixedDecimals);
@@ -162,13 +182,7 @@ function format(value, options) {
  */
 
 function bytes(value, options) {
-  if (typeof value === 'string') {
-    return parse(value);
-  }
-
-  if (typeof value === 'number') {
-    return format(value, options);
-  }
-
+  if (typeof value === 'string') return parse(value);
+  if (typeof value === 'number') return format(value, options);
   return null;
 }

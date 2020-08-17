@@ -39,7 +39,6 @@ sub_process = cp.spawn('node', Args.concat(['--start']), options);
 
 const clearInterval = setInterval(() => {
   const changed = readdir(
-    path.join(APP_ROOT, 'public'),
     path.join(APP_ROOT, 'server'),
     path.join(APP_ROOT, 'scss'),
   );
@@ -107,6 +106,13 @@ function readdir () {
     // condition1: file is a file
     if (file.isFile()) { 
       const filePath = path.join(dir, file.name);
+
+      // 过滤非代码库管理文件
+      if (file.name === '.DS_Store') {
+        fs.unlinkSync(filePath);
+        console.log('删除了文件:', filePath);
+      }
+
       if (!fs.existsSync(filePath)) continue;
 
       const content = fs.readFileSync(filePath, 'utf8');

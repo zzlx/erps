@@ -42,16 +42,15 @@ export default class HomePage extends React.Component {
   }
 
   componentDidMount() {
+    console.log(this.props);
     const store = this.context.store;
-    const types = store.getTypes();
-
-    store.dispatch({type: types.ZZZ});
+    store.dispatch({type: store.types.ZZZ});
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    console.log('shouldUpdate');
+    // 组件更新逻辑
     return false;
-    if (this.props == nextProps) return false;
-    else return true;
   }
 }
 

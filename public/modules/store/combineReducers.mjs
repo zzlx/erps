@@ -32,7 +32,7 @@ export default function combineReducers(reducers) {
   for (let i = 0; i < reducerKeys.length; i++) {
     const key = reducerKeys[i];
 
-    if (env && env === 'development') {
+    if (globalThis.env && globalThis.env === 'development') {
       if (typeof reducers[key] === 'undefined') {
         warning("No reducer provided for key \"" + key + "\"");
       }
@@ -47,7 +47,7 @@ export default function combineReducers(reducers) {
 
   let unexpectedKeyCache;
 
-  if (env && env !== 'production') {
+  if (globalThis.env && globalThis.env !== 'production') {
     unexpectedKeyCache = {};
   }
 
@@ -64,7 +64,7 @@ export default function combineReducers(reducers) {
       throw shapeAssertionError;
     }
 
-    if (env && env !== 'production') {
+    if (globalThis.env && globalThis.env !== 'production') {
       const warningMessage = getUnexpectedStateShapeWarningMessage(
         state, 
         finalReducers, 

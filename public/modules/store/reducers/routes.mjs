@@ -13,10 +13,10 @@ const routes = [
     "exact": false
   },
   { 
-    "path": [ "/", "/index.html", "/home/:module(\\w+)?" ], 
+    "path": [ "/", "/index.html", "/homepage", "/homepage/:module(\\w+)?" ], 
     "title": "首页|Home",
     "view": "HomePage",
-    "exact": false
+    "exact": true,
   },
   {
     "path": "/login",

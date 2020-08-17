@@ -11,5 +11,5 @@
  */
 
 if (console && console.warn) {
-  console.warn(`浏览器不支持module,建议升级浏览器版本以获取最佳使用体验.`);
+  console.warn(`浏览器不支持ES module,建议升级浏览器版本以获取最佳使用体验.`);
 }
