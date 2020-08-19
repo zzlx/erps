@@ -31,6 +31,3 @@ function getParams (paramsString) {
 
   return params;
 }
-
-// test
-//console.log(getLocations('http://zzlx.org/home?test=test&test1=test2'));

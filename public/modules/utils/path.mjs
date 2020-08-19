@@ -8,8 +8,22 @@
  * *****************************************************************************
  */
 
+import assert from './assert.mjs';
+
+// path char component
+const CHAR_FORWARD_SLASH = '/'.charCodeAt(0);  // 斜杠/
+const CHAR_BACKWARD_SLASH = '\\'.charCodeAt(0); // 反斜杠\
+const CHAR_COLON = 58;          //  :
+const CHAR_DOT = 46;            // .
+const CHAR_UPPERCASE_A = 65;    // A
+const CHAR_UPPERCASE_Z = 90;    // Z
+const CHAR_LOWERCASE_A = 97;    // a
+const CHAR_LOWERCASE_Z = 122;   // z
+
+
 export default new Proxy({
   dirname,
+  extname,
   isURLPath,
   join,
   createLocation,
@@ -37,23 +51,9 @@ export default new Proxy({
   },
 });
 
-// path char component
-const CHAR_FORWARD_SLASH = 47;  // 斜杠/
-const CHAR_BACKWARD_SLASH = 92; // 反斜杠\
-const CHAR_COLON = 58;          //  =
-const CHAR_DOT = 46;            // .
-const CHAR_UPPERCASE_A = 65;    // A
-const CHAR_UPPERCASE_Z = 90;    // Z
-const CHAR_LOWERCASE_A = 97;    // a
-const CHAR_LOWERCASE_Z = 122;   // z
-
-/**
- * 
- *
- */
-
 /**
  * resolve
+ *
  */
 
 function resolve(...args) {
@@ -113,7 +113,7 @@ function isPosix (path) {
 
 function isAbsolute(path) {
   if (path.length === 0) return false;
-  if (isURLPath(path)) return true; // URL路径为绝对路径
+  if (isURLPath(path)) return true;
 
   const code = path.charCodeAt(0);
 
@@ -157,35 +157,30 @@ function dirname(path) {
   return path.slice(0, end);
 }
 
-/**
- *
- */
+function join() {
+  // path part array
+  const ppa = Array.prototype.slice.call(arguments)
+    .filter(Boolean)
+    .filter(v => v !== '');
 
-function join(...args) {
-  if (args.length === 0) return '.';
+  return ppa.length === 0 ? '.' : normalize(ppa.join('/'));
+}
 
-  let joined = null;
+function extname (path) {
+  assert(typeof(path) === 'string', `Path: ${path} must be string.`)
 
-  for (let i = 0; i < args.length; i++) {
-    const part = args[i];
-    if (part.length > 0) {
-      if (joined == null) joined = part;
-      else joined += `/${part}`;
+  let index = path.length;
+
+  for (let i = path.length - 1; i > -1; i--) {
+    if (index === path.length && path[i] === '/') break;
+
+    if (path[i] === '.') {
+      index = i; 
+      break;
     }
   }
 
-  if (joined == null) return '.';
-
-  return normalize(joined);
-}
-
-/**
- *
- *
- */
-
-function extname () {
-
+  return path.substr(index);
 }
 
 /**
@@ -200,7 +195,24 @@ function relative (from, to) {
  */
 
 function basename (path, ext) {
+  assert(typeof(path) === 'string', `Path: ${path} must be string.`)
 
+  let index = 0;
+
+  for (let i = path.length - 1; i > -1; i--) {
+    if (path[i] === '/') {
+      index = i + 1 ; 
+      break;
+    }
+  }
+
+  const baseName = path.substr(index); 
+
+  return ext 
+    ? baseName.substr(-ext.length) === ext 
+      ? baseName.substr(0, baseName.length - ext.length)
+      : baseName
+    : baseName;
 }
 
 /**

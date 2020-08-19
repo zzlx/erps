@@ -9,8 +9,8 @@
  * *****************************************************************************
  */
 
-import HttpError from './HttpError.mjs'; // @todo:
-import { compile, parse, pathToRegexp, } from '../../public/modules/utils/path-to-regexp.mjs';
+import HttpError from './HttpError.mjs';
+import { compile, parse, pathToRegexp, } from '../utils.mjs';
 
 export default class Router {
 

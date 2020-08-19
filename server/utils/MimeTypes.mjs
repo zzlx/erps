@@ -6,7 +6,12 @@
  * *****************************************************************************
  */
 
-import db from '../constants/mime-types.json';
+import fs from 'fs';
+import path from 'path';
+
+const __dirname = path.dirname(import.meta.url.substr(7));
+const __SRC = path.dirname(__dirname);
+const db = JSON.parse(fs.readFileSync(path.join(__SRC, 'constants', 'mime-types.json')));
 
 const EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/
 const TEXT_TYPE_REGEXP = /^text\//i

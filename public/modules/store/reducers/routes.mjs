@@ -36,7 +36,7 @@ const routes = [
     "view": "NotFound",
     "exact": false
   }
-]
+];
 
 export default (state = routes, action) => {
   return state;

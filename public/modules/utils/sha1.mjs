@@ -3,7 +3,17 @@
  *
  */
 
-export default function sha1 (bytes) {
+export default new Proxy({}, {
+  get: function (target, property, receiver) {
+    if (property === 'sha1') {
+      return (bytes) => sha1(bytes).map(v=v.toString(16).join(''));
+    }
+
+		return Reflect.get(target, property, receiver);
+  },
+});
+
+function sha1 (bytes) {
   var K = [0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6];
   var H = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0];
 

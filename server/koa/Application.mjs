@@ -33,7 +33,7 @@ export default class Application extends EventEmitter {
     this.opts = Object.assign({}, { 
       // default options
       env: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
-      keys: ['org.zzlx'],
+      keys: ['enpseC5vcmc='],
       protocol: 'http2',
       proxy: false,
       silent: false,

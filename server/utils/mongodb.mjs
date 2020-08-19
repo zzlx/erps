@@ -108,12 +108,3 @@ export default new Proxy(mongodb, {
     }: undefined;
 	}
 });
-
-
-/**
- *
- *
- */
-
-function getDB () {
-}

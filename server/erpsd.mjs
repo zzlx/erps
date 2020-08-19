@@ -22,11 +22,11 @@ import zlib from 'zlib';
 
 import sass from 'node-sass';
 
-import config from '../server/config.mjs';
-import parseArgvs from '../server/utils/parseArgvs.mjs';
+import config from './config.mjs';
+import parseArgvs from './utils/parseArgvs.mjs';
 
 // @todo: 服务器端渲染支持
-import HtmlParser from './utils/HtmlParser.mjs';
+import { HTMLRender } from './utils.mjs';
 
 const __filename = import.meta.url.substr(7);
 const FILE_NAME = path.basename(__filename, path.extname(__filename));
@@ -54,15 +54,15 @@ function recordPid () {
 // 被此事件捕获的exception,需要进行妥善处理
 // 不应出现未经管理的exception
 process.on('uncaughtException', (err, origin) => {
-	debug('exception: ', err);
-	debug('origin: ', origin);
+	debug('exception: %o', err);
+	debug('origin: %o', origin);
 });
 
 // Task: caught rejections
 // 被此事件捕获的rejection,需要进行妥善处理
 // 系统不应出现未经管理的rejection
 process.on('unhandledRejection', (reason, promise) => {
-	debug('promise: ', promise);
+	debug('unhandledRejection: %o', reason);
 });
 
 // Task: signal events
@@ -167,7 +167,7 @@ async function start () {
 
   // Task2: 生成index.html文件
   await new Promise((resolve, reject) => {
-    const html = new HtmlParser().setTitle('Home').render();
+    const html = new HTMLRender().setTitle('Home').render();
 
     fs.promises.writeFile(paths.templateHtml, html).then(()=> {
       resolve();

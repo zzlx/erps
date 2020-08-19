@@ -23,10 +23,10 @@ let sub_process = null;
 const APP_ROOT = path.dirname(__dirname);
 const Args = [
   '--trace-warnings',
-  '--experimental_top_level_await',
-  '--experimental-json-modules',
+//  '--experimental_top_level_await',
+//  '--experimental-json-modules',
   path.join(APP_ROOT, 'server', 'erpsd.mjs'),
-];
+].filter(Boolean);
 
 options = {
   //cwd: APP_ROOT,
@@ -46,7 +46,7 @@ const clearInterval = setInterval(() => {
 		sub_process = cp.spawn('node', Args.concat(['--restart']), options);
 	}
 
-}, 1500);
+}, 2500); // 每隔2.5s 遍历一次目录,经验间隔时间
 
 process.on('uncaughtException', (err, origin) => {
   console.log(err);
@@ -76,7 +76,7 @@ process.on('exit', () => {
 });
 
 process.nextTick(() => {
-  console.log('开始执行开发服务程序...');
+  console.log('执行服务程序...');
 });
 
 const storeMap = new Map();

@@ -1100,7 +1100,7 @@ _parse_argv() {
         ;;
 
       --start )
-        node --experimental-json-modules $_ROOT/server/erpsd.mjs --start &
+        node $_ROOT/server/erpsd.mjs --start &
         ;;
 
       --restart )

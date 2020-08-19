@@ -1,4 +1,5 @@
 /**
+ * *****************************************************************************
  *
  * Creates a store enhancer that applies middleware to Redux store dispatch method.
  * This is handy for a variety of tasks, 
@@ -12,6 +13,7 @@
  *
  * @param {...Function} middlewares The middleware chain to be applied.
  * @returns {Function} A store enhancer applying the middleware.
+ * *****************************************************************************
  */
 
 import compose from './compose.mjs';

@@ -20,13 +20,12 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import PackageJSON from '../package.json';
-
 const __filename = import.meta.url.substr(7);
 const __dirname = path.dirname(__filename);
 const __basename = path.basename(__filename);
 const debug = util.debuglog(`debug:${__basename}`);
 const APP_ROOT = path.dirname(__dirname);
+const PackageJSON = JSON.parse(fs.readFileSync(path.join(APP_ROOT, 'package.json'), 'utf8'));
 const APP_HOME = path.join(os.homedir(), `.${PackageJSON.name}`);
 
 class Config {
@@ -40,7 +39,7 @@ class Config {
       pidFile: path.join(APP_HOME, `${process.title}.pid`),
       mainApp: path.join(APP_ROOT, 'server', 'main.mjs'),
       buildPath: path.join(APP_HOME, 'build'), // 用于存储生成的前端文件
-      scssEntryPoint: path.join(APP_ROOT, 'scss', 'main.scss'),
+      scssEntryPoint: path.join(APP_ROOT, 'styles', 'main.scss'),
       public: path.join(APP_ROOT, 'public'),
       templateHtml: path.join(APP_ROOT, 'public', 'index.html'),
       stylesCss: path.join(APP_ROOT, 'public', 'statics', 'styles.css'),

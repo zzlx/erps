@@ -86,6 +86,7 @@ function unicode_to_utf8 (bin) {
       let c3 = b32       & 0b111111 | 0b10000000;
 
       u8a.push(c0, c1, c2, c3);
+
     } else {
       throw new Error('Invalid Unicode char.');
     }
@@ -96,7 +97,6 @@ function unicode_to_utf8 (bin) {
 
 /**
  * convert utf8 to unicode
- *
  */
 
 function utf8_to_unicode (utf8String) {

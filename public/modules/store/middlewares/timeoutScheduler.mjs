@@ -1,7 +1,10 @@
 /**
+ * *****************************************************************************
+ *
  * Scheduler actions with { meta: { delay: N } } to be delayed by N milliseconds.
  * Makes `dispatch` return a function to cancel the timeout. 
  *
+ * *****************************************************************************
  */
 
 export default store => next => action => {

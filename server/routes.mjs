@@ -4,6 +4,8 @@
  * 服务器端路由配置
  *
  *
+ * 路由
+ *
  * *****************************************************************************
  */
 
@@ -14,6 +16,7 @@ import ReactDOMServer from 'react-dom/server.js';
 
 import dba from './koa/middlewares/dba.mjs';
 import statics from './koa/middlewares/statics.mjs';
+import serverRender from './koa/middlewares/serverRender.mjs';
 
 import Router from './koa/Router.mjs';
 import config from './config.mjs';
@@ -48,8 +51,9 @@ graphql.all('graphql', '/graphql', async (ctx, next) => {
 //index.use('/modules', modules.routes(), modules.allowedMethods());
 
 index.use('/api', graphql.routes(), graphql.allowedMethods());
+
+// 服务器渲染逻辑
+index.get('/*', serverRender());
 index.get('/*', statics(paths.public));
-index.get('/*', () => {
-})
 
 export default index;

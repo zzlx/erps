@@ -36,7 +36,7 @@ export default function App (store) {
   let i = 0;
 
   for (let route of routes) {
-    const component = React.lazy(() => import(`./views/${route.view}.mjs`));
+    const component = React.lazy(() => import(`./apps/${route.view}.mjs`));
 
     if (route.from) {
       routeArray.push(React.createElement(Redirect, { key: i++, ...route, component }));
