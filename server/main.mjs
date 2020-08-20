@@ -1,12 +1,8 @@
 /**
  * *****************************************************************************
  *
+ * 服务端主程序
  * Backend services application
- *
- * 后端服务程序,用于解析http请求，并返回响应
- *
- * 服务器逻辑:
- *
  *
  * *****************************************************************************
  */
@@ -14,23 +10,33 @@
 import fs from 'fs';
 import http2 from 'http2';
 import os from 'os';
+import path from 'path';
 import util from 'util';
 
 import Koa from './koa/Application.mjs';
+
 import cors from './koa/middlewares/cors.mjs';
 import cookies from './koa/middlewares/cookies.mjs';
 import error from './koa/middlewares/error.mjs';
 import log from './koa/middlewares/log.mjs';
 import xResponse from './koa/middlewares/xResponse.mjs';
+import router from './routes.mjs'; // 路由配置
 
-import router from './routes.mjs';
 import config from './config.mjs';
+import WriteStream from './utils/WriteStream.mjs';
+import { date } from './utils.mjs'; // @todo: 
 
 const debug = util.debuglog('debug:main.mjs');
+const paths = config.paths;
+const logWriter = new WriteStream();
 
 const app = new Koa();
 app.use(error());            // 捕获中间件级错误
-app.use(log());              // request log
+app.use(log((log) => {
+  // 按日期存档
+  logWriter.path = path.join(paths.logPath, date.format('yyyymmdd') + '.log');
+  logWriter.write(Object.values(log).join('\t') + '\n');
+}));
 app.use(xResponse());        // 记录中间件响应时间
 app.use(cors());             // 跨域访问
 app.use(cookies());          // cookie读写及签名

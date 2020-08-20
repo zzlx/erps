@@ -1,10 +1,32 @@
 /**
  * *****************************************************************************
  *
- * Date object extention.
+ * Date utils.
  *
  * *****************************************************************************
  */
+
+export default new Proxy(Date, {
+	apply: function (target, thisArg, argumentsList) {
+    return target(...argumentsList);
+	},
+
+	construct: function (target, argumentsList, newTarget) {
+    newTarget = new target(...argumentsList);
+    return newTarget;
+	},
+
+	get: function (target, property, receiver) {
+    if (property === 'format') return format;
+    if (property === 'weekday') return weekday;
+    if (property === 'toLocaleISOString') return toLocaleISOString;
+    if (property === 'tPlusN') return tPlusN;
+    if (property === 'getFormattedDate') return getFormattedDate;
+
+
+		return Reflect.get(target, property, receiver);
+  }
+});
 
 
 /*
@@ -16,12 +38,6 @@ const MONTHS = [
   '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'
 ];
 
-export default class NewDate extends Date {
-  constructor () {
-    super();
-  }
-}
-
 /**
  * 格式化日期字符串
  *
@@ -29,9 +45,9 @@ export default class NewDate extends Date {
  * @return {string}
  */
 
-NewDate.prototype.format = function (date, fmt) {
+function format (date, fmt) {
   if (fmt == null) { fmt = date; date = null; }
-  const d = date ? new Date(date) : this && this.date ? this.date : new Date(); 
+  const d = date ? new Date(date) : new Date(); 
 
   const o = {
     'y+': d.getFullYear(),
@@ -66,8 +82,8 @@ NewDate.prototype.format = function (date, fmt) {
  * @return {string}
  */
 
-NewDate.prototype.weekday = function (date) {
-  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
+function weekday (date) {
+  const d = date ? new Date(date) : new Date(); 
 
 	const day = ['日', '一', '二', '三', '四', '五', '六'];
 	return '星期' + day[d.getDay()];
@@ -81,9 +97,8 @@ NewDate.prototype.weekday = function (date) {
  * @return {string} locale iso string
  */
 
-NewDate.prototype.toLocaleISOString = function (date) {
-  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
-
+function toLocaleISOString (date) {
+  const d = date ? new Date(date) : new Date(); 
 	const tzOffset = (d.getTimezoneOffset())/60;
 	const timestamp = d.valueOf() - tzOffset * 3600000;
 	const trail = `+0${Math.abs(tzOffset)}00`; // @todo: 需要优化
@@ -91,14 +106,15 @@ NewDate.prototype.toLocaleISOString = function (date) {
 }
 
 /**
- * 计算t+n
+ * 计算t+n日期
  *
- * @param: {} date
+ * @param: {object} date
+ * @param: {bumber} n
  *
  */
 
-NewDate.prototype.tPlusN  = function (date, n) {
-  const d = date ? new Date(date) : this && this._date ? this._date : new Date(); 
+function tPlusN (date, n) {
+  const d = date ? new Date(date) : new Date(); 
 
 	n = n ? n : 1;
 	const date_today = d.toLocaleString().replace(/\s.*/, '');
@@ -112,9 +128,7 @@ NewDate.prototype.tPlusN  = function (date, n) {
 	return new Date(reset); 
 }
 
-NewDate.prototype.getFormattedDate = function () {
-  return this.getDate() + "-" + MONTHS[this.getMonth()] + "-" + this.getFullYear();
+function getFormattedDate (date) {
+  const d = date ? new Date(date) : new Date(); 
+  return d.getDate() + "-" + MONTHS[d.getMonth()] + "-" + d.getFullYear();
 }
-
-//const test = new NewDate().getFormattedDate();
-//console.log(test);

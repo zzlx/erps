@@ -23,8 +23,6 @@ export default () => {
   const debug = util.debuglog('debug:server-render-middleware');
 
   return function (ctx, next) {
-    console.log(ctx);
-
 
     // 转发中间件
     if (path.extname(ctx.path) !== '') return next();

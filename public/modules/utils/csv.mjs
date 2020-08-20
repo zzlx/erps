@@ -11,28 +11,34 @@
  */
 
 export default new Proxy({
-  toCSV,
-},{
-  /**
-   * getter
-   *
-   * @param {obj} target
-   * @param {string} property
-   * @param {obj} receiver
-   * @return {function}
-   */
-
-	get: function (target, property, receiver) {
-
-    if (target[property] == null) {
-      if (console && console.warn) {
-        console.warn(`The property '${property}' is not defined, please confirmed.`)
-      }
-
-      return () => {};
+  value: null,
+  csv: null,
+}, {
+	apply: function (target, thisArg, argumentsList) {
+    if (typeof(value) === 'string' && isCSV(value)) {
+      target.csv = value;
+      target.value = csvParser(value);
     }
 
-		return Reflect.get(target, property, receiver);
+    if (Array.isArray(value)) {
+      target.value = value;
+      target.csv = toCSV(value);
+    }
+
+    console.log(this);
+    return this;
+  },
+
+  get: function (target, property, receiver) {
+    if (property === 'isCSV') {
+      return value => isCSV(value);
+    }
+
+    if (property === 'toString') {
+      return  value => toCSV(value)
+    }
+
+    return Reflect.get(target, property, receiver);
   },
 });
 
@@ -60,6 +66,7 @@ function toCSV (value) {
 
 	// step3: 重置遍历器,重新遍历数组,使用title作为key值
 	it.reset();
+
 	while (it.hasNext()) {
 
 		const item = it.next();
@@ -93,4 +100,52 @@ function makeIterator (array) {
 		hasNext: () => nextIndex < array.length,
 		next: () => nextIndex < array.length ? array[nextIndex++] : null,
 	}
+}
+
+function csvParser(csv) {
+  csv = String(csv);
+  if ('string' !== typeof csv) throw new TypeError('Must be csv string.');
+
+  const retval = [];
+  const lines = csv.split(/\r\n|\n/);
+  let i = 0, keys;
+
+  const parser = (csv) => {
+    const csvValueRegExp = new RegExp(/(?!\s*$)\s*(?:'([^'\\]*(?:\\[\S\s][^'\\]*)*)'|"([^"\\]*(?:\\[\S\s][^"\\]*)*)"|([^,'"\s\\]*(?:\s+[^,'"\s\\]+)*))\s*(?:,|$)/, 'g');
+    const result = [];
+    let match;
+
+    // 匹配值
+    while((match = csvValueRegExp.exec(csv)) !== null) {
+      if (undefined !== match[1]) { result.push(match[1].trim()); continue; }
+      if (undefined !== match[2]) { result.push(match[2].trim()); continue; }
+      if (undefined !== match[3]) { result.push(match[3].trim()); continue; }
+      result.push(''); // 空值
+    }
+
+    return result.length ? result : null;
+
+  }
+
+  for (let line of lines) {
+    const obj = {};
+    const result = parser(line);
+    if (!result) continue;
+    if (i === 0 ) { keys = result; i++; continue; }
+
+    for (let j = 0; j < keys.length; j++) {
+      const key = keys[j];
+      obj[key] = result[j];
+    }
+
+    retval.push(obj);
+  }
+
+  return retval;
+}
+
+function isCSV (value) {
+  const csvValidRegExp = /^\s*(?:\'[^\'\\]*(?:\\[\S\s][^\'\\]*)*\'|\"[^\"\\]*(?:\\[\S\s][^\"\\]*)*\"|[^,\'\"\s\\]*(?:\s+[^,\'"\s\\]+)*)\s*(?:,\s*(?:\'[^\'\\]*(?:\\[\S\s][^\'\\]*)*\'|\"[^\"\\]*(?:\\[\S\s][^\"\\]*)*\"|[^,\'\"\s\\]*(?:\s+[^,\'\"\s\\]+)*)\s*)*$/;
+
+  return typeof(value) === 'string' && csvValidRegExp.test(value);
 }

@@ -46,14 +46,8 @@ graphql.all('graphql', '/graphql', async (ctx, next) => {
   ctx.body = 'graphql';
 });
 
-//index.use('/', statics(paths.public));
-//index.use('/statics', statics.routes(), statics.allowedMethods());
-//index.use('/modules', modules.routes(), modules.allowedMethods());
-
 index.use('/api', graphql.routes(), graphql.allowedMethods());
-
-// 服务器渲染逻辑
-index.get('/*', serverRender());
 index.get('/*', statics(paths.public));
+index.all('/*', serverRender());
 
 export default index;

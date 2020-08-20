@@ -1,61 +1,38 @@
 /**
  * *****************************************************************************
  *
- * 访问日志记录
+ * # 日志中间件
  *
- * @param: {String} logPath
- * @param: {String} format
+ * 构造日志对象,为服务器提供日志记录
  *
- * @return: {Function} middleware function
+ * @param {function} callback 将日志对象交给callback处理
+ * @return {function} middleware
+ * @api public
+ *
  * *****************************************************************************
  */
 
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import util from 'util';
+import { assert, date } from '../../utils.mjs';
 
-import NewDate from '../../utils/Date.mjs'; // @todo: 
-const debug = util.debuglog('debug:middleware.log');
-
-export default function logMiddleware (logPath, format) {
-
-	// 保证日志目录
-	if (null == logPath) logPath = path.join(process.env.HOME, '.log');
-  // if logPath already exists, that can be no side effect
-  fs.promises.mkdir(logPath, {recursive: true}).catch(err => {
-		debug('创建日志目录时发生错误:');
-	});
-
-  // format: 
-  // {time}
-  // {method}
-  // {ip}
-  // {port}
-  // {user-agent}
-  // {referer}
-  // {status}
-  let rc = 0; // request_counter
+export default callback => {
+  assert(typeof callback === 'function', `${callback} must be a function.`);
 
   return async function logMiddleware (ctx, next) {
+
     await next();
 
-    const log = new Array(
-			NewDate.prototype.toLocaleISOString(),
-      `${ctx.socket.remoteAddress}:${ctx.socket.remotePort}`,
-			`"${ctx.get('user-agent')}"`,
-      ctx.method, 
-			ctx.href,
-      ctx.status,
-      ctx.get('referer'),
-		).join('\t'); // 使用制表符作为分隔符
-
-    debug(`Request count ${++rc}.`);
-    debug(log);
-
-    // write request log to file
-		const dateSN = NewDate.prototype.format('yyyymmdd');
-    fs.promises.open(path.join(logPath, `request_${dateSN}.log`), 'a+')
-			.then(fd => fs.promises.appendFile(fd, log + os.EOL).then(() => fd.close()));
+    callback({
+      "datetime": date.toLocaleISOString(),
+      "user-agent": ctx.get("user-agent"),
+      "c-ip": ctx.socket.remoteAddress,
+      "c-port": ctx.socket.remotePort,
+      "method": ctx.method,
+      "url": ctx.href,
+      "status": ctx.status,
+      "referer": ctx.get("referer"),
+      "s-ip": ctx.socket.localAddress,
+      "s-port": ctx.socket.localPort,
+      "s-pid": process.pid,
+    }); 
   } 
 }
