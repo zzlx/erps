@@ -1,10 +1,13 @@
 /**
+ * *****************************************************************************
+ *
  * This function transforms a JS object `ObjMap<Promise>` into a `Promise<ObjMap>`
  *
  * This is akin to bluebird's `Promise.props`, 
  * but implemented only using `Promise.all` 
  * so it will work with any implementation of ES6 promises.
  *
+ * *****************************************************************************
  */
 
 export default function promiseForObject(object) {
@@ -15,6 +18,6 @@ export default function promiseForObject(object) {
     return values.reduce((resolvedObject, value, i) => {
       resolvedObject[keys[i]] = value;
       return resolvedObject;
-    }, Object.create(null));
+    }, {});
   });
 }

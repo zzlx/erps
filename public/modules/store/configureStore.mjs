@@ -27,7 +27,7 @@ export default function configureStore (preloadedState = Object.create(null)) {
     thunk,
     promise,
     timeoutScheduler,
-    (env && env === 'development') ? logger : false
+    (globalThis.env && globalThis.env === 'development') ? logger : false
   ].filter(Boolean);
 
   const middlewareEnhancer = applyMiddleware(middlewares); 

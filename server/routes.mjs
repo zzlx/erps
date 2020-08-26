@@ -3,9 +3,6 @@
  *
  * 服务器端路由配置
  *
- *
- * 路由
- *
  * *****************************************************************************
  */
 
@@ -20,6 +17,7 @@ import serverRender from './koa/middlewares/serverRender.mjs';
 
 import Router from './koa/Router.mjs';
 import config from './config.mjs';
+import { date } from './utils.mjs'; // @todo: 
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`); 
@@ -32,9 +30,7 @@ const s = new Router({
   prefix: '',
 });
 
-const graphql = new Router({ 
-  //prefix: '/api'
-});
+const graphql = new Router({});
 
 graphql.use(dba(config));
 
@@ -46,8 +42,16 @@ graphql.all('graphql', '/graphql', async (ctx, next) => {
   ctx.body = 'graphql';
 });
 
+index.get('/system/log', (ctx, next) => {
+  const logFile = path.join(paths.logPath, date.format('yyyymmdd') + '.log');
+
+  // @todos: 需要完善显示页面
+  ctx.type = 'text';
+  ctx.body = fs.createReadStream(logFile);
+});
+
 index.use('/api', graphql.routes(), graphql.allowedMethods());
-index.get('/*', statics(paths.public));
 index.all('/*', serverRender());
+index.get('/*', statics(paths.public));
 
 export default index;

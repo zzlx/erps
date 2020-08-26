@@ -53,7 +53,9 @@ export default class WriterStream {
   }
 
   createWriteStream() {
-    const stream = fs.createWriteStream(this[FP]);
+    const stream = fs.createWriteStream(this[FP], {
+      flags: 'a+'
+    });
     stream.on('error', err => {
       this.stream = null;
     });

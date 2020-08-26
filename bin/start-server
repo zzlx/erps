@@ -40,7 +40,7 @@ sub_process = cp.spawn('node', Args.concat(['--start']), options);
 const clearInterval = setInterval(() => {
   const changed = readdir(
     path.join(APP_ROOT, 'server'),
-    path.join(APP_ROOT, 'styles'),
+    path.join(APP_ROOT, 'css'),
   );
 	if (changed) {
 		sub_process = cp.spawn('node', Args.concat(['--restart']), options);

@@ -12,13 +12,16 @@
  * *****************************************************************************
  */
 
+import util from 'util';
 import { assert, date } from '../../utils.mjs';
 
-export default callback => {
+const debug = util.debuglog('node:log-middlewar');
+const printLog = value => debug(value);
+
+export default (callback = printLog ) => {
   assert(typeof callback === 'function', `${callback} must be a function.`);
 
   return async function logMiddleware (ctx, next) {
-
     await next();
 
     callback({
@@ -33,6 +36,7 @@ export default callback => {
       "s-ip": ctx.socket.localAddress,
       "s-port": ctx.socket.localPort,
       "s-pid": process.pid,
+      "errors": ctx.state.errors ? ctx.state.errors.join(',') : '',
     }); 
   } 
 }

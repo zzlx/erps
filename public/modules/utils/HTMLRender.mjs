@@ -13,7 +13,6 @@
 
 export default class HtmlParser {
   constructor(props) {
-
     this.state = Object.assign({}, {
       title: 'Untitled',
       charset: 'UTF-8',
@@ -73,7 +72,7 @@ export default class HtmlParser {
   }
 
   render () {
-    this.html = `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="zh-cmn-Hans">
   <head>
     <meta charset="${this.state.charset}" />
@@ -92,11 +91,9 @@ export default class HtmlParser {
     <div id="root">${this.state.body || ''}</div>
     <script>
       window.env = '${process.env.NODE_ENV}';
-      window.__INITIAL_STATE__ = ${JSON.stringify(this.state.initialState)};
+      window.__INITIAL__STATE__ = ${JSON.stringify(this.state.initialState)};
     </script>
   </body>
 </html>`;
-
-    return this.html;
   }
 }

@@ -2,8 +2,9 @@
  * *****************************************************************************
  *
  * 服务器渲染中间件
+ * ===============
  *
- * ReactDOMServer
+ * # ReactDOMServer API
  *
  * * renderToString(element)
  * * renderToStaticMarkup(element)
@@ -19,17 +20,18 @@ import util from 'util';
 import config from '../../config.mjs';
 import { HTMLRender } from '../../utils.mjs'; 
 
-export default () => {
-  const debug = util.debuglog('debug:server-render-middleware');
+const debug = util.debuglog('debug:server-render-middleware');
+
+export default (clientRoutes) => {
 
   return function (ctx, next) {
-
-    // 转发中间件
+    // 转发有扩展名的路径至下一中间件
     if (path.extname(ctx.path) !== '') return next();
 
-    const html = new HTMLRender({
-      title: 'TEST',
-    });
+
+    // @todo: 利用客户端路由进行匹配渲染,以优化SEO
+
+    const html = new HTMLRender();
 
     ctx.type = 'html';
     ctx.body = html.render();

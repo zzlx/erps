@@ -7,32 +7,35 @@
  *
  * 静态资源服务
  * 内容协商
- * 缓存策略支持
+ * 缓存策略支持:通过ETag实现缓存逻辑
  * 压缩版本支持
  *
  * @param {object|string} opts
  * @return {function} middleware function
+ * @api public
  * *****************************************************************************
  */
 
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
+import { assert } from '../../utils.mjs';
 
 const debug = util.debuglog('debug:statics-middleware');
 
-export default function statics (options = {}) {
+export default (options = {}) => {
   const opts = Object.assign({}, {
     compress: false,
     directoryIndex: ['index.html'],
     immutable: false,
     index: 'index.html',
-    maxage: 0,
+    maxAge: 12*60*60, // 默认缓存12小时
     root: null,
+    lastModified: true,
     rewrite: true, // 重定向
   }, typeof options === 'string' ? { root: options } : options);
 
-  if (opts.root == null) throw new Error('opts.root is unconfigured.');
+  assert(opts.root, 'You must provider the static path as the root path.');
 
   return async function staticsMiddleware (ctx, next) {
 
@@ -55,18 +58,10 @@ export default function statics (options = {}) {
     // 不含文件扩展名的路径rewrite为callbackURL
     if (path.extname(url) === '') url = callbackURL;
 
-    // @todo: 完善资源最后修改时间戳对比逻辑
-    const lastModified = ctx.get('if-modified-since');
-
     // get accept encoding
     const accetpEncoding = ctx.get('accept-encoding');
 
     ctx.type = path.extname(url); // set content-type
-
-    if (ctx.app.env === 'development') {
-      // set no cache in development mode.
-      ctx.set('cache-control', 'no-cache'); // 开发模式下no cache
-    }
 
     // content negotiation
     if (/\bbr\b/.test(accetpEncoding) && fs.existsSync(url + '.br')) {
@@ -81,13 +76,27 @@ export default function statics (options = {}) {
       ctx.set('vary', 'accept-encoding');
       ctx.set('content-encoding', 'gzip');
       url += '.gz';
-    } else if (!fs.existsSync(url)) {
-      ctx.status = 404;
-      return await next();
     }
 
-    const stats = fs.lstatSync(url);
-    ctx.set('last-modified', new Date(stats.mtimeMs).toUTCString());
-    ctx.body = fs.createReadStream(url);
+    // response
+    if (fs.existsSync(url)) {
+
+      ctx.set('vary', 'User-Agent'); // 
+
+      const stats = fs.lstatSync(url);
+      const etag = `${stats.mtimeMs}`; 
+
+      if (ctx.get('if-none-match') === etag) {
+        ctx.status = 304; // 响应304
+      } else {
+        ctx.length = stats.size;
+        ctx.set('etag', etag); // 开启服务端资源验证逻辑
+        ctx.set('last-modified', stats.mtime); // 开启浏览器端缓存
+        // cache control是否启用,似乎作用不大
+        //ctx.set('cache-control', `max-age:${opts.maxAge}`);
+
+        ctx.body = fs.createReadStream(url);
+      }
+    }
   }
 }

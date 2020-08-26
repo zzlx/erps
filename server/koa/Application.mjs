@@ -109,7 +109,8 @@ export default class Application extends EventEmitter {
       ctx.app = this;
       ctx.headers = headers;
       ctx.flags = flags;
-      ctx.state = new Map(); // store states
+      ctx.state = Object.create(null);
+      ctx.state.errors = []; // 用于记录系统错误;
       ctx.stream = stream;
 
       return this.handleRequest(ctx, fn);
@@ -187,15 +188,15 @@ export default class Application extends EventEmitter {
   }
 }
 
-// 附加路由
-Application.Router = Router;
-
 /**
- * Response stream
+ * Response api:
  *
+ * stream.respond
+ * stream.end
  */
 
-Application.prototype.respond = function (ctx) {
+Application.prototype.respond = (ctx) => {
+
   if (false === ctx.respond) return; 
 
   let body = ctx.body;
@@ -210,11 +211,10 @@ Application.prototype.respond = function (ctx) {
   }
 
   if (!ctx.writable) {
-		debug('Can not write to stream, ctx.writable is false.');
-		return this.stream.end();
-	}
+    return ctx.stream.end();;
+  }
 
-  // buffer body
+  // buffer or string body
   if (Buffer.isBuffer(body) || typeof body === 'string') {
     return ctx.stream.end(body);
   }

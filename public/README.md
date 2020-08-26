@@ -1,5 +1,5 @@
-README
-======
+UI前端资源
+==========
 
 前端资源目录用于存放html\css\js等资源
 
@@ -16,15 +16,3 @@ README
 # 部署说明
 
 将public目录整体拷贝到虚拟主机目录
-
-# 部署示例
-
-```
-
-```
-
-# 版权说明
-
-MIT License
-Copyright (c) 2019-present zzlx.org
-All rights reserved.

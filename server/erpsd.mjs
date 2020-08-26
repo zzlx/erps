@@ -120,8 +120,7 @@ function getPid () {
   }
 
   // 仅在unix环境下有效
-  // @todo
-  pidFromPort = cp.execSync('lsof -i:3000 | awk \'NR==2{print $2}\'').toString('utf8');
+  pidFromPort = cp.execSync(`lsof -i:${config.server.port} | awk \'NR==2{print $2}\'`).toString('utf8');
 
   if (pidFromPort) pid = pidFromPort
 
@@ -213,11 +212,8 @@ async function start () {
 
   http2server.listen({
     ipv6Only: false, // 是否仅开启IPV6
-    host: '::',      // '::'/'0.0.0.0'/绑定服务器主机名或IP地址
-    port: process.env.PORT 
-      ? Number.parseInt(process.env.PORT, 10) 
-      : 3000,
-      //: process.env.NODE_ENV === 'development' ? 3000 : 8000,
+    host: config.server.host,
+    port: config.server.port,
     exclusive: false, // false 可接受进程共享端口, 支持集群服务器配置
   });
 }

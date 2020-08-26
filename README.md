@@ -1,21 +1,20 @@
 ERPS
 ====
 
-ERPS(ERP Services), 集成ERP、CRM、OA、HR等系统功能于一体的综合业务服务平台。
-
-# 使用方法
-
-```bash
-./bin/erpctl.sh --help
-```
-
-# 部署实施
-
+ERPS(ERP Services Platform), 集成ERP、OA、CRM、HR等功能于一体的综合业务服务平台。
 
 # 版权声明
 
+Copyright (C) 2019-present zzlx.org
+
+兹授权, 任何人均可免费获得此软件拷贝及其文档,不严格限制使用此软件的使用、
+拷贝、修改、合并、发布、发行、再授权及销售此软件的拷贝。
+
+> 授权参照MIT许可证
+
+# MIT许可证原文 
+
 MIT License (MIT)
-Copyright (c) 2019-present zzlx.org
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,9 +33,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-## 授权条款
-
-* 被授权人有权利使用、复制、修改、合并、出版发行、散布、再授权及贩售软件及软件的副本。
-* 被授权人可根据程序的需要修改授权条款为适当的内容。
-* 被授权人义务在软件和软件的所有副本中都必须包含版权声明和许可声明。

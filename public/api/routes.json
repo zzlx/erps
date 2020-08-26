@@ -1,0 +1,32 @@
+[
+  { 
+    "path": "/settings/:module(\\w+)?", 
+    "exact": false,
+    "title": "设置",
+    "view": "HomePage"
+  },
+  { 
+    "path": [ "/", "/index.html", "/homepage", "/homepage/:module(\\w+)?" ], 
+    "exact": true,
+    "title": "首页|Home",
+    "view": "HomePage"
+  },
+  {
+    "path": "/login",
+    "exact": false,
+    "title": "登陆",
+    "view": "Login"
+  },
+  {
+    "path": "/databases/:tables(\\w+)?",
+    "exact": true,
+    "title": "数据库",
+    "view": "HomePage"
+  },
+  { 
+    "path": "*", 
+    "exact": false,
+    "title": "Error:404|NotFound",
+    "view": "NotFound"
+  }
+]

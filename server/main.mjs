@@ -31,12 +31,13 @@ const paths = config.paths;
 const logWriter = new WriteStream();
 
 const app = new Koa();
-app.use(error());            // 捕获中间件级错误
+
+// setting log middlware at the first, so erros can be record.
 app.use(log((log) => {
-  // 按日期存档
   logWriter.path = path.join(paths.logPath, date.format('yyyymmdd') + '.log');
   logWriter.write(Object.values(log).join('\t') + '\n');
 }));
+app.use(error());            // 捕获中间件级错误
 app.use(xResponse());        // 记录中间件响应时间
 app.use(cors());             // 跨域访问
 app.use(cookies());          // cookie读写及签名

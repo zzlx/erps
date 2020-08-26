@@ -840,6 +840,11 @@ export default class Context {
     const original = this[RES_BODY];
     this[RES_BODY] = val;
 
+    if (EMPTY_CODE.includes(this.status)) {
+      this[RES_BODY] = null;
+      return;
+    }
+
     // no content
     if (null == val || val === false || true === val) {
       if (!EMPTY_CODE.includes(this.status)) {
@@ -902,7 +907,8 @@ export default class Context {
   }
 
   /**
-   * user-level errors
+   *
+   * ctx.throw传递过来的user-level错误
    *
    * ctx.throw([status], [msg], [properties])
    *
@@ -930,7 +936,6 @@ export default class Context {
     const error = new HttpError(...args);
 		throw error;
   }
-
 }
 
 /**

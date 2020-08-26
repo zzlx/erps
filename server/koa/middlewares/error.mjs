@@ -13,7 +13,8 @@ export default () => {
     try { 
       await next();
     } catch (error) {  
-      return Promise.reject(error);
+      ctx.state.errors.push(error.message); // store error
+      Promise.reject(error); // reject error
     } 
   }
 }

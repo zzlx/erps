@@ -8,11 +8,11 @@ export default function printCharCode(code) {
     // NaN/undefined represents access beyond the end of the file.
     isNaN(code) 
       ? '<EOF>' 
-      : code < 0x007f // Trust JSON for ASCII.
+      : code < 0x7f // Trust JSON for ASCII.
         ? JSON.stringify(String.fromCharCode(code)) 
         // Otherwise print the escaped form.
         : "\"\\u".concat(('00' + code.toString(16).toUpperCase()).slice(-4), "\"")
   );
 }
 
-//console.log(printCharCode(900)); // test
+console.log(printCharCode(29579)); // test

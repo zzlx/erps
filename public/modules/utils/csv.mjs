@@ -10,37 +10,39 @@
  * *****************************************************************************
  */
 
-export default new Proxy({
-  value: null,
-  csv: null,
-}, {
-	apply: function (target, thisArg, argumentsList) {
-    if (typeof(value) === 'string' && isCSV(value)) {
-      target.csv = value;
-      target.value = csvParser(value);
-    }
+import assert from './assert.mjs';
 
-    if (Array.isArray(value)) {
-      target.value = value;
-      target.csv = toCSV(value);
-    }
+export default (value) => {
+  const target = {};
 
-    console.log(this);
-    return this;
-  },
+  if (typeof(value) === 'string' && isCSV(value)) {
+    target.csv = value;
+    target.value = csvParser(value);
+  }
 
-  get: function (target, property, receiver) {
-    if (property === 'isCSV') {
-      return value => isCSV(value);
-    }
+  if (Array.isArray(value)) {
+    target.value = value;
+    target.csv = toCSV(value);
+  }
 
-    if (property === 'toString') {
-      return  value => toCSV(value)
-    }
+  return new Proxy(target, {
 
-    return Reflect.get(target, property, receiver);
-  },
-});
+    apply: function (target, thisArg, argumentsList) {
+      console.log(argumentsList);
+    },
+
+    get: function (target, property, receiver) {
+      if (property === 'isCSV') {
+        return value => isCSV(value);
+      }
+
+      if (property === 'toJSON') return () => target.value;
+      if (property === 'toString') return () => target.value;
+
+      return Reflect.get(target, property, receiver);
+    },
+  });
+}
 
 function toCSV (value) {
 
@@ -103,8 +105,7 @@ function makeIterator (array) {
 }
 
 function csvParser(csv) {
-  csv = String(csv);
-  if ('string' !== typeof csv) throw new TypeError('Must be csv string.');
+  assert('string' === typeof csv, 'Value Must be a string.');
 
   const retval = [];
   const lines = csv.split(/\r\n|\n/);

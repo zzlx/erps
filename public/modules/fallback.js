@@ -10,6 +10,14 @@
  * *****************************************************************************
  */
 
-if (console && console.warn) {
-  console.warn(`浏览器不支持ES module,建议升级浏览器版本以获取最佳使用体验.`);
+let container = window.document.getElementById('root'); // get container
+
+if (null == container) {
+  container = window.document.createElement('div');
+  container.id = 'root';
+  window.document.body.appendChild(container);
 }
+
+const message = `浏览器不支持ES module,建议升级浏览器版本以获取最佳使用体验.`;
+container.innerHTML = message; 
+if (console && console.warn) console.warn(message);
