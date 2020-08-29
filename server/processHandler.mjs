@@ -12,7 +12,7 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import config from './config/default.mjs';
+import config from '../config/default.mjs';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 

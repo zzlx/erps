@@ -19,7 +19,7 @@ import util from 'util';
 
 import './processHandler.mjs'; // 载入进程管理模块
 import app from '../server/services/main.mjs';
-import config from '../server/config/default.mjs';
+import config from '../config/default.mjs';
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`);

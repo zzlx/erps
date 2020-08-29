@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * *****************************************************************************
  *
@@ -11,7 +12,7 @@ import path from 'path';
 import util from 'util';
 import zlib from 'zlib';
 
-import { assert } from '../utils.mjs';
+import { assert } from '../server/utils.mjs';
 import config from '../config/default.mjs';
 
 const paths = config.paths;

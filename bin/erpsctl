@@ -58,13 +58,6 @@ declare -a _KVDB
 # 函数命名规则: 脚本函数均以“_”作为前缀及单词连接符
 # @todo: 按函数首字母顺序排列
 
-_build_ui() {
-  _debug "构建前端APP...";
-  cd $_ROOT
-  npm run build
-  cd $_ORIG_PWD
-}
-
 _rm() {
 	_debug '_rm: remove files';
 

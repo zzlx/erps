@@ -18,7 +18,7 @@ import util from 'util';
 import zlib from 'zlib';
 
 import { assert, argvParser, } from '../server/utils.mjs';
-import config from '../server/config/default.mjs';
+import config from '../config/default.mjs';
 
 const paths = config.paths;
 const state_cache = {}; // cache process state
@@ -165,20 +165,6 @@ function getPidByPort (port) {
   ).toString('utf8');
 }
 
-function startMongod () {
-  const Args = [
-    `--dbpath=${config.paths.dataPath}`
-  ].filter(Boolean).concat(argvs);
-
-  const mongod_process = cp.spawn('mongod', Args, {
-    //cwd: APP_ROOT,
-    env: process.env,
-    detached: true,
-    stdio: ['ignore', 1, 2], 
-  });
-
-  return mongod_process;
-}
 function stop () {
   if (http2server == null) {
     // check pid process

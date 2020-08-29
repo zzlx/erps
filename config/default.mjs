@@ -18,14 +18,14 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import { assert } from '../utils.mjs';
+import { assert } from '../server/utils.mjs';
 
 const __filename = import.meta.url.substr(7);
 const __dirname = path.dirname(__filename);
 const __basename = path.basename(__filename);
 const debug = util.debuglog(`debug:${__basename}`);
 
-const APP_ROOT = path.dirname(path.dirname(__dirname));
+const APP_ROOT = path.dirname(__dirname);
 const PackageJSON = JSON.parse(fs.readFileSync(path.join(APP_ROOT, 'package.json'), 'utf8'));
 const APP_HOME = path.join(os.homedir(), `.${PackageJSON.name}`);
 
