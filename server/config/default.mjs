@@ -1,13 +1,15 @@
 /**
  * *****************************************************************************
  *
- * Configurations
+ * Default Configurations
+ * =======================
  *
- * 配置项目: 
- * 1. 服务端默认配置
- * 2. 服务端本地配置:config.json
- * 3. 数据库配置
- * 4. 用户本地配置
+ * 系统配置: 
+ *
+ * * 服务端默认配置
+ * * 服务端本地配置:config.json
+ * * 数据库配置
+ * * 用户本地配置
  *
  * *****************************************************************************
  */
@@ -16,43 +18,42 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import {assert} from './utils.mjs';
+import { assert } from '../utils.mjs';
 
 const __filename = import.meta.url.substr(7);
 const __dirname = path.dirname(__filename);
 const __basename = path.basename(__filename);
 const debug = util.debuglog(`debug:${__basename}`);
-const APP_ROOT = path.dirname(__dirname);
+
+const APP_ROOT = path.dirname(path.dirname(__dirname));
 const PackageJSON = JSON.parse(fs.readFileSync(path.join(APP_ROOT, 'package.json'), 'utf8'));
 const APP_HOME = path.join(os.homedir(), `.${PackageJSON.name}`);
 
 // default configuration
 const defaultConfiguration = {
-  env: process.env.NODE_ENV || 'production',
+  pidPrefix: 'org.zzlx',
   paths: {
     appRoot: APP_ROOT,
     appHome: APP_HOME, 
+    configFile: path.join(APP_HOME, 'config.json'),
+    dataPath: path.join(os.homedir(), 'data'),
     logPath: path.join(APP_HOME, 'log'),
-    configJsonFile: path.join(APP_HOME, 'config.json'),
-    pidFile: path.join(APP_HOME, `${process.title}.pid`),
     mainApp: path.join(APP_ROOT, 'server', 'main.mjs'),
-    buildPath: path.join(APP_HOME, 'build'), // 用于存储生成的前端文件
-    scssEntryPoint: path.join(APP_ROOT, 'css', 'main.scss'),
-    public: path.join(APP_ROOT, 'public'),
-    templateHtml: path.join(APP_ROOT, 'public', 'index.html'),
-    stylesCss: path.join(APP_ROOT, 'public', 'statics', 'styles.css'),
     nodeModules: path.join(APP_ROOT, 'node_modules'),
+    public: path.join(APP_ROOT, 'public'),
+    serverPath: path.join(APP_ROOT, 'server'),
+    scssEntryPoint: path.join(APP_ROOT, 'styles', 'main.scss'),
+    stylesCss: path.join(APP_ROOT, 'public', 'statics', 'styles.css'),
   },
   server: {
-    port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 8888,
     host: isSupportIPv6() ? "::" : "0.0.0.0",
-    mem: os.totalmem(),
     hostname: os.hostname(),
-  },
+    port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 8888,
+  }
 }
 
 /**
- *
+ * Utility functions
  */
 
 function isSupportIPv6 () {
@@ -123,16 +124,27 @@ function readyPaths () {
 }
 
 /**
- * Export configurations
- *
+ * Configuration Object
  */
 
 export default new Proxy(defaultConfiguration, {
   get: function (target, property, receiver) {
+
+    if (property === 'env') return process.env.NODE_ENV || 'production';
     if (property === 'saveConfig') return () => {}
     if (property === 'readConfig') return () => {}
     if (property === 'readyPaths') return readyPaths;
+    if (property === 'toString' || property === 'toJSON') {
+      return () => JSON.stringify(target);
+    }
 
     return Reflect.get(target, property, receiver);
-  }
+  },
+
+	set: function (target, property, value) {
+    if (property === 'env') process.env.NODE_ENV = property
+
+		target[property] = value;
+		return true;
+	},
 });

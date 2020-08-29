@@ -80,23 +80,20 @@ export default (options = {}) => {
 
     // response
     if (fs.existsSync(url)) {
-
-      ctx.set('vary', 'User-Agent'); // 
-
       const stats = fs.lstatSync(url);
       const etag = `${stats.mtimeMs}`; 
 
-      if (ctx.get('if-none-match') === etag) {
-        ctx.status = 304; // 响应304
-      } else {
-        ctx.length = stats.size;
-        ctx.set('etag', etag); // 开启服务端资源验证逻辑
-        ctx.set('last-modified', stats.mtime); // 开启浏览器端缓存
-        // cache control是否启用,似乎作用不大
-        //ctx.set('cache-control', `max-age:${opts.maxAge}`);
+      ctx.set('vary', 'User-Agent'); // 
 
-        ctx.body = fs.createReadStream(url);
+      if (ctx.get('if-none-match') === etag) {
+        return ctx.status = 304; // not modified status
       }
+
+      ctx.length = stats.size;
+      ctx.set('etag', etag); // 开启服务端资源验证逻辑
+      ctx.set('last-modified', stats.mtime); // 开启浏览器端缓存
+      ctx.set('cache-control', `max-age=${opts.maxAge}`);
+      ctx.body = fs.createReadStream(url);
     }
   }
 }

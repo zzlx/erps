@@ -11,14 +11,6 @@
 export default new Proxy({
 }, {
 	get: function (target, property, receiver) {
-    if (target[property] == null) {
-      if (console && console.warn) {
-        console.warn(`The property '${property}' is not defined, please confirmed.`)
-      }
-
-      return () => {};
-    }
-
 		return Reflect.get(target, property, receiver);
   }
 });

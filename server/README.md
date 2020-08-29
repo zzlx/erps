@@ -1,4 +1,7 @@
 Server
 ======
 
+管理的后端服务
 
+* Http服务
+* MongoDB数据库服务

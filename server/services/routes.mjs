@@ -11,24 +11,17 @@ import path from 'path';
 import util from 'util';
 import ReactDOMServer from 'react-dom/server.js';
 
-import dba from './koa/middlewares/dba.mjs';
-import statics from './koa/middlewares/statics.mjs';
-import serverRender from './koa/middlewares/serverRender.mjs';
+import dba from '../koa/middlewares/dba.mjs';
+import statics from '../koa/middlewares/statics.mjs';
+import serverRender from '../koa/middlewares/serverRender.mjs';
 
-import Router from './koa/Router.mjs';
-import config from './config.mjs';
-import { date } from './utils.mjs'; // @todo: 
+import Router from '../koa/Router.mjs';
+import config from '../config/default.mjs';
+import { date } from '../utils.mjs'; // @todo: 
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`); 
 const paths = config.paths;
-
-const index = new Router(); // index router
-
-const s = new Router({
-  methods: ['GET'],
-  prefix: '',
-});
 
 const graphql = new Router({});
 
@@ -42,7 +35,18 @@ graphql.all('graphql', '/graphql', async (ctx, next) => {
   ctx.body = 'graphql';
 });
 
-index.get('/system/log', (ctx, next) => {
+// 定义主路由
+const Index = new Router();
+
+Index.use('/api', graphql.routes(), graphql.allowedMethods());
+
+Index.get('/test', (ctx, next) => {
+  //ctx.body = fs.readDirSync()
+  ctx.body = 'test1';
+
+});
+
+Index.get('/system/log', (ctx, next) => {
   const logFile = path.join(paths.logPath, date.format('yyyymmdd') + '.log');
 
   // @todos: 需要完善显示页面
@@ -50,8 +54,7 @@ index.get('/system/log', (ctx, next) => {
   ctx.body = fs.createReadStream(logFile);
 });
 
-index.use('/api', graphql.routes(), graphql.allowedMethods());
-index.all('/*', serverRender());
-index.get('/*', statics(paths.public));
+Index.all('/*', serverRender());
+Index.get('/*', statics(paths.public));
 
-export default index;
+export default Index;

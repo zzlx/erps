@@ -2,13 +2,13 @@
  * *****************************************************************************
  *
  * Argv Parser
+ * ===========
  *
  * parser arguments and value, return param map.
  *
  * @params {array|string} argvs
  * @return {object} state
  * @api public
- *
  * *****************************************************************************
  */
 
@@ -58,10 +58,4 @@ export default function argvParser (argvs) {
   }
 
   return params;
-}
-
-// Test
-if (process && process.env.NODE_ENV === 'test') {
-  const pMap = argvParser('-abc --test --ttt=test');
-  console.log(pMap);
 }

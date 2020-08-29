@@ -17,8 +17,7 @@
 import ReactDOMServer from 'react-dom/server.js'
 import path from 'path';
 import util from 'util';
-import config from '../../config.mjs';
-import { HTMLRender } from '../../utils.mjs'; 
+import HTMLRender from '../../utils/HTMLRender.mjs'; 
 
 const debug = util.debuglog('debug:server-render-middleware');
 
