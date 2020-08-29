@@ -20,7 +20,13 @@ import zlib from 'zlib';
 import { assert, argvParser, } from '../server/utils.mjs';
 import config from '../server/config/default.mjs';
 
-// 执行程序
+const paths = config.paths;
+const state_cache = {}; // cache process state
+
+// Task_1: 检测系统平台类型
+assert(getOSPlatform() === 'unix-like', `Only can be run in unix-like platform.`)
+
+// Task_2: 执行程序
 process.nextTick(() => executer()); 
 
 /**
@@ -33,106 +39,6 @@ process.nextTick(() => executer());
  *
  * *****************************************************************************
  */
-
-function getPid () {
-  let pid = null;
-  let pidFromFile = null;
-  let pidFromPort = null;
-
-  if (fs.existsSync(pidFile)) {
-    pidFromFile = fs.readFileSync(pidFile, 'utf8');
-  }
-
-  // 仅在unix环境下有效
-  pidFromPort = cp.execSync(`lsof -i:${config.server.port} | awk \'NR==2{print $2}\'`).toString('utf8');
-
-  if (pidFromPort) pid = pidFromPort
-
-  return pid;
-}
-
-function restart () {
-  debug('%s is restarting...', process.title);
-  if (getPid() == '' || getPid() == null) {
-    console.log(`${process.title} is not started, use '--start' have a try.`);
-    start();
-    return;
-  }
-
-  stop();
-  start();
-}
-
-function stop () {
-  if (http2server == null) {
-    // check pid process
-    const pid = getPid();
-    if (pid) cp.execSync(`kill -9 ${pid}`);
-    return;
-  }
-
-  http2server.close(() => {
-    debug('Server is closed.');
-
-  });
-}
-
-async function start () {
-
-  // Task1: 构建styles.css
-  // 启动时均重建styles.css文件,以保证代码最新
-  await import(path.join(config.paths.appRoot, 'server', 'sass.mjs'))
-    .then(m => m.default)
-    .then(sass => sass());
-
-  // Task2: 生成index.html文件
-  await new Promise((resolve, reject) => {
-    const html = new HTMLRender().setTitle('Home').render();
-
-    fs.promises.writeFile(path.join(paths.public, 'index.html'), html).then(()=> {
-      resolve();
-    }).catch(err => { reject(err); });
-  });
-
-  // Task3: 拷贝react、react-dom
-  await Promise.all([
-    fs.promises.copyFile(
-      path.join(
-        paths.nodeModules, 
-        'react-dom', 
-        'umd', 
-        `react-dom.${config.env === 'development' ? 'development' : 'production.min'}.js`),
-      path.join(
-        paths.public, 
-        'statics', 
-        `react-dom.${config.env === 'development' ? 'development' : 'production.min'}.js`),
-    ), 
-    fs.promises.copyFile(
-      path.join(
-        paths.nodeModules, 
-        'react', 
-        'umd', 
-        `react.${config.env === 'development' ? 'development' : 'production.min'}.js`),
-      path.join(
-        paths.public, 
-        'statics', 
-        `react.${config.env === 'development' ? 'development' : 'production.min'}.js`),
-    ), 
-  ]);
-
-  // after the server started successfully, record pid to pidfile.
-  http2server.on('listening', function () {
-    recordPid().catch((err) => debug(err));
-  });
-
-  http2server.listen({
-    ipv6Only: false, // 是否仅开启IPV6
-    host: config.server.host,
-    port: config.server.port,
-    exclusive: false, // false 可接受进程共享端口, 支持集群服务器配置
-  });
-
-}
 
 function executer () {
   // Task: Parse argvs
@@ -201,39 +107,6 @@ function watcher () {
   );
 }
 
-function createServer () {
-  const server =  http2.createSecureServer({
-    key: fs.readFileSync(`/etc/ssl/${os.hostname()}-key.pem`),
-    cert: fs.readFileSync(`/etc/ssl/${os.hostname()}-cert.pem`),
-    allowHTTP1: true,
-    //ca: [fs.readFileSync('client-cert.pem')],
-    //sigalgs: 
-    //ciphers: 
-    //clientCertEngine: 
-    //dhparam
-    //ecdhCurve
-    //privateKeyEngine
-    //passphrase: 'sample',
-    //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-  }).on('listening', function () {
-    // listening event 
-
-    console.log('Server is running on adress: %o', this.address());
-
-  }).on('error', function(err) {
-    // error event 
-
-    debug(this);
-
-    if (err.code === 'EADDRINUSE') {
-      console.info(`Address ${err.address}:${err.port} is in use, try again later.`)
-    }
-  }).on('stream', app.callback());
-
-
-  return server;
-}
-
 function useCluster () {
   const numCPUs = os.cpus().length;
 
@@ -256,23 +129,95 @@ function useCluster () {
   }
 }
 
-function generateStyles () {
-  const paths = config.paths;
-  // Task1: 构建styles.css
-  // 启动时均重建styles.css文件,以保证代码最新
-  return import('node-sass').then(m => m.default).then(sass => {
-    sass.render({
-      file: config.paths.scssEntryPoint,
-      outputStyle: config.env === 'production' ? 'compressed': 'nested',
-    }, (err, result) => {
-      if (err) reject(err);
+function getOSPlatform () {
+  let platform = null;
 
-      Promise.all([
-        fs.promises.writeFile(paths.stylesCss, result.css),
-        fs.promises.writeFile(paths.stylesCss + '.br', zlib.brotliCompressSync(result.css)),
-      ]);
+  switch (os.platform()) {
+    case 'aix': 
+    case 'darwin': 
+    case 'freebsd': 
+    case 'linux': 
+    case 'openbsd': 
+    case 'sunos': 
+      platform = 'unix-like';
+      break;
+    case 'win32': 
+    case 'win64': 
+      platform = 'win';
+      break;
+    default:
+      platform = 'unknown';
+  }
 
-      resolve();
-    });
+  return platform;
+}
+
+/**
+ * 根据port查询服务进程ID
+ *
+ * @param {string|number}
+ * @return {string} 
+ */
+
+function getPidByPort (port) {
+  return cp.execSync(`lsof -i:${port} | grep 'LISTEN' \
+    | awk \'NR==1{print $2}\'`
+  ).toString('utf8');
+}
+
+function startMongod () {
+  const Args = [
+    `--dbpath=${config.paths.dataPath}`
+  ].filter(Boolean).concat(argvs);
+
+  const mongod_process = cp.spawn('mongod', Args, {
+    //cwd: APP_ROOT,
+    env: process.env,
+    detached: true,
+    stdio: ['ignore', 1, 2], 
+  });
+
+  return mongod_process;
+}
+function stop () {
+  if (http2server == null) {
+    // check pid process
+    const pid = getPid();
+    if (pid) cp.execSync(`kill -9 ${pid}`);
+    return;
+  }
+
+  http2server.close(() => {
+    debug('Server is closed.');
   });
 }
+
+// boundler
+function copyReactModule () {
+  // Task3: 拷贝react、react-dom
+  return Promise.all([
+    fs.promises.copyFile(
+      path.join(
+        paths.nodeModules, 
+        'react-dom', 
+        'umd', 
+        `react-dom.${config.env === 'development' ? 'development' : 'production.min'}.js`),
+      path.join(
+        paths.public, 
+        'statics', 
+        `react-dom.${config.env === 'development' ? 'development' : 'production.min'}.js`),
+    ), 
+    fs.promises.copyFile(
+      path.join(
+        paths.nodeModules, 
+        'react', 
+        'umd', 
+        `react.${config.env === 'development' ? 'development' : 'production.min'}.js`),
+      path.join(
+        paths.public, 
+        'statics', 
+        `react.${config.env === 'development' ? 'development' : 'production.min'}.js`),
+    ), 
+  ]);
+}
+

@@ -4,7 +4,7 @@
  * Process handler
  * ===============
  *
- * 监测进程异常
+ * 进程管理
  *
  * *****************************************************************************
  */
@@ -19,7 +19,6 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 const debug = util.debuglog('debug:processHandler.mjs');
 const paths = config.paths;
 const pidFile = path.join(paths.appHome, `${process.title}.pid`);
-
 
 // Task: caught exceptions
 // 被此事件捕获的exception,需要进行妥善处理

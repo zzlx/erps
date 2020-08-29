@@ -129,7 +129,6 @@ function readyPaths () {
 
 export default new Proxy(defaultConfiguration, {
   get: function (target, property, receiver) {
-
     if (property === 'env') return process.env.NODE_ENV || 'production';
     if (property === 'saveConfig') return () => {}
     if (property === 'readConfig') return () => {}
