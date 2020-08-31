@@ -24,6 +24,7 @@ const paths = config.paths;
 const state_cache = {}; // cache process state
 
 // Task_1: 检测系统平台类型
+// 系统服务依赖于类unix系统环节, 在非unix环境中无法正常提供服务
 assert(getOSPlatform() === 'unix-like', `Only can be run in unix-like platform.`)
 
 // Task_2: 执行程序

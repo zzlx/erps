@@ -8,10 +8,10 @@
 
 import fs from 'fs';
 import path from 'path';
-import cp from 'child_process';
 import util from 'util';
 import ReactDOMServer from 'react-dom/server.js';
 
+import tasks from '../../tasks/index.mjs';
 import dba from '../koa/middlewares/dba.mjs';
 import statics from '../koa/middlewares/statics.mjs';
 import serverRender from '../koa/middlewares/serverRender.mjs';
@@ -95,7 +95,7 @@ Index.get('/*', async (ctx, next) => {
       for (let file of scssFiles) {
         const stats = fs.lstatSync(file);
         if (stats.mtime > cssStats.ctime) {
-          await cp.spawn(path.join(paths.tasksPath, 'generateCSS.mjs'));
+          await tasks.generateCSS();
           break;
         }
       }
