@@ -1,4 +1,12 @@
 # .gitignore文件由程序自动维护生成,修改前请知晓将产生的影响。
 # 忽略动态更新、自动生成的文件及目录
 index.html
-data
+styles.css
+styles.css*
+styles.css.*
+react.development.js
+react.production.min.js
+react-dom.development.js
+react-dom.production.min.js
+*.br
+*.zip

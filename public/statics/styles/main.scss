@@ -3,20 +3,21 @@
  *
  * 🌿CSS styles system
  *
+ *  
+ *
  *
  * *****************************************************************************
  */
 
-@import "settings"; // theme
+@import "settings";
 
-// styles
 @import "functions";
 @import "variables";
 @import "mixins";
-@import "root";
+
+@import "_root.scss";
 @import "reboot";
 @import "type";
-
 @import "images";
 @import "code";
 @import "grid";
@@ -35,7 +36,6 @@
 @import "pagination";
 @import "badge";
 @import "jumbotron";
-@import "alert";
 @import "progress";
 @import "media";
 @import "list-group";
@@ -52,10 +52,11 @@
 @import "text";
 
 // components
+@import "./components/_alert.scss";
 @import "./components/_gitter.scss";
 @import "./components/_footer.scss";
-@import "./components/_placeholder.scss";
 @import "./components/_markdown.scss";
+@import "./components/_placeholder.scss";
 
 // animations
 @import "./animations/_rainbow.scss";
