@@ -1,10 +1,10 @@
 /**
  * *****************************************************************************
  *
- * Process handler
+ * Process settings
  * ===============
  *
- * 进程管理
+ * 进程设置
  *
  * *****************************************************************************
  */
@@ -14,11 +14,10 @@ import path from 'path';
 import util from 'util';
 import config from '../config/default.mjs';
 
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+const debug = util.debuglog('debug:processSettings.mjs');
 
-const debug = util.debuglog('debug:processHandler.mjs');
-const paths = config.paths;
-const pidFile = path.join(paths.appHome, `${process.title}.pid`);
+process.nextTick(() => writePidFile());
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 // Task: caught exceptions
 // 被此事件捕获的exception,需要进行妥善处理
@@ -74,13 +73,16 @@ process.on('exit', (code) => {
  *
  */
 
-function createPidFile () {
+function writePidFile () {
+  const pidFile = path.join(config.paths.appHome, `${process.title}.pid`);
+
   return fs.promises.writeFile(pidFile, String(process.pid), 'utf8').catch(err => { 
     debug('write pid file error: ', err); 
   });
 }
 
 function deletePidFile () {
+  const pidFile = path.join(config.paths.appHome, `${process.title}.pid`);
   // 定义删除pidFile函数
   fs.promises.unlink(pidFile).then(() => {
     debug(`delete ${pidFile} success.`);

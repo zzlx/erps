@@ -25,25 +25,27 @@ const __dirname = path.dirname(__filename);
 const __basename = path.basename(__filename);
 const debug = util.debuglog(`debug:${__basename}`);
 
-const APP_ROOT = path.dirname(__dirname);
-const PackageJSON = JSON.parse(fs.readFileSync(path.join(APP_ROOT, 'package.json'), 'utf8'));
+const __ROOT = path.dirname(__dirname);
+const PackageJSON = JSON.parse(fs.readFileSync(path.join(__ROOT, 'package.json'), 'utf8'));
 const APP_HOME = path.join(os.homedir(), `.${PackageJSON.name}`);
 
 // default configuration
 const defaultConfiguration = {
   pidPrefix: 'org.zzlx',
   paths: {
-    appRoot: APP_ROOT,
+    appRoot: __ROOT,
     appHome: APP_HOME, 
     configFile: path.join(APP_HOME, 'config.json'),
     dataPath: path.join(os.homedir(), 'data'),
     logPath: path.join(APP_HOME, 'log'),
-    mainApp: path.join(APP_ROOT, 'server', 'main.mjs'),
-    nodeModules: path.join(APP_ROOT, 'node_modules'),
-    public: path.join(APP_ROOT, 'public'),
-    serverPath: path.join(APP_ROOT, 'server'),
-    scssEntryPoint: path.join(APP_ROOT, 'styles', 'main.scss'),
-    stylesCss: path.join(APP_ROOT, 'public', 'statics', 'styles.css'),
+    mainApp: path.join(__ROOT, 'server', 'main.mjs'),
+    nodeModules: path.join(__ROOT, 'node_modules'),
+    public: path.join(__ROOT, 'public'),
+    serverPath: path.join(__ROOT, 'server'),
+    scssPath: path.join(__ROOT, 'styles'),
+    scssEntryPoint: path.join(__ROOT, 'styles', 'main.scss'),
+    stylesCss: path.join(__ROOT, 'public', 'statics', 'styles.css'),
+    tasksPath: path.join(__ROOT, 'tasks'),
   },
   server: {
     host: isSupportIPv6() ? "::" : "0.0.0.0",
@@ -141,7 +143,9 @@ export default new Proxy(defaultConfiguration, {
   },
 
 	set: function (target, property, value) {
-    if (property === 'env') process.env.NODE_ENV = property
+    if (property === 'env') {
+      process.env.NODE_ENV = value;
+    }
 
 		target[property] = value;
 		return true;

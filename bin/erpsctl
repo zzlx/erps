@@ -76,23 +76,6 @@ _rm() {
 	unset trash_dir
 }
 
-_read_dir() {
-  _debug "循环读取目录中的文件"
-
-  if [[ ! -d $1 ]]; then echo $1; fi
-
-  for file in `ls $1`
-  do
-    if [[ -d ${1}/$file ]]; then
-      _read_dir ${1}/$file
-    else
-      echo ${1}/$file
-    fi
-  done
-
-  unset dir
-}
-
 _setup() {
 	mkdir -p $HOME/.bin \
 		&& ln -s $_BIN/$_FILE $HOME/.bin/${_FILE%.*} 2>/dev/null \
@@ -1139,11 +1122,6 @@ _parse_argv() {
 				_npm_install; break
 				;;
 
-			# 打包代码
-			--package )
-				_package_app; break
-				;;
-
 			--build )
 				_build_ui; break
 				;;
@@ -1177,19 +1155,6 @@ _readDotEnv() {
 
 	if [[ $debug ]]; then _DEBUG=$debug; fi
 	if [[ $app_env ]]; then _ENV=$app_env; fi
-}
-
-_watcher() {
-  files_sha1=()
-  files=($(_read_dir $_ROOT/src | tr '\n' ' '));
-
-  count=${#files[@]}
-  for (( i=0; i < 10; i++ ));
-  do
-    sha1=$(shasum ${files[$i]})
-    _KVDB[$i]=$sha1
-    echo ${_KVDB[$i]};
-  done
 }
 
 _get_pid_by_port () {

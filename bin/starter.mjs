@@ -50,8 +50,6 @@ function executer () {
     switch(param) { 
       case 'env': 
         config.env = paramMap.get('env');
-        process.env.NODE_ENV = config.env;
-
         paramMap.delete(param); // delete param key
         continue;
       case 'debug':
@@ -73,17 +71,17 @@ function executer () {
         break;
       case 'stop':
         paramMap.delete(param); // delete param key
-        stop();
+        stopHttpd();
         break;
       case 'start':
         paramMap.delete(param); // delete param key
-        start();
+        startHttpd();
         break;
       case 'restart':
         paramMap.delete(param); // delete param key
         restart();
         break;
-      case 'watcher':
+      case 'development':
         paramMap.delete(param); // delete param key
         watcher();
         break;
@@ -95,15 +93,21 @@ function executer () {
   }
 }
 
+function startHttpd () {
+  state_cache.httpd = cp.spawn('node', [
+    path.join(paths.appRoot, 'server', 'http2d.mjs')
+  ], {
+    stdio: [0, 1, 2],
+  });
+}
+
 function watcher () {
-  console.log('开启监听...');
+  start();
+
   watchPath(
+    path.join(paths.appRoot, 'config'),
     path.join(paths.appRoot, 'server'),
-    path.join(paths.appRoot, 'styles'),
-    () => {
-      console.log('重启服务');
-      restart();
-    }
+    () => restart(),
   );
 }
 
@@ -165,45 +169,9 @@ function getPidByPort (port) {
   ).toString('utf8');
 }
 
-function stop () {
-  if (http2server == null) {
-    // check pid process
-    const pid = getPid();
-    if (pid) cp.execSync(`kill -9 ${pid}`);
-    return;
-  }
+function stopHttpd () {
+  //if (http2d !== null) return http2d.close();
 
-  http2server.close(() => {
-    debug('Server is closed.');
-  });
+  const pid = getPidByPort(config.server.port);
+  if (pid) cp.execSync(`kill -9 ${pid}`);
 }
-
-// boundler
-function copyReactModule () {
-  // Task3: 拷贝react、react-dom
-  return Promise.all([
-    fs.promises.copyFile(
-      path.join(
-        paths.nodeModules, 
-        'react-dom', 
-        'umd', 
-        `react-dom.${config.env === 'development' ? 'development' : 'production.min'}.js`),
-      path.join(
-        paths.public, 
-        'statics', 
-        `react-dom.${config.env === 'development' ? 'development' : 'production.min'}.js`),
-    ), 
-    fs.promises.copyFile(
-      path.join(
-        paths.nodeModules, 
-        'react', 
-        'umd', 
-        `react.${config.env === 'development' ? 'development' : 'production.min'}.js`),
-      path.join(
-        paths.public, 
-        'statics', 
-        `react.${config.env === 'development' ? 'development' : 'production.min'}.js`),
-    ), 
-  ]);
-}
-

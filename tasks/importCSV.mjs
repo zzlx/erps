@@ -1,18 +1,70 @@
+#!/usr/bin/env node
 /**
  * *****************************************************************************
  *
- * 数据库查询
- * ==========
+ * 数据导入工具
+ * ===========
+ *
+ * 支持大文件导入
  *
  * *****************************************************************************
  */
 
-const mongodb = require('mongodb');
+import fs from 'fs';
+import path from 'path';
+
+import mongodb from 'mongodb';
+import { assert, argvParser, } from '../server/utils.mjs';
+
 const MongoClient = mongodb.MongoClient;
 const client = new MongoClient('mongodb://localhost:27017', { 
   useUnifiedTopology: true
 });  
 
+const ARGVS = Array.prototype.slice.call(process.argv, 2);
+const paramMap = argvParser(ARGVS);
+
+if (paramMap.has('input')) {
+  const CSVFile = paramMap.get('input');
+
+  const CSVFileStream = fs.createReadStream(CSVFile, 'utf8');
+  const total_size = fs.lstatSync(CSVFile).size;
+
+  CSVFileStream.on('readable', function () {
+    let chunk;
+    let count = 0;
+    let rest_str = '';
+
+    while (null !== (chunk = CSVFileStream.read())) {
+      count += chunk.length;
+
+      const row_array = (rest_str + chunk.toString()).split(/(?:\r)?\n/);
+      rest_str = row_array.pop();
+
+      for (let row of row_array) {
+        parse(row);
+      }
+
+      console.log(`${count/total_size*100}%`);
+    }
+
+    if (rest_str.length) {
+      rest_str.split(/(?:\r)\n/);
+    }
+  });
+
+  CSVFileStream.on('end', () => {
+    console.log('Reached end of stream.');
+  });
+
+}
+
+function parse (row) { 
+  let column = row.split(' '); 
+  console.log(column);
+}
+
+/*
 const cache = new Set(); 
 
 async function run () {
@@ -44,9 +96,8 @@ async function run () {
         }
       });
 
-      if (updates.length > 80000) {
-        console.log(i);
-        collection_dingdan.bulkWrite(updates);
+      if (updates.length > 79999) {
+        //collection_dingdan.bulkWrite(updates);
         updates = [];
       }
 
@@ -63,3 +114,4 @@ async function run () {
 } 
 
 run().catch(console.error);
+*/

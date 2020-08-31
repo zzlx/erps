@@ -21,11 +21,13 @@ async function run () {
     const db = client.db('yamei');
     const collection_ESN = db.collection('ESN');
     const collection_chuku = db.collection('出库记录');
-    const collection_dingdan = db.collection('订单-转换自原始数据');
+    const collection_dingdan = db.collection('订单记录');
 
     const cursor = collection_dingdan.aggregate([
       { $match: { 
-        "商品价格": { $gte: 300 }, 
+        "商品价格": /\d{3,4}.*/, 
+        "商品类型": /^自营商品/,
+        "收货人姓名": {$not: /测试/}
       }},
       { $group: {
         _id: "$购买账号",

@@ -17,13 +17,13 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import './processHandler.mjs'; // 载入进程管理模块
+import './processSettings.mjs'; // 载入进程管理模块
 import app from '../server/services/main.mjs';
 import config from '../config/default.mjs';
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`);
-process.title = `${config.pidPrefix}.${path.basename(__filename)}`;
+process.title = `${config.pidPrefix}.${path.basename(__filename, path.extname(__filename))}`;
 
 const server = http2.createSecureServer({
   key: fs.readFileSync(`/etc/ssl/${os.hostname()}-key.pem`),

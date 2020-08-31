@@ -1,14 +1,25 @@
 #!/bin/sh
 
-if [[ ! -d $1 ]]; then echo $1; fi
+function _read_dir () {
 
-for file in `ls $1`
-do
-  if [[ -d ${1}/$file ]]; then
-    _read_dir ${1}/$file
-  else
-    echo ${1}/$file
-  fi
-done
+	if [[ ! -d $1 ]]; then 
+		echo $1; 
+		exit
+	fi
 
-unset dir
+	_PWD=$(cd $(dirname $1) || exit; pwd -P)
+	echo ${_PWD}
+
+	for file in `ls $1`
+	do
+		if [[ -d ${_PWD}/$file ]]; then
+			_read_dir ${_PWD}/$file
+		else
+			echo ${_PWD}/$1/$file
+		fi
+	done
+
+	unset _PWD
+}
+
+_read_dir $1

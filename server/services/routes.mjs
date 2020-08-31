@@ -8,6 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import cp from 'child_process';
 import util from 'util';
 import ReactDOMServer from 'react-dom/server.js';
 
@@ -16,8 +17,9 @@ import statics from '../koa/middlewares/statics.mjs';
 import serverRender from '../koa/middlewares/serverRender.mjs';
 
 import Router from '../koa/Router.mjs';
-import config from '../config/default.mjs';
+import config from '../../config/default.mjs';
 import { date } from '../utils.mjs'; // @todo: 
+import readDir from '../utils/readDir.mjs';
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`); 
@@ -55,6 +57,54 @@ Index.get('/system/log', (ctx, next) => {
 });
 
 Index.all('/*', serverRender());
+
+/**
+ * 当发生样式文件修改时，自动重建styles.css文件
+ */
+
+Index.get('/*', async (ctx, next) => {
+  if (ctx.app.env === 'development') {
+    if (ctx.path === '/statics/react-dom.development.js' ||
+        ctx.path === '/statics/react-dom.production.min.js') {
+      if (!fs.existsSync(path.join(paths.public, ctx.path))) {
+        await fs.promises.copyFile(
+          path.join(
+            paths.nodeModules, 'react-dom', 'umd', path.basename(ctx.path),
+          ),
+          path.join(paths.public, ctx.path)
+        );
+      }
+    }
+
+    if (ctx.path === '/statics/react.development.js' ||
+        ctx.path === '/statics/react.production.min.js') {
+      if (!fs.existsSync(path.join(paths.public, ctx.path))) {
+        await fs.promises.copyFile(
+          path.join(
+            paths.nodeModules, 'react', 'umd', path.basename(ctx.path),
+          ),
+          path.join(paths.public, ctx.path)
+        );
+      }
+    }
+
+    if (ctx.path === '/statics/styles.css') {
+      const scssFiles = readDir(paths.scssPath); 
+      const cssStats = fs.lstatSync(paths.stylesCss);
+
+      for (let file of scssFiles) {
+        const stats = fs.lstatSync(file);
+        if (stats.mtime > cssStats.ctime) {
+          await cp.spawn(path.join(paths.tasksPath, 'generateCSS.mjs'));
+          break;
+        }
+      }
+    }
+  }
+
+  await next();
+});
+
 Index.get('/*', statics(paths.public));
 
 export default Index;
