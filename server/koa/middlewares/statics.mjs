@@ -29,7 +29,7 @@ export default (options = {}) => {
     directoryIndex: ['index.html'],
     immutable: false,
     index: 'index.html',
-    maxAge: 12*60*60, // 默认缓存12小时
+    maxAge: 1*60*60, // 默认缓存1小时
     root: null,
     lastModified: true,
     rewrite: true, // 重定向
@@ -83,16 +83,15 @@ export default (options = {}) => {
       const stats = fs.lstatSync(url);
       const etag = `${stats.mtimeMs}`; 
 
-      ctx.set('vary', 'User-Agent'); // 
-
       if (ctx.get('if-none-match') === etag) {
         return ctx.status = 304; // not modified status
       }
 
+      ctx.set('vary', 'User-Agent'); // 
       ctx.length = stats.size;
       ctx.set('etag', etag); // 开启服务端资源验证逻辑
       ctx.set('last-modified', stats.mtime); // 开启浏览器端缓存
-      ctx.set('cache-control', `max-age=${ctx.app.env === 'development' ? 0 : opts.maxAge}`);
+      ctx.set('cache-control', `max-age=${opts.maxAge}`);
       ctx.body = fs.createReadStream(url);
     }
   }

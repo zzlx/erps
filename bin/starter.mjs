@@ -22,6 +22,7 @@ import config from '../config/default.mjs';
 
 const paths = config.paths;
 const state_cache = {}; // cache process state
+let httpd = null;
 
 // Task_1: 检测系统平台类型
 // 系统服务依赖于类unix系统环节, 在非unix环境中无法正常提供服务
@@ -46,7 +47,7 @@ function executer () {
   const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
   const paramMap = argvParser(ARGVS);
 
-  // 
+  // 处理环境变量配置 
   for (let param of paramMap.keys()) { 
     switch(param) { 
       case 'env': 
@@ -61,7 +62,7 @@ function executer () {
     }
   }
 
-  if (paramMap.size == 0) console.log('There is nothing to do.');
+  if (paramMap.size == 0) console.log('There is nothing to do./@todo: Show help message.');
 
   // execute tasks
   for (let param of paramMap.keys()) {
@@ -95,11 +96,14 @@ function executer () {
 }
 
 function startHttpd () {
-  state_cache.httpd = cp.spawn('node', [
-    path.join(paths.appRoot, 'server', 'http2d.mjs')
-  ], {
+
+  const args = [ path.join(paths.appRoot, 'server', 'http2d.mjs') ];
+  const options = {
+    detached: process.env.NODE_ENV === 'production' ? true : false,
     stdio: [0, 1, 2],
-  });
+  };
+
+  httpd = cp.spawn('node', args, options);
 }
 
 function watcher () {

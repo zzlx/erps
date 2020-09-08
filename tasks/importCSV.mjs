@@ -21,91 +21,92 @@ const client = new MongoClient('mongodb://localhost:27017', {
   useUnifiedTopology: true
 });  
 
+const csv = '/Users/wangxuemin/test.txt';
+
 const ARGVS = Array.prototype.slice.call(process.argv, 2);
 const paramMap = argvParser(ARGVS);
 
-if (paramMap.has('input')) {
-  const CSVFile = paramMap.get('input');
-
-  const CSVFileStream = fs.createReadStream(CSVFile, 'utf8');
-  const total_size = fs.lstatSync(CSVFile).size;
-
-  CSVFileStream.on('readable', function () {
-    let chunk;
+function readFile (callback) {
+  return new Promise((resolve, reject) => {
+    const CSVFile = csv;
+    const CSVFileStream = fs.createReadStream(CSVFile, 'utf8');
+    const total_size = fs.lstatSync(CSVFile).size;
     let count = 0;
     let rest_str = '';
 
-    while (null !== (chunk = CSVFileStream.read())) {
-      count += chunk.length;
+    CSVFileStream.on('readable', function () {
+      let chunk;
 
-      const row_array = (rest_str + chunk.toString()).split(/(?:\r)?\n/);
-      rest_str = row_array.pop();
+      while (null !== (chunk = CSVFileStream.read())) {
+        count += chunk.length;
+        console.log(`${(count/total_size*100).toFixed(2)}%`);
 
-      for (let row of row_array) {
-        parse(row);
+        const row_array = (rest_str + chunk.toString()).split(/(?:\r)?\n/);
+        rest_str = row_array.pop();
+
+        const values = [];
+
+        for (let row of row_array) {
+          values.push(parse(row));
+        }
+
+        callback(values);
       }
 
-      console.log(`${count/total_size*100}%`);
-    }
+      if (rest_str.length) {
+        rest_str.split(/(?:\r)\n/);
+      }
+    });
 
-    if (rest_str.length) {
-      rest_str.split(/(?:\r)\n/);
-    }
+    CSVFileStream.on('end', () => {
+      console.log('Reached end of stream.');
+      resolve();
+    });
   });
-
-  CSVFileStream.on('end', () => {
-    console.log('Reached end of stream.');
-  });
-
 }
 
 function parse (row) { 
-  let column = row.split(' '); 
-  console.log(column);
+  //let column = row.split(' '); 
+  let column = row.split(','); 
+  let value = {
+    'esn': '',
+    'order_id': '',
+    'in_time': '',
+    'out_time': '',
+    'bound_time': '',
+    'user_id': '',
+  };
+
+  const itera = column[Symbol.iterator]();
+  value['esn'] = itera.next().value;
+  const order_id = itera.next().value;
+  value['order_id'] = order_id === 'NULL' ? '' : order_id;
+
+  const in_time = itera.next().value;
+  value['in_time'] = in_time === 'NULL' ? '' : in_time;
+
+  const out_time = itera.next().value;
+  value['out_time'] = out_time === 'NULL' ? '' : out_time;
+
+  const bound_time = itera.next().value;
+  value['bound_time'] = bound_time === 'NULL' ? '' : bound_time;
+
+  value['user_id'] = itera.next().value;
+
+  return value;
 }
 
-/*
 const cache = new Set(); 
 
 async function run () {
   try {
     await client.connect();
     const db = client.db('yamei');
-    const collection_ESN = db.collection('ESN');
-    const collection_chuku = db.collection('出库记录');
-    const collection_dingdan = db.collection('订单-转换自原始数据');
+    const collection_OBD = db.collection('OBD设备_userID');
 
-    const cursor = collection_dingdan.find();
-    const count = await cursor.count();
-    console.log(`Total number: ${count}`);
-
-    let updates = [];
-    let i = 0;
-
-    while (await cursor.hasNext()) {
-      const doc = await cursor.next();
-      i++
-
-      updates.push({
-        updateOne: {
-          "filter" : { _id: doc['_id'] },
-          "update": { $set: {
-            '购买账号': String(doc['购买账号']).trim(),
-          }},
-          "upsert": true,
-        }
-      });
-
-      if (updates.length > 79999) {
-        //collection_dingdan.bulkWrite(updates);
-        updates = [];
-      }
-
-    }
-
-    if (updates.length) { 
-      await collection_dingdan.bulkWrite(updates);
-    }
+    await readFile(function (values) {
+      collection_OBD.insertMany(values);
+    });
 
   } finally { 
     console.log('执行完毕');
@@ -114,4 +115,3 @@ async function run () {
 } 
 
 run().catch(console.error);
-*/

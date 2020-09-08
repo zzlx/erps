@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Alert component
+ * Message component
  *
  * 信息提示框(通知、警告、反馈等)
  * Contextual feedback messages for typical user actions 
@@ -14,12 +14,12 @@
  * 5. 横幅通知、通知中心、锁屏通知
  *
  * 使用方法：
- * 给Alert一个fixed定位的透明背景容器(比如通知中心),Alert可以悬浮在主界面上
+ * 给Message一个fixed定位的透明背景容器(比如通知中心),Message可以悬浮在主界面上
  *
  * *****************************************************************************
  */
 
-export default class Alert extends React.PureComponent {
+export default class Message extends React.PureComponent {
   constructor (props) {
     super(props);
     this.state = {

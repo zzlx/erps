@@ -25,7 +25,7 @@ export default class HtmlParser {
       scripts: [
         { src: `/statics/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
         { src: `/statics/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-        { src: "/modules/main.mjs", module: true },
+        { src: "/modules/main.mjs", module: true, crossorigin: true },
         { src: "/modules/fallback.js", nomodule: true},
       ],
       styleLinks: [ 

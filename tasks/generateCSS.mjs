@@ -24,7 +24,7 @@ sass.render({
   if (err) console.err(err);;
 
   Promise.all([
-    fs.promises.writeFile(paths.stylesCss, result.css),
-    fs.promises.writeFile(paths.stylesCss + '.br', zlib.brotliCompressSync(result.css)),
+    fs.promises.writeFile(paths.cssFile, result.css),
+    fs.promises.writeFile(paths.cssFile + '.br', zlib.brotliCompressSync(result.css)),
   ]);
 });

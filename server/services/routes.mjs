@@ -11,14 +11,14 @@ import path from 'path';
 import util from 'util';
 import ReactDOMServer from 'react-dom/server.js';
 
-import tasks from '../../tasks/index.mjs';
+import tasks from '../../tasks/lists.mjs';
 import dba from '../koa/middlewares/dba.mjs';
 import statics from '../koa/middlewares/statics.mjs';
 import serverRender from '../koa/middlewares/serverRender.mjs';
 
 import Router from '../koa/Router.mjs';
 import config from '../../config/default.mjs';
-import { date } from '../utils.mjs'; // @todo: 
+import { date } from '../utils.mjs';
 import readDir from '../utils/readDir.mjs';
 
 const __filename = import.meta.url.substr(7);
@@ -63,34 +63,28 @@ Index.all('/*', serverRender());
  */
 
 Index.get('/*', async (ctx, next) => {
+  if (ctx.path === '/statics/react-dom.development.js' ||
+      ctx.path === '/statics/react-dom.production.min.js') {
+    if (!fs.existsSync(path.join(paths.public, ctx.path))) {
+      const s = path.join(paths.nodeModules, 'react-dom', 'umd', path.basename(ctx.path));
+      const o = path.join(paths.public, ctx.path);
+      if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
+    }
+  }
+
+  if (ctx.path === '/statics/react.development.js' ||
+      ctx.path === '/statics/react.production.min.js') {
+    if (!fs.existsSync(path.join(paths.public, ctx.path))) {
+      const s = path.join(paths.nodeModules, 'react', 'umd', path.basename(ctx.path));
+      const o = path.join(paths.public, ctx.path);
+      if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
+    }
+  }
+
   if (ctx.app.env === 'development') {
-    if (ctx.path === '/statics/react-dom.development.js' ||
-        ctx.path === '/statics/react-dom.production.min.js') {
-      if (!fs.existsSync(path.join(paths.public, ctx.path))) {
-        await fs.promises.copyFile(
-          path.join(
-            paths.nodeModules, 'react-dom', 'umd', path.basename(ctx.path),
-          ),
-          path.join(paths.public, ctx.path)
-        );
-      }
-    }
-
-    if (ctx.path === '/statics/react.development.js' ||
-        ctx.path === '/statics/react.production.min.js') {
-      if (!fs.existsSync(path.join(paths.public, ctx.path))) {
-        await fs.promises.copyFile(
-          path.join(
-            paths.nodeModules, 'react', 'umd', path.basename(ctx.path),
-          ),
-          path.join(paths.public, ctx.path)
-        );
-      }
-    }
-
     if (ctx.path === '/statics/styles.css') {
       const scssFiles = readDir(paths.scssPath); 
-      const cssStats = fs.lstatSync(paths.stylesCss);
+      const cssStats = fs.lstatSync(paths.cssFile);
 
       for (let file of scssFiles) {
         const stats = fs.lstatSync(file);
@@ -105,6 +99,8 @@ Index.get('/*', async (ctx, next) => {
   await next();
 });
 
-Index.get('/*', statics(paths.public));
+Index.get('/*', statics({
+  root: paths.public,
+}));
 
 export default Index;

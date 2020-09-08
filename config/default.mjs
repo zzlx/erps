@@ -44,7 +44,7 @@ const defaultConfiguration = {
     serverPath: path.join(__ROOT, 'server'),
     scssPath: path.join(__ROOT, 'public', 'statics', 'styles'),
     scssEntryPoint: path.join(__ROOT, 'public', 'statics', 'styles', 'main.scss'),
-    stylesCss: path.join(__ROOT, 'public', 'statics', 'styles.css'),
+    cssFile: path.join(__ROOT, 'public', 'statics', 'styles.css'),
     tasksPath: path.join(__ROOT, 'tasks'),
   },
   server: {
