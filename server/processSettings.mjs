@@ -12,7 +12,7 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import config from '../config/default.mjs';
+import config from './config/settings.mjs';
 
 const debug = util.debuglog('debug:processSettings.mjs');
 

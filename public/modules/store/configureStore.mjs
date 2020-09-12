@@ -6,7 +6,6 @@
 
 // private modules
 import applyMiddleware from './applyMiddleware.mjs';
-import combineReducers from './combineReducers.mjs';
 
 import crashReporter from './middlewares/crashReporter.mjs';
 import thunk from './middlewares/thunk.mjs';
@@ -18,7 +17,7 @@ import monitorReducers from './enhancers/monitorReducers.mjs';
 import createStore from './createStore.mjs';
 import compose from './compose.mjs';
 
-import * as reducers from './reducers/index.mjs';
+import reducer from './reducer.mjs';
 
 export default function configureStore (preloadedState = Object.create(null)) {
   // middleware enhancer
@@ -36,9 +35,7 @@ export default function configureStore (preloadedState = Object.create(null)) {
     ? compose(middlewareEnhancer, monitorReducers) 
     : middlewareEnhancer;
 
-  const reducerObj = combineReducers(reducers);
-
-  const store = createStore(reducerObj, preloadedState, enhancer);
+  const store = createStore(reducer, preloadedState, enhancer);
 
   return store;
 }

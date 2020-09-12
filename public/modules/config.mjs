@@ -8,12 +8,11 @@
 
 import path from './utils/path.mjs';
 
-// 获取APP根路径
-const rootURL = new URL(path.dirname(path.dirname(import.meta.url)));
+const rootURL = new URL(path.dirname(path.dirname(import.meta.url))); // 根路径
 
 export default new Proxy({
+  rootURL: rootURL,
   rootPath: rootURL.href,
-  protocol: rootURL.protocol,
 }, {
   get: function (target, property, receiver) {
     return Reflect.get(target, property, receiver);

@@ -1,9 +1,7 @@
 /**
  * *****************************************************************************
  *
- * readDir
- *
- * 循环读取目录,返回文件路径数组.
+ * 循环读取目录,返回文件列表(文件路径列表).
  *
  * *****************************************************************************
  */
@@ -12,25 +10,23 @@ import fs from 'fs';
 import path from 'path';
 
 export default function readDir (dir) {
-  let retval = [];
+  let file_lists = []; // 文件列表
   
   if (Array.isArray(dir)) {
-    for (let d of dir) {
-      retval = retval.concat(readDir(d));
-    }
+    for (let d of dir) file_lists = file_lists.concat(readDir(d));
   }
 
-  if (typeof dir === 'string') {
+  if (typeof dir === 'string' && fs.existsSync(dir)) {
     const files = fs.readdirSync(dir, {withFileTypes: true});
 
     for (let file of files) {
       const filePath = path.join(dir, file.name);
-      if (file.isFile()) retval.push(filePath);
+      if (file.isFile()) file_lists.push(filePath);
       if (file.isDirectory()) {
-        retval = retval.concat(readDir(filePath))
+        file_lists = file_lists.concat(readDir(filePath))
       }
     }
   }
 
-  return retval;
+  return file_lists;
 }

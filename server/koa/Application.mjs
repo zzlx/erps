@@ -52,29 +52,8 @@ export default class Application extends EventEmitter {
     if (util.inspect.custom) {
       this[util.inspect.custom] = this.inspect;
     }
+
   } // end of constructor
-
-  /**
-   * inspect
-   */
-
-  inspect () {
-    return this.toJSON();
-  }
-
-  /**
-   *
-   *
-   */
-
-  toJSON () {
-    return {
-      'env': this.env,
-      'subdomainOffset': this.subdomainOffset,
-      'proxy': this.proxy,
-      'keys': this.keys,
-    };
-  }
 
   /**
    * Use the given middleware 'fn'
@@ -89,7 +68,7 @@ export default class Application extends EventEmitter {
       throw new TypeError('The middleware you provided must be a function!');
     }
 
-    this.middlewares.push(fn);
+    this.middlewares.push(fn); // 存储到中间件数组
 
     return this;
   }
@@ -101,7 +80,7 @@ export default class Application extends EventEmitter {
   callback () {
     const fn = this.compose(this.middlewares);
 
-    if (!this.listenerCount('error')) this.on('error', this.onerror);
+    if (!this.listenerCount('error')) this.on('error', this.onerror); // 绑定事件处理器
 
     return (stream, headers, flags) => {
       const ctx = new Context(); // create context object
@@ -110,27 +89,13 @@ export default class Application extends EventEmitter {
       ctx.headers = headers;
       ctx.flags = flags;
       ctx.state = Object.create(null);
-      ctx.state.errors = []; // 用于记录系统错误;
+      ctx.state.errors = [];
       ctx.stream = stream;
 
-      return this.handleRequest(ctx, fn);
+      return fn(ctx).then(() => this.respond(ctx)).catch(err => {
+        this.emit('error', err);
+      });
     }
-  }
-
-  /**
-   * Return a handler callback for node's http2 server stream event
-   * 
-   * @return {Function}
-   * @api public
-   */
-
-  handleRequest (ctx, fn) {
-		return fn(ctx).then(() => this.respond(ctx)).catch(err => {
-      debug(err);
-      ctx.status = 500;
-      if (this.env != 'production') ctx.body = err.message;
-      this.respond(ctx);
-    });
   }
 
   /**
@@ -140,7 +105,7 @@ export default class Application extends EventEmitter {
    * @api private
    */
 
-  onerror(err, ctx) {
+  onerror(err) {
     if (!(err instanceof Error)) {
       throw new TypeError(util.format('non-error thrown: %j', err));
     }
@@ -186,39 +151,22 @@ export default class Application extends EventEmitter {
       }
     }
   }
-}
 
-/**
- * Response api:
- *
- * stream.respond
- * stream.end
- */
+  respond (ctx) {
+    if (false === ctx.respond) return; // bypass response
 
-Application.prototype.respond = (ctx) => {
+    // 响应空消息
+    if (null == ctx.body) {
+      ctx.status = ctx.status || 404;
+      ctx.body = ctx.message;
+    }
 
-  if (false === ctx.respond) return; 
+    if (!ctx.headerSent) ctx.stream.respond(ctx.response.headers);
 
-  let body = ctx.body;
-
-  if (null == body) {
-    ctx.status = ctx.status || 404;
-    body = ctx.message;
+    // Cautions
+    if (!ctx.writable) return ctx.stream.end();;
+    if (Buffer.isBuffer(ctx.body)) return ctx.stream.end(ctx.body);
+    if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
+    if (ctx.body instanceof Stream) return ctx.body.pipe(ctx.stream);
   }
-
-  if (!ctx.headerSent) {
-	  ctx.stream.respond(ctx.response.headers);
-  }
-
-  if (!ctx.writable) {
-    return ctx.stream.end();;
-  }
-
-  // buffer or string body
-  if (Buffer.isBuffer(body) || typeof body === 'string') {
-    return ctx.stream.end(body);
-  }
-
-	// stream body
-  if (body instanceof Stream) return body.pipe(ctx.stream);
 }

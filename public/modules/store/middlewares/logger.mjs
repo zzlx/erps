@@ -6,21 +6,15 @@
  * *****************************************************************************
  */
 
-let counter = 0;
-
 export default store => next => action => {
-
-  const actionName =  action.type || 'UNKNOWN_ACTION_TYPE';
   const type = store.types.getType(action.type);
+  console.group(`${action.type}_${type.desc}`);
+  console.log('state_prev:', store.getState());
+  console.info('dispatching:', action);
 
-  console.group(`Action_${++counter}`);
+  const result = next(action);
 
-  console.log('prevState:', store.getState());
-  console.info('dispatching:', Object.assign({}, action, {desc: type.desc}));
-
-  let result = next(action); // 执行action
-
-  console.log('newState:', store.getState());
+  console.log('state_new:', store.getState());
   console.groupEnd();
 
   return result;

@@ -21,7 +21,7 @@ import log from '../koa/middlewares/log.mjs';
 import xResponse from '../koa/middlewares/xResponse.mjs';
 import router from './routes.mjs'; // 路由配置
 
-import config from '../../config/default.mjs';
+import config from '../config/settings.mjs';
 import WriteStream from '../utils/WriteStream.mjs';
 import { date } from '../utils.mjs'; // @todo: 
 
@@ -44,8 +44,5 @@ app.use(cors());             // 跨域访问
 app.use(cookies());          // cookie读写及签名
 app.use(router.routes());
 app.use(router.allowedMethods());
-
-// check    
-debug(`Application's environment is ${app.env}`);
 
 export default app;

@@ -11,6 +11,8 @@
  * *****************************************************************************
  */
 
+import fs from 'fs';
+
 export default class HtmlParser {
   constructor(props) {
     this.state = Object.assign({}, {

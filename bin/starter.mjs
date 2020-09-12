@@ -1,45 +1,33 @@
 #!/usr/bin/env node
 /**
  * *****************************************************************************
- *
- * 服务启动器
- *
- * 进程执行完即退出
+ * 
+ * 脚本管理程序
  *
  * *****************************************************************************
  */
 
 import cluster from 'cluster';
-import crypto from 'crypto';
 import cp from 'child_process';
 import os from 'os';
 import path from 'path';
-import util from 'util';
-import zlib from 'zlib';
 
 import { assert, argvParser, } from '../server/utils.mjs';
-import config from '../config/default.mjs';
+import config from '../server/config/settings.mjs';
 
 const paths = config.paths;
-const state_cache = {}; // cache process state
 let httpd = null;
 
 // Task_1: 检测系统平台类型
 // 系统服务依赖于类unix系统环节, 在非unix环境中无法正常提供服务
-assert(getOSPlatform() === 'unix-like', `Only can be run in unix-like platform.`)
+assert(getOSPlatform() === 'unix-like', `Run in unix-like platform.`);
 
 // Task_2: 执行程序
 process.nextTick(() => executer()); 
 
 /**
- * *****************************************************************************
- *
  * Utility functions 
  *
- * > ##### 注意:ETags 
- * > 以下为此脚本工具用到的*功能函数* 
- *
- * *****************************************************************************
  */
 
 function executer () {
@@ -71,21 +59,17 @@ function executer () {
         //showHelp();
         paramMap.delete(param); // delete param key
         break;
-      case 'stop':
-        paramMap.delete(param); // delete param key
-        stopHttpd();
-        break;
       case 'start':
         paramMap.delete(param); // delete param key
         startHttpd();
         break;
+      case 'stop':
+        paramMap.delete(param); // delete param key
+        stopHttpd();
+        break;
       case 'restart':
         paramMap.delete(param); // delete param key
         restart();
-        break;
-      case 'development':
-        paramMap.delete(param); // delete param key
-        watcher();
         break;
     }
 
@@ -96,7 +80,6 @@ function executer () {
 }
 
 function startHttpd () {
-
   const args = [ path.join(paths.appRoot, 'server', 'http2d.mjs') ];
   const options = {
     detached: process.env.NODE_ENV === 'production' ? true : false,
@@ -106,14 +89,13 @@ function startHttpd () {
   httpd = cp.spawn('node', args, options);
 }
 
-function watcher () {
-  start();
 
-  watchPath(
-    path.join(paths.appRoot, 'config'),
-    path.join(paths.appRoot, 'server'),
-    () => restart(),
-  );
+function stopHttpd () {
+  let pid = null;
+  if (httpd !== null) pid = httpd.pid;
+  else pid = getPidByPort(config.system.port);
+
+  if (pid) cp.execSync(`kill -9 ${pid}`);
 }
 
 function useCluster () {
@@ -172,11 +154,4 @@ function getPidByPort (port) {
   return cp.execSync(`lsof -i:${port} | grep 'LISTEN' \
     | awk \'NR==1{print $2}\'`
   ).toString('utf8');
-}
-
-function stopHttpd () {
-  //if (http2d !== null) return http2d.close();
-
-  const pid = getPidByPort(config.server.port);
-  if (pid) cp.execSync(`kill -9 ${pid}`);
 }

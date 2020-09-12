@@ -6,9 +6,9 @@
  * *****************************************************************************
  */
 
-export default store => next => action => {
-  const isPromise = fn => Boolean(fn && typeof fn.then === 'function');
+import isPromise from '../../utils/isPromise.mjs';
 
+export default store => next => action => {
   // promise action
   if (isPromise(action)) return action.then(result => next(result)); 
 

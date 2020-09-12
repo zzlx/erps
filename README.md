@@ -3,6 +3,13 @@ ERPS
 
 ERPS(ERP Services Platform), 集成ERP、OA、CRM、HR等功能于一体的综合业务服务平台。
 
+# 源码目录简介
+
+* bin: 服务启动程序
+* public: 前端资源代码库
+* server: 服务端代码库
+* styles: 样式系统代码库
+
 # 版权声明
 
 Copyright (C) 2019-present zzlx.org

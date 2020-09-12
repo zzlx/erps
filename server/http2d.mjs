@@ -19,7 +19,7 @@ import util from 'util';
 
 import './processSettings.mjs'; // 载入进程管理模块
 import app from '../server/services/main.mjs';
-import config from '../config/default.mjs';
+import config from '../server/config/settings.mjs';
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`);
@@ -46,24 +46,20 @@ server.on('listening', function () {
 });
 
 server.on('error', function(err) {
-  // error event 
-
-  debug(this);
-
   if (err.code === 'EADDRINUSE') {
     console.info(`Address ${err.address}:${err.port} is in use, try again later.`)
   }
 });
 
-server.on('stream', app.callback()).on('listening', function () {
+server.on('stream', app.callback());
+server.on('listening', function () {
   // after the server started successfully, record pid to pidfile.
   // recordPid().catch((err) => debug(err));
-  debug(``);
 });
 
 server.listen({
   ipv6Only: false, // 是否仅开启IPV6
-  host: config.server.host,
-  port: config.server.port,
+  host: config.system.host,
+  port: config.system.port,
   exclusive: false, // false 可接受进程共享端口, 支持集群服务器配置
 });

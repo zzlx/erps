@@ -47,11 +47,14 @@ function renderDOM () {
 }
 
 async function callback () {
-  console.log(config);
-
   const csv = await import('./utils/csv.mjs').then(m => m.default);
+
   console.groupCollapsed('系统信息');
   console.info(`就绪时间: ${new Date()}`);
+
+  if (config.rootURL.protocol === 'https:') {
+    console.warn(`https is required.`);
+  }
 
   if (globalThis.env && globalThis.env !== 'production') {
     console.info(`当前环境:${env}`);
