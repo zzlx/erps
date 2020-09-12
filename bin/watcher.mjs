@@ -2,15 +2,12 @@
 /**
  * *****************************************************************************
  * 
- * 脚本自动启动器
- * ==============
- *
- * 监视目录变动，当检测到文件改动时，重启指定的命令
+ * 开发环境下监测目录中文件改动，用于重启指定的命令
  *
  * ## 使用方法:
  *
  * ```
- * watcher.mjs --path=server --command=starter.mjs --args=
+ * watcher.mjs --paths=server --command=starter.mjs --args=
  * ```
  *
  * *****************************************************************************
@@ -21,61 +18,26 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import { assert, argvParser, } from '../server/utils.mjs';
-import config from '../server/config/settings.mjs';
-import FileWatcher from '../server/utils/FileWatcher.mjs';
+import { assert, argvParser, } from '../src/utils.mjs';
+import FileWatcher from '../src/utils/FileWatcher.mjs';
 
-const paths = config.paths;
-let httpd = null;
+const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
+const paramMap = argvParser(ARGVS);
 
-process.nextTick(() => parseParams()); 
+let childProcess = null;
 
-/**
- * 解析参数,并执行命令
- */
+let command = paramMap.get('command');
+assert(command, '请提供要执行的命令!');
+command = command[0] === '/' ? command : path.join(process.cwd(), command);
+const paths = paramMap.get('paths').split(',');
+assert(paths.length, '请提供要监测的目录!');
+const args = paramMap.get('args').split(' ');
 
-function parseParams () {
-  // Task: Parse argvs
-  const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
-  const paramMap = argvParser(ARGVS);
+process.env.NODE_ENV = 'development'; // 默认开发环境
+process.env.NODE_DEBUG = 'debug:*'; // 默认开发环境
 
-  assert(paramMap.size == 0, 'There is nothing to do./@todo: Show help message.');
+console.log('Watch paths: ', paths);
 
-  // execute tasks
-  for (let param of paramMap.keys()) {
-    switch(param) {
-      case 'command':
-        paramMap.delete(param); // delete param key
-        break;
-      case 'args':
-        paramMap.delete(param); // delete param key
-        break;
-      case 'paths':
-        paramMap.delete(param); // delete param key
-        break;
-    }
-
-    if (paramMap.size > 0) {
-      console.log(`The param you provid is not supported.`);
-    }
-  }
-}
-
-function executer () {
-  const args = [];
-  const options = {
-    detached: process.env.NODE_ENV === 'production' ? true : false,
-    stdio: [0, 1, 2],
-  };
-
-  childProcess = cp.spawn(command, args, options);
-}
-
-function watcher () {
-  new FileWatcher(
-    path.join(paths.appRoot, 'server'),
-    () => {
-      console.log('服务正在重启...');
-    },
-  );
-}
+process.nextTick(() => new FileWatcher(...paths, () => {
+  cp.spawn(command, args, { stdio: [0, 1, 2], detached: false, });
+})); 

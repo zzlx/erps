@@ -12,8 +12,8 @@ import cp from 'child_process';
 import os from 'os';
 import path from 'path';
 
-import { assert, argvParser, } from '../server/utils.mjs';
-import config from '../server/config/settings.mjs';
+import { assert, argvParser, } from '../src/utils.mjs';
+import config from '../src/config/settings.mjs';
 
 const paths = config.paths;
 let httpd = null;
@@ -69,7 +69,7 @@ function executer () {
         break;
       case 'restart':
         paramMap.delete(param); // delete param key
-        restart();
+        restartHttpd();
         break;
     }
 
@@ -80,7 +80,7 @@ function executer () {
 }
 
 function startHttpd () {
-  const args = [ path.join(paths.appRoot, 'server', 'http2d.mjs') ];
+  const args = [ path.join(paths.appRoot, 'services', 'http2d.mjs') ];
   const options = {
     detached: process.env.NODE_ENV === 'production' ? true : false,
     stdio: [0, 1, 2],
@@ -96,6 +96,11 @@ function stopHttpd () {
   else pid = getPidByPort(config.system.port);
 
   if (pid) cp.execSync(`kill -9 ${pid}`);
+}
+
+function restartHttpd () {
+  stopHttpd();
+  startHttpd();
 }
 
 function useCluster () {

@@ -8,6 +8,7 @@ import modal from './reducers/modal.mjs';
 import navs from './reducers/navs.mjs';
 import profiles from './reducers/profiles.mjs';
 import routes from './reducers/routes.mjs';
+import settings from './reducers/settings.mjs';
 import todos from './reducers/todos.mjs';
 import users from './reducers/users.mjs';
 
@@ -20,6 +21,7 @@ export default combineReducers({
   navs,
   profiles,
   routes,
+  settings,
   todos,
   users,
 });

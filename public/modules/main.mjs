@@ -1,14 +1,19 @@
 /**
  * *****************************************************************************
- *
- * 浏览器客户端程序
+ * 
+ * 客户端主程序
+ * ============
  *
  * *****************************************************************************
  */
 
-import config from './config.mjs';
 import assert from './utils/assert.mjs';
+import path from './utils/path.mjs';
 import configureStore from './store/configureStore.mjs';
+
+const preloadedState = window.__INITIAL_STATE__
+const store = configureStore(preloadedState); 
+const settings = store.getState('settings')
 
 let container = window.document.getElementById('root');
 
@@ -27,9 +32,7 @@ function renderDOM () {
   } else if (globalThis.React == null) {
     container.innerHTML = 'React is not available, please confirmed!';
   } else {
-    import('./App.mjs').then(m => m.default).then(async App => {
-      const preloadedState = window.__INITIAL_STATE__
-      const store = configureStore(preloadedState); 
+    import('./UI.mjs').then(m => m.default).then(async App => {
 
       const element = App(store);
 
@@ -52,9 +55,7 @@ async function callback () {
   console.groupCollapsed('系统信息');
   console.info(`就绪时间: ${new Date()}`);
 
-  if (config.rootURL.protocol === 'https:') {
-    console.warn(`https is required.`);
-  }
+  if (settings.rootURL.protocol !== 'https:') console.warn(`https is required.`);
 
   if (globalThis.env && globalThis.env !== 'production') {
     console.info(`当前环境:${env}`);
@@ -66,8 +67,8 @@ async function callback () {
     console.log(csv('test,ttt\n1,2\n3,4'));
   }
 
-  console.info(`使用说明:${config.rootPath}/index.html?page=manual`);
-  console.info(`联系我们: ${config.rootPath}/index.html?page=contact`);
+  console.info(`使用说明:${settings.rootURL}/index.html?page=manual`);
+  console.info(`联系我们:${settings.rootURL}/index.html?page=manual`);
   console.groupEnd();
 
   const ua = window.navigator.userAgent;
@@ -98,7 +99,7 @@ async function callback () {
 function backgroundWork () {
   if (globalThis.Worker) {
 
-    const worker = new Worker(`${config.rootPath}/modules/web-work.mjs`);
+    const worker = new Worker(`${settings.rootURL}/modules/web-work.mjs`);
 
     worker.postMessage({cmd: 'start', msg: ['work']});
 

@@ -1,7 +1,8 @@
 /**
  * *****************************************************************************
  *
- * Path utilities
+ * 路径工具包
+ * ==========
  *
  * 兼容posix、window、URL目录
  *
@@ -19,37 +20,6 @@ const CHAR_UPPERCASE_A = 65;    // A
 const CHAR_UPPERCASE_Z = 90;    // Z
 const CHAR_LOWERCASE_A = 97;    // a
 const CHAR_LOWERCASE_Z = 122;   // z
-
-
-export default new Proxy({
-  dirname,
-  extname,
-  isURLPath,
-  join,
-  createLocation,
-}, { 
-  /**
-   * getter
-   *
-   * @param {obj} target
-   * @param {string} property
-   * @param {obj} receiver
-   * @return {function}
-   */
-
-	get: function (target, property, receiver) {
-
-    if (target[property] == null) {
-      if (console && console.warn) {
-        console.warn(`The property '${property}' is not defined, please confirmed.`)
-      }
-
-      return () => {};
-    }
-
-		return Reflect.get(target, property, receiver);
-  },
-});
 
 /**
  * resolve
@@ -108,7 +78,10 @@ function isPosix (path) {
 }
 
 /**
- * 判断是否为绝对路径
+ * is absolute path
+ *
+ * @param {string} path
+ * @return {boolean} 
  */
 
 function isAbsolute(path) {
@@ -673,3 +646,14 @@ function normalizeString (path, allowAboveRoot, separator, isPathSeparator) {
 
   return res;
 }
+
+export default {
+  dirname,
+  extname,
+  isURLPath,
+  join,
+  createLocation,
+  isAbsolute,
+  stripTrailingSlash,
+};
+

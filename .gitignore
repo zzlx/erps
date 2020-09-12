@@ -2,7 +2,7 @@
 # 参考文档 http://help.github.com/ignore-files/
 # #############################################
 
-# OS
+# Mac
 .DS_Store
 
 # vim

@@ -1,8 +1,6 @@
 " ==============================================================================
 "
-" vimrc配置文件
-"
-" 以指定vimrc配置文件运行vim: `vim -u vimrc`
+" Vim IDE(集成开发环境:Integrated Development Environment)
 "
 " author: wangxuemin@zzlx.org
 " ==============================================================================
@@ -174,6 +172,19 @@ else:
 
 EOM
 endfunction
+
+" ------------------------------------------------------------------------------
+" Test
+"
+func! Test()
+python << EOM
+import sys
+import webbrowser
+url=sys.argv[1]
+webbrowser.open(url)
+EOM
+endfunc
+
 
 " ------------------------------------------------------------------------------
 " 设置头

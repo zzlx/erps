@@ -6,14 +6,14 @@
  * *****************************************************************************
  */
 
-import isPromise from '../../utils/isPromise.mjs';
+import value from '../../utils/value.mjs';
 
 export default store => next => action => {
   // promise action
-  if (isPromise(action)) return action.then(result => next(result)); 
+  if (value(action).isPromise) return action.then(result => next(result)); 
 
   // promise payload
-  if (action && isPromise(action.payload)) {
+  if (action && value(action.payload).isPromise) {
     return action.payload.then(
       result => {
         next(Object.assign({}, action, { payload: result }));

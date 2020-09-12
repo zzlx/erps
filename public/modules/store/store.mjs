@@ -23,7 +23,7 @@ import logger from './middlewares/logger.mjs';
 import monitorReducers from './enhancers/monitorReducers.mjs';
 
 import { types } from './actions/index.mjs';
-import isPlainObject from '../utils/isPlainObject.mjs';
+import value from '../utils/value.mjs';
 import getIn from '../utils/getIn.mjs';
 
 const LISTENERS = Symbol('listeners');
@@ -115,7 +115,7 @@ export default function store (preloadedState = Object.create(null)) {
 
       if ('dispatch' === property) {
         return (action) => {
-          if (!isPlainObject(action)) {
+          if (!value(action).isPlainObject) {
             throw new Error(
               'Actions must be plain objects. Use custom middleware for async actions.'
             );
