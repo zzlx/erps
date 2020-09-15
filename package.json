@@ -10,13 +10,16 @@
     "d3": "^5.9.7",
     "jsbarcode": "^3.11.0",
     "marked": "^0.7.0",
-    "mongodb": "^3.4.0",
-    "mysql": "^2.15.0",
     "node-sass": "^4.13.0",
     "qrcode": "^1.4.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "remarkable": "^1.7.1",
     "xlsx": "^0.14.5"
+  },
+  "dependencies": {
+    "mongodb": "^3.4.0",
+    "mysql": "^2.15.0",
+    "tedious": "^9.2.1"
   }
 }

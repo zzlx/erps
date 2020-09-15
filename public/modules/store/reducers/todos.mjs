@@ -35,7 +35,6 @@ function todos(state = [], action) {
 
     case types.REMOVE_TODO:
       if (action.error) return state;
-      console.log(action);
       return state.filter(todo => todo._id !== action.payload.data.removeTodo.id);
 
     case types.TOGGLE_TODO:

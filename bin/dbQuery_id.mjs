@@ -10,7 +10,7 @@
  */
 
 import mongodb from 'mongodb';
-import { assert, argvParser, } from '../server/utils.mjs';
+import { assert, argvParser, } from '../src/utils.mjs';
 
 const MongoClient = mongodb.MongoClient;
 const client = new MongoClient('mongodb://localhost:27017', { 
@@ -26,13 +26,13 @@ async function run () {
     const collection_OBD = db.collection('OBD设备_userID');
 
     const cursor = collection_OBD.aggregate();
-    const total = await cursor.count();
+    //const total = await cursor.count();
     let count = 0;
     let doc = null;
     let writes = [];
 
     while ((doc = await cursor.next()) !== null) {
-      console.log(`${(count++/total)*100}%`);
+      //console.log(`${(count++/total)*100}%`);
 
       writes.push({
         updateOne: {

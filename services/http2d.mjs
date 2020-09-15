@@ -19,7 +19,7 @@ import util from 'util';
 
 import '../src/processSettings.mjs'; // 载入进程管理模块
 import app from './routes/main.mjs';
-import config from '../src/config/settings.mjs';
+import config from '../config/settings.mjs';
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`);

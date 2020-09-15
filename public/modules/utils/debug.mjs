@@ -7,7 +7,7 @@
  */
 
 export default function debug () {
-  if (!(env && env === 'development')) return;
+  if (!(globalThis.env && globalThis.env === 'development')) return;
 
   if (console && console.trace) {
     console.trace(...arguments);

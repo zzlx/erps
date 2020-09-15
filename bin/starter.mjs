@@ -13,7 +13,7 @@ import os from 'os';
 import path from 'path';
 
 import { assert, argvParser, } from '../src/utils.mjs';
-import config from '../src/config/settings.mjs';
+import config from '../config/settings.mjs';
 
 const paths = config.paths;
 let httpd = null;
