@@ -7,28 +7,33 @@
  * *****************************************************************************
  */
 
+import global from './utils/global.mjs';
+import console from './utils/console.mjs';
+import path from './utils/path.mjs';
+
+const rootURL =  path.dirname(path.dirname(import.meta.url));
+const ua = global.navigator.userAgent;
+
 (async function main () {
-  const ua = window.navigator.userAgent;
-  const path = await import('./utils/path.mjs');
   const assert = await import('./utils/assert.mjs').then(m=>m.default)
-  const preloadedState = window.__INITIAL_STATE__
+  const preloadedState = global.__INITIAL_STATE__
   const configureStore = await import('./store/configureStore.mjs').then(m => m.default);
   const store = configureStore(preloadedState); 
   const settings = store.getState('settings')
 
-  assert(globalThis.React, 'React is not available, please confirmed!');
-  assert(globalThis.ReactDOM, 'ReactDOM is not available, please confirmed!');
+  assert(global.React, 'React is not available, please confirmed!');
+  assert(global.ReactDOM, 'ReactDOM is not available, please confirmed!');
 
   import('./UI.mjs').then(m => m.default).then(async App => {
 
     const element = App(store);
 
-    let container = window.document.getElementById('root');
+    let container = global.document.getElementById('root');
 
     if (null == container) {
-      container = window.document.createElement('div');
+      container = global.document.createElement('div');
       container.id = 'root';
-      window.document.body.appendChild(container);
+      global.document.body.appendChild(container);
     }
 
     // 存在服务端渲染等页面使用hydrate方法渲染
@@ -42,27 +47,27 @@
     }
 
   });
-
-  function callback () {
-    console.groupCollapsed('系统信息');
-    console.info(`就绪时间: ${new Date()}`);
-
-    if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edge') === -1 || ua.indexOf('Firefox') > -1) {
-      if (/^(https?|file):$/.test(window.location.protocol)) {
-        console.log('');
-      }
-    }
-
-    if (globalThis.env && globalThis.env !== 'production') {
-      console.info(`当前环境:${env}`);
-
-      // @todo:  消息框提示
-      window.navigator.cookieEnabled && console.info(`cookie支持已启用`);
-    }
-
-    console.groupEnd();
-  }
 })().catch(console.error);
+
+function callback () {
+  console.groupCollapsed('系统信息');
+  console.info(`就绪时间: ${new Date()}`);
+
+  if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edge') === -1 || ua.indexOf('Firefox') > -1) {
+    if (/^(https?|file):$/.test(global.location.protocol)) {
+      console.log('');
+    }
+  }
+
+  if (global.env && global.env !== 'production') {
+    console.info(`当前环境:${env}`);
+
+    // @todo:  消息框提示
+    window.navigator.cookieEnabled && console.info(`cookie支持已启用`);
+  }
+
+  console.groupEnd();
+}
 
 function detectDevice () {
   const ua = window.navigator.userAgent;
@@ -94,7 +99,7 @@ async function test () {
 }
 
 function backgroundWork () {
-  if (globalThis.Worker) {
+  if (global.Worker) {
 
     const worker = new Worker(`${settings.rootURL}/modules/web-work.mjs`);
 

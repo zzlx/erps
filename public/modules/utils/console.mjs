@@ -1,15 +1,15 @@
 /**
  * *****************************************************************************
  *
- * 控制台对象扩展
+ * 控制台对象
  *
- * @file console.mjs
  * *****************************************************************************
  */
 
-import global from 'global';
+import global from './global.mjs';
 
-const isBackend = Boolean(global && global.process);
+const isBackend = global && global.process;
+const isBroswer = global.document ? true : false
 const isWin = isBackend && process.platform === 'win32';
 
 const MOVE_LEFT  = '\u001b[1000D';
@@ -19,12 +19,17 @@ const CLEAR_PAGE = isWin ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H';
 
 export default new Proxy(console, {
 	get: function (target, property, receiver) {
+
 		if (property === 'print') {
       return (str) => process.stdout.write(MOVE_LEFT + CLEAR_LINE+String(str));
 		}
 
 		if (property === 'progressBar') receiver.progressBar = progressBar;
-		if (property === 'debug') receiver.debug = debug;
+
+		if (property === 'debug') {
+      if (target['debug'] == null) return debug; 
+    }
+
 		if (property === 'clear') {
 			return () => process.stdout.write(CLEAR_PAGE);
 		}
@@ -34,11 +39,17 @@ export default new Proxy(console, {
 });
 
 /**
- * debug
+ * 打印调试信息
  */
 
-function debug (...args) {
-  console.log(args);
+function debug () {
+  if (!(global.env && global.env === 'development')) return;
+
+  if (console && console.trace) {
+    console.trace(...arguments);
+  } else {
+    console.log(...arguments);
+  }
 }
 
 /**

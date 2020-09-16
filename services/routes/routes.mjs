@@ -11,13 +11,13 @@ import path from 'path';
 import util from 'util';
 import ReactDOMServer from 'react-dom/server.js';
 
+import config from '../../config/settings.mjs';
 import tasks from '../../services/tasks.mjs';
 import dba from '../../src/koa/middlewares/dba.mjs';
 import statics from '../../src/koa/middlewares/statics.mjs';
 import serverRender from '../../src/koa/middlewares/serverRender.mjs';
 
 import Router from '../../src/koa/Router.mjs';
-import config from '../../src/config/settings.mjs';
 import { date } from '../../src/utils.mjs';
 import readDir from '../../src/utils/readDir.mjs';
 

@@ -8,7 +8,7 @@
 
 import cp from 'child_process';
 import path from 'path';
-import config from '../src/config/settings.mjs';
+import config from '../config/settings.mjs';
 
 const paths = config.paths;
 

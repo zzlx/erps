@@ -15,7 +15,7 @@
 import util from 'util';
 
 import { assert } from '../../utils.mjs';
-import MongoDBA from '../../utils/mongodb.mjs';
+import MongoDBA from '../../database/mongodb.mjs';
 
 const debug = util.debuglog('debug:middleware.mongodb');
 const MongoClient = Symbol('mongoClient');

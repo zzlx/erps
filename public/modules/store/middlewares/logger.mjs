@@ -8,7 +8,8 @@
 
 export default store => next => action => {
   const type = store.types.getType(action.type);
-  console.group(`${action.type}_${type.desc}`);
+
+  console.group(`${action ? action.type : 'Unknown Action'}_${type.desc}`);
   console.log('state_prev:', store.getState());
   console.info('dispatching:', action);
 

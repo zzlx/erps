@@ -21,7 +21,7 @@ import log from '../../src/koa/middlewares/log.mjs';
 import xResponse from '../../src/koa/middlewares/xResponse.mjs';
 import router from './routes.mjs'; // 路由配置
 
-import config from '../../src/config/settings.mjs';
+import config from '../../config/settings.mjs';
 import WriteStream from '../../src/utils/WriteStream.mjs';
 import { date } from '../../src/utils.mjs'; // @todo: 
 

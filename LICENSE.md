@@ -1,10 +1,17 @@
-License
-========
+# 软件许可
+
+参照MIT许可证进行授权
+
+## 授权
+
+兹授权:
+
+任何人均可免费获得此软件的拷贝,
+不严格限制使用、拷贝、修改、合并、发布、发行、再授权及销售此软件的拷贝。
 
 Copyright (C) 2019-present zzlx.org
 
-兹授权, 任何人均可免费获得此软件拷贝及其文档,不严格限制使用此软件的使用、
-拷贝、修改、合并、发布、发行、再授权及销售此软件的拷贝。
+## MIT许可证原文
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

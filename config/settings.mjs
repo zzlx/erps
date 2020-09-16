@@ -19,7 +19,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import { assert } from '../utils.mjs';
+import { assert } from '../src/utils.mjs';
 import paths from './paths.mjs';
 import system from './system.mjs';
 
