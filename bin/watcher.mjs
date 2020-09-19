@@ -18,7 +18,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import { assert, argvParser, } from '../src/utils.mjs';
+import { assert, argvParser, } from '../src/utils/index.mjs';
 import FileWatcher from '../src/utils/FileWatcher.mjs';
 
 const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array

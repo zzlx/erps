@@ -23,7 +23,7 @@ import router from './routes.mjs'; // 路由配置
 
 import config from '../../config/settings.mjs';
 import WriteStream from '../../src/utils/WriteStream.mjs';
-import { date } from '../../src/utils.mjs'; // @todo: 
+import { date } from '../../src/utils/index.mjs'; // @todo: 
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`);

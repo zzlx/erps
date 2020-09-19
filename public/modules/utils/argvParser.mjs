@@ -12,7 +12,7 @@
  * *****************************************************************************
  */
 
-export default function argvParser (argvs) {
+export default function parser (argvs) {
   // convert string to array;
   if ('string' === typeof argvs) argvs = argvs.split(/\s+/);
 

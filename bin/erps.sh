@@ -1083,7 +1083,7 @@ _parse_argv() {
         ;;
 			--watcher )
         $_BIN/watcher.mjs --command=$_BIN/starter.mjs --args='--restart' \
-          --paths=${_ROOT}/src,${_ROOT}/services,${_ROOT}/resolvers,${_ROOT}/config,$_ROOT/schema
+          --paths=${_ROOT}/src,${_ROOT}/services,${_ROOT}/resolvers,${_ROOT}/config
 				break;
 				;;
       --setup )

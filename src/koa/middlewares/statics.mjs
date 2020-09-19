@@ -19,7 +19,7 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import { assert } from '../../utils.mjs';
+import { assert } from '../../utils/index.mjs';
 
 const debug = util.debuglog('debug:statics-middleware');
 

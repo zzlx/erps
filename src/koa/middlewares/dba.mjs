@@ -14,7 +14,7 @@
 
 import util from 'util';
 
-import { assert } from '../../utils.mjs';
+import { assert } from '../../utils/index.mjs';
 import MongoDBA from '../../database/mongodb.mjs';
 
 const debug = util.debuglog('debug:middleware.mongodb');

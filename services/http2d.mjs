@@ -17,7 +17,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import '../src/processSettings.mjs'; // 载入进程管理模块
+import './processSettings.mjs'; // 载入进程管理模块
 import app from './routes/main.mjs';
 import config from '../config/settings.mjs';
 

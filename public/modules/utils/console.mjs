@@ -1,16 +1,15 @@
 /**
  * *****************************************************************************
  *
- * 控制台对象
+ * 控制台对象功能扩展
  *
  * *****************************************************************************
  */
 
 import global from './global.mjs';
 
-const isBackend = global && global.process;
-const isBroswer = global.document ? true : false
-const isWin = isBackend && process.platform === 'win32';
+const isBrowser = global.window ? true : false
+const isWin = !isBrowser && global.process && global.process.platform === 'win32';
 
 const MOVE_LEFT  = '\u001b[1000D';
 const MOVE_UP    = '\u001b[1A';
@@ -26,10 +25,6 @@ export default new Proxy(console, {
 
 		if (property === 'progressBar') receiver.progressBar = progressBar;
 
-		if (property === 'debug') {
-      if (target['debug'] == null) return debug; 
-    }
-
 		if (property === 'clear') {
 			return () => process.stdout.write(CLEAR_PAGE);
 		}
@@ -39,25 +34,11 @@ export default new Proxy(console, {
 });
 
 /**
- * 打印调试信息
- */
-
-function debug () {
-  if (!(global.env && global.env === 'development')) return;
-
-  if (console && console.trace) {
-    console.trace(...arguments);
-  } else {
-    console.log(...arguments);
-  }
-}
-
-/**
  *
  */
 
 function print(string) {
-  if (isBackend) return process.stdout.write(String(string));
+  if (!isBrowser) return process.stdout.write(String(string));
   console.log(string);
 }
 

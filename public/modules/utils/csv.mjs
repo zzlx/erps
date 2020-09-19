@@ -12,7 +12,7 @@
 
 import assert from './assert.mjs';
 
-export default (value) => {
+export default function (value) {
   const target = {};
 
   if (typeof(value) === 'string' && isCSV(value)) {

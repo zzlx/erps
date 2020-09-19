@@ -9,7 +9,7 @@
  */
 
 import fs from 'fs';
-import { assert } from '../utils.mjs'
+import { assert } from '../utils/index.mjs'
 
 const WS = Symbol('write_stream');
 const FP = Symbol('file_path');

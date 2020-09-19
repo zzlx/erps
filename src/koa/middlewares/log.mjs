@@ -13,7 +13,7 @@
  */
 
 import util from 'util';
-import { assert, date } from '../../utils.mjs';
+import { assert, date } from '../../utils/index.mjs';
 
 const debug = util.debuglog('node:log-middlewar');
 const printLog = value => debug(value);

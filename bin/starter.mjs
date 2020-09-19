@@ -12,7 +12,7 @@ import cp from 'child_process';
 import os from 'os';
 import path from 'path';
 
-import { assert, argvParser, } from '../src/utils.mjs';
+import { assert, argvParser, } from '../src/utils/index.mjs';
 import config from '../config/settings.mjs';
 
 const paths = config.paths;

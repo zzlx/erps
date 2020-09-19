@@ -18,7 +18,7 @@ import statics from '../../src/koa/middlewares/statics.mjs';
 import serverRender from '../../src/koa/middlewares/serverRender.mjs';
 
 import Router from '../../src/koa/Router.mjs';
-import { date } from '../../src/utils.mjs';
+import { date } from '../../src/utils/index.mjs';
 import readDir from '../../src/utils/readDir.mjs';
 
 const __filename = import.meta.url.substr(7);

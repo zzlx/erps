@@ -17,6 +17,12 @@ const __ROOT = path.dirname(__dirname);
 const PackageJSON = JSON.parse(fs.readFileSync(path.join(__ROOT, 'package.json'), 'utf8'));
 const APP_HOME = path.join(os.homedir(), `.${PackageJSON.name}`);
 
+
+const defaults = {
+  'public': 'public',
+  'nodeModules': 'node_modules',
+}
+
 export default new Proxy({
   appRoot: __ROOT, 
   appHome: APP_HOME, 
@@ -27,8 +33,8 @@ export default new Proxy({
   public: path.join(__ROOT, 'public'),
   binPath: path.join(__ROOT, 'bin'),
   srcPath: path.join(__ROOT, 'src'),
-  scssPath: path.join(__ROOT, 'public', 'static', 'styles'),
-  scssEntryPoint: path.join(__ROOT, 'public', 'static', 'styles', 'main.scss'),
+  scssPath: path.join(__ROOT, 'styles'),
+  scssEntryPoint: path.join(__ROOT, 'styles', 'main.scss'),
   cssFile: path.join(__ROOT, 'public', 'statics', 'styles.css'),
 }, {
   get: function (target, property, receiver) {
