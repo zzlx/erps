@@ -1,5 +1,24 @@
-ERPS
-=======
+ERP服务系统
+===========
 
-ERPS(ERP Services Platform), 集成ERP、OA、CRM、HR等功能于一体的综合业务服务平台。
-详情请阅读[参考文档](./public/docs/README.md)
+ERPs(ERP Service System), 集ERP、OA、CRM、HR等功能于一体的综合业务服务平台。
+
+# 系统初始化
+
+```
+npm install
+```
+
+# 管理服务
+
+* 启动服务
+
+```
+npm run start
+```
+
+* 停止服务
+
+```
+npm run stop
+```
