@@ -1077,13 +1077,9 @@ _parse_argv() {
       --restart )
         node $_ROOT/server/erpsd.mjs --restart
         ;;
-      --vim )
-				vim -u $_ROOT/.vimrc $_ROOT
-				break;
-        ;;
 			--watcher )
         $_BIN/watcher.mjs --command=$_BIN/starter.mjs --args='--restart' \
-          --paths=${_ROOT}/src,${_ROOT}/services,${_ROOT}/resolvers,${_ROOT}/config
+          --paths=${_ROOT}/src,${_ROOT}/server
 				break;
 				;;
       --setup )

@@ -11,8 +11,8 @@ import path from 'path';
 import util from 'util';
 import ReactDOMServer from 'react-dom/server.js';
 
-import config from '../../config/settings.mjs';
-import tasks from '../../services/tasks.mjs';
+import config from '../../src/config/settings.mjs';
+import tasks from '../../server/tasks.mjs';
 import dba from '../../src/koa/middlewares/dba.mjs';
 import statics from '../../src/koa/middlewares/statics.mjs';
 import serverRender from '../../src/koa/middlewares/serverRender.mjs';
@@ -49,7 +49,7 @@ Index.get('/test', (ctx, next) => {
 });
 
 Index.get('/system/log', (ctx, next) => {
-  const logFile = path.join(paths.logPath, date.format('yyyymmdd') + '.log');
+  const logFile = path.join(paths.HOME, 'log', date.format('yyyymmdd') + '.log');
 
   // @todos: 需要完善显示页面
   ctx.type = 'text';
@@ -65,26 +65,26 @@ Index.all('/*', serverRender());
 Index.get('/*', async (ctx, next) => {
   if (ctx.path === '/statics/react-dom.development.js' ||
       ctx.path === '/statics/react-dom.production.min.js') {
-    if (!fs.existsSync(path.join(paths.public, ctx.path))) {
-      const s = path.join(paths.nodeModules, 'react-dom', 'umd', path.basename(ctx.path));
-      const o = path.join(paths.public, ctx.path);
+    if (!fs.existsSync(path.join(paths.PUBLIC, ctx.path))) {
+      const s = path.join(paths.NODE_MODULES, 'react-dom', 'umd', path.basename(ctx.path));
+      const o = path.join(paths.PUBLIC, ctx.path);
       if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
     }
   }
 
   if (ctx.path === '/statics/react.development.js' ||
       ctx.path === '/statics/react.production.min.js') {
-    if (!fs.existsSync(path.join(paths.public, ctx.path))) {
-      const s = path.join(paths.nodeModules, 'react', 'umd', path.basename(ctx.path));
-      const o = path.join(paths.public, ctx.path);
+    if (!fs.existsSync(path.join(paths.PUBLIC, ctx.path))) {
+      const s = path.join(paths.NODE_MODULES, 'react', 'umd', path.basename(ctx.path));
+      const o = path.join(paths.PUBLIC, ctx.path);
       if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
     }
   }
 
   if (ctx.app.env === 'development') {
-    if (ctx.path === '/statics/styles.css') {
-      const scssFiles = readDir(paths.scssPath); 
-      const cssStats = fs.lstatSync(paths.cssFile);
+    if (ctx.path === '/styles/main.css') {
+      const scssFiles = readDir(path.join(paths.PUBLIC, 'styles', 'scss')); 
+      const cssStats = fs.lstatSync(path.join(paths.PUBLIC, 'styles', 'main.css'));
 
       for (let file of scssFiles) {
         const stats = fs.lstatSync(file);
@@ -100,7 +100,7 @@ Index.get('/*', async (ctx, next) => {
 });
 
 Index.get('/*', statics({
-  root: paths.public,
+  root: paths.PUBLIC,
 }));
 
 export default Index;

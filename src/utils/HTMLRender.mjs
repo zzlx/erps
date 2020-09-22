@@ -31,7 +31,7 @@ export default class HtmlParser {
         { src: "/modules/fallback.js", nomodule: true},
       ],
       styleLinks: [ 
-        "/statics/styles.css"
+        "/styles/main.css"
       ],
     }, props);
 

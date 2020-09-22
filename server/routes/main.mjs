@@ -19,11 +19,12 @@ import cookies from '../../src/koa/middlewares/cookies.mjs';
 import error from '../../src/koa/middlewares/error.mjs';
 import log from '../../src/koa/middlewares/log.mjs';
 import xResponse from '../../src/koa/middlewares/xResponse.mjs';
-import router from './routes.mjs'; // 路由配置
 
-import config from '../../config/settings.mjs';
+import config from '../../src/config/settings.mjs';
 import WriteStream from '../../src/utils/WriteStream.mjs';
 import { date } from '../../src/utils/index.mjs'; // @todo: 
+
+import router from './routes.mjs'; // 路由配置
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`);
@@ -34,7 +35,7 @@ const app = new Koa();
 
 // setting log middlware at the first, so erros can be record.
 app.use(log((log) => {
-  logWriter.path = path.join(paths.logPath, date.format('yyyymmdd') + '.log');
+  logWriter.path = path.join(paths.HOME, 'log', date.format('yyyymmdd') + '.log');
   logWriter.write(Object.values(log).join('\t') + '\n');
 }));
 

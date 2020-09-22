@@ -9,7 +9,7 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import config from '../config/settings.mjs';
+import config from '../src/config/settings.mjs';
 
 const debug = util.debuglog('debug:processSettings.mjs');
 
@@ -71,7 +71,7 @@ process.on('exit', (code) => {
  */
 
 function writePidFile () {
-  const pidFile = path.join(config.paths.appHome, `${process.title}.pid`);
+  const pidFile = path.join(config.paths.HOME, `${process.title}.pid`);
 
   return fs.promises.writeFile(pidFile, String(process.pid), 'utf8').catch(err => { 
     debug('write pid file error: ', err); 
@@ -79,7 +79,7 @@ function writePidFile () {
 }
 
 function deletePidFile () {
-  const pidFile = path.join(config.paths.appHome, `${process.title}.pid`);
+  const pidFile = path.join(config.paths.HOME, `${process.title}.pid`);
   // 定义删除pidFile函数
   fs.promises.unlink(pidFile).then(() => {
     debug(`delete ${pidFile} success.`);

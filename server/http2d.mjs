@@ -19,11 +19,11 @@ import util from 'util';
 
 import './processSettings.mjs'; // 载入进程管理模块
 import app from './routes/main.mjs';
-import config from '../config/settings.mjs';
+import config from '../src/config/settings.mjs';
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`);
-process.title = `${config.pidPrefix}.${path.basename(__filename, path.extname(__filename))}`;
+process.title = `${path.basename(__filename, path.extname(__filename))}`;
 
 const server = http2.createSecureServer({
   key: fs.readFileSync(`/etc/ssl/${os.hostname()}-key.pem`),
@@ -47,11 +47,17 @@ server.on('listening', function () {
 
 server.on('error', function(err) {
   if (err.code === 'EADDRINUSE') {
-    console.info(`Address ${err.address}:${err.port} is in use, try again later.`)
   }
+
+  debug(err);
 });
 
-server.on('stream', app.callback());
+const cb = app.callback();
+let counter = 0;
+server.on('stream', (...arg) => {
+  debug('stream count: ', ++counter);
+  cb(...arg);
+});
 server.on('listening', function () {
   // after the server started successfully, record pid to pidfile.
   // recordPid().catch((err) => debug(err));

@@ -7,7 +7,6 @@
 //
 // Normalize is licensed MIT. https://github.com/necolas/normalize.css
 
-
 // Document
 //
 // 1. Change from `box-sizing: content-box` so that `width` is not affected by `padding` or `border`.
@@ -19,14 +18,14 @@
 *,
 *::before,
 *::after {
-  box-sizing: border-box; // 1
+  box-sizing: border-box;
 }
 
 html {
-  font-family: sans-serif; // 2
-  line-height: 1.15; // 3
-  -webkit-text-size-adjust: 100%; // 4
-  -webkit-tap-highlight-color: rgba($black, 0); // 5
+  font-family: sans-serif;
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba($black, 0);
 }
 
 // Shim for "new" HTML5 structural elements to display correctly (IE10, older browsers)
@@ -67,16 +66,14 @@ body {
   outline: 0 !important;
 }
 
-
-// Content grouping
-//
-// 1. Add the correct box sizing in Firefox.
-// 2. Show the overflow in Edge and IE.
-
 hr {
   box-sizing: content-box; // 1
   height: 0; // 1
   overflow: visible; // 2
+  margin-top: $hr-margin-y;
+  margin-bottom: $hr-margin-y;
+  border: 0;
+  border-top: $hr-border-width solid $hr-border-color;
 }
 
 
@@ -90,9 +87,13 @@ hr {
 // margin for easier control within type scales as it avoids margin collapsing.
 // stylelint-disable-next-line selector-list-comma-newline-after
 h1, h2, h3, h4, h5, h6 {
-  @include font-size($font-size-base);
   margin-top: 0;
   margin-bottom: $headings-margin-bottom;
+  font-family: $headings-font-family;
+  font-weight: $headings-font-weight;
+  line-height: $headings-line-height;
+  color: $headings-color;
+	@include font-size($font-size-base);
 }
 
 // Reset margins on paragraphs
@@ -152,6 +153,18 @@ dd {
 
 blockquote {
   margin: 0 0 1rem;
+  margin-bottom: $spacer;
+  @include font-size($blockquote-font-size);
+}
+
+blockquote footer {
+  display: block;
+  @include font-size($blockquote-small-font-size);
+  color: $blockquote-small-color;
+
+  &::before {
+    content: "\2014\00A0"; // em dash, nbsp
+  }
 }
 
 b,
@@ -160,8 +173,15 @@ strong {
 }
 
 small {
-  @include font-size(80%); // Add the correct font size in all browsers
+  @include font-size($small-font-size);
+  font-weight: $font-weight-normal;
 }
+
+mark {
+  padding: $mark-padding;
+  background-color: $mark-bg;
+}
+
 
 //
 // Prevent `sub` and `sup` elements from affecting the line height in

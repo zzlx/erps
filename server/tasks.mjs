@@ -8,13 +8,13 @@
 
 import cp from 'child_process';
 import path from 'path';
-import config from '../config/settings.mjs';
+import config from '../src/config/settings.mjs';
 
 const paths = config.paths;
 
 export default new Proxy({
   "generateCSS": function () { 
-    return cp.spawn(path.join(paths.binPath, 'generateCSS.mjs'));
+    return cp.spawn(path.join(paths.BIN, 'generateCSS.mjs'));
   }
 }, {
   get: function (target, property, receiver) {

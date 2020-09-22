@@ -2,6 +2,8 @@
 "
 " Vim IDE(集成开发环境:Integrated Development Environment)
 "
+" 使用方法: 'vim -u .vimrc'
+"
 " author: wangxuemin@zzlx.org
 " ==============================================================================
 

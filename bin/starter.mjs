@@ -13,7 +13,7 @@ import os from 'os';
 import path from 'path';
 
 import { assert, argvParser, } from '../src/utils/index.mjs';
-import config from '../config/settings.mjs';
+import config from '../src/config/settings.mjs';
 
 const paths = config.paths;
 let httpd = null;
@@ -80,7 +80,7 @@ function executer () {
 }
 
 function startHttpd () {
-  const args = [ path.join(paths.appRoot, 'services', 'http2d.mjs') ];
+  const args = [ path.join(paths.SERVER, 'http2d.mjs') ];
   const options = {
     detached: process.env.NODE_ENV === 'production' ? true : false,
     stdio: [0, 1, 2],

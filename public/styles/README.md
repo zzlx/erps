@@ -1,12 +1,11 @@
-样式系统
-============
+# 样式系统
 
-# 待办事项
+## Todos
 
 * 优化已有的类设置减少特殊类设置
 * 系统已有类样式只减不增,对于使用media查询的情况尽可能多的使用utility类
 
-# HSL函数 
+## HSL函数 
 
 * hsl($hue,$saturation,$lightness)：通过色相（hue）、饱和度(saturation)和亮度（lightness）的值创建一个颜色；
 * hsla($hue,$saturation,$lightness,$alpha)：通过色相（hue）、饱和度(saturation)、亮度（lightness）和透明（alpha）的值创建一个颜色；
