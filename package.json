@@ -1,6 +1,6 @@
 {
   "name": "erps",
-  "description": "ERP services.",
+  "description": "ERP system services.",
   "version": "1.0.0",
   "private": true,
   "license": "MIT",

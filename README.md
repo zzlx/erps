@@ -1,7 +1,7 @@
-ERP服务系统
-===========
+ERPs
+======
 
-ERPs(ERP Service System), 集ERP、OA、CRM、HR等功能于一体的综合业务服务平台。
+[ERPs](./docs/manual/README.md),ERP service system.
 
 # 使用说明
 
