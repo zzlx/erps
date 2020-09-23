@@ -17,12 +17,13 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import './processSettings.mjs'; // 载入进程管理模块
-import app from './routes/main.mjs';
-import config from '../src/config/settings.mjs';
+import streamHandler from './routes/main.mjs';
+import settings from '../src/config/settings.mjs';
 
+const debug = util.debuglog('debug:http2d.mjs');
 const __filename = import.meta.url.substr(7);
-const debug = util.debuglog(`debug:${path.basename(__filename)}`);
+
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 process.title = `${path.basename(__filename, path.extname(__filename))}`;
 
 const server = http2.createSecureServer({
@@ -42,30 +43,26 @@ const server = http2.createSecureServer({
 
 server.on('listening', function () {
   // listening event 
-  console.log('Server is running in %s mode. %o', process.env.NODE_ENV, this.address());
+  console.log('The %s Server is running on %o.', process.env.NODE_ENV, this.address());
 });
 
 server.on('error', function(err) {
   if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${err.port} is used, try again later.`);
   }
 
   debug(err);
 });
 
-const cb = app.callback();
-let counter = 0;
-server.on('stream', (...arg) => {
-  debug('stream count: ', ++counter);
-  cb(...arg);
+server.on('close', function () {
+  debug(this);
 });
-server.on('listening', function () {
-  // after the server started successfully, record pid to pidfile.
-  // recordPid().catch((err) => debug(err));
-});
+
+server.on('stream', streamHandler);
 
 server.listen({
   ipv6Only: false, // 是否仅开启IPV6
-  host: config.system.host,
-  port: config.system.port,
+  host: settings.system.host,
+  port: settings.system.port,
   exclusive: false, // false 可接受进程共享端口, 支持集群服务器配置
 });

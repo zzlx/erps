@@ -161,12 +161,17 @@ export default class Application extends EventEmitter {
       ctx.body = ctx.message;
     }
 
-    if (!ctx.headerSent) ctx.stream.respond(ctx.response.headers);
-
-    // Cautions
-    if (!ctx.writable) return ctx.stream.end();;
+    if (!ctx.headersSent) ctx.stream.respond(ctx.response.headers);
+    if (!ctx.writable) return ctx.stream.end();
     if (Buffer.isBuffer(ctx.body)) return ctx.stream.end(ctx.body);
     if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
-    if (ctx.body instanceof Stream) return ctx.body.pipe(ctx.stream);
+
+    if (ctx.body instanceof Stream) {
+      Stream.pipeline(
+        ctx.body, 
+        ctx.stream, 
+        err => { if (err) console.log(err); }
+      );
+    }
   }
 }

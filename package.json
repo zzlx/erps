@@ -6,6 +6,7 @@
   "license": "MIT",
   "homepage": ".",
 	"scripts": {
+		"devel": "./bin/watcher.mjs --command='./bin/erps.sh' --args='--restart' --paths=bin,server,src",
 		"help": "./bin/erps.sh --help",
 		"start": "./bin/erps.sh --start",
 		"restart": "./bin/erps.sh --restart",

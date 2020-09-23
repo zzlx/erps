@@ -3,13 +3,52 @@ ERP服务系统
 
 ERPs(ERP Service System), 集ERP、OA、CRM、HR等功能于一体的综合业务服务平台。
 
-# 系统初始化
+# 使用说明
+
+## 系统环境准备
+
+* 使用nvm工具安装Node.js
+
+```
+nvm install 14.10.0
+```
+
+* 下载系统软件
+
+```
+git clone --depth 1 -b master https://github.com/zzlx/erps.git
+```
+
+* 安装系统依赖
 
 ```
 npm install
 ```
 
-# 管理服务
+## 目录简介
+
+* bin
+可执行脚本
+
+* docs
+系统文档
+
+* public
+前端资源及代码
+
+* server
+后端资源及代码
+
+* src
+源码库
+
+## 开始使用
+
+* 启动开发环境
+
+```
+npm run devel
+```
 
 * 启动服务
 

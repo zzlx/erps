@@ -9,26 +9,21 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import config from '../src/config/settings.mjs';
 
-const debug = util.debuglog('debug:processSettings.mjs');
-
-process.nextTick(() => writePidFile());
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+const debug = util.debuglog('debug:process.mjs');
 
 // Task: caught exceptions
 // 被此事件捕获的exception,需要进行妥善处理
 // 不应出现未经管理的exception
 process.on('uncaughtException', (err, origin) => {
-	debug('Exception: %o', err);
-	debug('Origin exception: %o', origin);
+  console.error('Exception(origin: %o): %o', origin, err);
 });
 
 // Task: caught rejections
 // 被此事件捕获的rejection,需要进行妥善处理
 // 系统不应出现未经管理的rejection
 process.on('unhandledRejection', (reason, promise) => {
-	debug('unhandledRejection: %o', reason);
+  console.error('unhandledRejection: %o', reason);
 });
 
 // Task: signal events
@@ -51,7 +46,7 @@ process.on('SIGINT', function (code) {
 
 // 被重定向时触发进程信号
 process.on('SIGPIPE', (code) => {
-	debug('Received SIGPIPE');
+  debug('Received SIGPIPE');
 })
 
 // Set beforeExit event handler
@@ -61,29 +56,5 @@ process.on('beforeExit', (code) => {
 
 // Set exit event handler
 process.on('exit', (code) => { 
-  deletePidFile();
   debug(`${process.title}(PID:${process.pid}) is exit.`);
 });
-
-/**
- * Utility functions
- *
- */
-
-function writePidFile () {
-  const pidFile = path.join(config.paths.HOME, `${process.title}.pid`);
-
-  return fs.promises.writeFile(pidFile, String(process.pid), 'utf8').catch(err => { 
-    debug('write pid file error: ', err); 
-  });
-}
-
-function deletePidFile () {
-  const pidFile = path.join(config.paths.HOME, `${process.title}.pid`);
-  // 定义删除pidFile函数
-  fs.promises.unlink(pidFile).then(() => {
-    debug(`delete ${pidFile} success.`);
-  }).catch((err) => {
-    debug(`delete ${pidFile} failure. reason:`, err);
-  }); 
-}

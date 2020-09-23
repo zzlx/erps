@@ -19,7 +19,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import { assert } from '../../src/utils/index.mjs';
+import { assert } from '../utils/index.mjs';
 import paths from './paths.mjs';
 import system from './system.mjs';
 
@@ -27,7 +27,9 @@ export default new Proxy({}, {
   get: function (target, property, receiver) {
     if (property === 'paths') return paths;
     if (property === 'system') return system;
-    if (property === 'env') return process.env.NODE_ENV || 'production';
+    if (property === 'env') return process.env.NODE_ENV;
+    if (property === 'writePidFile') return writePidFile;
+    if (property === 'deletePidFile') return deletePidFile;
     if (property === 'saveConfig') return () => {};
     if (property === 'readConfig') return () => {};
     if (property === 'readyPaths') return readyPaths;
@@ -47,6 +49,25 @@ export default new Proxy({}, {
 		return true;
 	},
 });
+
+/**
+ *
+ *
+ */
+
+function deletePidFile () {
+  const pidFile = path.join(paths.HOME, `${process.title}.pid`);
+  return fs.promises.unlink(pidFile);
+}
+
+/**
+ *
+ */
+
+function writePidFile () {
+  const pidFile = path.join(paths.HOME, `${process.title}.pid`);
+  return fs.promises.writeFile(pidFile, String(process.pid));
+}
 
 /**
  * read config file

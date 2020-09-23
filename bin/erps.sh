@@ -1069,19 +1069,14 @@ _parse_argv() {
 		    _DEBUG='true'
 				;;
       --stop )
-        node $_ROOT/server/erpsd.mjs --stop
+        $_BIN/starter.mjs --stop
         ;;
       --start )
-        node $_ROOT/server/erpsd.mjs --start &
+        $_BIN/starter.mjs --start
         ;;
       --restart )
-        node $_ROOT/server/erpsd.mjs --restart
+        $_BIN/starter.mjs --restart
         ;;
-			--watcher )
-        $_BIN/watcher.mjs --command=$_BIN/starter.mjs --args='--restart' \
-          --paths=${_ROOT}/src,${_ROOT}/server
-				break;
-				;;
       --setup )
 				_setup
         ;;

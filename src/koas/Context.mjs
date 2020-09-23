@@ -9,6 +9,7 @@
 import http from 'http';
 import http2 from 'http2';
 import net from 'net';
+import Stream from 'stream';
 import util from 'util';
 import zlib from 'zlib';
 
@@ -149,8 +150,7 @@ export default class Context {
    */
 
   get httpVersion () {
-    return '2';
-    //return this.stream.session.alpnProtocol === 'h2' ? '2' : '1';
+    return this.stream.session.alpnProtocol === 'h2' ? '2' : '1';
   }
 
   /**
@@ -887,15 +887,10 @@ export default class Context {
     }
 
     // stream
-    if ('function' === typeof val.pipe) {
-
-      const handler = err => this.onerror(err);
-      if (!~val.listeners('error').indexOf(handler)) {
-        val.on('error', handler);
-      }
-
+    if (val instanceof Stream) {
+      const handler = err => this.throw(err);
+      if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
       if (null !== original && original != val) this.remove('Content-Length');
-
       if (setType) this.type = 'bin';
       return;
     }
