@@ -888,7 +888,7 @@ export default class Context {
 
     // stream
     if (val instanceof Stream) {
-      const handler = err => this.throw(err);
+      const handler = error => debug(error);
       if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
       if (null !== original && original != val) this.remove('Content-Length');
       if (setType) this.type = 'bin';
@@ -933,6 +933,8 @@ export default class Context {
   }
 }
 
+
+
 /**
  * compress content
  *
@@ -945,29 +947,29 @@ Context.prototype.compress  = function (value) {
 
 	// less than size
   const size = this.app.opts.compressThreshold * 1024;
+
 	if (this.length == null || this.length <= size) {
     return value;
   }
 
 	const encoding = this.get('accept-encoding');
+	this.set('vary', 'accept-encoding');
 
 	if (/\bbr\b/.test(encoding)) {
 		this.set('content-encoding', 'br');
-		this.set('vary', 'accept-encoding');
 		retval = zlib.brotliCompressSync(value);
     //retval = zlib.createBrotliCompress();
 	} else if (/\bdeflate\b/.test(encoding)) {
 		this.set('content-encoding', 'deflate');
-	  this.set('vary', 'accept-encoding');
 		retval = zlib.deflateCompressSync(value);
     //retval = stream.pipline(value, zlib.createDeflate())
 	} else if (/\bgzip\b/.test(encoding)) {
 		this.set('content-encoding', 'gzip');
-		this.set('vary', 'accept-encoding');
 		retval = zlib.gzipSync(value);
     //retval = stream.pipline(value, zlib.createGzip())
   }
 
   this.length = Buffer.byteLength(retval); // 重新计算内容大小
+
   return retval;
 } // end of comporess function

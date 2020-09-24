@@ -18,7 +18,7 @@ import serverRender from '../../src/koas/middlewares/serverRender.mjs';
 import Router from '../../src/koas/Router.mjs';
 
 import settings from '../../src/config/settings.mjs';
-import { date } from '../../src/utils/index.mjs';
+import { date } from '../../src/utils.mjs';
 import readDir from '../../src/utils/readDir.mjs';
 
 import tasks from '../../server/tasks.mjs';
@@ -29,7 +29,7 @@ const paths = settings.paths;
 
 const graphql = new Router({});
 
-graphql.use(dba(settings));
+//graphql.use(dba(settings));
 
 graphql.all('graphql', '/graphql', async (ctx, next) => {
   //ctx.body = await ctx.getRawBody();
@@ -44,7 +44,7 @@ const Index = new Router();
 
 Index.use('/api', graphql.routes(), graphql.allowedMethods());
 
-Index.get('/system/log', (ctx, next) => {
+Index.get('/logger', (ctx, next) => {
   ctx.type = 'text';
   const logFile = path.join(paths.HOME, 'log', date.format('yyyymmdd') + '.log');
   ctx.body = fs.createReadStream(logFile);
@@ -78,7 +78,6 @@ Index.get('/*', async (ctx, next) => {
   if (ctx.app.env === 'development') {
     if (ctx.path === '/styles/main.css') {
       const scssFiles = readDir(path.join(paths.PUBLIC, 'styles', 'scss')); 
-      debug(scssFiles);
       const cssStats = fs.lstatSync(path.join(paths.PUBLIC, 'styles', 'main.css'));
 
       for (let file of scssFiles) {

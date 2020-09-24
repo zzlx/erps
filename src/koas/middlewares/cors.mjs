@@ -16,9 +16,6 @@
  * *****************************************************************************
  */
 
-import util from 'util';
-const debug = util.debuglog('debug:corsmiddleware');
-
 export default function (options) {
 
   options = options || {};

@@ -1,162 +1,127 @@
 #!/usr/bin/env node
 /**
  * *****************************************************************************
- * 
- * 脚本管理程序
  *
+ * 守护进程启动器(Daemon Starter)
+ * 
+ * ## 功能
+ *
+ * * 监控源码目录,有变动时触发change事件重启服务
+ * * 监控命令进程,退出时进行重启 
+ * * 记录命令进程启动、退出情况
+ * * ...
+ *
+ * ## 使用方法:
+ *
+ * ```
+ * watcher.mjs --paths=server --command=starter.mjs --args='--restart'
+ * ```
  * *****************************************************************************
  */
 
-import cluster from 'cluster';
 import cp from 'child_process';
-import os from 'os';
-import path from 'path';
+import crypto from 'crypto';
+import EventEmitter from 'events'; 
+import fs from 'fs';
 
-import { assert, argvParser, } from '../src/utils/index.mjs';
-import config from '../src/config/settings.mjs';
+import { assert, argvParser, console } from '../src/utils.mjs';
+import readDir from '../src/utils/readDir.mjs';
 
-const paths = config.paths;
-let httpd = null;
+const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
+const paramMap = argvParser(ARGVS);
 
-// Task_1: 检测系统平台类型
-// 系统服务依赖于类unix系统环节, 在非unix环境中无法正常提供服务
-assert(getOSPlatform() === 'unix-like', `Run in unix-like platform.`);
-
-// Task_2: 执行程序
-process.nextTick(() => executer()); 
-
-/**
- * Utility functions 
- *
- */
-
-function executer () {
-  // Task: Parse argvs
-  const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
-  const paramMap = argvParser(ARGVS);
-
-  // 处理环境变量配置 
-  for (let param of paramMap.keys()) { 
-    switch(param) { 
-      case 'env': 
-        config.env = paramMap.get('env');
-        paramMap.delete(param); // delete param key
-        continue;
-      case 'debug':
-        process.env.NODE_DEBUG = 'debug:*';
-        paramMap.delete(param); // delete param key
-        continue;
-      //default:
-    }
-  }
-
-  if (paramMap.size == 0) console.log('There is nothing to do./@todo: Show help message.');
-
-  // execute tasks
-  for (let param of paramMap.keys()) {
-    switch(param) {
-      case 'help':
-        //showHelp();
-        paramMap.delete(param); // delete param key
-        break;
-      case 'start':
-        paramMap.delete(param); // delete param key
-        startHttpd();
-        break;
-      case 'stop':
-        paramMap.delete(param); // delete param key
-        stopHttpd();
-        break;
-      case 'restart':
-        paramMap.delete(param); // delete param key
-        restartHttpd();
-        break;
-    }
-
-    if (paramMap.size > 0) {
-      console.log(`The param you provid is not supported.`);
-    }
-  }
+if (paramMap.has('devel')) {
+  process.env.NODE_ENV = 'development'; 
+  process.env.NODE_DEBUG = 'debug:*';
 }
 
-function startHttpd () {
-  const args = [ path.join(paths.SERVER, 'http2d.mjs') ];
-  const options = {
-    detached: process.env.NODE_ENV === 'production' ? true : false,
-    stdio: [0, 1, 2],
-  };
+const command = paramMap.get('command');
+assert(command, '请提供要执行的命令!');
 
-  httpd = cp.spawn('node', args, options);
-}
+const paths = paramMap.get('paths').split(',');
+assert(paths.length, '请提供要监测的目录!');
 
+const args = paramMap.get('args').split(' ');
+let cmd = null;
+let lastPid = null;
 
-function stopHttpd () {
-  let pid = null;
-  if (httpd !== null) pid = httpd.pid;
-  else pid = getPidByPort(config.system.port);
+process.nextTick(() => new Watcher(...paths, () => {
+  cmd = cp.spawn(command, args, { stdio: [0, 1, 2], detached: false });
+  console.clear();
+  console.log(`启动进程(PID:${cmd.pid}) ${lastPid ? `进程(PID:${lastPid})已退出` : ''}`);
+  lastPid = cmd.pid;
+})); 
 
-  if (pid) cp.execSync(`kill -9 ${pid}`);
-}
+class Watcher extends EventEmitter {
+  constructor() {
+    super();
+    let callback = () => {};
+    this.paths = Array.prototype.slice.call(arguments);
 
-function restartHttpd () {
-  stopHttpd();
-  startHttpd();
-}
-
-function useCluster () {
-  const numCPUs = os.cpus().length;
-
-  if (cluster.isMaster) {
-    console.log(`Master ${process.pid} is running`);
-
-    // Fork workers.
-    // 使用一半cpu执行任务
-    for (let i = 0; i < Math.round(numCPUs/2); i++) {
-      cluster.fork();
+    if (typeof(this.paths[this.paths.length - 1]) === 'function') {
+      callback = this.paths.pop();
     }
 
-    cluster.on('exit', (worker, code, signal) => {
-      console.log(`worker ${worker.process.pid} died`);
+    this.db = new Map();
+
+    // 提示监测的目录列表
+    console.info('Watch paths: ', this.paths);
+
+    callback(); // 先执行一次
+
+    this.on('change', (file) => {
+      if (this.timeout && this.timeout._destroyed == null) {
+        clearTimeout(this.timeout); 
+      }
+
+      this.timeout = setTimeout(() => callback(), 2500); // 2.5秒内再次出现变动则取消上次
     });
 
-  } else {
+    setInterval(() => this.detect(), 3000); // 每隔3秒检测一次目录变动
+  }
 
-    console.log(`Worker ${process.pid} started`);
+  detect () {
+    const files = readDir(this.paths);
+
+    for (let file of files) {
+      if (!fs.existsSync(file)) return;
+
+      const content = fs.readFileSync(file, 'utf8');
+      const sha1 = crypto.createHash('sha1').update(content).digest('hex');
+
+      if (this.db.has(file) && this.db.get(file) !== sha1) {
+        this.emit('change', file);
+        this.db.set(file, sha1); // 存储改动后的哈希值
+        break;
+      }
+
+      this.db.set(file, sha1); // 存储文件哈希值
+    }
   }
 }
 
-function getOSPlatform () {
-  let platform = null;
-
-  switch (os.platform()) {
-    case 'aix': 
-    case 'darwin': 
-    case 'freebsd': 
-    case 'linux': 
-    case 'openbsd': 
-    case 'sunos': 
-      platform = 'unix-like';
-      break;
-    case 'win32': 
-    case 'win64': 
-      platform = 'win';
-      break;
-    default:
-      platform = 'unknown';
-  }
-
-  return platform;
-}
 
 /**
- * 根据port查询服务进程ID
  *
- * @param {string|number}
- * @return {string} 
+ *
+ * @param: {string} question
+ * @param: {bool} password 是否显示*号代替输入字符 
+ *
  */
 
-function getPidByPort (port) {
-  return cp.execSync(`lsof -i:${port} | grep 'LISTEN' \
-    | awk \'NR==1{print $2}\'`
-  ).toString('utf8');
+function readFromStdin () {
+  const question = arguments[0];
+
+  process.stdout.write(String(question));
+
+  return new Promise((resolve, reject) => {
+    if (process.stdin.isPaused()) process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    process.stdin.on('data', (chunk) => {
+      const input = String(chunk).trim();
+      resolve(input);
+      process.stdin.pause();
+    });
+  });
 }

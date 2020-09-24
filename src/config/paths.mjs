@@ -24,6 +24,13 @@ export default new Proxy(paths, {
   get: function (target, property, receiver) {
     if (property === 'ROOT') return __ROOT;
     if (property === 'HOME') return path.join(os.homedir(), `.${packageJSON.name}`);
+    if (property === 'TMP') {
+      return path.join(os.homedir(), `.${packageJSON.name}`, 'tmp');
+    }
+    if (property === 'LOG') {
+      return path.join(os.homedir(), `.${packageJSON.name}`, 'log');
+    }
+
 
     return Reflect.get(target, property, receiver);
   },

@@ -12,12 +12,8 @@
  * *****************************************************************************
  */
 
-import util from 'util';
-
-import { assert } from '../../utils/index.mjs';
 import MongoDBA from '../../database/mongodb.mjs';
 
-const debug = util.debuglog('debug:middleware.mongodb');
 const MongoClient = Symbol('mongoClient');
 
 export default function (opts = null) {

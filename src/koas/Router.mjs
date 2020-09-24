@@ -10,7 +10,7 @@
  */
 
 import HttpError from './HttpError.mjs';
-import { compile, parse, pathToRegexp, } from '../utils/index.mjs';
+import { compile, parse, pathToRegexp, } from '../utils.mjs';
 
 export default class Router {
 

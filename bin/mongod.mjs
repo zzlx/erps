@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * *****************************************************************************
  *
@@ -10,10 +11,11 @@
 
 import cp from 'child_process';
 import util from 'util';
-const debug = util.debuglog('debug:mongod');
+import settings from '../src/config/settings.mjs';
 
+const debug = util.debuglog('debug:mongod');
 const Args = [
-  `--dbpath=${config.paths.dataPath}`
+  `--dbpath=${settings.paths.dataPath}`
 ].filter(Boolean).concat(argvs);
 
 cp.spawn('mongod', Args, {

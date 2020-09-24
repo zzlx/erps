@@ -12,19 +12,16 @@
  * *****************************************************************************
  */
 
-import util from 'util';
-import { assert, date } from '../../utils/index.mjs';
-
-const debug = util.debuglog('node:log-middlewar');
-
-export default (callback = console.log ) => {
-  assert(typeof callback === 'function', `${callback} must be a function.`);
+export default function log (callback = console.log ) {
+  if (typeof callback !== 'function') {
+    throw new TypeError(`callback must be a function.`);
+  }
 
   return async function logMiddleware (ctx, next) {
     await next();
 
     const log = {
-      "datetime": date.toLocaleISOString(),
+      "datetime": new Date().toISOString(),
       "user-agent": ctx.get("user-agent"),
       "c-ip": ctx.socket.remoteAddress,
       "c-port": ctx.socket.remotePort,
@@ -35,10 +32,8 @@ export default (callback = console.log ) => {
       "s-ip": ctx.socket.localAddress,
       "s-port": ctx.socket.localPort,
       "s-pid": process.pid,
-      "errors": ctx.state.errors ? ctx.state.errors.join(',') : '',
     };
 
-    debug(log);
     callback(log);
   } 
 }

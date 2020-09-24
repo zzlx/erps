@@ -16,10 +16,7 @@
 
 import ReactDOMServer from 'react-dom/server.js'
 import path from 'path';
-import util from 'util';
 import HTMLRender from '../../utils/HTMLRender.mjs'; 
-
-const debug = util.debuglog('debug:server-render-middleware');
 
 export default (clientRoutes) => {
 

@@ -92,9 +92,9 @@ export default class Application extends EventEmitter {
       ctx.state.errors = [];
       ctx.stream = stream;
 
-      return fn(ctx).then(() => this.respond(ctx)).catch(err => {
-        this.emit('error', err);
-      });
+      return fn(ctx)
+        .then(() => respond(ctx))
+        .catch(err => { ctx.status = 500; ctx.body = err.message });
     }
   }
 
@@ -151,27 +151,37 @@ export default class Application extends EventEmitter {
       }
     }
   }
+}
 
-  respond (ctx) {
-    if (false === ctx.respond) return; // bypass response
+function respond (ctx) {
+  if (false === ctx.respond) return; // bypass response
 
-    // 响应空消息
-    if (null == ctx.body) {
-      ctx.status = ctx.status || 404;
-      ctx.body = ctx.message;
-    }
+  // 响应空消息
+  if (null == ctx.body) {
+    ctx.status = ctx.status || 404;
+    ctx.body = ctx.message;
+  }
 
-    if (!ctx.headersSent) ctx.stream.respond(ctx.response.headers);
-    if (!ctx.writable) return ctx.stream.end();
-    if (Buffer.isBuffer(ctx.body)) return ctx.stream.end(ctx.body);
-    if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
+  if (!ctx.headersSent) {
+    const headers = ctx.response.headers;
+    const options = { 
+      endStream: [204, 205, 304].includes(ctx.status) ? true : false, 
+      waitForTrailers: false 
+    };
 
-    if (ctx.body instanceof Stream) {
-      Stream.pipeline(
-        ctx.body, 
-        ctx.stream, 
-        err => { if (err) console.log(err); }
-      );
-    }
+    ctx.stream.respond(headers, options);
+  }
+
+  if (!ctx.writable) return ctx.stream.end();
+
+  if (Buffer.isBuffer(ctx.body)) return ctx.stream.end(ctx.body);
+  if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
+
+  if (ctx.body instanceof Stream) {
+    Stream.pipeline(
+      ctx.body, 
+      ctx.stream, 
+      err => { if (err) console.log(err); }
+    );
   }
 }

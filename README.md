@@ -1,9 +1,7 @@
-ERPs
-======
+[ERPs](./docs/manual/README.md)
+===============================
 
-[ERPs](./docs/manual/README.md),ERP service system.
-
-# 使用说明
+A ERP service system.
 
 ## 系统环境准备
 

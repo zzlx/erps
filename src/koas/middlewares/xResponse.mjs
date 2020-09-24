@@ -14,9 +14,6 @@
  */
 
 import os from 'os';
-import util from 'util';
-
-const debug = util.debuglog('debug:x-response-middleware');
 
 export default function xResponse(opts = {}) {
 	return async function xResponseMiddleware (ctx, next) {

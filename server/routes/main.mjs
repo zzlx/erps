@@ -16,10 +16,11 @@ import cookies from '../../src/koas/middlewares/cookies.mjs';
 import error from '../../src/koas/middlewares/error.mjs';
 import log from '../../src/koas/middlewares/log.mjs';
 import xResponse from '../../src/koas/middlewares/xResponse.mjs';
+import stream from '../../src/koas/middlewares/stream.mjs';
 
 import config from '../../src/config/settings.mjs';
 import WriteStream from '../../src/utils/WriteStream.mjs';
-import { date } from '../../src/utils/index.mjs'; // @todo: 
+import { date } from '../../src/utils.mjs'; // @todo: 
 
 import router from './routes.mjs'; // 路由配置
 

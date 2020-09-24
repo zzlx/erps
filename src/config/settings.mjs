@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Configurations
+ * Settings
  * ==============
  *
  * 系统配置: 
@@ -19,9 +19,13 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import { assert } from '../utils/index.mjs';
 import paths from './paths.mjs';
 import system from './system.mjs';
+
+readyPaths(
+  paths.TMP,
+  paths.HOME
+);
 
 export default new Proxy({}, {
   get: function (target, property, receiver) {
@@ -32,6 +36,12 @@ export default new Proxy({}, {
     if (property === 'deletePidFile') return deletePidFile;
     if (property === 'saveConfig') return () => {};
     if (property === 'readConfig') return () => {};
+    if (property === 'cert') {
+      return fs.readFileSync(`/etc/ssl/${os.hostname()}-cert.pem`);
+    }
+    if (property === 'privateKey') {
+      return fs.readFileSync(`/etc/ssl/${os.hostname()}-key.pem`);
+    }
     if (property === 'readyPaths') return readyPaths;
     if (property === 'toString' || property === 'toJSON') {
       return () => JSON.stringify(target);
@@ -106,7 +116,9 @@ function readyPaths () {
   const promises = [];
 
   for (let path of paths) {
-    assert(typeof path === 'string', 'paths must be string.');
+    if (typeof path !== 'string') {
+      throw new TypeError('paths must be string.');
+    }
 
     promises.push(
       fs.mkdir(path, { recursive: true }, err => {

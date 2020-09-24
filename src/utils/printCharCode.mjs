@@ -15,4 +15,4 @@ export default function printCharCode(code) {
   );
 }
 
-console.log(printCharCode(29579)); // test
+//console.log(printCharCode(29579)); // test

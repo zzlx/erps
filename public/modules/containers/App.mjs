@@ -24,11 +24,11 @@
  * *****************************************************************************
  */
 
-import Provider from './components/Provider.mjs';
-import Redirect from './components/Redirect.mjs';
-import Switch from './components/Switch.mjs';
-import Route from './components/Route.mjs';
-import Spinner from './components/Spinner.mjs';
+import Provider from '../components/Provider.mjs';
+import Redirect from '../components/Redirect.mjs';
+import Switch from '../components/Switch.mjs';
+import Route from '../components/Route.mjs';
+import Spinner from '../components/Spinner.mjs';
 
 export default function App (store) {
   const routes = store.getState('routes');
@@ -36,7 +36,7 @@ export default function App (store) {
   let i = 0;
 
   for (let route of routes) {
-    const component = React.lazy(() => import(`./containers/${route.view}.mjs`));
+    const component = React.lazy(() => import(`./${route.view}.mjs`));
 
     if (route.from) {
       routeArray.push(React.createElement(Redirect, { key: i++, ...route, component }));

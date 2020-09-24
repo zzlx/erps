@@ -10,10 +10,6 @@
  * *****************************************************************************
  */
 
-import util from 'util';
-
-const debug = util.debuglog('debug:middleware.vhost');
-
 export default (opts) => async function vhost (ctx, next) {
   if('string' === typeof ctx.hostname) {
     return ctx.body = 'Hostname: ' + ctx.hostname + ' 未被正确配置';

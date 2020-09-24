@@ -9,10 +9,8 @@
  * *****************************************************************************
  */
 
-import util from 'util';
 import crypto from 'crypto';
 
-const debug = util.debuglog('debug:cookie.middleware');
 const COOKIES = Symbol('middleware#cookies');
 
 export default (opts) => function cookieMiddleware (ctx, next) {

@@ -24,10 +24,7 @@ export default new Proxy(console, {
 		}
 
 		if (property === 'progressBar') receiver.progressBar = progressBar;
-
-		if (property === 'clear') {
-			return () => process.stdout.write(CLEAR_PAGE);
-		}
+		if (property === 'clearLine') return () => process.stdout.write(CLEAR_LINE);
 
 		return Reflect.get(target, property, receiver);
 	}
