@@ -1,12 +1,12 @@
 /**
+ * *****************************************************************************
+ *
  * Inspect
  *
  * 用于在error messsage中打印value
+ *
+ * *****************************************************************************
  */
-
-const nodejsCustomInspectSymbol = typeof Symbol === 'function' 
-  ? Symbol.for('nodejs.util.inspect.custom') 
-  : undefined;
 
 export default function inspect(value) {
   switch (typeof(value)) {
@@ -43,6 +43,10 @@ export default function inspect(value) {
 }
 
 function getCustomFn(object) {
+  const nodejsCustomInspectSymbol = typeof Symbol === 'function' 
+    ? Symbol.for('nodejs.util.inspect.custom') 
+    : undefined;
+
   const customInspectFn = object[String(nodejsCustomInspectSymbol)];
   if (typeof customInspectFn === 'function') return customInspectFn;
   if (typeof object.inspect === 'function') return object.inspect;

@@ -47,7 +47,7 @@ let lastPid = null;
 process.nextTick(() => new Watcher(...paths, () => {
   cmd = cp.spawn(command, args, { stdio: [0, 1, 2], detached: false });
   console.clear();
-  console.log(`启动进程(PID:${cmd.pid}) ${lastPid ? `进程(PID:${lastPid})已退出` : ''}`);
+  console.log(`${lastPid ? `进程(PID:${lastPid})已退出 ` : ''}进程(PID:${cmd.pid})已启动`);
   lastPid = cmd.pid;
 })); 
 

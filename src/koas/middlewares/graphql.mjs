@@ -13,12 +13,13 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { graphql, buildASTSchema, parse, Source } from '../graphql/index.mjs';
-import getResolvers from '../utils/getModulesFromPath.mjs';
-import { APP_PATH } from '../config.mjs';
+import { graphql, buildASTSchema, parse, Source } from '../../graphql/index.mjs';
+import getResolvers from '../../utils/getModulesFromPath.mjs';
+import settings from '../../config/settings.mjs';
 
-const schemaPath = path.join(APP_PATH, 'src', 'schema');
-const resolversPath = path.join(APP_PATH, 'src', 'resolvers');
+const paths = settings.paths;
+const schemaPath = path.join(paths.SERVER, 'schema');
+const resolversPath = path.join(paths.SERVER, 'resolvers');
 let schema = null;
 let fieldResolver = null;
 

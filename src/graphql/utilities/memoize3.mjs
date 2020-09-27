@@ -1,15 +1,11 @@
 /**
+ *
  * Memoizes the provided three-argument function.
- *
- *
- *
- *
- *
  *
  */
 
 export default function memoize3(fn) {
-  let cache0;
+  let cache0 = null;
 
   return function memoized(a1, a2, a3) {
     if (!cache0) {
@@ -17,17 +13,14 @@ export default function memoize3(fn) {
     }
 
     let cache1 = cache0.get(a1);
-    let cache2;
+    let cache2 = null;
 
     if (cache1) {
       cache2 = cache1.get(a2);
 
       if (cache2) {
         const cachedValue = cache2.get(a3);
-
-        if (cachedValue !== undefined) {
-          return cachedValue;
-        }
+        if (cachedValue !== undefined) return cachedValue;
       }
     } else {
       cache1 = new WeakMap();

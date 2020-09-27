@@ -6,6 +6,8 @@
  * *****************************************************************************
  */
 
+import assert from './assert.mjs';
+
 export default new Proxy(Date, {
 	apply: function (target, thisArg, argumentsList) {
     return target(...argumentsList);
@@ -41,23 +43,27 @@ const MONTHS = [
 /**
  * 格式化日期字符串
  *
- * @param {date} date
+ * @param {object|string} date
+ * @param {string} fmt
  * @return {string}
+ *
  */
 
-function format (date, fmt) {
-  if (fmt == null) { fmt = date; date = null; }
-  const d = date ? new Date(date) : new Date(); 
+function format () {
+  const date = arguments.length === 2 ? new Date(arguments[0]) : new Date();
+  let fmt = arguments.length === 2 ? arguments[1] : arguments[0];
+
+  assert(typeof fmt === 'string', 'fmt must be a string.')
 
   const o = {
-    'y+': d.getFullYear(),
-    'm+': d.getMonth() + 1,
-    'd+': d.getDate(),
-    'H+': d.getHours(),
-    'M+': d.getMinutes(),
-    's+': d.getSeconds(),
-    'q+': Math.floor((d.getMonth() + 3) / 3),
-    S: d.getMilliseconds()  //毫秒
+    'y+': date.getFullYear(),
+    'm+': date.getMonth() + 1,
+    'd+': date.getDate(),
+    'H+': date.getHours(),
+    'M+': date.getMinutes(),
+    's+': date.getSeconds(),
+    'q+': Math.floor((date.getMonth() + 3) / 3),
+    S: date.getMilliseconds() //毫秒
   };
 
   for (let k of Object.keys(o)) {

@@ -19,14 +19,13 @@ export default function readDir (dir) {
   }
 
   if (typeof dir === 'string' && fs.existsSync(dir)) {
+
     const files = fs.readdirSync(dir, {withFileTypes: true});
 
     for (let file of files) {
       const filePath = path.join(dir, file.name);
       if (file.isFile()) file_lists.push(filePath);
-      if (file.isDirectory()) {
-        file_lists = file_lists.concat(readDir(filePath))
-      }
+      if (file.isDirectory()) file_lists = file_lists.concat(readDir(filePath));
     }
   }
 

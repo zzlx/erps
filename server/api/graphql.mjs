@@ -8,7 +8,6 @@
  * *****************************************************************************
  */
 
-export default function graphqlAPI () {
-  const ctx = this;
-
+export default function graphqlAPI (ctx) {
+  ctx.body = 'graphql';
 }

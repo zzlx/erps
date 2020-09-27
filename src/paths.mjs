@@ -14,8 +14,9 @@ import path from 'path';
 // Locate the root path of app source
 const __filename = import.meta.url.substr(7);
 const __dirname = path.dirname(__filename);
-const __ROOT = path.dirname(path.dirname(__dirname));
+const __ROOT = path.dirname(__dirname);
 const paths = readPath(__ROOT);
+
 const packageJSON = paths.PACKAGE 
   ? JSON.parse(fs.readFileSync(paths.PACKAGE))
   : {};
@@ -23,14 +24,7 @@ const packageJSON = paths.PACKAGE
 export default new Proxy(paths, {
   get: function (target, property, receiver) {
     if (property === 'ROOT') return __ROOT;
-    if (property === 'HOME') return path.join(os.homedir(), `.${packageJSON.name}`);
-    if (property === 'TMP') {
-      return path.join(os.homedir(), `.${packageJSON.name}`, 'tmp');
-    }
-    if (property === 'LOG') {
-      return path.join(os.homedir(), `.${packageJSON.name}`, 'log');
-    }
-
+    if (property === 'API') return path.join(target.SERVER,'api');
 
     return Reflect.get(target, property, receiver);
   },

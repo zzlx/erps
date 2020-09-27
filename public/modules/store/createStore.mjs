@@ -24,7 +24,7 @@
  */
 
 import { types } from './actions/index.mjs';
-import value from '../utils/value.mjs';
+import is from '../utils/is.mjs';
 import getIn from '../utils/getIn.mjs';
 
 const $$observable = Symbol('observable');
@@ -180,7 +180,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
    */
 
   function dispatch(action) {
-    if (!value(action).isPlainObject) {
+    if (!is(action).plainObject) {
       throw new Error(
         'Actions must be plain objects. Use custom middleware for async actions.'
       );

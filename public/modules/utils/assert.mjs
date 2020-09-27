@@ -9,8 +9,8 @@
  * *****************************************************************************
  */
 
-export default function assert (value, message) {
-  if (!value) {
+export default function assert (condition, message) {
+  if (!condition) {
     const err = new Error(message || `Assertion failed.`);
     if (Error.captureStackTrace) Error.captureStackTrace(err, assert);
     throw err;

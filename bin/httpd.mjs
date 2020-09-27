@@ -18,16 +18,23 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import { assert, argvParser, console } from '../src/utils.mjs';
+import serviceApp from '../server/main.mjs';
 import settings from '../src/config/settings.mjs';
+import { 
+  assert, 
+  argvParser, 
+  console 
+} from '../src/utils.mjs';
 
-const __filename = import.meta.url.substr(7);
-const debug = util.debuglog('debug:httpd.mjs');
-const sessionStore = {};
 const paths = settings.paths;
+const debug = util.debuglog('debug:httpd.mjs');
+
+// 定义存储器
+const sessionStore = {};
+let httpd = null;
 let server = null;
 
-process.title = `${path.basename(__filename, path.extname(__filename))}`;
+process.title = 'erps.httpd';
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 process.on('exit', code => {
@@ -89,15 +96,15 @@ function executer () {
         break;
       case 'start':
         paramMap.delete(param); // delete param key
-        startHttpd();
+        start();
         break;
       case 'stop':
         paramMap.delete(param); // delete param key
-        stopHttpd();
+        stop();
         break;
       case 'restart':
         paramMap.delete(param); // delete param key
-        restartHttpd();
+        restart();
         break;
     }
 
@@ -107,8 +114,25 @@ function executer () {
   }
 }
 
-function startHttpd () {
-  server = createServer();
+function start () {
+  const server = http2.createSecureServer({
+    key: settings.privateKey,
+    cert: settings.cert,
+    allowHTTP1: true,
+    //ca: [fs.readFileSync('client-cert.pem')],
+    //sigalgs: 
+    //ciphers: 
+    //clientCertEngine: 
+    //dhparam
+    //ecdhCurve
+    //privateKeyEngine
+    //passphrase: 'sample',
+    //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+    sessionTimeout: 300, // seconds
+    handshakeTimeout: 120000, // milliseconds
+  });
+
+  attachServerEvent(server);
 
   server.listen({
     ipv6Only: false, // 是否仅开启IPV6
@@ -118,18 +142,18 @@ function startHttpd () {
   });
 }
 
-
-function stopHttpd () {
+function stop () {
   let pid = null;
+  const port = settings.system.port;
   if (httpd !== null) pid = httpd.pid;
-  else pid = getPidByPort(config.system.port);
+  else pid = getPidByPort(port);
 
   if (pid) cp.execSync(`kill -9 ${pid}`);
 }
 
-function restartHttpd () {
-  stopHttpd();
-  startHttpd();
+function restart () {
+  stop();
+  start();
 }
 
 function useCluster () {
@@ -190,30 +214,6 @@ function getPidByPort (port) {
   ).toString('utf8');
 }
 
-function createServer () {
-  const server = http2.createSecureServer({
-    key: settings.privateKey,
-    cert: settings.cert,
-    allowHTTP1: true,
-    //ca: [fs.readFileSync('client-cert.pem')],
-    //sigalgs: 
-    //ciphers: 
-    //clientCertEngine: 
-    //dhparam
-    //ecdhCurve
-    //privateKeyEngine
-    //passphrase: 'sample',
-    //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-    sessionTimeout: 300, // seconds
-    handshakeTimeout: 120000, // milliseconds
-  });
-
-  attachServerEvent(server);
-
-  return server;
-}
-
-
 // attach
 function attachServerEvent (server) {
   const keylogFile = fs.createWriteStream(path.join(paths.TMP, 'ssl-keys.log'), {flags: 'a+'});
@@ -270,6 +270,8 @@ function attachServerEvent (server) {
     console.clearLine();
     console.log('The %s Server is running on %o.', process.env.NODE_ENV, this.address());
   });
+
+  const streamHandler = serviceApp.streamHandler();
 
   server.on('stream', (stream, headers, flags) => {
     debug('new stream event with flags:', flags); // flags: 37

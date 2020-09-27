@@ -26,3 +26,7 @@ yarn.lock
 *.local.json
 *.o
 *.out
+
+# directory
+config
+log

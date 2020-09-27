@@ -18,34 +18,37 @@ import ReactDOMServer from 'react-dom/server.js'
 import path from 'path';
 
 export default (opts) => {
-
   return function (ctx, next) {
+
     // 转发有扩展名的路径至下一中间件
     if (path.extname(ctx.path) !== '') return next();
 
 
     // @todo: 利用客户端路由进行匹配渲染,以优化SEO
 
-    const html = new HTMLRender(opts);
+    // template
+    const html = new HTMLTemplate(opts);
+    html.initialState = {};
 
     ctx.type = 'html';
     ctx.body = html.render();
   }
 }
 
-class HtmlRender {
+class HTMLTemplate {
   constructor(props) {
+
     this.state = Object.assign({}, {
       title: 'Untitled',
       charset: 'UTF-8',
       body: null,
-      initialState: Object.create(null),
       scriptTags: [],
       keywords: [],
       viewport: "width=device-width, initial-scale=1.0, shrink-to-fit=no",
       description: '',
       scripts: [],
       styles: [],
+      initialState: Object.create(null), // 传给页面的初始数据
     }, props);
 
     // 解析html

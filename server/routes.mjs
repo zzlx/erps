@@ -12,57 +12,40 @@ import util from 'util';
 
 import ReactDOMServer from 'react-dom/server.js';
 
-import dba from '../../src/koas/middlewares/dba.mjs';
-import statics from '../../src/koas/middlewares/statics.mjs';
-import serverRender from '../../src/koas/middlewares/serverRender.mjs';
-import Router from '../../src/koas/Router.mjs';
+import dba from '../src/koas/middlewares/dba.mjs';
+import statics from '../src/koas/middlewares/statics.mjs';
+import serverRender from '../src/koas/middlewares/serverRender.mjs';
+import Router from '../src/koas/Router.mjs';
 
-import settings from '../../src/config/settings.mjs';
-import { date } from '../../src/utils.mjs';
-import readDir from '../../src/utils/readDir.mjs';
+import settings from '../src/config/settings.mjs';
+import { date } from '../src/utils.mjs';
+import readDir from '../src/utils/readDir.mjs';
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`); 
 const paths = settings.paths;
+const index = new Router({});
+const api = new Router({});
 
-const graphql = new Router({});
+api.all('/', async (ctx, next) => {
+  const apiFile = path.join(paths.API, ctx.path.replace(/^\/api\//, '') + '.mjs');
 
-//graphql.use(dba(settings));
+  if (fs.existsSync(apiFile)) {
+    return await import(apiFile).then(m => {
+      const api = m.default;
+      api(ctx);
+    });
+  }
 
-graphql.all('graphql', '/graphql', async (ctx, next) => {
-  //ctx.body = await ctx.getRawBody();
-  //debug(ctx.params);
-  //debug('ctx._matchedRoute', ctx._matchedRoute);
-  //debug(ctx.router.url('graphql', 'tttt'));
-  ctx.body = 'graphql';
+  ctx.body = 'api';
 });
-
-// 定义主路由
-const Index = new Router();
-
-Index.use('/api', graphql.routes(), graphql.allowedMethods());
-
-Index.get('/logger', (ctx, next) => {
-  ctx.type = 'text';
-  const logFile = path.join(paths.HOME, 'log', date.format('yyyymmdd') + '.log');
-  ctx.body = fs.createReadStream(logFile);
-});
-
-Index.all('/*', serverRender({
-  styles: [ "/styles/main.css" ],
-  scripts: [
-    { src: `/statics/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/statics/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: "/modules/main.mjs", module: true, crossorigin: true },
-    { src: "/modules/fallback.js", nomodule: true},
-  ],
-}));
 
 /**
  * 当发生样式文件修改时，自动重建styles.css文件
  */
 
-Index.get('/*', async (ctx, next) => {
+index.get('/*', async (ctx, next) => {
+
   if (ctx.path === '/statics/react-dom.development.js' ||
       ctx.path === '/statics/react-dom.production.min.js') {
     if (!fs.existsSync(path.join(paths.PUBLIC, ctx.path))) {
@@ -84,12 +67,12 @@ Index.get('/*', async (ctx, next) => {
   if (ctx.app.env === 'development') {
     if (ctx.path === '/styles/main.css') {
       const scssFiles = readDir(path.join(paths.PUBLIC, 'styles', 'scss')); 
-      const cssStats = fs.lstatSync(path.join(paths.PUBLIC, 'styles', 'main.css'));
+      const cssFile = path.join(paths.PUBLIC, 'styles', 'main.css');
+      const cssStats = fs.lstatSync(cssFile);
 
       for (let file of scssFiles) {
         const stats = fs.lstatSync(file);
         if (stats.mtime > cssStats.ctime) {
-          
           // @todo: 
           break;
         }
@@ -100,6 +83,20 @@ Index.get('/*', async (ctx, next) => {
   await next();
 });
 
-Index.get('/*', statics({ root: paths.PUBLIC }));
+// 将api路由附加至index
+index.use('/api*', api.routes(), api.allowedMethods());
 
-export default Index;
+index.all('/*', serverRender({
+  styles: [ "/styles/main.css" ],
+  scripts: [
+    { src: `/statics/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+    { src: `/statics/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+    { src: "/modules/main.mjs", module: true, crossorigin: true },
+    { src: "/modules/fallback.js", nomodule: true},
+  ],
+}));
+
+// 
+index.get('/*', statics({ root: paths.PUBLIC }));
+
+export default index;

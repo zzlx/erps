@@ -8,21 +8,26 @@
  * *****************************************************************************
  */
 
-import inspect from '../../utils/inspect.mjs';
-import invariant from '../../utils/invariant.mjs';
-import isInvalid from '../../utils/isInvalid.mjs';
-import isNullish from '../../utils/isNullish.mjs';
-import isPromise from '../../utils/isPromise.mjs';
-import memoize3 from '../../utils/memoize3.mjs';
-import { forEach, isCollection } from '../../utils/iterall.mjs';
-import promiseForObject from '../../utils/promiseForObject.mjs';
-import promiseReduce from '../../utils/promiseReduce.mjs';
+import { 
+  assert, 
+  is,
+} from '../../utils.mjs';
 
+import inspect from '../../utils/inspect.mjs';
+import { forEach, isCollection } from '../../utils/iterall.mjs';
+
+import memoize3 from '../utilities/memoize3.mjs';
+import promiseForObject from '../utilities/promiseForObject.mjs';
+import promiseReduce from '../utilities/promiseReduce.mjs';
 import { GraphQLError, locatedError, } from '../error/index.mjs';
 import { getOperationRootType } from '../utilities/getOperationRootType.mjs';
 import { typeFromAST } from '../utilities/typeFromAST.mjs';
 import { Kind } from '../language/kinds.mjs';
-import { getVariableValues, getArgumentValues, getDirectiveValues } from './values.mjs';
+import { 
+  getVariableValues, 
+  getArgumentValues, 
+  getDirectiveValues 
+} from './values.mjs';
 
 import { 
   isObjectType, 
@@ -89,7 +94,7 @@ export function execute(
  */
 
 function buildResponse(exeContext, data) {
-  if (isPromise(data)) {
+  if (is(data)) {
     return data.then(resolved => buildResponse(exeContext, resolved));
   }
 
@@ -132,12 +137,12 @@ export function addPath(prev, key) {
 
 export function assertValidExecutionArguments(schema, document, rawVariableValues) { 
   // If the schema used for execution is invalid, throw an error.
-  invariant(document, 'Must provide document');
+  assert(document, 'Must provide document');
 
   assertValidSchema(schema);
 
   // Variables, if provided, must be an object.
-  invariant(
+  assert(
     !rawVariableValues || typeof(rawVariableValues) === 'object',
     'Variables must be provided as an Object where each property is a variable value. ' + 
     'Perhaps look to see if an unparsed JSON string was provided.'
@@ -222,9 +227,9 @@ export function buildExecutionContext(
     return errors;
   }
 
-  // invariant
-  invariant(operation, 'Has operation if no errors.');
-  invariant(variableValues, 'Has variables if no errors.');
+  // assert
+  assert(operation, 'Has operation if no errors.');
+  assert(variableValues, 'Has variables if no errors.');
 
   return {
     schema: schema,
@@ -265,7 +270,7 @@ function executeOperation(exeContext, operation, rootValue) {
       ? executeFieldsSerially(exeContext, type, rootValue, path, fields) 
       : executeFields(exeContext, type, rootValue, path, fields);
 
-    if (isPromise(result)) {
+    if (is(result).promise) {
       return result.then(undefined, (error) => {
         exeContext.errors.push(error);
         return Promise.resolve(null);
@@ -298,7 +303,7 @@ function executeFieldsSerially(context, parentType, rootValue, path, fields) {
 
     if (result === undefined) { return results; }
 
-    if (isPromise(result)) {
+    if (is(result).promise) {
       return result.then((resolvedResult) => {
         results[responseName] = resolvedResult;
         return results;
@@ -334,7 +339,7 @@ function executeFields(exeContext, parentType, rootValue, path, fields) {
     if (result !== undefined) {
       results[field] = result;
 
-      if (!containsPromise && isPromise(result)) {
+      if (!containsPromise && is(result).promise) {
         containsPromise = true;
       }
     }
@@ -576,7 +581,7 @@ export function resolveFieldValueOrError(
     const result = resolveFn(rootValue, args, _contextValue, info);
 
     // 处理潜在的promise result
-    return isPromise(result) ? result.then(undefined, asErrorInstance) : result;
+    return is(result).promise ? result.then(undefined, asErrorInstance) : result;
 
   } catch (error) {
     return asErrorInstance(error);
@@ -597,7 +602,7 @@ function completeValueCatchingError(context, returnType, fieldNodes, info, path,
   try {
     let completed;
 
-    if (isPromise(result)) {
+    if (is(result).promise) {
       completed = result.then(resolved => {
         return completeValue(context, returnType, fieldNodes, info, path, resolved);
       });
@@ -605,7 +610,7 @@ function completeValueCatchingError(context, returnType, fieldNodes, info, path,
       completed = completeValue(context, returnType, fieldNodes, info, path, result);
     }
 
-    if (isPromise(completed)) {
+    if (is(completed).promise) {
       // Note: we don't rely on a `catch` method, 
       // but we do expect "thenable" to take a second callback for the error case.
       return completed.then(undefined, error => {
@@ -688,7 +693,7 @@ function completeValue(context, returnType, fieldNodes, info, path, result) {
   } // If result value is null-ish (null, undefined, or NaN) then return null.
 
 
-  if (isNullish(result)) {
+  if (is(result).null) {
     return null;
   } // If field type is List, complete each item in the list with the inner type
 
@@ -742,7 +747,7 @@ function completeValue(context, returnType, fieldNodes, info, path, result) {
  */
 
 function completeListValue(context, returnType, fieldNodes, info, path, result) {
-  invariant(
+  assert(
     isCollection(result), 
     "Expected Iterable, but did not find one for field ".concat(info.parentType.name, ".").concat(info.fieldName, ".")
   );
@@ -759,7 +764,7 @@ function completeListValue(context, returnType, fieldNodes, info, path, result) 
     var fieldPath = addPath(path, index);
     var completedItem = completeValueCatchingError(context, itemType, fieldNodes, info, fieldPath, item);
 
-    if (!containsPromise && isPromise(completedItem)) {
+    if (!containsPromise && is(completedItem).promise) {
       containsPromise = true;
     }
 
@@ -774,11 +779,11 @@ function completeListValue(context, returnType, fieldNodes, info, path, result) 
  */
 
 function completeLeafValue(returnType, result) {
-  invariant(returnType.serialize, 'Missing serialize method on type.');
+  assert(returnType.serialize, 'Missing serialize method on type.');
 
   const serializedResult = returnType.serialize(result);
 
-  if (isInvalid(serializedResult)) {
+  if (is(serializedResult).invalid) {
     throw new Error(
       `Expected a value of type ${inspect(returnType)} but received: ${inspect(result)}`
     );
@@ -797,7 +802,7 @@ function completeAbstractValue(context, returnType, fieldNodes, info, path, resu
     ? returnType.resolveType(result, context.contextValue, info) 
     : defaultResolveTypeFn(result, context.contextValue, info, returnType);
 
-  if (isPromise(runtimeType)) {
+  if (is(runtimeType).promise) {
     return runtimeType.then((resolvedRuntimeType) => {
       return completeObjectValue(
         context, 
@@ -864,7 +869,7 @@ function completeObjectValue(context, returnType, fieldNodes, info, path, result
   if (returnType.isTypeOf) {
     const isTypeOf = returnType.isTypeOf(result, context.contextValue, info);
 
-    if (isPromise(isTypeOf)) {
+    if (is(isTypeOf).promise) {
       return isTypeOf.then((resolvedIsTypeOf) => {
         if (!resolvedIsTypeOf) {
           throw invalidReturnTypeError(returnType, result, fieldNodes);
@@ -952,7 +957,7 @@ function defaultResolveTypeFn(value, contextValue, info, abstractType) {
     if (type.isTypeOf) {
       const isTypeOfResult = type.isTypeOf(value, contextValue, info);
 
-      if (isPromise(isTypeOfResult)) {
+      if (is(isTypeOfResult).promise) {
         promisedIsTypeOfResults[i] = isTypeOfResult;
       } else if (isTypeOfResult) {
         return type;
