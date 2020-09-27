@@ -7,26 +7,21 @@
 // private modules
 import applyMiddleware from './applyMiddleware.mjs';
 
-import crashReporter from './middlewares/crashReporter.mjs';
-import thunk from './middlewares/thunk.mjs';
-import promise from './middlewares/promise.mjs';
-import timeoutScheduler from './middlewares/timeoutScheduler.mjs';
-import logger from './middlewares/logger.mjs';
-
 import monitorReducers from './enhancers/monitorReducers.mjs';
 import createStore from './createStore.mjs';
 import compose from './compose.mjs';
+import * as M from './middlewares/index.mjs';
 
-import reducer from './reducer.mjs';
+import reducer from './reducers/index.mjs';
 
 export default function configureStore (preloadedState = Object.create(null)) {
   // middleware enhancer
   const middlewares = [
-    crashReporter, 
-    thunk,
-    promise,
-    timeoutScheduler,
-    (globalThis.env && globalThis.env === 'development') ? logger : false
+    M.crashReporter, 
+    M.thunk,
+    M.promise,
+    M.timeoutScheduler,
+    (globalThis.env && globalThis.env === 'development') ? M.logger : false,
   ].filter(Boolean);
 
   const middlewareEnhancer = applyMiddleware(middlewares); 

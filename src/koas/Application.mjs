@@ -77,7 +77,7 @@ export default class Application extends EventEmitter {
    *
    */
 
-  callback () {
+  streamHandler () {
     const fn = this.compose(this.middlewares);
 
     if (!this.listenerCount('error')) this.on('error', this.onerror); // 绑定事件处理器
@@ -92,9 +92,7 @@ export default class Application extends EventEmitter {
       ctx.state.errors = [];
       ctx.stream = stream;
 
-      return fn(ctx)
-        .then(() => respond(ctx))
-        .catch(err => { ctx.status = 500; ctx.body = err.message });
+      return fn(ctx).then(() => respond(ctx)).catch(err => respond(ctx, err));
     }
   }
 
@@ -153,8 +151,13 @@ export default class Application extends EventEmitter {
   }
 }
 
-function respond (ctx) {
+function respond (ctx, err) {
   if (false === ctx.respond) return; // bypass response
+
+  if (err) {
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
 
   // 响应空消息
   if (null == ctx.body) {

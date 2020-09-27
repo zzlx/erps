@@ -21,8 +21,6 @@ import settings from '../../src/config/settings.mjs';
 import { date } from '../../src/utils.mjs';
 import readDir from '../../src/utils/readDir.mjs';
 
-import tasks from '../../server/tasks.mjs';
-
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`); 
 const paths = settings.paths;
@@ -50,7 +48,15 @@ Index.get('/logger', (ctx, next) => {
   ctx.body = fs.createReadStream(logFile);
 });
 
-Index.all('/*', serverRender());
+Index.all('/*', serverRender({
+  styles: [ "/styles/main.css" ],
+  scripts: [
+    { src: `/statics/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+    { src: `/statics/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+    { src: "/modules/main.mjs", module: true, crossorigin: true },
+    { src: "/modules/fallback.js", nomodule: true},
+  ],
+}));
 
 /**
  * 当发生样式文件修改时，自动重建styles.css文件
@@ -83,7 +89,8 @@ Index.get('/*', async (ctx, next) => {
       for (let file of scssFiles) {
         const stats = fs.lstatSync(file);
         if (stats.mtime > cssStats.ctime) {
-          await tasks.generateCSS();
+          
+          // @todo: 
           break;
         }
       }

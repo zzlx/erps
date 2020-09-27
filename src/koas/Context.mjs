@@ -19,7 +19,7 @@ import contentType from 'content-type';
 
 import HttpError from './HttpError.mjs';
 import MemCache from '../utils/memCache.mjs';
-import MimeTypes from '../utils/MimeTypes.mjs';
+import MimeTypes from './MimeTypes.mjs';
 
 const debug = util.debuglog('debug:application.context');
 
@@ -888,7 +888,7 @@ export default class Context {
 
     // stream
     if (val instanceof Stream) {
-      const handler = error => debug(error);
+      const handler = error => debug('set body error: ', error);
       if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
       if (null !== original && original != val) this.remove('Content-Length');
       if (setType) this.type = 'bin';

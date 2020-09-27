@@ -22,6 +22,7 @@
  */
 
 import { types } from './actions/index.mjs';
+import assert from '../utils/assert.mjs';
 import value from '../utils/value.mjs';
 import warning from '../utils/warning.mjs';
 

@@ -13,9 +13,8 @@
  *
  * ## 使用方法:
  *
- * ```
- * watcher.mjs --paths=server --command=starter.mjs --args='--restart'
- * ```
+ * starter command --watch-paths='' --restart
+ *
  * *****************************************************************************
  */
 
