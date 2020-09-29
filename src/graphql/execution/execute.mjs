@@ -8,10 +8,7 @@
  * *****************************************************************************
  */
 
-import { 
-  assert, 
-  is,
-} from '../../utils.mjs';
+import { assert } from '../../utils.mjs';
 
 import inspect from '../../utils/inspect.mjs';
 import { forEach, isCollection } from '../../utils/iterall.mjs';
@@ -94,7 +91,7 @@ export function execute(
  */
 
 function buildResponse(exeContext, data) {
-  if (is(data)) {
+  if (assert.isPromise(data)) {
     return data.then(resolved => buildResponse(exeContext, resolved));
   }
 
@@ -270,7 +267,7 @@ function executeOperation(exeContext, operation, rootValue) {
       ? executeFieldsSerially(exeContext, type, rootValue, path, fields) 
       : executeFields(exeContext, type, rootValue, path, fields);
 
-    if (is(result).promise) {
+    if (assert.isPromise(result)) {
       return result.then(undefined, (error) => {
         exeContext.errors.push(error);
         return Promise.resolve(null);
@@ -303,7 +300,7 @@ function executeFieldsSerially(context, parentType, rootValue, path, fields) {
 
     if (result === undefined) { return results; }
 
-    if (is(result).promise) {
+    if (assert.isPromise(result)) {
       return result.then((resolvedResult) => {
         results[responseName] = resolvedResult;
         return results;
@@ -339,7 +336,7 @@ function executeFields(exeContext, parentType, rootValue, path, fields) {
     if (result !== undefined) {
       results[field] = result;
 
-      if (!containsPromise && is(result).promise) {
+      if (!containsPromise && assert.isPromise(result)) {
         containsPromise = true;
       }
     }
@@ -581,7 +578,7 @@ export function resolveFieldValueOrError(
     const result = resolveFn(rootValue, args, _contextValue, info);
 
     // 处理潜在的promise result
-    return is(result).promise ? result.then(undefined, asErrorInstance) : result;
+    return assert.isPromise(result)? result.then(undefined, asErrorInstance) : result;
 
   } catch (error) {
     return asErrorInstance(error);
@@ -602,7 +599,7 @@ function completeValueCatchingError(context, returnType, fieldNodes, info, path,
   try {
     let completed;
 
-    if (is(result).promise) {
+    if (assert.isPromise(result)) {
       completed = result.then(resolved => {
         return completeValue(context, returnType, fieldNodes, info, path, resolved);
       });
@@ -610,7 +607,7 @@ function completeValueCatchingError(context, returnType, fieldNodes, info, path,
       completed = completeValue(context, returnType, fieldNodes, info, path, result);
     }
 
-    if (is(completed).promise) {
+    if (assert.isPromise(completed)) {
       // Note: we don't rely on a `catch` method, 
       // but we do expect "thenable" to take a second callback for the error case.
       return completed.then(undefined, error => {
@@ -764,7 +761,7 @@ function completeListValue(context, returnType, fieldNodes, info, path, result) 
     var fieldPath = addPath(path, index);
     var completedItem = completeValueCatchingError(context, itemType, fieldNodes, info, fieldPath, item);
 
-    if (!containsPromise && is(completedItem).promise) {
+    if (!containsPromise && assert.isPromise(completedItem)) {
       containsPromise = true;
     }
 
@@ -802,7 +799,7 @@ function completeAbstractValue(context, returnType, fieldNodes, info, path, resu
     ? returnType.resolveType(result, context.contextValue, info) 
     : defaultResolveTypeFn(result, context.contextValue, info, returnType);
 
-  if (is(runtimeType).promise) {
+  if (assert.isPromise(runtimeType)) {
     return runtimeType.then((resolvedRuntimeType) => {
       return completeObjectValue(
         context, 
@@ -869,7 +866,7 @@ function completeObjectValue(context, returnType, fieldNodes, info, path, result
   if (returnType.isTypeOf) {
     const isTypeOf = returnType.isTypeOf(result, context.contextValue, info);
 
-    if (is(isTypeOf).promise) {
+    if (assert.isPromise(isTypeOf)) {
       return isTypeOf.then((resolvedIsTypeOf) => {
         if (!resolvedIsTypeOf) {
           throw invalidReturnTypeError(returnType, result, fieldNodes);
@@ -957,7 +954,7 @@ function defaultResolveTypeFn(value, contextValue, info, abstractType) {
     if (type.isTypeOf) {
       const isTypeOfResult = type.isTypeOf(value, contextValue, info);
 
-      if (is(isTypeOfResult).promise) {
+      if (assert.isPromise(isTypeOfResult)) {
         promisedIsTypeOfResults[i] = isTypeOfResult;
       } else if (isTypeOfResult) {
         return type;

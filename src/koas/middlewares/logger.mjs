@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * # 日志中间件
+ * # 日志记录
  *
  * 构造日志对象,为服务器提供日志记录
  *
@@ -19,7 +19,7 @@ import zlib from 'zlib';
 const fmt = v => `0${v}`.substr(-2);
 const sn = d => `${d.getFullYear()}${fmt(d.getMonth() + 1)}${fmt(d.getDate())}`; 
 
-export default function log (options = {}) {
+export default function logger (options = {}) {
   let opts = { path: process.cwd() };
   if (typeof options === 'string') opts.path = options;
 
@@ -41,7 +41,6 @@ export default function log (options = {}) {
       "s-pid": process.pid,
       "status": null,
       "res-time": null,
-      "errors": '',
     };
 
     try {
@@ -51,12 +50,9 @@ export default function log (options = {}) {
       // 记录服务端响应信息
       log['status'] = ctx.status;
       log["res-time"] = ctx.response.headers['x-response-time'];
-      log["errors"] = ctx.state.errors.join('|');
 
     } catch (error) {
-      log["errors"] = log['errors'] + error.message;
-      ctx.state.errors.push(error.message); // store error
-      Promise.reject(error); // reject error
+      Promise.reject(error);
     }
 
     if (ctx.state.noLog) return;
@@ -66,7 +62,11 @@ export default function log (options = {}) {
     await archiveFile(logFile); // 存档日志
 
     if (!fs.existsSync(logFile)) {
+      // 创建不存在的日志文件
       createWS(logFile);
+
+      // 写入日志文件格式说明及字段对应名称
+      ws.write('# 格式说明: 字段采用Tab符号分隔,每条记录占据一行.\n');
       ws.write(Object.keys(log).join('\t') + '\n');
     }
 

@@ -9,6 +9,7 @@
  * *****************************************************************************
  */
 
+import compose from './compose.mjs';
 import HttpError from './HttpError.mjs';
 import { compile, parse, pathToRegexp, } from '../utils.mjs';
 
@@ -309,7 +310,6 @@ Router.prototype.routes = function () {
       return memo.concat(layer.stack);
     }, []);
 
-    const compose = ctx.app.compose;
     return compose(layerChain)(ctx, next);
   }
 

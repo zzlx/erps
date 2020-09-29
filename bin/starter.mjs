@@ -69,14 +69,11 @@ class Watcher extends EventEmitter {
     callback(); // 先执行一次
 
     this.on('change', (file) => {
-      if (this.timeout && this.timeout._destroyed == null) {
-        clearTimeout(this.timeout); 
-      }
-
-      this.timeout = setTimeout(() => callback(), 2500); // 2.5秒内再次出现变动则取消上次
+      clearTimeout(this.timeout); 
+      this.timeout = setTimeout(() => callback(), 2000);
     });
 
-    setInterval(() => this.detect(), 3000); // 每隔3秒检测一次目录变动
+    setInterval(() => this.detect(), 1500); // 每隔s秒检测一次目录变动
   }
 
   detect () {

@@ -23,13 +23,11 @@ export default (opts) => {
     // 转发有扩展名的路径至下一中间件
     if (path.extname(ctx.path) !== '') return next();
 
-
     // @todo: 利用客户端路由进行匹配渲染,以优化SEO
 
     // template
     const html = new HTMLTemplate(opts);
     html.initialState = {};
-
     ctx.type = 'html';
     ctx.body = html.render();
   }
@@ -37,7 +35,6 @@ export default (opts) => {
 
 class HTMLTemplate {
   constructor(props) {
-
     this.state = Object.assign({}, {
       title: 'Untitled',
       charset: 'UTF-8',

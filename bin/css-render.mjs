@@ -10,7 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
-import settings from '../src/config/settings.mjs';
+import settings from '../src/settings.mjs';
 
 const paths = settings.paths;
 const scssEntryPoint = path.join(paths.PUBLIC, 'styles', 'scss', 'main.scss');

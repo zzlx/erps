@@ -14,10 +14,12 @@
  * @return {function} middleware function
  * @api public
  * *****************************************************************************
- */
-
+ */ 
 import fs from 'fs';
 import path from 'path';
+import util from 'util';
+
+const debug = util.debuglog('debug:statics-middleware');
 
 export default (options = {}) => {
   const opts = Object.assign({}, {
@@ -36,6 +38,8 @@ export default (options = {}) => {
   }
 
   return async function staticsMiddleware (ctx, next) {
+
+    return ctx.body = 'statics';
 
     // only accept GET/HEAD/OPTIONS method
     if (!/(GET|HEAD|OPTIONS)/.test(ctx.method)) {
@@ -68,8 +72,8 @@ export default (options = {}) => {
     //ctx.set('vary', 'accept-encoding');
     ctx.set('vary', 'User-Agent');
 
+    // 
     const accetpEncoding = ctx.get('accept-encoding'); // get accept encoding
-
     if (/\bbr\b/.test(accetpEncoding) && fs.existsSync(url + '.br')) {
       ctx.set('content-encoding', 'br');
       url += '.br';
@@ -97,7 +101,8 @@ export default (options = {}) => {
       ctx.set('cache-control', `max-age=${opts.maxAge}`); 
       if (ctx.app.env === 'development') ctx.set('cache-control', 'max-age=0'); 
 
-      ctx.body = fs.createReadStream(url);
+      ctx.body = fs.readFileSync(url, 'utf8');
+      //ctx.body = fs.createReadStream(url);
     }
   }
 }

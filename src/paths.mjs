@@ -24,11 +24,28 @@ const packageJSON = paths.PACKAGE
 export default new Proxy(paths, {
   get: function (target, property, receiver) {
     if (property === 'ROOT') return __ROOT;
-    if (property === 'API') return path.join(target.SERVER,'api');
+    if (property === 'API') return path.join(target.SERVER, 'api');
+
+    if (property === 'LOG') {
+      if (target['LOG']) return target['LOG'];
+      const logPath = path.join(__ROOT, 'log');
+      fs.mkdirSync(logPath);
+      return logPath;
+    }
+
+    if (property === 'CONFIG') {
+      if (target['CONFIG']) return target['CONFIG'];
+      const configPath = path.join(__ROOT, 'config');
+      fs.mkdirSync(cofigPath);
+      return configPath;
+    }
+
+    if (property === 'DATA') {
+      return path.join(os.homedir(), 'data');
+    }
 
     return Reflect.get(target, property, receiver);
-  },
-	//set: function (target, property, value) { },
+  }
 });
 
 /**

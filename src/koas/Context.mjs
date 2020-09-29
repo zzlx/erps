@@ -6,6 +6,7 @@
  * *****************************************************************************
  */
 
+import assert from 'assert';
 import http from 'http';
 import http2 from 'http2';
 import net from 'net';
@@ -30,7 +31,6 @@ const REQ_BODY    = Symbol('context#request-body');
 const REQ_HEADERS = Symbol('context#request-headers');
 const REQ_URL     = Symbol('context#request-URL');
 const REQ_IP      = Symbol('context#request-ip');
-
 const RES_BODY    = Symbol('context#response-body');
 const RES_HEADERS = Symbol('context#response-headers');
 
@@ -58,7 +58,8 @@ export default class Context {
   /**
    * get request raw body
    */
-  getRawBody () {
+
+  get rawBody () {
     if (this[REQ_BODY] != null) return this[REQ_BODY];
 
     return new Promise(async (resolve, reject) => {
@@ -191,10 +192,10 @@ export default class Context {
    */
 
   get status() {
-    return this[RES_HEADERS][this.httpVersion == 2 
-      ? http2.constants.HTTP2_HEADER_STATUS 
-      : 'status'
-    ]
+    const statusKey = this.httpVersion == 2 
+      ? http2.constants.HTTP2_HEADER_STATUS : 'status';
+
+    return this[RES_HEADERS][statusKey];
   }
 
   /**
@@ -205,20 +206,13 @@ export default class Context {
    */
 
   set status(code) {
-    if (!(typeof code === 'string' || typeof code === 'number')) {
-      throw new TypeError(`status code:${code} must be a number or string.`);
-    }
+    const sKey = this.httpVersion == 2 
+      ? http2.constants.HTTP2_HEADER_STATUS 
+      : 'status';
+    const sCode = Number.parseInt(code);
+    assert(http.STATUS_CODES[sCode], `Settings status ${code} is invalid.`);
 
-    // status code
-    let sc = Number.parseInt(code, 10);
-
-    // check status is valid.
-    if (!http.STATUS_CODES[sc]) throw new Error('Invalid status code: ' + code)
-
-    this.set(
-      this.httpVersion == 2 ? http2.constants.HTTP2_HEADER_STATUS : 'status',
-      sc
-    );
+    this.set(sKey, sCode);
   }
 
   /**
@@ -277,7 +271,6 @@ export default class Context {
   get path() {
     return this.headers[http2.constants.HTTP2_HEADER_PATH];
   }
-
 
   /**
    *
@@ -426,8 +419,7 @@ export default class Context {
    */
 
   set length(n) {
-
-    this.set('content-length', Number(n));
+    this.set('content-length', Number.parseInt(n));
   }
 
   /**
@@ -439,8 +431,7 @@ export default class Context {
 
   get length() {
     const len = this[RES_HEADERS][http2.constants.HTTP2_HEADER_CONTENT_LENGTH];
-    if (len == '') return 0;
-    return Number(len); // ~~len
+    return ~~len; // ~~'' => 0
   }
 
   /**
@@ -890,50 +881,50 @@ export default class Context {
     if (val instanceof Stream) {
       const handler = error => debug('set body error: ', error);
       if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
+
       if (null !== original && original != val) this.remove('Content-Length');
       if (setType) this.type = 'bin';
       return;
     }
 
     // json
-    this.remove('Content-Length');
     this.type = 'json';
     this[RES_BODY] = this.compress(JSON.string(val));
   }
-
-  /**
-   *
-   * ctx.throw传递过来的user-level错误
-   *
-   * ctx.throw([status], [msg], [properties])
-   *
-   * Throw an error with `status` (default 500) and `msg`. 
-   * Note that these are user-level errors, 
-   * and the message may be exposed to the client.
-   *
-   *    this.throw(403)
-   *    this.throw(400, 'name required')
-   *    this.throw('something exploded')
-   *    this.throw(new Error('invalid'))
-   *    this.throw(400, new Error('invalid'))
-   *
-   * See: https://github.com/jshttp/http-errors
-   *
-   * Note: `status` should only be passed as the first parameter.
-   *
-   * @param {String|Number|Error} err, msg or status
-   * @param {String|Number|Error} [err, msg or status]
-   * @param {Object} [properties]
-   * @api public
-   */
-
-  throw (...args) {
-    const error = new HttpError(...args);
-		throw error;
-  }
 }
 
+Context.prototype.onerror = function (err) {
+  this.app.emit('error', err, this);
+}
 
+/**
+ *
+ * ctx.throw([status], [msg], [properties])
+ *
+ * Throw an error with `status` (default 500) and `msg`. 
+ * Note that these are user-level errors, 
+ * and the message may be exposed to the client.
+ *
+ *    this.throw(403)
+ *    this.throw(400, 'name required')
+ *    this.throw('something exploded')
+ *    this.throw(new Error('invalid'))
+ *    this.throw(400, new Error('invalid'))
+ *
+ * See: https://github.com/jshttp/http-errors
+ *
+ * Note: `status` should only be passed as the first parameter.
+ *
+ * @param {String|Number|Error} err, msg or status
+ * @param {String|Number|Error} [err, msg or status]
+ * @param {Object} [properties]
+ * @api public
+ */
+
+Context.prototype.throw = function (...args) {
+  const error = new HttpError(...args);
+  throw error;
+}
 
 /**
  * compress content

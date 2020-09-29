@@ -5,7 +5,7 @@
   "license": "MIT-like",
   "private": true,
   "scripts": {
-    "devel": "./bin/starter.mjs --devel --command='./bin/httpd.mjs' --args='--restart' --paths=bin,server,src",
+    "devel": "./bin/starter.mjs --devel --command='./bin/httpd.mjs' --args='--restart' --paths=bin,config,public,server,src",
     "start-httpd": "./bin/httpd.mjs --start",
     "restart-httpd": "./bin/httpd.mjs --restart",
     "stop-httpd": "./bin/httpd.mjs --stop"

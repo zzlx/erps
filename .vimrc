@@ -35,6 +35,13 @@ set shortmess=atI
 set title 
 
 " ------------------------------------------------------------------------------
+" 状态显示
+set ruler
+set statusline=%F[:b%n][%{&ff}]%m%r%h%w%y\ %=\ %-8.(%l,%c%V%)\ %p%%
+set laststatus=2
+set nocursorline
+
+" ------------------------------------------------------------------------------
 " 编辑模式配置 "
 "
 set backupcopy=yes
@@ -85,12 +92,6 @@ set matchtime=1
 set hlsearch 
 set incsearch    " 实时搜索功能
 set ignorecase   " 搜索时大小写不敏感
-
-" 状态显示
-set ruler
-set statusline=%F[:b%n]%m%r%h%w%y\ %=\ %-8.(%l,%c%V%)\ %p%%
-set laststatus=2
-set nocursorline
 
 " 语法高亮
 syntax on

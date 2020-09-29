@@ -23,7 +23,6 @@
 
 import { types } from './actions/index.mjs';
 import assert from '../utils/assert.mjs';
-import is from '../utils/is.mjs';
 import warning from '../utils/warning.mjs';
 
 export default function combineReducers(reducers) {
@@ -126,7 +125,7 @@ function getUnexpectedStateShapeWarningMessage(
     return 'Store does not have a valid reducer. Make sure the argument passed ' + 'to combineReducers is an object whose values are reducers.';
   }
 
-  if (!is(inputState).plainObject) {
+  if (!assert.isPlainObject(inputState)) {
     return "The " + argumentName + " has unexpected type of \"" + {}.toString.call(inputState).match(/\s([a-z|A-Z]+)/)[1] + "\". Expected argument to be an object with the following " + ("keys: \"" + reducerKeys.join('", "') + "\"");
   }
 

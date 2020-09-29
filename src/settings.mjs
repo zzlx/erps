@@ -22,11 +22,6 @@ import util from 'util';
 import paths from './paths.mjs';
 import system from './system.mjs';
 
-readyPaths(
-  paths.TMP,
-  paths.HOME
-);
-
 export default new Proxy({}, {
   get: function (target, property, receiver) {
     if (property === 'paths') return paths;
@@ -42,7 +37,6 @@ export default new Proxy({}, {
     if (property === 'privateKey') {
       return fs.readFileSync(`/etc/ssl/${os.hostname()}-key.pem`);
     }
-    if (property === 'readyPaths') return readyPaths;
     if (property === 'toString' || property === 'toJSON') {
       return () => JSON.stringify(target);
     }
@@ -104,28 +98,3 @@ function readConfig () {
   });
 }
 
-/**
- * ready paths
- *
- * @param {string} paths
- * @api public
- */
-
-function readyPaths () {
-  let paths = Array.prototype.slice.call(arguments);
-  const promises = [];
-
-  for (let path of paths) {
-    if (typeof path !== 'string') {
-      throw new TypeError('paths must be string.');
-    }
-
-    promises.push(
-      fs.mkdir(path, { recursive: true }, err => {
-        if (err) throw err;
-      })
-    );
-  }
-
-  return Promise.all(promises);
-}

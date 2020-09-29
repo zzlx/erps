@@ -10,10 +10,9 @@
 
 import fs from 'fs';
 import path from 'path';
-import paths from '../../../src/config/paths.mjs';
+import paths from '../../../src/paths.mjs';
 
 export default function logger (ctx) {
-
   ctx.state.noLog = true;
   ctx.type = 'text';
   const logFile = path.join(paths.LOG, 'request.log');

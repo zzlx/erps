@@ -20,15 +20,15 @@
 
 import Koas from '../src/koas/Application.mjs';
 import * as M from '../src/koas/middlewares/index.mjs';
-import config from '../src/config/settings.mjs';
+import settings from '../src/settings.mjs';
 import router from './routes.mjs'; // 路由配置
 
 // 准备程序
-const paths = config.paths;
+const paths = settings.paths;
 const app = new Koas(); // 初始化Koas服务框架
 
 // 通用中间件栈
-app.use(M.log(paths.LOG));     // 记录访问日志\中间件错误
+app.use(M.logger(paths.LOG));     // 记录访问日志\中间件错误
 app.use(M.xResponse());        // 记录中间件响应时间
 app.use(M.cors());             // 跨域访问
 app.use(M.cookies());          // cookie读写及签名

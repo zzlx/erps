@@ -19,7 +19,7 @@ import path from 'path';
 import util from 'util';
 
 import serviceApp from '../server/main.mjs';
-import settings from '../src/config/settings.mjs';
+import settings from '../src/settings.mjs';
 import { 
   assert, 
   argvParser, 
@@ -134,6 +134,14 @@ function start () {
 
   attachServerEvent(server);
 
+  const streamHandler = serviceApp.streamHandler();
+
+  server.on('stream', (stream, headers, flags) => {
+    debug('new stream event with flags:', flags); // flags: 37
+    attachStreamEvents(stream);
+    streamHandler(stream, headers, flags);
+  });
+
   server.listen({
     ipv6Only: false, // 是否仅开启IPV6
     host: settings.system.host,
@@ -216,7 +224,7 @@ function getPidByPort (port) {
 
 // attach
 function attachServerEvent (server) {
-  const keylogFile = fs.createWriteStream(path.join(paths.TMP, 'ssl-keys.log'), {flags: 'a+'});
+  const keylogFile = fs.createWriteStream(path.join(paths.LOG, 'ssl-keys.log'), {flags: 'a+'});
 
   server.on('keylog', (line, tlsSocket) => {
     debug('keylog event with line:', line.toString());
@@ -271,13 +279,6 @@ function attachServerEvent (server) {
     console.log('The %s Server is running on %o.', process.env.NODE_ENV, this.address());
   });
 
-  const streamHandler = serviceApp.streamHandler();
-
-  server.on('stream', (stream, headers, flags) => {
-    debug('new stream event with flags:', flags); // flags: 37
-    attachStreamEvents(stream);
-    streamHandler(stream, headers, flags);
-  });
 }
 
 function attachStreamEvents (stream) {
