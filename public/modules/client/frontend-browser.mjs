@@ -37,22 +37,15 @@ export default function browserRender (element) {
 }
 
 function callback () {
+  if (global.env !== 'development') return;
+
+  const sysinfo = {
+    'cookie-enabled': global.navigator.cookieEnabled,
+    'ready-time': new Date().toISOString(),
+  };
+
   console.groupCollapsed('系统信息');
-  console.info(`就绪时间: ${new Date()}`);
-
-  if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edge') === -1 || ua.indexOf('Firefox') > -1) {
-    if (/^(https?|file):$/.test(global.location.protocol)) {
-      console.log('');
-    }
-  }
-
-  if (global.env && global.env !== 'production') {
-    console.info(`当前环境:${env}`);
-
-    // @todo:  消息框提示
-    window.navigator.cookieEnabled && console.info(`cookie支持已启用`);
-  }
-
+  console.dir(sysinfo);
   console.groupEnd();
 }
 

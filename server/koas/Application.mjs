@@ -92,7 +92,6 @@ export default class Application extends EventEmitter {
   handleRequest (ctx, fn) {
     const onerror = err => ctx.onerror(err);
     const handleResponse = () => respond(ctx);
-    debug(ctx.stream.socket);
 
     return fn(ctx).then(handleResponse).catch(onerror);
   }

@@ -20,6 +20,6 @@ export default function warning () {
   }
 
   if (!!condition) return; 
-  if (console && console.warn) console.warn(message)
-  else console.log('Warning! ', message);
+  if (console && console.warn) return console.warn(message);
+  console.log('Warning: ', message);
 }

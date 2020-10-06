@@ -6,14 +6,14 @@
  * *****************************************************************************
  */
 
-import is from '../../utils/is.mjs';
+import assert from '../../utils/assert.mjs';
 
 export default store => next => action => {
   // promise action
-  if (is(action).promise) return action.then(result => next(result)); 
+  if (assert.isPromise(action)) return action.then(result => next(result)); 
 
   // promise payload
-  if (action && is(action.payload).promise) {
+  if (action && assert.isPromise(action.payload)) {
     return action.payload.then(
       result => {
         next(Object.assign({}, action, { payload: result }));

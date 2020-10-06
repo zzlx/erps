@@ -19,12 +19,12 @@ import path from 'path';
 import util from 'util';
 
 import serviceApp from '../server/main.mjs';
-import settings from '../src/settings.mjs';
+import settings from '../server/settings.mjs';
 import { 
   assert, 
   argvParser, 
   console 
-} from '../src/utils.mjs';
+} from '../server/utils.mjs';
 
 const paths = settings.paths;
 const debug = util.debuglog('debug:httpd.mjs');
@@ -126,7 +126,7 @@ function start () {
     //dhparam
     //ecdhCurve
     //privateKeyEngine
-    //passphrase: 'sample',
+    passphrase: settings.passphrase,
     //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
     sessionTimeout: 300, // seconds
     handshakeTimeout: 120000, // milliseconds
@@ -224,6 +224,7 @@ function getPidByPort (port) {
 
 // attach
 function attachServerEvent (server) {
+
   const keylogFile = fs.createWriteStream(path.join(paths.LOG, 'ssl-keys.log'), {flags: 'a+'});
 
   server.on('keylog', (line, tlsSocket) => {
@@ -282,6 +283,7 @@ function attachServerEvent (server) {
 }
 
 function attachStreamEvents (stream) {
+
   stream.on('aborted', () => {
     debug('Stream is aborted.');
   });

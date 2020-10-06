@@ -2,10 +2,9 @@
   "name": "erps",
   "version": "1.0.0",
   "description": "A ERP system services.",
-  "license": "MIT-like",
   "private": true,
   "scripts": {
-    "devel": "./bin/starter.mjs --devel --command='./bin/httpd.mjs' --args='--restart' --paths=bin,config,public,server,src",
+    "devel": "./bin/starter.mjs --devel --command='./bin/httpd.mjs' --args='--restart' --paths=bin,server",
     "start-httpd": "./bin/httpd.mjs --start",
     "restart-httpd": "./bin/httpd.mjs --restart",
     "stop-httpd": "./bin/httpd.mjs --stop"

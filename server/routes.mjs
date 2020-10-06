@@ -12,14 +12,14 @@ import util from 'util';
 
 import ReactDOMServer from 'react-dom/server.js';
 
-import dba from '../src/koas/middlewares/dba.mjs';
-import serverRender from '../src/koas/middlewares/serverRender.mjs';
-import statics from '../src/koas/middlewares/statics.mjs';
-import Router from '../src/koas/Router.mjs';
+import dba from './koas/middlewares/dba.mjs';
+import serverRender from './koas/middlewares/serverRender.mjs';
+import statics from './koas/middlewares/statics.mjs';
+import Router from './koas/Router.mjs';
 
-import settings from '../src/settings.mjs';
-import { date } from '../src/utils.mjs';
-import readDir from '../src/utils/readDir.mjs';
+import settings from './settings.mjs';
+import { date } from './utils.mjs';
+import readDir from './utils/readDir.mjs';
 
 const __filename = import.meta.url.substr(7);
 const debug = util.debuglog(`debug:${path.basename(__filename)}`); 

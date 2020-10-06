@@ -1,15 +1,8 @@
 #!/bin/sh
 # ------------------------------------------------------------------------------
-#
-# 脚本管理程序
-# ============
-#
-# # 功能描述
-#
-# * 提供源代码库版本管理及变更提交
-# * 服务器证书申请或自签名证书等签发
-# * 自动安装nvm并管理node版本
-#
+# 
+# doit🔧
+# 
 # ------------------------------------------------------------------------------
 
 # 执行环境设定
@@ -37,6 +30,7 @@ declare -r _RENEW_ALLOW=30
 declare -r _RESTART_INT=15     # 设置开发模式下重启服务间隔时间
 
 # Letsencrypt`s ACME service API address
+# 
 declare -r _ACME_API="https://acme-v02.api.letsencrypt.org"
 declare -r _ACME_API_STAGING="https://acme-staging-v02.api.letsencrypt.org"
 

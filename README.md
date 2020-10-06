@@ -1,4 +1,4 @@
-[ERPs](./docs/manual/README.md)
+[ERP Services(ERPs)](./docs/manual/README.md)
 ===============================
 
 A ERP service system.

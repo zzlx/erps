@@ -18,9 +18,9 @@
  * *****************************************************************************
  */
 
-import Koas from '../src/koas/Application.mjs';
-import * as M from '../src/koas/middlewares/index.mjs';
-import settings from '../src/settings.mjs';
+import Koas from './koas/Application.mjs';
+import * as M from './koas/middlewares/index.mjs';
+import settings from './settings.mjs';
 import router from './routes.mjs'; // 路由配置
 
 // 准备程序

@@ -1,7 +1,10 @@
 /**
  * *****************************************************************************
  *
- * Date utilities.
+ * Date and time
+ *
+ * 最新标准:
+ * [ISO 8601-1:2019](https://www.iso.org/obp/ui/#iso:std:iso:8601:-1:ed-1:v1:en)
  *
  * *****************************************************************************
  */
@@ -14,14 +17,14 @@ export default new Proxy(Date, {
 	},
 
 	construct: function (target, argumentsList, newTarget) {
-    newTarget = new target(...argumentsList);
-    return newTarget;
+    return new target(...argumentsList);
 	},
 
 	get: function (target, property, receiver) {
+
     if (property === 'format') return format;
     if (property === 'weekday') return weekday;
-    if (property === 'toLocaleISOString') return toLocaleISOString;
+    if (property === 'toISOString') return toISOString;
     if (property === 'tPlusN') return tPlusN;
     if (property === 'getFormattedDate') return getFormattedDate;
 
@@ -103,7 +106,7 @@ function weekday (date) {
  * @return {string} locale iso string
  */
 
-function toLocaleISOString (date) {
+function toISOString (date) {
   const d = date ? new Date(date) : new Date(); 
 	const tzOffset = (d.getTimezoneOffset())/60;
 	const timestamp = d.valueOf() - tzOffset * 3600000;

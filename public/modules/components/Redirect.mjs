@@ -11,10 +11,10 @@
 import ReactContext from "./Context.mjs";
 import { types } from '../store/actions/index.mjs';
 
-import warning from '../utils/warning.mjs';
-import path from '../utils/path.mjs';
-import locationsAreEqual from '../utils/locationsAreEqual.mjs';
+import assert from '../utils/assert.mjs';
 import generatePath from "../utils/generatePath.mjs";
+import path from '../utils/path.mjs';
+import warning from '../utils/warning.mjs';
 
 export default class Redirect extends React.PureComponent {
   render () {

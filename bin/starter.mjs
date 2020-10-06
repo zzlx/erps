@@ -23,8 +23,8 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
 
-import { assert, argvParser, console } from '../src/utils.mjs';
-import readDir from '../src/utils/readDir.mjs';
+import { assert, argvParser, console } from '../server/utils.mjs';
+import readDir from '../server/utils/readDir.mjs';
 
 const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
 const paramMap = argvParser(ARGVS);
@@ -47,7 +47,7 @@ let lastPid = null;
 process.nextTick(() => new Watcher(...paths, () => {
   cmd = cp.spawn(command, args, { stdio: [0, 1, 2], detached: false });
   console.clear();
-  console.log(`${lastPid ? `进程(PID:${lastPid})已退出 ` : ''}进程(PID:${cmd.pid})已启动`);
+  console.log(`${lastPid ? `(PID:${lastPid})进程退出 ` : ''}(PID:${cmd.pid})启动...`);
   lastPid = cmd.pid;
 })); 
 

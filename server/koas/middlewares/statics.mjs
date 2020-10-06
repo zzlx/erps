@@ -39,8 +39,6 @@ export default (options = {}) => {
 
   return async function staticsMiddleware (ctx, next) {
 
-    return ctx.body = 'statics';
-
     // only accept GET/HEAD/OPTIONS method
     if (!/(GET|HEAD|OPTIONS)/.test(ctx.method)) {
       ctx.status = 405; // method not allowed.
@@ -101,8 +99,7 @@ export default (options = {}) => {
       ctx.set('cache-control', `max-age=${opts.maxAge}`); 
       if (ctx.app.env === 'development') ctx.set('cache-control', 'max-age=0'); 
 
-      ctx.body = fs.readFileSync(url, 'utf8');
-      //ctx.body = fs.createReadStream(url);
+      ctx.body = fs.createReadStream(url);
     }
   }
 }

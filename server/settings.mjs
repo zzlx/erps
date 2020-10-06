@@ -22,10 +22,12 @@ import util from 'util';
 import paths from './paths.mjs';
 import system from './system.mjs';
 
-export default new Proxy({}, {
+// settings from config
+const sfc = fs.readFileSync(path.join(paths.CONFIG, 'settings.json'), 'utf8');
+const configs = JSON.parse(sfc);
+
+export default new Proxy(Object.assign(configs, { paths: paths }, { system: system }), {
   get: function (target, property, receiver) {
-    if (property === 'paths') return paths;
-    if (property === 'system') return system;
     if (property === 'env') return process.env.NODE_ENV;
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;

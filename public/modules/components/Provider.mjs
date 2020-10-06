@@ -9,7 +9,7 @@
  */
 
 import Context from './Context.mjs';
-import shallowEqual from '../utils/shallowEqual.mjs';
+import assert from '../utils/assert.mjs';
 
 export default class Provider extends React.Component {
   constructor(props) {
@@ -61,7 +61,7 @@ export default class Provider extends React.Component {
 
       this.setState(prevState => {
         // If the value is the same, skip the unnecessary state update.
-        if (shallowEqual(prevState.storeState, newState)) {
+        if (assert.shallowEqual(prevState.storeState, newState)) {
           return null;
         }
 

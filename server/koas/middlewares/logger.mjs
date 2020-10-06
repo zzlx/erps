@@ -15,21 +15,27 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
+import { date } from '../../utils.mjs';
 
 const fmt = v => `0${v}`.substr(-2);
 const sn = d => `${d.getFullYear()}${fmt(d.getMonth() + 1)}${fmt(d.getDate())}`; 
 
 export default function logger (options = {}) {
-  let opts = { path: process.cwd() };
-  if (typeof options === 'string') opts.path = options;
+  const opts = Object.assign({}, {
+    path: process.cwd(),
+  }, typeof options === 'string' ? {path: options} : options);
 
   let ws = null; // write stream 
-  const createWS = (file) => ws = fs.createWriteStream(file, {flags: 'a'}); 
+
+  const getWS = file => {
+    if (ws && ws.close === false) return ws;
+    ws = fs.createWriteStream(file, {flags: 'a'}); 
+    return ws;
+  }
 
   return async function logMiddleware (ctx, next) {
-    // 记录访问日志信息
-    const log = {
-      "time": new Date(),
+    const log = { // 构造日志对象
+      "time": date.toISOString(),
       "c-ip": ctx.socket.remoteAddress,
       "c-port": ctx.socket.remotePort,
       "user-agent": ctx.get("user-agent"),
@@ -62,17 +68,17 @@ export default function logger (options = {}) {
     await archiveFile(logFile); // 存档日志
 
     if (!fs.existsSync(logFile)) {
+      ws.end();
+
       // 创建不存在的日志文件
-      createWS(logFile);
+      getWS(logFile);
 
       // 写入日志文件格式说明及字段对应名称
       ws.write('# 格式说明: 字段采用Tab符号分隔,每条记录占据一行.\n');
       ws.write(Object.keys(log).join('\t') + '\n');
     }
 
-    if (ws == null) createWS(logFile); 
-    if (ws && ws.close) createWS(logFile);
-
+    getWS(logFile);
     ws.write(Object.values(log).join('\t') + '\n');
   } 
 }
