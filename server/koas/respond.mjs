@@ -15,7 +15,6 @@ export default function respond (ctx) {
 
   // allow bypassing response
   if (ctx.respond === false) return; 
-  if (!ctx.writable) return stream.end();
   if (emptyStatus.includes(ctx.status)) return stream.end();
   if ('HEAD' === ctx.method) return stream.end();
 
@@ -26,13 +25,13 @@ export default function respond (ctx) {
 
   // response header
   if (!ctx.headersSent) {
-    const headers = ctx.response.headers;
-    stream.respond(headers, {
+    stream.respond(ctx.response.headers, {
       endStream: emptyStatus.includes(ctx.status) ? true : false, 
       waitForTrailers: false 
     });
   }
 
+  if (!ctx.writable) return stream.end();
   if (Buffer.isBuffer(body)) return stream.end(body);
   if ('string' === typeof(body)) return stream.end(body);
   if (body instanceof Stream) return body.pipe(stream);

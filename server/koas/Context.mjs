@@ -112,37 +112,6 @@ export default class Context {
     return Boolean(this[RES_HEADERS][field.toLowerCase()]);
   }
 
-  /**
-   * Set header `field` to `val`, or pass an object of header fields.
-   *
-   * Examples:
-   *
-   *    this.set('Foo', ['bar', 'baz']);
-   *    this.set('Accept', 'application/json');
-   *    this.set({ Accept: 'text/plain', 'X-API-Key': 'tobi' });
-   *
-   * @param {String|Object|Array} field
-   * @param {String} val
-   * @return {Boolean}
-   * @api public
-   */
-
-  set(field, val) {
-    if (this.headerSent) return false; // set header failure
-    if (this[RES_HEADERS] == null) this[RES_HEADERS] = Object.create(null);
-
-    if (2 == arguments.length) {
-      if (Array.isArray(val)) val = val.map(v => typeof v === 'string' ? v : String(v));
-      else if (typeof val !== 'string') val = String(val);
-      this[RES_HEADERS][field.toLowerCase()] = val;
-    } else {
-      for (const key in field) {
-        this.set(key, field[key]);
-      }
-    }
-
-    return true; // set header success
-  }
 
   /**
    * Return httpVersion
@@ -247,39 +216,17 @@ export default class Context {
   }
 
   /**
-   * AUTHORITY
-   */
-
-  get authority() {
-    return this.headers[http2.constants.HTTP2_HEADER_AUTHORITY];
-  }
-
-  /**
-   * SCHEME
-   */
-
-  get schema() {
-    return this.headers[http2.constants.HTTP2_HEADER_SCHEME];
-  }
-
-  /**
-   * return request path
-   *
-   * @return
-   */
-
-  get path() {
-    return this.headers[http2.constants.HTTP2_HEADER_PATH];
-  }
-
-  /**
    *
    */
 
   get URL() {
     if (!this[REQ_URL]) {
+      const schema = this.headers[http2.constants.HTTP2_HEADER_SCHEME];
+      const authority = this.headers[http2.constants.HTTP2_HEADER_AUTHORITY];
+      const path =  this.headers[http2.constants.HTTP2_HEADER_PATH];
+
       try {
-        this[REQ_URL] = new URL(`${this.schema}://${this.authority}${this.path}`);
+        this[REQ_URL] = new URL(`${schema}://${authority}${path}`);
       } catch (err) {
         this[REQ_URL] = Object.create(null);
       }
@@ -567,33 +514,6 @@ export default class Context {
 
     if (mimeType) this.set(http2.constants.HTTP2_HEADER_CONTENT_TYPE, mimeType);
     else this.remove(http2.constants.HTTP2_HEADER_CONTENT_TYPE);
-  }
-
-  /**
-   * Set the Last-Modified date using a string or a Date.
-   *
-   *     this.response.lastModified = new Date();
-   *     this.response.lastModified = '2013-09-13';
-   *
-   * @param {String|Date} type
-   * @api public
-   */
-
-  set lastModified(val) {
-    if ('string' == typeof val) val = new Date(val);
-    this.set(http2.constants.HTTP2_HEADER_LAST_MODIFIED, val.toUTCString());
-  }
-
-  /**
-   * Get the Last-Modified date in Date form, if it exists.
-   *
-   * @return {Date}
-   * @api public
-   */
-
-  get lastModified() {
-    const date = this[RES_HEADERS][http2.constants.HTTP2_HEADER_LAST_MODIFIED];
-    if (date) return new Date(date);
   }
 
   /**
@@ -891,6 +811,40 @@ export default class Context {
     this.type = 'json';
     this[RES_BODY] = this.compress(JSON.string(val));
   }
+}
+
+/**
+ * Set header `field` to `val`, or pass an object of header fields.
+ *
+ * Examples:
+ *
+ *    this.set('Foo', ['bar', 'baz']);
+ *    this.set('Accept', 'application/json');
+ *    this.set({ Accept: 'text/plain', 'X-API-Key': 'tobi' });
+ *
+ * @param {String|Object|Array} field
+ * @param {String} val
+ * @return {Boolean}
+ * @api public
+ */
+
+Context.prototype.set = function (field, val) {
+  if (this.headerSent) return false; // set header failure
+  if (this[RES_HEADERS] == null) this[RES_HEADERS] = Object.create(null);
+
+  if (2 == arguments.length) {
+    if (Array.isArray(val)) val = val.map(v => typeof v === 'string' ? v : String(v));
+    else if (typeof val !== 'string') val = String(val);
+    this[RES_HEADERS][field.toLowerCase()] = val;
+  }
+
+  if (typeof field === 'object') {
+    for (const key of Object.keys(field)) {
+      this.set(key, field[key]);
+    }
+  }
+
+  return true; // set header success
 }
 
 Context.prototype.onerror = function (err) {

@@ -11,6 +11,20 @@
 
 import assert from './assert.mjs';
 
+export default new Proxy({
+  dirname,
+  extname,
+  isURLPath,
+  join,
+  createLocation,
+  isAbsolute,
+  stripTrailingSlash,
+}, {
+  get: function (target, property, receiver) {
+    return Reflect.get(target, property, receiver);
+  }
+});
+
 // path char component
 const CHAR_FORWARD_SLASH = '/'.charCodeAt(0);  // 斜杠/
 const CHAR_BACKWARD_SLASH = '\\'.charCodeAt(0); // 反斜杠\
@@ -215,7 +229,7 @@ function stripBasename(path, prefix) {
 }
 
 /**
- * 去掉尾部slash
+ * strip trailing slash
  */
 
 function stripTrailingSlash(path) {
@@ -646,14 +660,3 @@ function normalizeString (path, allowAboveRoot, separator, isPathSeparator) {
 
   return res;
 }
-
-export default {
-  dirname,
-  extname,
-  isURLPath,
-  join,
-  createLocation,
-  isAbsolute,
-  stripTrailingSlash,
-};
-

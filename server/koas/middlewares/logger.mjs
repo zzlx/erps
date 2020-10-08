@@ -68,7 +68,7 @@ export default function logger (options = {}) {
     await archiveFile(logFile); // 存档日志
 
     if (!fs.existsSync(logFile)) {
-      ws.end();
+      if (ws) ws.end();
 
       // 创建不存在的日志文件
       getWS(logFile);

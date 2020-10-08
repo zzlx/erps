@@ -93,11 +93,13 @@ export default (options = {}) => {
       }
 
       ctx.length = stats.size;
-      ctx.set('etag', etag); // 开启服务端资源验证逻辑
-      ctx.set('last-modified', stats.mtime); // 开启浏览器端缓存
 
-      ctx.set('cache-control', `max-age=${opts.maxAge}`); 
-      if (ctx.app.env === 'development') ctx.set('cache-control', 'max-age=0'); 
+      // 客户端缓存配置
+      ctx.set({
+        'etag': etag, // 开启服务端资源验证逻辑
+        'last-modified': stats.mtime, // 开启浏览器端缓存
+        'cache-control': `max-age=${ctx.app.env === 'development' ? 0 : opts.maxAge}`,
+      }); 
 
       ctx.body = fs.createReadStream(url);
     }

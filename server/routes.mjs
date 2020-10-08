@@ -1,72 +1,58 @@
 /**
  * *****************************************************************************
  *
- * 服务器端路由配置
+ * 服务器路由
+ *
+ *
+ *
  *
  * *****************************************************************************
  */
 
+import cp from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-import ReactDOMServer from 'react-dom/server.js';
-
-import dba from './koas/middlewares/dba.mjs';
+import Router from './koas/Router.mjs';
 import serverRender from './koas/middlewares/serverRender.mjs';
 import statics from './koas/middlewares/statics.mjs';
-import Router from './koas/Router.mjs';
 
-import settings from './settings.mjs';
-import { date } from './utils.mjs';
+import settings from './config/settings.mjs';
 import readDir from './utils/readDir.mjs';
+import api from './api/index.mjs';
 
-const __filename = import.meta.url.substr(7);
-const debug = util.debuglog(`debug:${path.basename(__filename)}`); 
+const debug = util.debuglog('debug:routes.mjs');
 const paths = settings.paths;
 const index = new Router({});
-const api = new Router({});
-
-api.all('/', async (ctx, next) => {
-  const apiFile = path.join(paths.API, ctx.path.replace(/^\/api\//, '') + '.mjs');
-
-  if (fs.existsSync(apiFile)) {
-    return await import(apiFile).then(m => {
-      const api = m.default;
-      api(ctx);
-    });
-  }
-
-  ctx.body = 'api';
-});
 
 /**
  * 当发生样式文件修改时，自动重建styles.css文件
  */
 
-/*
 index.get('/*', async (ctx, next) => {
+  const pathname = ctx.pathname;
 
-  if (ctx.path === '/statics/react-dom.development.js' ||
-      ctx.path === '/statics/react-dom.production.min.js') {
-    if (!fs.existsSync(path.join(paths.PUBLIC, ctx.path))) {
-      const s = path.join(paths.NODE_MODULES, 'react-dom', 'umd', path.basename(ctx.path));
-      const o = path.join(paths.PUBLIC, ctx.path);
+  if (pathname === '/statics/react-dom.development.js' ||
+      pathname === '/statics/react-dom.production.min.js') {
+    if (!fs.existsSync(path.join(paths.PUBLIC, pathname))) {
+      const s = path.join(paths.NODE_MODULES, 'react-dom', 'umd', path.basename(pathname));
+      const o = path.join(paths.PUBLIC, pathname);
       if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
     }
   }
 
-  if (ctx.path === '/statics/react.development.js' ||
-      ctx.path === '/statics/react.production.min.js') {
-    if (!fs.existsSync(path.join(paths.PUBLIC, ctx.path))) {
-      const s = path.join(paths.NODE_MODULES, 'react', 'umd', path.basename(ctx.path));
-      const o = path.join(paths.PUBLIC, ctx.path);
+  if (pathname === '/statics/react.development.js' ||
+      pathname === '/statics/react.production.min.js') {
+    if (!fs.existsSync(path.join(paths.PUBLIC, pathname))) {
+      const s = path.join(paths.NODE_MODULES, 'react', 'umd', path.basename(pathname));
+      const o = path.join(paths.PUBLIC, pathname);
       if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
     }
   }
 
   if (ctx.app.env === 'development') {
-    if (ctx.path === '/styles/main.css') {
+    if (pathname === '/styles/main.css') {
       const scssFiles = readDir(path.join(paths.PUBLIC, 'styles', 'scss')); 
       const cssFile = path.join(paths.PUBLIC, 'styles', 'main.css');
       const cssStats = fs.lstatSync(cssFile);
@@ -74,7 +60,11 @@ index.get('/*', async (ctx, next) => {
       for (let file of scssFiles) {
         const stats = fs.lstatSync(file);
         if (stats.mtime > cssStats.ctime) {
+          debug(stats);
+          debug(cssStats);
+
           // @todo: 
+          await cp.spawn(path.join(paths.BIN, 'css-render.mjs'));
           break;
         }
       }
@@ -84,12 +74,10 @@ index.get('/*', async (ctx, next) => {
   await next();
 
 });
-*/
 
 // 将api路由附加至index
 index.use('/api*', api.routes(), api.allowedMethods());
 
-/*
 index.get('/*', serverRender({
   styles: [ "/styles/main.css" ],
   scripts: [
@@ -99,9 +87,7 @@ index.get('/*', serverRender({
     { src: "/modules/fallback.js", nomodule: true},
   ],
 }));
-*/
 
-// 
 index.get('/*', statics({ root: paths.PUBLIC }));
 
 export default index;

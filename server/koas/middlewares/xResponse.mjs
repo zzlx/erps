@@ -20,21 +20,23 @@ export default function xResponse(opts = {}) {
     let timer= process.hrtime(); // use process.uptime can be efficient
     //const start = Date.now();
 
+    await next();
+
     if (ctx.app.env !== 'production') {
+      timer = process.hrtime(timer); // hrtime is an array like [s, ns]
+
+      // count micro secont time 
+      const interval = Math.round(timer[0] * 1000 + timer[1] / 1000000);
+      //const ms = Date.now() - start;
+
       const platform = `${os.platform()}_${os.arch()}`;
       const nodejs = `${process.release.name}@${process.version}`; 
 
-      ctx.set('X-Powered-By', `${nodejs} (${platform})`); 
+      ctx.set({
+        'X-Response-Time': `${interval}ms`,
+        'X-Powered-By': `${nodejs} (${platform})`,
+      });
     }
 
-    await next();
-
-    timer = process.hrtime(timer); // hrtime is an array like [s, ns]
-
-    // count micro secont time 
-    const interval = Math.round(timer[0] * 1000 + timer[1] / 1000000);
-    //const ms = Date.now() - start;
-
-    ctx.set('X-Response-Time', `${interval}ms`);
   }
 }

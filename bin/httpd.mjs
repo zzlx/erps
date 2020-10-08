@@ -19,7 +19,7 @@ import path from 'path';
 import util from 'util';
 
 import serviceApp from '../server/main.mjs';
-import settings from '../server/settings.mjs';
+import settings from '../server/config/settings.mjs';
 import { 
   assert, 
   argvParser, 
@@ -243,7 +243,7 @@ function attachServerEvent (server) {
   });
 
   server.on('OCSPRequest', (certificate, issuer, callback) => {
-    debug('OCSPRequest event with certificate: %o, and issuer: %o', 
+    debug('OCSPRequest event with certificate: %o, issuer: %o', 
       certificate.toString('hex'),
       issuer,
     );

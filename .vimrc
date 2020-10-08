@@ -1,13 +1,13 @@
 " ==============================================================================
 "
-" VIM开发环境配置文件
+" VIM配置
 "
 " usage: 'vim -u .vimrc'
 " author: wangxuemin@zzlx.org
 " ==============================================================================
 
 set nocompatible  " Use Vim defaults instead of 100% vi compatibility
-set backspace=2   " more powerful backspacing
+set backspace=2
      
 " ------------------------------------------------------------------------------
 " 文件类型设置 "
@@ -35,7 +35,7 @@ set shortmess=atI
 set title 
 
 " ------------------------------------------------------------------------------
-" 状态显示
+" 状态栏
 set ruler
 set statusline=%F[:b%n][%{&ff}]%m%r%h%w%y\ %=\ %-8.(%l,%c%V%)\ %p%%
 set laststatus=2

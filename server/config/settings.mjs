@@ -34,10 +34,12 @@ export default new Proxy(Object.assign(configs, { paths: paths }, { system: syst
     if (property === 'saveConfig') return () => {};
     if (property === 'readConfig') return () => {};
     if (property === 'cert') {
-      return fs.readFileSync(`/etc/ssl/${os.hostname()}-cert.pem`);
+      const certFile = target.certFile || `/etc/ssl/${os.hostname()}-cert.pem`;
+      return fs.readFileSync(certFile);
     }
     if (property === 'privateKey') {
-      return fs.readFileSync(`/etc/ssl/${os.hostname()}-key.pem`);
+      const keyFile = target.privateKey || `/etc/ssl/privkey.pem`;
+      return fs.readFileSync(keyFile);
     }
     if (property === 'toString' || property === 'toJSON') {
       return () => JSON.stringify(target);

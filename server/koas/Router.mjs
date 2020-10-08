@@ -1,45 +1,44 @@
 /**
  * *****************************************************************************
  *
- * Router
- *
- * RESTful resource routing manager.
- *
+ * 服务端路由器
  *
  * *****************************************************************************
  */
 
 import compose from './compose.mjs';
 import HttpError from './HttpError.mjs';
-import { compile, parse, pathToRegexp, } from '../utils.mjs';
+import { 
+  assert, 
+  compile, 
+  parse, 
+  path,
+  pathToRegexp, 
+} from '../utils.mjs';
 
 export default class Router {
-
   /**
    * constructor
    *
    * @param {object} props
    * @param {string} props.prefix
-   * @param {array} props.methods
+   * @param {array}  props.methods
    * @param {object} props.params
-   *
    */
 
   constructor (opts = {}) {
     this.opts = Object.assign({}, {
-      // default options
       methods: [ 'GET', 'HEAD', 'OPTIONS', 'POST' ],
     }, opts);
 
     this.methods = this.opts.methods;
     this.params = {};
-    this.stack  = []; // stacks
+    this.stack  = [];
 
-     // this.get|put|post|patch|delete|del ⇒ Router
+    // this.get|put|post|patch|delete|del ⇒ Router
     for (let i = 0; i < this.methods.length; i++) {
       const method = this.methods[i].toLowerCase().replace('-', '_');
 
-      // @todo: 完善name逻辑
       this[method] = function (name, path, middleware) {
 
         if (typeof path === "string" || path instanceof RegExp) {
@@ -68,12 +67,7 @@ export default class Router {
 
   param (param, middleware) {
     this.params[param] = middleware;
-
-    for (let i = 0; i < this.stack.length; i++) {
-      const route = this.stack[i];
-      route.param(param, middleware);
-    }
-
+    for (let route of this.stack) route.param(param, middleware);
     return this;
   }
 
@@ -98,7 +92,7 @@ export default class Router {
       name = null;
     }
 
-    this.register(path, this.methods, middleware, { name });
+    this.register(path, this.methods, middleware, { name: name });
 
     return this;
   }
@@ -107,17 +101,15 @@ export default class Router {
    * Lookup route with given name.
    *
    * Usage:
-   * router.route(namedRoute);  => namedRoute
+   * router.route(routeName);  => namedRoute
    *
    * @param {string} name
    * @returns {Layer|false}
    */
 
-  route (name) {
-    const routes = this.stack;
-
-    for (let i = 0; i < routes.length; i++) {
-      if (routes[i].name && routes[i].name === name) return routes[i];
+  route (routeName) {
+    for (let route of this.stack) {
+      if (route.name && route.name === routeName) return route;
     }
 
     return false;
@@ -138,13 +130,12 @@ export default class Router {
 
   url (name, params) {
     const route = this.route(name);
+    assert(route, `No route found for name: ${name}`);
 
     if (route) {
       const args = Array.prototype.slice.call(arguments, 1);
       return route.url.apply(route, args);
     }
-
-    return new Error(`No route found for name: ${name}`);
   }
 
   /**
@@ -159,20 +150,10 @@ export default class Router {
    */
 
   prefix (prefix) {
-    if (typeof prefix !== 'string') {
-      throw new Error('prefix paramater must be string.');
-    }
-
-    prefix = prefix.replace(/\/$/, '');
-
+    assert(typeof prefix === 'string', 'prefix paramater must be string.');
+    prefix = stripTrailingSlash(prefix);
     this.opts.prefix = prefix;
-
-    // stack layer
-    for (let i = 0; i < this.stack.length; i++) {
-      const layer = this.stack[i];
-      layer.setPrefix(prefix);
-    }
-
+    for (let route of this.stack) route.setPrefix(prefix);
     return this;
   }
 }
@@ -188,36 +169,30 @@ export default class Router {
  */
 
 Router.prototype.use = function () {
-  const router = this;
   const args = Array.prototype.slice.call(arguments);
+  const router = this;
 
   // paths 
   if (Array.isArray(arguments[0])) {
     let paths = arguments[0];
 
-    for (let i = 0; i < paths.length; i++) {
-      const path = paths[i];
+    for (let path of paths) {
       this.use.apply(this, [path].concat(args.slice(1)));
-    }
+    } 
 
     return this;
   }
 
-  // path
+  // if has path
   const hasPath = typeof arguments[0] === 'string';
 
   let path;
   if (hasPath) path = args.shift(); 
 
   // iterator middleware arguments
-  for (let i = 0; i < args.length; i++) {
-
-    // get middleware
-    const middleware = args[i];
-
+  for (let middleware of args) {
     // whether router middleware
     if (middleware.router) {
-
       //
       const cloneRouter = Object.assign(
         Object.create(Router.prototype), 
@@ -244,11 +219,9 @@ Router.prototype.use = function () {
 
       if (router.params) {
         const routerParams = Object.keys(router.params);
-
-        for (let k = 0; k < routerParams.length; k++) {
-          const key = routerParams[k];
+        for (let key of routerParams) {
           cloneRouter.param(key, router.params[key]);
-        } // end of for k
+        }
       }
 
     } else {
@@ -265,7 +238,7 @@ Router.prototype.use = function () {
 
 /**
  *
- * Returns router middleware which dispatches a route matching the request.
+ * Return router middleware which dispatches a route matching the request.
  *
  * @returns {Function}
  */
@@ -275,10 +248,10 @@ Router.prototype.routes = function () {
 
   function routerMiddleware (ctx, next) {
 
-    const path = router.opts.routerPath || ctx.routerPath || ctx.path;
+    const path = router.opts.routerPath || ctx.routerPath || ctx.pathname;
     const matched = router.match(path, ctx.method);
 
-    let layerChain; // 
+    let layerChain;
 
     if (ctx.matched) {
       ctx.matched.push.apply(ctx.matched, matched.path);
@@ -336,28 +309,21 @@ Router.prototype.routes = function () {
 Router.prototype.allowedMethods = function (options = {}) {
   const implemented = this.methods;
 
-  return async function allowedMethods(ctx, next) {
+  return async function allowedMethodsMiddleware(ctx, next) {
     await next();
 
     const allowed = {};
 
     if (!ctx.status || ctx.status === 404) {
-
-      for (let i = 0; i < ctx.matched.length; i++) {
-        const route = ctx.matched[i];
-
-        for (let j = 0; j < route.methods.length; j++) {
-          const method = route.methods[j];
-          allowed[method] = method;
-        }
-
-      } // end for matched
+      for (let route of ctx.matched) {
+        for (let method of route.methods) allowed[method] = method;
+      }
 
       const allowedArr = Object.keys(allowed);
 
       if (!~implemented.indexOf(ctx.method)) {
         if (options.throw) {
-          let notImplementedThrowable = (typeof options.notImplemented === 'function')
+          let notImplementedThrowable = typeof options.notImplemented === 'function'
             ? options.notImplemented()
             : new HttpError(http2.constants.HTTP_STATUS_NOT_IMPLEMENTED);
 
@@ -366,12 +332,16 @@ Router.prototype.allowedMethods = function (options = {}) {
           ctx.status = http2.constants.HTTP_STATUS_NOT_IMPLEMENTED;
           ctx.set('Allow', allowedArr.join(', '));
         }
+
       } else if (allowedArr.length) {
         if (ctx.method === 'OPTIONS') {
+
           ctx.status = http2.constants.HTTP_STATUS_OK;
           ctx.body = '';
           ctx.set('Allow', allowedArr.join(', '));
+
         } else if (!allowed[ctx.method]) {
+
           if (options.throw) {
             let notAllowedThrowable = typeof options.methodNotAllowed === 'function'
               ? options.methodNotAllowed()
@@ -381,6 +351,7 @@ Router.prototype.allowedMethods = function (options = {}) {
             ctx.status = http2.constants.HTTP_STATUS_METHOD_NOT_ALLOWED
             ctx.set('Allow', allowedArr.join(', '));
           }
+
         }
       }
     }
@@ -412,26 +383,24 @@ Router.prototype.redirect = function (source, destination, code = 301) {
 }
 
 /**
+ *
  * Create and register a route.
  *
  * @param {string} path
  * @param {array} methods
  * @param  {function} middleware
- *
  * @returns {Layer}
  * @private
  */
 
 Router.prototype.register = function (path, methods, middleware, opts = {}) {
-  if (Array.isArray(path)) {
-    for (let i = 0; i < path.length; i++) {
-      const curPath = path[i];
-      this.register(curPath, methods, middleware, opts);
-    }
 
+  if (Array.isArray(path)) {
+    for (let curPath of path) this.register(curPath, methods, middleware, opts);
     return this;
   }
 
+  // route
   const route = new Layer(path, methods, middleware, {
     end: opts.end === false ? opts.end : true,
     name: opts.name,
@@ -441,15 +410,10 @@ Router.prototype.register = function (path, methods, middleware, opts = {}) {
     ignoreCaptures: opts.ignoreCaptures,
   });
 
-  if (this.opts.prefix) {
-    route.setPrefix(this.opts.prefix);
-  }
+  if (this.opts.prefix) route.setPrefix(this.opts.prefix);
 
   // add parameter middleware
-  for (let i = 0; i < Object.keys(this.params).length; i++) {
-    const param = Object.keys(this.params)[i];
-    route.param(param, this.params[param]);
-  }
+  for (let p of Object.keys(this.params)) route.param(p, this.params[p]);
 
   this.stack.push(route);
 
@@ -457,6 +421,7 @@ Router.prototype.register = function (path, methods, middleware, opts = {}) {
 }
 
 /**
+ *
  * Match given path and return corresponding routes
  *
  *
@@ -475,9 +440,7 @@ Router.prototype.match = function (path, method) {
     route: false,
   };
 
-  for  (let i = 0; i < layers.length; i++) {
-    let layer = layers[i];
-
+  for (let layer of layers) {
     if (layer.match(path)) {
       matched.path.push(layer);
 
@@ -492,6 +455,7 @@ Router.prototype.match = function (path, method) {
 }
 
 /**
+ *
  * Generate URL from url pattern and given `params`.
  *
  * # example
@@ -503,6 +467,7 @@ Router.prototype.match = function (path, method) {
  * @param {String} path url pattern
  * @param {Object} params url parameters
  * @returns {String}
+ *
  */
 
 Router.url = function (path) {
@@ -511,45 +476,41 @@ Router.url = function (path) {
 }
 
 /**
- * *****************************************************************************
- *
  * Route layer
- *
- * Initialize a new routing Layer with given `method`, `path`, and `middleware`.
- *
- * @param {String|RegExp} path Path string or regular expression.
- * @param {Array} methods Array of HTTP verbs.
- * @param {Array} middleware Layer callback/middleware or series of.
- * @param {Object=} opts
- * @param {String=} opts.name route name
- * @param {String=} opts.sensitive case sensitive (default: false)
- * @param {String=} opts.strict require the trailing slash (default: false)
- * @returns {Layer}
- * @private
- * *****************************************************************************
  */
 
 class Layer {
+  /**
+   * Initialize a new routing Layer with given `method`, `path`, and `middleware`.
+   *
+   * @param {String|RegExp} path Path string or regular expression.
+   * @param {Array} methods Array of HTTP verbs.
+   * @param {Array} middleware Layer callback/middleware or series of.
+   * @param {Object=} opts
+   * @param {String=} opts.name route name
+   * @param {String=} opts.sensitive case sensitive (default: false)
+   * @param {String=} opts.strict require the trailing slash (default: false)
+   * @returns {Layer}
+   * @private
+   */
   constructor (path, methods, middleware, opts = {}) {
     this.opts = Object.assign({}, opts);
     this.name = this.opts.name || null;
-    this.methods = [];
-    this.paramNames = [];
+    this.methods = []; // 方法
+    this.paramNames = []; // 参数
     this.stack = Array.isArray(middleware) ? middleware : [middleware];
 
-    for (let i = 0; i < methods.length; i++) {
-      const len = this.methods.push(methods[i].toUpperCase());
+    for (let method of methods) {
+      const len = this.methods.push(method.toUpperCase());
       if (this.methods[len-1] === 'GET') this.methods.unshift('HEAD');
     }
 
-    for (let i = 0; i < this.stack.length; i++) {
-      const fn = this.stack[i];
-      if (typeof(fn) !== 'function') {
-        throw new Error(`${this.opts.name || path}: middleware must be a function.`);
-      }
+    for (let fn of this.stack) {
+      assert(typeof fn === 'function', `${fn} must be a function.`);
     }
 
     this.path = path;
+    
     this.regexp = pathToRegexp(path, this.paramNames, this.opts);
   }
 
@@ -563,7 +524,7 @@ class Layer {
 
   setPrefix (prefix) {
     if (this.path) {
-      this.path = (this.path !== '/' || this.opts.strict === true)
+      this.path = this.path !== '/' || this.opts.strict === true
         ? `${prefix}${this.path}` 
         : prefix;
 
@@ -571,7 +532,7 @@ class Layer {
       this.regexp = pathToRegexp(this.path, this.paramNames, this.opts);
     }
 
-    return this;
+    return this; // return route
   }
 
   /**
@@ -589,8 +550,8 @@ class Layer {
 
     for (let i = 0; i < captures.length; i++) {
       if (this.paramNames[i]) {
-        const c = captures[i];
-        params[this.paramNames[i].name] = c ? decodeURIComponent(c) : c;
+        const cap = captures[i];
+        params[this.paramNames[i].name] = cap ? decodeURIComponent(cap) : cap;
       }
     }
 
@@ -668,18 +629,16 @@ class Layer {
    */
 
   captures (path) {
-
-    // ignore capture
-    // or return the matched key
-    return this.opts.ignoreCaptures 
-      ? [] 
-      : path.match(this.regexp).slice(1);
+    return this.opts.ignoreCaptures ? [] : path.match(this.regexp).slice(1);
   }
 
   /**
    * Generate URL for route using given `params`.
    *
-   *
+   * ```javascript
+   * const route = new Layer('/users/:id', ['GET'], fn);
+   * route.url({ id: 123 }); // => "/users/123"
+   * ```
    * @param {Object} params url parameters
    * @returns {String} url string
    * @private
@@ -688,9 +647,9 @@ class Layer {
 
   url (params, options) {
     let args = params;
-    const url = this.path.replace(/\(\.\*\)/g, '');
+    let replace = {};
 
-    if (typeof(params) !== 'object') {
+    if (typeof params !== 'object') {
       args = Array.prototype.slice.call(arguments);
 
       if (typeof args[args.length - 1] === 'object') {
@@ -699,15 +658,13 @@ class Layer {
       }
     }
 
-    const toPath = compile(url, options);
-    let replaced;
-
+    const url = this.path.replace(/\(\.\*\)/g, '');
     const tokens = parse(url);
-    let replace = {};
 
-    if (args instanceof Array) {
-      for (let i = 0, j = 0, len = tokens.length; i < len; i++) {
-        if (tokens[i].name) replace[tokens[i].name] = args[j++]
+    if (Array.isArray(args)) {
+      let j = 0;
+      for (let token of tokens) {
+        if (token.name) replace[token.name] = args[j++];
       }
     } else if (tokens.some(token => token.name)) {
       replace = params;
@@ -715,18 +672,20 @@ class Layer {
       options = params;
     }
 
-    replaced = toPath(replace);
+    const toPath = compile(url, options);
+
+    let replaced = toPath(replace);
 
     if (options && options.query) {
-      replaced = parseUrl(replaced);
+      replaced = new URL(replaced);
+
       if (typeof options.query === 'string') {
         replaced.search = options.query;
       } else {
         replaced.search = undefined;
-        replaced.query = options.query;
       }
 
-      return formatUrl(replaced);
+      return replaced.href;
     }
 
     return replaced;
