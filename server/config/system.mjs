@@ -2,7 +2,6 @@
  * *****************************************************************************
  *
  * 系统配置项
- * ============
  *
  * *****************************************************************************
  */
@@ -18,7 +17,7 @@ export default new Proxy({
   release: os.release(),
   userInfo: os.userInfo(),
   hostname: os.hostname(),
-  host: isSupportIPv6() ? "::" : "0.0.0.0",
+  ipv6: isSupportIPv6(),
   port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 8888,
   pidPrefix: 'org.zzlx',
   platform: os.platform(),

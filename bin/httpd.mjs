@@ -18,8 +18,8 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import serviceApp from '../server/main.mjs';
 import settings from '../server/config/settings.mjs';
+import serviceApp from '../server/main.mjs';
 import { 
   assert, 
   argvParser, 
@@ -35,24 +35,6 @@ let httpd = null;
 let server = null;
 
 process.title = 'erps.httpd';
-process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-
-process.on('exit', code => {
-  debug(`${process.title}(PID:${process.pid}) is exit with code ${code}.`);
-});
-
-// 被此事件捕获的exception,需要进行妥善处理
-// 不应出现未经管理的exception
-process.on('uncaughtException', (error, origin) => {
-  console.error('Caught exception: %o', error);
-  console.error('Origin exception: %s', origin);
-});
-
-// 被此事件捕获的rejection,需要进行妥善处理
-// 系统不应出现未经管理的rejection
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled rejection: %o', reason);
-});
 
 process.nextTick(() => {
   // 检测系统平台类型
@@ -74,6 +56,7 @@ function executer () {
     switch(param) { 
       case 'env': 
         settings.env = paramMap.get('env');
+
         paramMap.delete(param); // delete param key
         continue;
       case 'debug':
@@ -144,7 +127,7 @@ function start () {
 
   server.listen({
     ipv6Only: false, // 是否仅开启IPV6
-    host: settings.system.host,
+    host: settings.system.ipv6 ? '::' : '0.0.0.0',
     port: settings.system.port,
     exclusive: false, // false 可接受进程共享端口, 支持集群服务器配置
   });

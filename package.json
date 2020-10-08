@@ -4,9 +4,10 @@
   "description": "A ERP system services.",
   "private": true,
   "scripts": {
-    "devel": "./bin/starter.mjs --devel --command='./bin/httpd.mjs' --args='--restart' --paths=bin,server",
-    "start-httpd": "./bin/httpd.mjs --start",
-    "restart-httpd": "./bin/httpd.mjs --restart",
+    "devel": "./bin/starter.mjs --command='./bin/httpd.mjs' --args='--restart' --paths=bin,server",
+    "ide": "vim -u .vimrc",
+    "restart": "./bin/httpd.mjs --restart",
+    "start": "./bin/httpd.mjs --start",
     "stop-httpd": "./bin/httpd.mjs --stop"
   },
   "dependencies": {

@@ -23,16 +23,12 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
 
+import settings from '../server/config/settings.mjs';
 import { assert, argvParser, console } from '../server/utils.mjs';
 import readDir from '../server/utils/readDir.mjs';
 
 const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
 const paramMap = argvParser(ARGVS);
-
-if (paramMap.has('devel')) {
-  process.env.NODE_ENV = 'development'; 
-  process.env.NODE_DEBUG = 'debug:*';
-}
 
 const command = paramMap.get('command');
 assert(command, '请提供要执行的命令!');
@@ -45,7 +41,10 @@ let cmd = null;
 let lastPid = null;
 
 process.nextTick(() => new Watcher(...paths, () => {
-  cmd = cp.spawn(command, args, { stdio: [0, 1, 2], detached: false });
+  cmd = cp.spawn(command, args, { 
+    stdio: [0, 1, 2], 
+    detached: false 
+  });
   console.clear();
   console.log(`${lastPid ? `(PID:${lastPid})进程退出 ` : ''}(PID:${cmd.pid})启动...`);
   lastPid = cmd.pid;

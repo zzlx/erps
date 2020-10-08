@@ -19,6 +19,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
+import './env.mjs';
 import paths from './paths.mjs';
 import system from './system.mjs';
 
