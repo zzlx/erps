@@ -14,13 +14,12 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-import Router from './koas/Router.mjs';
-import serverRender from './koas/middlewares/serverRender.mjs';
-import statics from './koas/middlewares/statics.mjs';
+import Router from '../src/koas/Router.mjs';
+import serverRender from '../src/koas/middlewares/serverRender.mjs';
+import statics from '../src/koas/middlewares/statics.mjs';
 
-import settings from './config/settings.mjs';
-import readDir from './utils/readDir.mjs';
-import api from './apis/index.mjs';
+import settings from '../src/config/settings.mjs';
+import readDir from '../src/utils/readDir.mjs';
 
 const debug = util.debuglog('debug:routes.mjs');
 const paths = settings.paths;
@@ -38,6 +37,7 @@ index.get('/*', async (ctx, next) => {
     if (!fs.existsSync(path.join(paths.PUBLIC, pathname))) {
       const s = path.join(paths.NODE_MODULES, 'react-dom', 'umd', path.basename(pathname));
       const o = path.join(paths.PUBLIC, pathname);
+      await fs.promises.mkdir(path.dirname(o), {recursive: true});
       if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
     }
   }
@@ -47,6 +47,7 @@ index.get('/*', async (ctx, next) => {
     if (!fs.existsSync(path.join(paths.PUBLIC, pathname))) {
       const s = path.join(paths.NODE_MODULES, 'react', 'umd', path.basename(pathname));
       const o = path.join(paths.PUBLIC, pathname);
+      await fs.promises.mkdir(path.dirname(o), {recursive: true});
       if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
     }
   }
@@ -54,6 +55,7 @@ index.get('/*', async (ctx, next) => {
   if (pathname === '/statics/css/styles.css') {
     const scssFiles = readDir(paths.SCSS);
     const cssFile = path.join(paths.PUBLIC, 'statics', 'css', 'styles.css');
+    await fs.promises.mkdir(path.dirname(cssFile), {recursive: true});
     const cssStats = fs.lstatSync(cssFile);
 
     for (let file of scssFiles) {
@@ -67,10 +69,8 @@ index.get('/*', async (ctx, next) => {
   }
 
   await next();
-});
 
-// 将api路由附加至index
-index.use('/api*', api.routes());
+});
 
 index.get('/*', serverRender({
   styles: [ "/statics/css/styles.css" ],
@@ -81,6 +81,30 @@ index.get('/*', serverRender({
     { src: "/modules/fallback.js", nomodule: true},
   ],
 }));
+
+// 将api路由附加至index
+index.all('/api/*', async (ctx, next) => {
+  //if (ctx.pathname === 'favicon.ico') return await next();
+  const apiFile = path.join(paths.SERVER, 'apis', path.relative('/api', ctx.pathname) + '.mjs');
+
+  if (fs.existsSync(apiFile)) {
+    return await import(apiFile).then(m => m.default).then(app => {
+      app(ctx);
+      debug(ctx.body);
+    });
+  }
+
+  ctx.type = 'html';
+  const html = new Html({
+    styles: ['/statics/css/styles.css'],
+  });
+
+  html.body = '<div class="container">' + 
+    marked(fs.readFileSync(path.join(paths.SERVER, 'apis', 'README.md'), 'utf8')) +
+  '</div>';
+
+  ctx.body = html.render();
+});
 
 index.get('/*', statics({ root: paths.PUBLIC }));
 

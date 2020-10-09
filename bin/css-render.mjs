@@ -18,7 +18,7 @@ import settings from '../server/config/settings.mjs';
 const paths = settings.paths;
 
 // 定义样式文件路径
-const scssEntryPoint = path.join(paths.SCSS, 'main.scss');
+const scssEntryPoint = path.join(paths.SRC, 'scss', 'main.scss');
 const cssFile = path.join(paths.PUBLIC, 'statics', 'css', 'styles.css');
 
 // node-sass module

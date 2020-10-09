@@ -38,39 +38,21 @@ export default (options = {}) => {
   }
 
   return async function staticsMiddleware (ctx, next) {
-
-    // only accept GET/HEAD/OPTIONS method
-    if (!/(GET|HEAD|OPTIONS)/.test(ctx.method)) {
-      ctx.status = 405; // method not allowed.
-      ctx.set('Allow', 'GET, HEAD, OPTIONS');
-      return await next();
-    }
-
-    // get relative path from pathname
-    // set absolute path
-    const relativePath = path.relative('/', ctx.pathname);
-    const absolutePath = path.resolve(opts.root, relativePath);
-
+    const relativePath = path.relative('/', ctx.pathname); // 获取路径
+    const absolutePath = path.resolve(opts.root, relativePath); // 构造路径
     let url = absolutePath;
-    let callbackURL = path.join(opts.root, 'index.html'); 
 
-    // 路径构造逻辑
-    // 不含文件扩展名的路径rewrite为callbackURL
-    if (path.extname(url) === '') url = callbackURL;
-
-    ctx.type = path.extname(url); // set content-type
-
-    // #内容协商算法#
-    // content negotiation algorithm
-    //
+    // @Algorithm:内容协商逻辑
 
     // Vary 是一个HTTP响应头部信息，
-    // 它决定了对于未来的一个请求头，应该用一个缓存的回复(response)还是向源服务器请求一个新的回复。
-    // 在响应状态码为 304 Not Modified  的响应中，也要设置 Vary 首部，而且要与相应的 200 OK 响应设置得一模一样。
+    // 它决定了对于未来的一个请求头，
+    // 应该用一个缓存的回复(response)还是向源服务器请求一个新的回复。
+    // 在响应状态码为 304 Not Modified  的响应中，
+    // 也要设置 Vary 首部，而且要与相应的 200 OK 响应设置得一模一样。
     //ctx.set('vary', 'accept-encoding');
     ctx.set('vary', 'User-Agent');
+    ctx.type = path.extname(url); // set content-type
 
-    // 
     const accetpEncoding = ctx.get('accept-encoding'); // get accept encoding
     if (/\bbr\b/.test(accetpEncoding) && fs.existsSync(url + '.br')) {
       ctx.set('content-encoding', 'br');
@@ -83,7 +65,6 @@ export default (options = {}) => {
       url += '.gz';
     }
 
-    // response
     if (fs.existsSync(url)) {
       const stats = fs.lstatSync(url);
       const etag = `${stats.mtimeMs}`; 
@@ -97,11 +78,13 @@ export default (options = {}) => {
       // 客户端缓存配置
       ctx.set({
         'etag': etag, // 开启服务端资源验证逻辑
-        'last-modified': stats.mtime, // 开启浏览器端缓存
+        //'last-modified': stats.mtime, // 开启浏览器端缓存
         'cache-control': `max-age=${ctx.app.env === 'development' ? 0 : opts.maxAge}`,
       }); 
 
       ctx.body = fs.createReadStream(url);
+    } else {
+      return await next();
     }
   }
 }

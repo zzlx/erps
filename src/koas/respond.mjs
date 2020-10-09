@@ -16,8 +16,7 @@ const debug = util.debuglog('debug:respond.mjd');
 const emptyStatus = [ 204, 205, 304 ];
 
 export default function respond (ctx) {
-  debug('执行客户端响应程序...');
-
+  debug('Response body:', ctx.body);
   let body = ctx.body;
 
   // allow bypassing response

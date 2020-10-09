@@ -24,7 +24,7 @@ import {
   assert, 
   argvParser, 
   console 
-} from '../server/utils.mjs';
+} from '../src/utils.mjs';
 
 const paths = settings.paths;
 const debug = util.debuglog('debug:httpd.mjs');

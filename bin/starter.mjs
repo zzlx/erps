@@ -23,9 +23,9 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
 
-import settings from '../server/config/settings.mjs';
-import { assert, argvParser, console } from '../server/utils.mjs';
-import readDir from '../server/utils/readDir.mjs';
+import settings from '../src/config/settings.mjs';
+import { assert, argvParser, console } from '../src/utils.mjs';
+import readDir from '../src/utils/readDir.mjs';
 
 const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
 const paramMap = argvParser(ARGVS);
