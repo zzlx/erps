@@ -5,10 +5,9 @@
   "private": true,
   "scripts": {
     "devel": "./bin/starter.mjs --command='./bin/httpd.mjs' --args='--restart' --paths=bin,server",
-    "vim": "vim -u .vimrc",
     "restart": "./bin/httpd.mjs --restart",
     "start": "./bin/httpd.mjs --start",
-    "stop-httpd": "./bin/httpd.mjs --stop"
+    "stop": "./bin/httpd.mjs --stop"
   },
   "dependencies": {
     "chart": "^0.1.2",
