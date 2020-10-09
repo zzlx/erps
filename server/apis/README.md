@@ -1,14 +1,17 @@
-# <h1 style="font-size: 1.5rem;">API服务列表</h1>
+API服务列表
+======
 
 ---
 
-## 1. API地址
+## 1. API列表
 
-* [/api/graphql](/api/graphql): 数据查询接口API
-* [/api/syslog](/api/syslog): 系统访问日志
+| API | 地址 | 备注 |
+| :--: | :--: | :--: |
+| GraphQ API |  [/api/graphql](/api/graphql) | 系统数据接口 |
+| Syslog API |  [/api/syslog](/api/syslog) | 查看系统访问日志 |
 
-## 2. 使用说明
+## 2. API使用说明
 
-* 请求方法: POST
+使用POST请求方法
 
 ---

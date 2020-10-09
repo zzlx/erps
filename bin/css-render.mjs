@@ -12,7 +12,7 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
-import settings from '../server/config/settings.mjs';
+import settings from '../config/settings.mjs';
 
 // 获取目录配置
 const paths = settings.paths;

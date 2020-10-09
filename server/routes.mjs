@@ -13,7 +13,7 @@ import cp from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import marked from 'marked';
+import Remarkable from 'remarkable';
 
 import settings from '../config/settings.mjs';
 import Router from '../src/kos/Router.mjs';
@@ -85,12 +85,13 @@ routes.all('/api*', async (ctx, next) => {
   }
 
   ctx.type = 'html';
-  const html = new Html({
-    styles: ['/statics/css/styles.css'],
+  const html = new Html({ styles: ['/statics/css/styles.css'], });
+  const md = new Remarkable({
+    html: true,
   });
 
-  html.body = '<div class="container">' + 
-    marked(fs.readFileSync(path.join(paths.SERVER, 'apis', 'README.md'), 'utf8')) +
+  html.body = '<div class="markdown container">' + 
+    md.render(fs.readFileSync(path.join(paths.SERVER, 'apis', 'README.md'), 'utf8')) +
   '</div>';
 
   ctx.body = html.render();
