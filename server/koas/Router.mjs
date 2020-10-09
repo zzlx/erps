@@ -169,65 +169,50 @@ export default class Router {
  */
 
 Router.prototype.use = function () {
-  const args = Array.prototype.slice.call(arguments);
   const router = this;
+  let path = 'string' === arguments[0] ? arguments[0] : null;
 
-  // paths 
-  if (Array.isArray(arguments[0])) {
-    let paths = arguments[0];
+  const middlewares = 'string' === typeof arguments[0]
+    ? Array.prototype.slice.call(arguments, 1)
+    : Array.prototype.slice.call(arguments);
 
-    for (let path of paths) {
-      this.use.apply(this, [path].concat(args.slice(1)));
-    } 
-
+  // support paths 
+  if (Array.isArray(path)) {
+    for (let p of path) this.use.apply(this, [p].concat(middlewares.slice(1)));
     return this;
   }
 
-  // if has path
-  const hasPath = typeof arguments[0] === 'string';
-
-  let path;
-  if (hasPath) path = args.shift(); 
-
   // iterator middleware arguments
-  for (let middleware of args) {
-    // whether router middleware
-    if (middleware.router) {
-      //
-      const cloneRouter = Object.assign(
-        Object.create(Router.prototype), 
-        middleware.router, 
-        { stack: middleware.router.stack.slice(0) }
-      );
+  for (let m of middlewares) {
+    if (m.router) {
+      const cloneRouter = Object.assign(Object.create(Router.prototype), m.router, {
+        stack: m.router.stack.slice(0) 
+      });
 
-      // 
       for (let j = 0; j < cloneRouter.stack.length; j++) {
         const nestedLayer = cloneRouter.stack[j]; // nested layer
-        const cloneLayer = Object.assign(
-          Object.create(Layer.prototype),
-          nestedLayer
-        );
+        const cloneLayer = Object.assign(Object.create(Layer.prototype), nestedLayer);
 
         // layer添加前缀
         if (path) cloneLayer.setPrefix(path);
         if (router.opts.prefix) cloneLayer.setPrefix(router.opts.prefix);
 
-        router.stack.push(cloneLayer); // 
+        router.stack.push(cloneLayer);
         cloneRouter.stack[j] = cloneLayer;
-
       } // end of for j
 
       if (router.params) {
         const routerParams = Object.keys(router.params);
-        for (let key of routerParams) {
-          cloneRouter.param(key, router.params[key]);
-        }
+        for (let key of routerParams) cloneRouter.param(key, router.params[key]);
       }
-
     } else {
-      router.register(path || '(.*)', [], middleware, {
+      const keys = [];
+      pathToRegexp(router.opts.prefix || '', keys);
+      const routerPrefixHasParam = router.opts.prefix && keys.length;
+
+      router.register(path || '(.*)', [], m, {
         end: false, 
-        ignoreCaptures: !hasPath
+        ignoreCaptures: !hasPath && !routerPrefixHasParam
       });
     } 
 

@@ -60,9 +60,6 @@ index.get('/*', async (ctx, next) => {
       for (let file of scssFiles) {
         const stats = fs.lstatSync(file);
         if (stats.mtime > cssStats.ctime) {
-          debug(stats);
-          debug(cssStats);
-
           // @todo: 
           await cp.spawn(path.join(paths.BIN, 'css-render.mjs'));
           break;
@@ -76,7 +73,7 @@ index.get('/*', async (ctx, next) => {
 });
 
 // 将api路由附加至index
-index.use('/api*', api.routes(), api.allowedMethods());
+index.use('/api*', api.routes());
 
 index.get('/*', serverRender({
   styles: [ "/styles/main.css" ],

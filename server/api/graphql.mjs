@@ -8,6 +8,6 @@
  * *****************************************************************************
  */
 
-export default function graphqlAPI (ctx) {
+export default function graphqlAPI (ctx, next) {
   ctx.body = 'graphql';
 }

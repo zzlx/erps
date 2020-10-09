@@ -161,9 +161,7 @@ export default class Context {
    */
 
   get status() {
-    const statusKey = this.httpVersion == 2 
-      ? http2.constants.HTTP2_HEADER_STATUS : 'status';
-
+    const statusKey = http2.constants.HTTP2_HEADER_STATUS;
     return this[RES_HEADERS][statusKey];
   }
 
@@ -758,7 +756,7 @@ export default class Context {
 
     // no content
     if (null == val || val === false || true === val) {
-      if (!EMPTY_CODE.includes(this.status)) {
+      if (EMPTY_CODE.includes(this.status) === -1) {
         this.status = http2.constants['HTTP_STATUS_NO_CONTENT']; // 204
       }
 
@@ -918,3 +916,5 @@ Context.prototype.compress  = function (value) {
 
   return retval;
 } // end of comporess function
+
+
