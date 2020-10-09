@@ -1,8 +1,11 @@
 /**
  * *****************************************************************************
  *
- * 🌿CSS styles.
+ * SCSS style system. 
  *
+ * @Note: 🌹🐂使用node-sass工具编译
+ * @License: MIT-like
+ * @Editor: wangxuemin@zzlx.org
  * *****************************************************************************
  */
 
@@ -15,7 +18,6 @@
 @import "root";
 @import "reboot";
 @import "type";
-@import "images";
 @import "grid";
 
 @import "./components/code";
@@ -25,6 +27,7 @@
 @import "./components/transitions";
 @import "./components/dropdown";
 @import "./components/button-group";
+@import "./components/images";
 @import "./components/input-group";
 @import "./components/custom-forms";
 @import "./components/nav";

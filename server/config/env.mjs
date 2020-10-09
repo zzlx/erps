@@ -8,6 +8,9 @@
 
 import fs from 'fs';
 import paths from './paths.mjs';
+import util from 'util';
+
+const debug = util.debuglog('debug:env.mjs');
 
 // 如果
 if (fs.existsSync(paths.ENV)) {

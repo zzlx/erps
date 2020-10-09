@@ -4,6 +4,8 @@
  *
  * 生成css文件
  *
+ *
+ *
  * *****************************************************************************
  */
 
@@ -12,9 +14,12 @@ import path from 'path';
 import zlib from 'zlib';
 import settings from '../server/config/settings.mjs';
 
+// 获取目录配置
 const paths = settings.paths;
-const scssEntryPoint = path.join(paths.PUBLIC, 'styles', 'scss', 'main.scss');
-const cssFile = path.join(paths.PUBLIC, 'styles', 'main.css');
+
+// 定义样式文件路径
+const scssEntryPoint = path.join(paths.SCSS, 'main.scss');
+const cssFile = path.join(paths.PUBLIC, 'statics', 'css', 'styles.css');
 
 // node-sass module
 import('node-sass').then(m => new Promise((resolve, reject) => {

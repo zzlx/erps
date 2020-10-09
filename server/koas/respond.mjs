@@ -1,6 +1,10 @@
 /**
  * *****************************************************************************
  *
+ * Respond 客户端响应程序
+ *
+ * 响应客户端的流程必须放入此阶段执行，否则需要调试中间件逻辑
+ *
  *
  * *****************************************************************************
  */
@@ -12,8 +16,9 @@ const debug = util.debuglog('debug:respond.mjd');
 const emptyStatus = [ 204, 205, 304 ];
 
 export default function respond (ctx) {
+  debug('执行客户端响应程序...');
+
   let body = ctx.body;
-  debug(body);
 
   // allow bypassing response
   if (ctx.respond === false) return; 
@@ -25,8 +30,8 @@ export default function respond (ctx) {
     body = ctx.message;
   }
 
-  // response header
-  if (ctx.headersSent === false) {
+  if (ctx.headersSent === false) { 
+    // header response
     ctx.stream.respond(ctx.response.headers, {
       endStream: emptyStatus.includes(ctx.status) ? true : false, 
       waitForTrailers: false 
