@@ -13,11 +13,8 @@
 import assert from 'assert';
 import EventEmitter from 'events'; 
 import util from 'util';
-
-import Router from './Router.mjs';
 import Context from './Context.mjs';
 import compose from './compose.mjs';
-import respond from './respond.mjs';
 
 const debug = util.debuglog('debug:application.mjs');
 
@@ -112,4 +109,47 @@ export default class Application extends EventEmitter {
     const msg = err.stack || err.toString();
     debug(msg.replace(/^/gm, '  '));
   }
+}
+
+/**
+ * *****************************************************************************
+ *
+ * respond 客户端响应程序
+ *
+ * *****************************************************************************
+ */
+
+function respond (ctx) {
+  // allow bypassing response
+  if (ctx.respond === false) return; 
+
+  // header response
+  if (ctx.headersSent === false) { 
+    ctx.stream.respond(ctx.response.headers, {
+      endStream: [
+        // empty content status
+        204, 205, 304, 
+      ].includes(ctx.status) ? true : false, 
+      waitForTrailers: false 
+    });
+  }
+
+  // content response
+  if (ctx.writable === false) {
+    return ctx.stream.end();
+  }
+
+  if ('HEAD' === ctx.method) {
+    return ctx.stream.end();
+  }
+
+  if (Buffer.isBuffer(ctx.body) || typeof ctx.body === 'string') {
+    return ctx.stream.end(ctx.body);
+  }
+
+  if (ctx.body && typeof ctx.body.pipe === 'function') {
+    return ctx.body.pipe(ctx.stream);
+  }
+
+  return ctx.stream.end();
 }

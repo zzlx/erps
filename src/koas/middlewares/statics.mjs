@@ -83,9 +83,8 @@ export default (options = {}) => {
       }); 
 
       ctx.body = fs.createReadStream(url);
-
     }
 
-    await next();
+    await next(); // 交由下一中间件处理
   }
 }
