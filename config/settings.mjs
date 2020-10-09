@@ -65,7 +65,7 @@ export default new Proxy(Object.assign(configs, { paths: paths }, { system: syst
  */
 
 function deletePidFile () {
-  const pidFile = path.join(paths.HOME, `${process.title}.pid`);
+  const pidFile = path.join(paths.APP_HOME, `${process.title}.pid`);
   return fs.promises.unlink(pidFile);
 }
 
@@ -74,7 +74,7 @@ function deletePidFile () {
  */
 
 function writePidFile () {
-  const pidFile = path.join(paths.HOME, `${process.title}.pid`);
+  const pidFile = path.join(paths.APP_HOME, `${process.title}.pid`);
   return fs.promises.writeFile(pidFile, String(process.pid));
 }
 
@@ -83,7 +83,7 @@ function writePidFile () {
  */
 
 function readConfig () {
-  fs.open(defaultConfiguration.paths.configJsonFile, 'a+', (err, fd) => {
+  fs.open(path.join(paths.APP_HOME, 'settings.json'), 'a+', (err, fd) => {
     if (err) throw err;
     
     fs.read(fd, (err, bytesRead, buffer) => {

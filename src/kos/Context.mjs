@@ -22,7 +22,7 @@ import HttpError from './HttpError.mjs';
 import MemCache from '../utils/memCache.mjs';
 import MimeTypes from './MimeTypes.mjs';
 
-const debug = util.debuglog('debug:application.context');
+const debug = util.debuglog('debug:context.mjs');
 
 // define symbol constants
 const ACCEPT = Symbol('context#accept');
@@ -797,9 +797,8 @@ export default class Context {
 
     // stream
     if (val instanceof Stream) {
-      const handler = error => debug('set body error: ', error);
+      const handler = error => debug('stream error: ', error);
       if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
-
       if (null !== original && original != val) this.remove('Content-Length');
       if (setType) this.type = 'bin';
       return;

@@ -78,8 +78,10 @@ export default function logger (options = {}) {
       getWS(logFile);
 
       // 写入日志文件格式说明及字段对应名称
-      ws.write('# 格式说明: 字段采用Tab符号分隔,每条记录占据一行.\n');
-      ws.write(Object.keys(ctx.state.log).join('\t') + '\n');
+      ws.write(
+        '# 格式说明: 字段采用Tab符号分隔,每条记录占据一行.' + '\n' +
+        Object.keys(ctx.state.log).join('\t') + '\n'
+      );
     }
 
     getWS(logFile);

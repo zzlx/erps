@@ -35,7 +35,9 @@ export default new Proxy({
 });
 
 /**
- * Utility functions
+ * 判断是否支持ipv6
+ *
+ * @return {boolean} true/false
  */
 
 function isSupportIPv6 () {

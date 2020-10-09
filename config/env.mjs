@@ -10,8 +10,8 @@
  */
 
 import fs from 'fs';
-import paths from './paths.mjs';
 import util from 'util';
+import paths from './paths.mjs';
 
 const debug = util.debuglog('debug:env.mjs');
 
@@ -48,15 +48,12 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 /**
- * *****************************************************************************
- *
  * 环境配置解析器
  *
  * 解析获取到的命令行参数列表，返回参数对象
  *
  * @params {string} env
  * @return {object} state
- * *****************************************************************************
  */
 
 function envParser (source = '') {

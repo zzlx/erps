@@ -19,7 +19,7 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-const debug = util.debuglog('debug:statics-middleware');
+const debug = util.debuglog('debug:middleware-statics.mjs');
 
 export default (options = {}) => {
   const opts = Object.assign({}, {
@@ -41,6 +41,8 @@ export default (options = {}) => {
     const relativePath = path.relative('/', ctx.pathname); // 获取路径
     const absolutePath = path.resolve(opts.root, relativePath); // 构造路径
     let url = absolutePath;
+
+    if (relativePath === '') return await next();
 
     // @Algorithm:内容协商逻辑
 
