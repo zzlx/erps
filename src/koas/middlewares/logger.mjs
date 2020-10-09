@@ -15,7 +15,10 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
+import util from 'util';
 import { date } from '../../utils.mjs';
+
+const debug = util.debuglog('debug:logger.mjs');
 
 const fmt = v => `0${v}`.substr(-2);
 const sn = d => `${d.getFullYear()}${fmt(d.getMonth() + 1)}${fmt(d.getDate())}`; 
@@ -34,19 +37,20 @@ export default function logger (options = {}) {
   }
 
   return async function logMiddleware (ctx, next) {
-    const log = { // 构造日志对象
-      "time": date.toISOString(),
-      "c-ip": ctx.socket.remoteAddress,
-      "c-port": ctx.socket.remotePort,
+    // 记录访问日志
+    ctx.state.log = {
+      "request-time": date.toISOString(),
+      "remote-address": ctx.socket.remoteAddress,
+      "remote-port": ctx.socket.remotePort,
       "user-agent": ctx.get("user-agent"),
       "referer": ctx.get("referer"),
       "method": ctx.method,
-      "url": ctx.href,
-      "s-ip": ctx.socket.localAddress,
-      "s-port": ctx.socket.localPort,
-      "s-pid": process.pid,
+      "href": ctx.href,
+      "address": ctx.socket.localAddress,
+      "port": ctx.socket.localPort,
+      "pid": process.pid,
       "status": null,
-      "res-time": null,
+      "respond-time": null,
     };
 
     try {
@@ -54,8 +58,8 @@ export default function logger (options = {}) {
       await next(); 
 
       // 记录服务端响应信息
-      log['status'] = ctx.status;
-      log["res-time"] = ctx.response.headers['x-response-time'];
+      ctx.state.log['status'] = ctx.status;
+      ctx.state.log["respond-time"] = ctx.response.headers['x-response-time'];
 
     } catch (error) {
       Promise.reject(error);
@@ -75,11 +79,11 @@ export default function logger (options = {}) {
 
       // 写入日志文件格式说明及字段对应名称
       ws.write('# 格式说明: 字段采用Tab符号分隔,每条记录占据一行.\n');
-      ws.write(Object.keys(log).join('\t') + '\n');
+      ws.write(Object.keys(ctx.state.log).join('\t') + '\n');
     }
 
     getWS(logFile);
-    ws.write(Object.values(log).join('\t') + '\n');
+    ws.write(Object.values(ctx.state.log).join('\t') + '\n');
   } 
 }
 

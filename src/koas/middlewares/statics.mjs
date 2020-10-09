@@ -83,8 +83,9 @@ export default (options = {}) => {
       }); 
 
       ctx.body = fs.createReadStream(url);
-    } else {
-      return await next();
+
     }
+
+    await next();
   }
 }

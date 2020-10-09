@@ -16,11 +16,12 @@ const debug = util.debuglog('debug:respond.mjd');
 const emptyStatus = [ 204, 205, 304 ];
 
 export default function respond (ctx) {
-  debug('Response body:', ctx.body);
-  let body = ctx.body;
-
   // allow bypassing response
   if (ctx.respond === false) return; 
+
+  let body = ctx.body;
+  debug('Response body:', body);
+
   if (emptyStatus.includes(ctx.status)) return ctx.stream.end();
   if ('HEAD' === ctx.method) return ctx.stream.end();
 

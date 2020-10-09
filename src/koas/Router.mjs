@@ -1,11 +1,15 @@
 /**
  * *****************************************************************************
  *
- * 服务端路由器
+ * 
+ * 
+ * 
+ * 
  *
  * *****************************************************************************
  */
 
+import util from 'util';
 import compose from './compose.mjs';
 import HttpError from './HttpError.mjs';
 import { 
@@ -15,6 +19,8 @@ import {
   path,
   pathToRegexp, 
 } from '../utils.mjs';
+
+const debug = util.debuglog('debug:router.mjs');
 
 export default class Router {
   /**
@@ -231,7 +237,7 @@ Router.prototype.use = function () {
 Router.prototype.routes = function () {
   const router = this;
 
-  function routerMiddleware (ctx, next) {
+  async function routerMiddleware (ctx, next) {
 
     const path = router.opts.routerPath || ctx.routerPath || ctx.pathname;
     const matched = router.match(path, ctx.method);
@@ -258,6 +264,7 @@ Router.prototype.routes = function () {
     if (mostSpecificLayer.name) ctx._matchedRouteName = mostSpecificLayer.name;
 
     layerChain = matchedLayers.reduce((memo, layer) => {
+
       memo.push((ctx, next) => {
         ctx.captures = layer.captures(path, ctx.captures);
         ctx.params = layer.params(path, ctx.captures, ctx.params);
@@ -268,7 +275,9 @@ Router.prototype.routes = function () {
       return memo.concat(layer.stack);
     }, []);
 
-    return compose(layerChain)(ctx, next);
+    await compose(layerChain)(ctx);
+
+    return await next();
   }
 
   routerMiddleware.router = this;
@@ -294,12 +303,11 @@ Router.prototype.routes = function () {
 Router.prototype.allowedMethods = function (options = {}) {
   const implemented = this.methods;
 
-  return async function allowedMethodsMiddleware(ctx, next) {
-    await next();
-
+  return function allowedMethodsMiddleware(ctx, next) {
     const allowed = {};
 
     if (!ctx.status || ctx.status === 404) {
+
       for (let route of ctx.matched) {
         for (let method of route.methods) allowed[method] = method;
       }
@@ -308,39 +316,40 @@ Router.prototype.allowedMethods = function (options = {}) {
 
       if (!~implemented.indexOf(ctx.method)) {
         if (options.throw) {
-          let notImplementedThrowable = typeof options.notImplemented === 'function'
-            ? options.notImplemented()
+          let notImplemented = typeof options.methodNotImplemented === 'function'
+            ? options.methodNotImplemented()
             : new HttpError(http2.constants.HTTP_STATUS_NOT_IMPLEMENTED);
 
-          throw notImplementedThrowable;
+          throw notImplemented;
         } else {
           ctx.status = http2.constants.HTTP_STATUS_NOT_IMPLEMENTED;
           ctx.set('Allow', allowedArr.join(', '));
         }
 
       } else if (allowedArr.length) {
-        if (ctx.method === 'OPTIONS') {
 
+        if (ctx.method === 'OPTIONS') {
           ctx.status = http2.constants.HTTP_STATUS_OK;
           ctx.body = '';
           ctx.set('Allow', allowedArr.join(', '));
 
-        } else if (!allowed[ctx.method]) {
+        }
 
+        if (!allowed[ctx.method]) {
           if (options.throw) {
-            let notAllowedThrowable = typeof options.methodNotAllowed === 'function'
+            let notAllowed = typeof options.methodNotAllowed === 'function'
               ? options.methodNotAllowed()
               : new HttpError(http2.constants.HTTP_STATUS_METHOD_NOT_ALLOWED);
-            throw notAllowedThrowable;
+            throw notAllowed;
           } else {
             ctx.status = http2.constants.HTTP_STATUS_METHOD_NOT_ALLOWED
             ctx.set('Allow', allowedArr.join(', '));
           }
-
         }
       }
     }
 
+    return next(); // 
   }
 }
 
