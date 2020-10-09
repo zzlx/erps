@@ -23,7 +23,7 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
 
-import settings from '../src/config/settings.mjs';
+import settings from '../config/settings.mjs';
 import { assert, argvParser, console } from '../src/utils.mjs';
 import readDir from '../src/utils/readDir.mjs';
 

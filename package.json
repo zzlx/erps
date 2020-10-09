@@ -4,7 +4,7 @@
   "description": "A ERP system services.",
   "private": true,
   "scripts": {
-    "devel": "./bin/starter.mjs --command='./bin/httpd.mjs' --args='--restart' --paths=bin,server,src",
+    "devel": "./bin/starter.mjs --command='./bin/httpd.mjs' --args='--restart' --paths=bin,config,server,src",
     "restart": "./bin/httpd.mjs --restart",
     "start": "./bin/httpd.mjs --start",
     "stop": "./bin/httpd.mjs --stop"

@@ -18,7 +18,7 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import settings from '../src/config/settings.mjs';
+import settings from '../config/settings.mjs';
 import { 
   assert, 
   argvParser, 
@@ -208,7 +208,7 @@ function getPidByPort (port) {
 // attach
 function attachServerEvent (server) {
 
-  const keylogFile = fs.createWriteStream(path.join(paths.LOG, 'ssl-keys.log'), {flags: 'a+'});
+  const keylogFile = fs.createWriteStream(path.join(paths.APP_LOG, 'ssl-keys.log'), {flags: 'a+'});
 
   server.on('keylog', (line, tlsSocket) => {
     debug('keylog event with line:', line.toString());

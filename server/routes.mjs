@@ -13,23 +13,25 @@ import cp from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
+import marked from 'marked';
 
-import Router from '../src/koas/Router.mjs';
-import serverRender from '../src/koas/middlewares/serverRender.mjs';
-import statics from '../src/koas/middlewares/statics.mjs';
-
-import settings from '../src/config/settings.mjs';
+import settings from '../config/settings.mjs';
+import Router from '../src/kos/Router.mjs';
+import statics from '../src/kos/middlewares/statics.mjs';
+import serverRender from '../src/kos/middlewares/serverRender.mjs';
+import Html from '../src/templates/Html.mjs';
 import readDir from '../src/utils/readDir.mjs';
 
 const debug = util.debuglog('debug:routes.mjs');
 const paths = settings.paths;
-const index = new Router({});
+const routes = new Router({});
+export default routes; // 输出路由配置
 
 /**
  * 当发生样式文件修改时，自动重建styles.css文件
  */
 
-index.get('/*', async (ctx, next) => {
+process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => {
   const pathname = ctx.pathname;
 
   if (pathname === '/statics/js/react-dom.development.js' ||
@@ -53,7 +55,7 @@ index.get('/*', async (ctx, next) => {
   }
 
   if (pathname === '/statics/css/styles.css') {
-    const scssFiles = readDir(paths.SCSS);
+    const scssFiles = readDir(path.join(paths.SRC, 'scss'));
     const cssFile = path.join(paths.PUBLIC, 'statics', 'css', 'styles.css');
     await fs.promises.mkdir(path.dirname(cssFile), {recursive: true});
     const cssStats = fs.lstatSync(cssFile);
@@ -69,28 +71,16 @@ index.get('/*', async (ctx, next) => {
   }
 
   await next();
-
 });
 
-index.get('/*', serverRender({
-  styles: [ "/statics/css/styles.css" ],
-  scripts: [
-    { src: `/statics/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/statics/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: "/modules/main.mjs", module: true, crossorigin: true },
-    { src: "/modules/fallback.js", nomodule: true},
-  ],
-}));
-
 // 将api路由附加至index
-index.all('/api/*', async (ctx, next) => {
+routes.all('/api*', async (ctx, next) => {
   //if (ctx.pathname === 'favicon.ico') return await next();
   const apiFile = path.join(paths.SERVER, 'apis', path.relative('/api', ctx.pathname) + '.mjs');
 
   if (fs.existsSync(apiFile)) {
     return await import(apiFile).then(m => m.default).then(app => {
       app(ctx);
-      debug(ctx.body);
     });
   }
 
@@ -106,6 +96,15 @@ index.all('/api/*', async (ctx, next) => {
   ctx.body = html.render();
 });
 
-index.get('/*', statics({ root: paths.PUBLIC }));
-
-export default index;
+routes.get('/*', 
+  serverRender({
+    styles: [ "/statics/css/styles.css" ],
+    scripts: [
+      { src: `/statics/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: `/statics/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: "/modules/main.mjs", module: true, crossorigin: true },
+      { src: "/modules/fallback.js", nomodule: true},
+    ],
+  }), 
+  statics({ root: paths.PUBLIC }), 
+);

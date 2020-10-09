@@ -24,7 +24,7 @@ import paths from './paths.mjs';
 import system from './system.mjs';
 
 // settings from config
-const sfc = fs.readFileSync(path.join(paths.CONFIG, 'settings.json'), 'utf8');
+const sfc = fs.readFileSync(path.join(paths.APP_HOME, 'settings.json'), 'utf8');
 const configs = JSON.parse(sfc);
 
 export default new Proxy(Object.assign(configs, { paths: paths }, { system: system }), {

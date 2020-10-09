@@ -10,15 +10,15 @@
  */
 
 import util from 'util';
-import Koas from '../src/koas/Application.mjs';
-import * as M from '../src/koas/middlewares/index.mjs';
-import settings from '../src/config/settings.mjs';
+import settings from '../config/settings.mjs';
+import Kos from '../src/kos/Application.mjs';
+import * as M from '../src/kos/middlewares/index.mjs';
 import router from '../server/routes.mjs'; // 主路由配置
 
 // 配置服务器程序
 const debug = util.debuglog('debug:main.mjs');
 const paths = settings.paths;
-const app = new Koas(); // 初始化服务器程序
+const app = new Kos(); // 初始化服务器程序
 export default app; // 输出服务器端程序
 
 // 配置基础服务中间件

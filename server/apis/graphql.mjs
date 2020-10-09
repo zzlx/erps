@@ -1,4 +1,6 @@
 /**
+ * *****************************************************************************
+ *
  * GraphQL API数据服务
  *
  * 逻辑:
@@ -7,14 +9,14 @@
  * 3. 执行graphql查询;
  * 4. 返回查询数据;
  *
- * @file graphql.mjs
+ * *****************************************************************************
  */
 
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { graphql, buildASTSchema, parse, Source } from '../../graphql/index.mjs';
-import getResolvers from '../../utils/getModulesFromPath.mjs';
+import { graphql, buildASTSchema, parse, Source } from '../../src/graphql/index.mjs';
+import getResolvers from '../../src/utils/getModulesFromPath.mjs';
 import settings from '../../config/settings.mjs';
 
 const paths = settings.paths;
@@ -23,7 +25,7 @@ const resolversPath = path.join(paths.SERVER, 'resolvers');
 let schema = null;
 let fieldResolver = null;
 
-export default async function graphqlAPI (ctx) {
+export default async function graphqlAPI (ctx, next) {
 
   ctx.cookies.set('test', '123');
 

@@ -30,5 +30,7 @@ export default (opts) => {
     const html = new HTMLTemplate(opts);
     ctx.type = 'html';
     ctx.body = html.render();
+
+    return next();
   }
 }

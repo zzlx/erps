@@ -1,11 +1,10 @@
 /**
  * *****************************************************************************
  *
- * kernel of application services.
+ * Kernel of services
  *
- * Usage:
+ * 服务核心程序
  *
- * const app = new Application();
  *
  * *****************************************************************************
  */
@@ -15,7 +14,6 @@ import EventEmitter from 'events';
 import util from 'util';
 import Context from './Context.mjs';
 import compose from './compose.mjs';
-
 const debug = util.debuglog('debug:application.mjs');
 
 export default class Application extends EventEmitter {
@@ -112,36 +110,22 @@ export default class Application extends EventEmitter {
 }
 
 /**
- * *****************************************************************************
- *
- * respond 客户端响应程序
- *
- * *****************************************************************************
+ * 客户端响应程序
  */
 
 function respond (ctx) {
   // allow bypassing response
-  if (ctx.respond === false) return; 
+  if (ctx.respond === false) return ctx.stream.end(); 
 
-  // header response
-  if (ctx.headersSent === false) { 
-    ctx.stream.respond(ctx.response.headers, {
-      endStream: [
-        // empty content status
-        204, 205, 304, 
-      ].includes(ctx.status) ? true : false, 
-      waitForTrailers: false 
-    });
-  }
+  // response headers, if headers has not been send
+  ctx.headersSent === false && ctx.stream.respond(ctx.response.headers, {
+    endStream: [ 204, 205, 304 ].includes(ctx.status) ? true : false, 
+    waitForTrailers: false, 
+  });
 
-  // content response
-  if (ctx.writable === false) {
-    return ctx.stream.end();
-  }
-
-  if ('HEAD' === ctx.method) {
-    return ctx.stream.end();
-  }
+  // response content
+  if (ctx.writable === false) return ctx.stream.end();
+  if ('HEAD' === ctx.method)  return ctx.stream.end();
 
   if (Buffer.isBuffer(ctx.body) || typeof ctx.body === 'string') {
     return ctx.stream.end(ctx.body);

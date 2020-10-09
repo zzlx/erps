@@ -10,7 +10,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import settings from '../src/settings.mjs';
+import settings from '../../config/settings.mjs';
 
 export default function logger (ctx) {
   ctx.state.noLog = true;
