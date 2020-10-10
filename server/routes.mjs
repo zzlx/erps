@@ -76,20 +76,9 @@ process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => 
 routes.get('/docs*', (ctx, next) => {
 
   let file = path.join(paths.DOCS, path.relative('/docs', ctx.pathname));
-
   if (file === paths.DOCS) file = path.join(file, 'README.md');
-
   if (path.extname(file) === '') file += '.md'
-
   if (!fs.existsSync(file)) return next();
-
-
-  // 是否保持原格式
-  if (ctx.searchParams.get('raw')) {
-    ctx.type = '.md';
-    ctx.body = fs.createReadStream(file);
-    return;
-  }
 
   ctx.type = 'html';
   const html = new Html({ styles: ['/statics/css/styles.css'], });
@@ -97,9 +86,12 @@ routes.get('/docs*', (ctx, next) => {
     html: true,
   });
 
-  html.body = '<div class="container markdown">' + 
-    md.render(fs.readFileSync(file, 'utf8')) +
-  '</div>';
+  const content = fs.readFileSync(file, 'utf8');
+  const body = ctx.searchParams.get('raw') 
+      ? `<pre contenteditable="true">${content}</pre>` 
+      : md.render(content);
+
+  html.body = `<div class="container markdown">${body}</div>`;
 
   ctx.body = html.render();
 });

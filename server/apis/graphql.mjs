@@ -20,7 +20,7 @@ import getResolvers from '../../src/utils/getModulesFromPath.mjs';
 import settings from '../../config/settings.mjs';
 
 const paths = settings.paths;
-const schemaPath = path.join(paths.SRC, 'schema');
+const schemaPath = path.join(paths.SERVER, 'schema');
 const resolversPath = path.join(paths.SERVER, 'resolvers');
 let schema = null;
 let fieldResolver = null;
