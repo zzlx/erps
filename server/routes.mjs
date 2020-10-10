@@ -74,7 +74,11 @@ process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => 
 });
 
 routes.get('/docs*', (ctx, next) => {
+
   let file = path.join(paths.DOCS, path.relative('/docs', ctx.pathname));
+
+  if (file === paths.DOCS) file = path.join(file, 'README.md');
+
   if (path.extname(file) === '') file += '.md'
 
   if (!fs.existsSync(file)) return next();
