@@ -34,8 +34,8 @@ export default routes; // 输出路由配置
 process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => {
   const pathname = ctx.pathname;
 
-  if (pathname === '/statics/js/react-dom.development.js' ||
-      pathname === '/statics/js/react-dom.production.min.js') {
+  if (pathname === '/assets/react-dom.development.js' ||
+      pathname === '/assets/react-dom.production.min.js') {
     if (!fs.existsSync(path.join(paths.PUBLIC, pathname))) {
       const s = path.join(paths.NODE_MODULES, 'react-dom', 'umd', path.basename(pathname));
       const o = path.join(paths.PUBLIC, pathname);
@@ -44,8 +44,8 @@ process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => 
     }
   }
 
-  if (pathname === '/statics/js/react.development.js' ||
-      pathname === '/statics/js/react.production.min.js') {
+  if (pathname === '/assets/react.development.js' ||
+      pathname === '/assets/react.production.min.js') {
     if (!fs.existsSync(path.join(paths.PUBLIC, pathname))) {
       const s = path.join(paths.NODE_MODULES, 'react', 'umd', path.basename(pathname));
       const o = path.join(paths.PUBLIC, pathname);
@@ -108,7 +108,7 @@ routes.all('/api*', async (ctx, next) => {
   }
 
   ctx.type = 'html';
-  const html = new Html({ styles: ['/statics/css/styles.css'], });
+  const html = new Html({ styles: ['/assets/styles.css'], });
   const md = new Remarkable({
     html: true,
   });
@@ -123,10 +123,10 @@ routes.all('/api*', async (ctx, next) => {
 routes.get('/*', 
   statics({ root: paths.PUBLIC }),
   serverRender({
-    styles: [ "/statics/css/styles.css" ],
+    styles: [ "/assets/styles.css" ],
     scripts: [
-      { src: `/statics/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-      { src: `/statics/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: `/assets/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: `/assets/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
       { src: "/modules/main.mjs", module: true, crossorigin: true },
       { src: "/modules/fallback.js", nomodule: true},
     ],
