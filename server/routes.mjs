@@ -73,6 +73,33 @@ process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => 
   await next();
 });
 
+routes.get('/docs*', (ctx, next) => {
+  let file = path.join(paths.DOCS, path.relative('/docs', ctx.pathname));
+  if (path.extname(file) === '') file += '.md'
+
+  if (!fs.existsSync(file)) return next();
+
+
+  // 是否保持原格式
+  if (ctx.searchParams.get('raw')) {
+    ctx.type = '.md';
+    ctx.body = fs.createReadStream(file);
+    return;
+  }
+
+  ctx.type = 'html';
+  const html = new Html({ styles: ['/statics/css/styles.css'], });
+  const md = new Remarkable({
+    html: true,
+  });
+
+  html.body = '<div class="container markdown">' + 
+    md.render(fs.readFileSync(file, 'utf8')) +
+  '</div>';
+
+  ctx.body = html.render();
+});
+
 // 将api路由附加至index
 routes.all('/api*', async (ctx, next) => {
   //if (ctx.pathname === 'favicon.ico') return await next();
