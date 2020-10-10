@@ -11,15 +11,13 @@
  * *****************************************************************************
  */
 
+import assert from '../../utils/assert.mjs';
+
 export default store => next => action => {
+  assert(action, 'Action must not be null.');
 
-  if (action && typeof action === 'function') {
-    return action(store); // 传入store对象
-  }
+  if (typeof action === 'function') return action(store);
+  if (typeof action === 'object') return next(action);
 
-  if (action && typeof action === 'object') {
-    return next(action);
-  }
-
-  throw new Error('Action must be a plain object.');
+  assert(0, 'Action must be a plain object.');
 }

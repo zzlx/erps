@@ -11,11 +11,11 @@
 
 import assert from './utils/assert.mjs';
 import global from './utils/global.mjs';
-import configureStore from './store/configureStore.mjs';
-import App from './apps/App.mjs';
 import settings from './settings.mjs';
+import App from './apps/App.mjs';
+import configureStore from './store/configureStore.mjs';
 
-(function main () {
+try {
   assert(global.React, 'React is not available, please confirmed!');
   const preloadedState = global.__INITIAL_STATE__
   const store = configureStore(preloadedState); 
@@ -25,7 +25,7 @@ import settings from './settings.mjs';
   //
   // 浏览器网络环境
   if (settings.protocol.substr(0,4) === 'http' && global.document) {
-    return import('./client/frontend-browser.mjs').then(m => {
+    import('./client/frontend-browser.mjs').then(m => {
       const render = m.default;
       render(element);
     });
@@ -34,7 +34,7 @@ import settings from './settings.mjs';
   // 浏览器本地环境 
   // 需要客户端路由逻辑适配本地环境
   if (settings.protocol === 'file:') {
-    return import('./client/browser.mjs').then(m => {
+    import('./client/browser.mjs').then(m => {
       const render = m.default;
       render(element);
     });
@@ -45,4 +45,6 @@ import settings from './settings.mjs';
   // @todo: dingtalk客户端环境
   //
 
-})().catch(console.error); // @todo: 无法追踪异步模块内部错误位置,给调试带来不便
+} catch (err) {
+  console.error(err);
+}

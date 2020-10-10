@@ -27,7 +27,7 @@
  * @param {string|object} options
  */
 
-export default function markdown (source, options, callback) {
+export default function parseMarkdown (source, options, callback) {
   const md = new Markdown(source, options);
 
   return source;

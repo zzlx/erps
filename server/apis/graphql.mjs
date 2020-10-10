@@ -15,20 +15,24 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import util from 'util';
 import { graphql, buildASTSchema, parse, Source } from '../../src/graphql/index.mjs';
 import getResolvers from '../../src/utils/getModulesFromPath.mjs';
 import settings from '../../config/settings.mjs';
 
+const debug = util.debuglog('node:graphql.mjs');
 const paths = settings.paths;
 const schemaPath = path.join(paths.SERVER, 'schema');
 const resolversPath = path.join(paths.SERVER, 'resolvers');
 let schema = null;
 let fieldResolver = null;
 
-export default async function graphqlAPI (ctx) {
+export default async function graphqlAPI (ctx, next) {
   // get schema
   if (schema == null) {
-    schema = await fs.promises.readdir(schemaPath, { encoding: 'utf8' }).then(files => {
+    schema = await fs.promises.readdir(schemaPath, { 
+      encoding: 'utf8' 
+    }).then(files => {
       return files.filter(file => file.match(/\.gql$/))
     }).then(files => {
       return Promise.all(files.map(file => fs.promises.readFile(path.join(schemaPath, file), 'utf8')))
@@ -52,7 +56,7 @@ export default async function graphqlAPI (ctx) {
     return;
   }
 
-  if ('GET' === ctx.method) {
+  if (ctx.method === 'GET') {
     request = {
       query: ctx.searchParams.get('query'),
       variables: ctx.searchParams.get('variables'),
@@ -60,7 +64,7 @@ export default async function graphqlAPI (ctx) {
     }
   } 
 
-  if ('POST' === ctx.method) {
+  if (ctx.method === 'POST') {
     /*
     ctx.stream.setEncoding('utf8');
     const body = await new Promise((resolve, reject) => {

@@ -1,6 +1,12 @@
 /**
+ * *****************************************************************************
+ *
+ * 执行一次GraphQL查询
  *
  *
+ *
+ *
+ * *****************************************************************************
  */
 
 export default function Graphql () {
@@ -35,5 +41,4 @@ export default function Graphql () {
     // 错误响应信息
     if (console && console.warn) console.warn(response);
   });
-
 }
