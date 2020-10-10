@@ -3,7 +3,7 @@
  *
  */
 
-import isInvalid from '../../utils/isInvalid.mjs';
+import { assert }from '../../utils.mjs';
 
 import { astFromValue } from '../utilities/astFromValue.mjs';
 import { print } from '../language/printer.mjs';
@@ -404,7 +404,7 @@ export const __InputValue = new GraphQLObjectType({
           'A GraphQL-formatted string representing the default value for this ' +
           'input value.',
         resolve: function resolve(inputVal) {
-          return isInvalid(inputVal.defaultValue) ? null : print(astFromValue(inputVal.defaultValue, inputVal.type));
+          return assert.isInvalid(inputVal.defaultValue) ? null : print(astFromValue(inputVal.defaultValue, inputVal.type));
         }
       }
     };

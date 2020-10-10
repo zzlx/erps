@@ -12,7 +12,6 @@ import http2 from 'http2';
 import net from 'net';
 import Stream from 'stream';
 import util from 'util';
-import zlib from 'zlib';
 
 // @todo: 本地化第三方模块
 import accepts from 'accepts';
@@ -120,6 +119,10 @@ export default class Context {
    */
 
   get httpVersion () {
+    if (this.stream.closed) {
+      return this.app.protocol === 'http2' ? '2' : '1';
+    }
+
     return this.stream.session.alpnProtocol === 'h2' ? '2' : '1';
   }
 
@@ -784,7 +787,7 @@ export default class Context {
             : 'text';
       }
 
-      this[RES_BODY] = this.compress(val);
+      this[RES_BODY] = val;
       return;
     }
 
@@ -796,7 +799,7 @@ export default class Context {
     }
 
     // stream
-    if (val instanceof Stream) {
+    if (val && typeof val.pipe === 'function') {
       const handler = error => debug('stream error: ', error);
       if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
       if (null !== original && original != val) this.remove('Content-Length');
@@ -804,9 +807,12 @@ export default class Context {
       return;
     }
 
-    // json
-    this.type = 'json';
-    this[RES_BODY] = this.compress(JSON.string(val));
+    if (typeof val === 'object') {
+      this.type = 'json';
+      this[RES_BODY] = JSON.stringify(val);
+    }
+
+    return;
   }
 }
 
@@ -844,10 +850,6 @@ Context.prototype.set = function (field, val) {
   return true; // set header success
 }
 
-Context.prototype.onerror = function (err) {
-  this.app.emit('error', err, this);
-}
-
 /**
  *
  * ctx.throw([status], [msg], [properties])
@@ -876,44 +878,3 @@ Context.prototype.throw = function (...args) {
   const error = new HttpError(...args);
   throw error;
 }
-
-/**
- * compress content
- *
- */
-
-Context.prototype.compress  = function (value) {
-  this.length = Buffer.byteLength(value); // 计算内容大小
-
-  let retval = null;
-
-	// less than size
-  const size = this.app.opts.compressThreshold * 1024;
-
-	if (this.length == null || this.length <= size) {
-    return value;
-  }
-
-	const encoding = this.get('accept-encoding');
-	this.set('vary', 'accept-encoding');
-
-	if (/\bbr\b/.test(encoding)) {
-		this.set('content-encoding', 'br');
-		retval = zlib.brotliCompressSync(value);
-    //retval = zlib.createBrotliCompress();
-	} else if (/\bdeflate\b/.test(encoding)) {
-		this.set('content-encoding', 'deflate');
-		retval = zlib.deflateCompressSync(value);
-    //retval = stream.pipline(value, zlib.createDeflate())
-	} else if (/\bgzip\b/.test(encoding)) {
-		this.set('content-encoding', 'gzip');
-		retval = zlib.gzipSync(value);
-    //retval = stream.pipline(value, zlib.createGzip())
-  }
-
-  this.length = Buffer.byteLength(retval); // 重新计算内容大小
-
-  return retval;
-} // end of comporess function
-
-

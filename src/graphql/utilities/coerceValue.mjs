@@ -1,6 +1,6 @@
 import { forEach, isCollection } from '../../utils/iterall.mjs';
 import inspect from '../../utils/inspect.mjs';
-import isInvalid from '../../utils/isInvalid.mjs';
+import { assert } from '../../utils.mjs';
 import orList from '../../utils/orList.mjs';
 import suggestionList from '../../utils/suggestionList.mjs';
 
@@ -42,7 +42,7 @@ export function coerceValue(value, type, blameNode, path) {
     try {
       var parseResult = type.parseValue(value);
 
-      if (isInvalid(parseResult)) {
+      if (assert.isInvalid(parseResult)) {
         return ofErrors([coercionError("Expected type ".concat(type.name), blameNode, path)]);
       }
 
@@ -110,8 +110,8 @@ export function coerceValue(value, type, blameNode, path) {
         var field = _step.value;
         var fieldValue = value[field.name];
 
-        if (isInvalid(fieldValue)) {
-          if (!isInvalid(field.defaultValue)) {
+        if (assert.isInvalid(fieldValue)) {
+          if (!assert.isInvalid(field.defaultValue)) {
             _coercedValue[field.name] = field.defaultValue;
           } else if (isNonNullType(field.type)) {
             _errors = add(_errors, coercionError("Field ".concat(printPath(atPath(path, field.name)), " of required ") + "type ".concat(inspect(field.type), " was not provided"), blameNode));

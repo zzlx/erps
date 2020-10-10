@@ -1,6 +1,6 @@
 import _defineProperty from '../../utils/defineProperty.mjs';
 import _objectSpread from '../../utils/objectSpread.mjs';
-import invariant from '../../utils/invariant.mjs';
+import { assert } from '../../utils.mjs';
 import mapValue from '../../utils/mapValue.mjs';
 import keyValMap from '../../utils/keyValMap.mjs';
 
@@ -35,7 +35,7 @@ import { isTypeDefinitionNode, isTypeExtensionNode } from '../language/predicate
  */
 export function extendSchema(schema, documentAST, options) {
   assertSchema(schema);
-  invariant(
+  assert(
     (documentAST && documentAST.kind === Kind.DOCUMENT), 
     'Must provide valid Document AST'
   );
@@ -101,7 +101,7 @@ export function extendSchema(schema, documentAST, options) {
 
   var astBuilder = new ASTDefinitionBuilder(typeDefinitionMap, options, function (typeName) {
     var existingType = schema.getType(typeName);
-    !existingType ? invariant(0, "Unknown type: \"".concat(typeName, "\".")) : void 0;
+    !existingType ? assert(0, "Unknown type: \"".concat(typeName, "\".")) : void 0;
     return extendNamedType(existingType);
   });
   var extendTypeCache = Object.create(null); // Get the extended root operation types.
@@ -200,7 +200,7 @@ export function extendSchema(schema, documentAST, options) {
 
   function getMergedDirectives() {
     var existingDirectives = schema.getDirectives().map(extendDirective);
-    !existingDirectives ? invariant(0, 'schema must have default directives') : void 0;
+    !existingDirectives ? assert(0, 'schema must have default directives') : void 0;
     return existingDirectives.concat(directiveDefinitions.map(function (node) {
       return astBuilder.buildDirective(node);
     }));

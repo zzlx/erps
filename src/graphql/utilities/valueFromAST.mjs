@@ -20,8 +20,7 @@
  */
 
 import keyMap from '../../utils/keyMap.mjs';
-import isInvalid from '../../utils/isInvalid.mjs';
-
+import { assert } from '../../utils.mjs';
 import { Kind } from '../language/kinds.mjs';
 import { 
   isScalarType, 
@@ -54,7 +53,7 @@ export function valueFromAST(valueNode, type, variables) {
   if (valueNode.kind === Kind.VARIABLE) {
     var variableName = valueNode.name.value;
 
-    if (!variables || isInvalid(variables[variableName])) {
+    if (!variables || assert.isInvalid(variables[variableName])) {
       // No valid return value.
       return;
     }
@@ -90,7 +89,7 @@ export function valueFromAST(valueNode, type, variables) {
         } else {
           var itemValue = valueFromAST(itemNodes[i], itemType, variables);
 
-          if (isInvalid(itemValue)) {
+          if (assert.isInvalid(itemValue)) {
             return; // Invalid: intentionally return no value.
           }
 
@@ -103,7 +102,7 @@ export function valueFromAST(valueNode, type, variables) {
 
     var coercedValue = valueFromAST(valueNode, itemType, variables);
 
-    if (isInvalid(coercedValue)) {
+    if (assert.isInvalid(coercedValue)) {
       return; // Invalid: intentionally return no value.
     }
 
@@ -137,7 +136,7 @@ export function valueFromAST(valueNode, type, variables) {
 
       var fieldValue = valueFromAST(fieldNode.value, field.type, variables);
 
-      if (isInvalid(fieldValue)) {
+      if (assert.isInvalid(fieldValue)) {
         return; // Invalid: intentionally return no value.
       }
 
@@ -173,7 +172,7 @@ export function valueFromAST(valueNode, type, variables) {
       return; // Invalid: intentionally return no value.
     }
 
-    if (isInvalid(result)) {
+    if (assert.isInvalid(result)) {
       return; // Invalid: intentionally return no value.
     }
 
@@ -189,5 +188,5 @@ export function valueFromAST(valueNode, type, variables) {
 // in the set of variables.
 
 function isMissingVariable(valueNode, variables) {
-  return valueNode.kind === Kind.VARIABLE && (!variables || isInvalid(variables[valueNode.name.value]));
+  return valueNode.kind === Kind.VARIABLE && (!variables || assert.isInvalid(variables[valueNode.name.value]));
 }

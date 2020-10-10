@@ -4,11 +4,11 @@
  *
  */
 
-import invariant from './invariant.mjs';
+import {assert} from '../utils.mjs';
 const MAX_LENGTH = 5;
 
 export default function orList(items) {
-  !(items.length !== 0) ? invariant(0) : void 0;
+  !(items.length !== 0) ? assert(0) : void 0;
 
   if (items.length === 1) {
     return items[0];

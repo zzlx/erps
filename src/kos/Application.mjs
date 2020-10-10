@@ -22,7 +22,7 @@ export default class Application extends EventEmitter {
 
     this.opts = Object.assign({}, { 
       // default options
-      env: process.env.NODE_ENV || 'production',
+      env: 'production',
       keys: ['enpseC5vcmc='],
       protocol: 'http2',
       proxy: false,
@@ -80,15 +80,22 @@ export default class Application extends EventEmitter {
   }
 
   /**
-   *
-   *
+   * 处理请求
    */
 
   handleRequest (ctx, fn) {
-    const onerror = err => ctx.onerror(err);
-    const handleResponse = () => respond(ctx);
+    return fn(ctx).then(() => respond(ctx)).catch(err => {
+      // 处理捕获到的中间件返回的错误
+      if (err.code === 'ENOENT') {
+        ctx.status = 404;
+        ctx.body = err.message
+      } else {
+        ctx.status = 500;
+        ctx.body = err.message
+      }
 
-    return fn(ctx).then(handleResponse).catch(onerror);
+      respond(ctx);
+    });
   }
 
   /**
@@ -110,12 +117,16 @@ export default class Application extends EventEmitter {
 }
 
 /**
- * 客户端响应程序
+ * 服务器端响应程序
  */
 
 function respond (ctx) {
   // allow bypassing response
-  if (ctx.respond === false) return ctx.stream.end(); 
+  if (ctx.respond === false) return ctx.stream.end();
+
+  // ensure status is exists
+  ctx.status = ctx.status || 404;
+  if (null == ctx.body) ctx.body = ctx.message;
 
   // response headers, if headers has not been send
   ctx.headersSent === false && ctx.stream.respond(ctx.response.headers, {
@@ -124,15 +135,27 @@ function respond (ctx) {
   });
 
   // response content
+  //
+  // writable
   if (ctx.writable === false) return ctx.stream.end();
+
   if ('HEAD' === ctx.method)  return ctx.stream.end();
 
+  // buffer/string
   if (Buffer.isBuffer(ctx.body) || typeof ctx.body === 'string') {
     return ctx.stream.end(ctx.body);
   }
 
+  // stream
   if (ctx.body && typeof ctx.body.pipe === 'function') {
     return ctx.body.pipe(ctx.stream);
+  }
+
+  // json
+  if (typeof ctx.body === 'object') {
+    ctx.type = 'json';
+    ctx.body = JSON.stringify(ctx.body);
+    return ctx.stream.end(ctx.body);
   }
 
   return ctx.stream.end();

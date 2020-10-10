@@ -1,7 +1,7 @@
 {
   "name": "erps",
   "version": "1.0.0",
-  "description": "A ERP system services.",
+  "description": "A ERP system services project.",
   "private": true,
   "scripts": {
     "devel": "./bin/starter.mjs --command='./bin/httpd.mjs' --args='--restart' --paths=bin,config,server,src",

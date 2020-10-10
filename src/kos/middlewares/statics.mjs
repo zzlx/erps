@@ -37,12 +37,15 @@ export default (options = {}) => {
     throw new Error('You must provider the static path as the root path.');
   }
 
-  return async function staticsMiddleware (ctx, next) {
+  return function staticsMiddleware (ctx, next) {
     const relativePath = path.relative('/', ctx.pathname); // 获取路径
-    const absolutePath = path.resolve(opts.root, relativePath); // 构造路径
-    let url = absolutePath;
+    let url = path.resolve(opts.root, relativePath);       // 构造绝对路径
 
-    if (relativePath === '') return await next();
+    // 设置响应类型
+    // 旁路掉没有扩展名的路径
+    // @todo: 提供目录服务
+    if (path.extname(url) === '') return next(); 
+    else ctx.type = path.extname(url);
 
     // @Algorithm:内容协商逻辑
 
@@ -53,7 +56,6 @@ export default (options = {}) => {
     // 也要设置 Vary 首部，而且要与相应的 200 OK 响应设置得一模一样。
     //ctx.set('vary', 'accept-encoding');
     ctx.set('vary', 'User-Agent');
-    ctx.type = path.extname(url); // set content-type
 
     const accetpEncoding = ctx.get('accept-encoding'); // get accept encoding
     if (/\bbr\b/.test(accetpEncoding) && fs.existsSync(url + '.br')) {
@@ -87,6 +89,6 @@ export default (options = {}) => {
       ctx.body = fs.createReadStream(url);
     }
 
-    await next(); // 交由下一中间件处理
+    return next(); // 交由下一中间件处理
   }
 }

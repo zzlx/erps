@@ -7,8 +7,8 @@
 
 import defineToStringTag from '../../utils/defineToStringTag.mjs';
 import defineToJSON from '../../utils/defineToJSON.mjs';
-import invariant from '../../utils/invariant.mjs';
 import inspect from '../../utils/inspect.mjs';
+import {assert} from '../../utils.mjs';
 
 import { GraphQLNonNull } from './definition.mjs';
 import { GraphQLString, GraphQLBoolean } from './scalars.mjs';
@@ -21,14 +21,14 @@ export class GraphQLDirective {
     this.locations = config.locations;
     this.astNode = config.astNode;
 
-    invariant(config.name, 'Directive must be named.');
-    invariant(Array.isArray(config.locations), 
+    assert(config.name, 'Directive must be named.');
+    assert(Array.isArray(config.locations), 
       "@".concat(config.name, " locations must be an Array.")
     ); 
 
     const args = config.args || {};
 
-    invariant(
+    assert(
       typeof args === 'object' && !Array.isArray(args),
       `@${config.name} args must be an object with argument names as keys.`
     ); 
@@ -147,7 +147,7 @@ export function isDirective(directive) {
 
 export function assertDirective(directive) {
   !isDirective(directive) 
-    ? invariant(0, 
+    ? assert(0, 
       "Expected ".concat(inspect(directive), " to be a GraphQL directive.")
     ) 
     : void 0;

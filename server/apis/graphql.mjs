@@ -20,15 +20,13 @@ import getResolvers from '../../src/utils/getModulesFromPath.mjs';
 import settings from '../../config/settings.mjs';
 
 const paths = settings.paths;
-const schemaPath = path.join(paths.SERVER, 'schema');
+const schemaPath = path.join(paths.SRC, 'schema');
 const resolversPath = path.join(paths.SERVER, 'resolvers');
 let schema = null;
 let fieldResolver = null;
 
-export default async function graphqlAPI (ctx, next) {
-
-  ctx.cookies.set('test', '123');
-
+export default async function graphqlAPI (ctx) {
+  // get schema
   if (schema == null) {
     schema = await fs.promises.readdir(schemaPath, { encoding: 'utf8' }).then(files => {
       return files.filter(file => file.match(/\.gql$/))
@@ -42,12 +40,10 @@ export default async function graphqlAPI (ctx, next) {
     });
   }
 
-  if (fieldResolver == null) {
-    // 获取resolvers
-    fieldResolver = await getResolvers(resolversPath);
-  }
+  // 获取resolvers
+  if (fieldResolver == null) fieldResolver = await getResolvers(resolversPath); 
 
-  let request = Object.create(null);
+  let request = null;
 
   // only allowed GET/POST method
   if (!/GET|POST/.test(ctx.method)) {
@@ -57,9 +53,11 @@ export default async function graphqlAPI (ctx, next) {
   }
 
   if ('GET' === ctx.method) {
-    request.query = ctx.searchParams.get('query');
-    request.variables = ctx.searchParams.get('variables');
-    request.operationName = ctx.searchParams.get('operationName');
+    request = {
+      query: ctx.searchParams.get('query'),
+      variables: ctx.searchParams.get('variables'),
+      operationName: ctx.searchParams.get('operationName'),
+    }
   } 
 
   if ('POST' === ctx.method) {
@@ -82,14 +80,16 @@ export default async function graphqlAPI (ctx, next) {
     request = body && JSON.parse(body);
   }
 
-  // 执行graphql解析查询
-  ctx.body = await graphql({
-    schema: schema, 
-    source: request.query || '{welcome}',
-    rootValue: {},
-    contextValue: ctx,
-    variableValues: request.variables,
-    operationName: request.operationName,
-    fieldResolver: fieldResolver,
-  });
+  if (request) {
+    // 执行graphql解析查询
+    ctx.body = await graphql({
+      schema: schema, 
+      source: request.query || '{welcome}',
+      rootValue: {},
+      contextValue: ctx,
+      variableValues: request.variables,
+      operationName: request.operationName,
+      fieldResolver: fieldResolver,
+    });
+  }
 }

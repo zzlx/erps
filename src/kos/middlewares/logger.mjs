@@ -39,17 +39,17 @@ export default function logger (options = {}) {
   return async function logMiddleware (ctx, next) {
     // 记录访问日志
     ctx.state.log = {
-      "request-time": date.toISOString(),
-      "remote-address": ctx.socket.remoteAddress,
-      "remote-port": ctx.socket.remotePort,
+      "datetime": date.toISOString(),
+      "c-address": ctx.socket.remoteAddress,
+      "c-port": ctx.socket.remotePort,
       "user-agent": ctx.get("user-agent"),
-      "referer": ctx.get("referer"),
       "method": ctx.method,
       "href": ctx.href,
-      "address": ctx.socket.localAddress,
-      "port": ctx.socket.localPort,
-      "pid": process.pid,
       "status": null,
+      "referer": ctx.get("referer"),
+      "s-address": ctx.socket.localAddress,
+      "s-port": ctx.socket.localPort,
+      "s-pid": process.pid,
       "respond-time": null,
     };
 
@@ -78,14 +78,12 @@ export default function logger (options = {}) {
       getWS(logFile);
 
       // 写入日志文件格式说明及字段对应名称
-      ws.write(
-        '# 格式说明: 字段采用Tab符号分隔,每条记录占据一行.' + '\n' +
-        Object.keys(ctx.state.log).join('\t') + '\n'
-      );
+      ws.write(Object.keys(ctx.state.log).join('\t'));
     }
 
     getWS(logFile);
-    ws.write(Object.values(ctx.state.log).join('\t') + '\n');
+
+    ws.write('\n' + Object.values(ctx.state.log).join('\t'));
   } 
 }
 

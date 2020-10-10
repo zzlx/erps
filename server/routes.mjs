@@ -90,7 +90,7 @@ routes.all('/api*', async (ctx, next) => {
     html: true,
   });
 
-  html.body = '<div class="markdown container">' + 
+  html.body = '<div class="container markdown">' + 
     md.render(fs.readFileSync(path.join(paths.SERVER, 'apis', 'README.md'), 'utf8')) +
   '</div>';
 
@@ -98,6 +98,7 @@ routes.all('/api*', async (ctx, next) => {
 });
 
 routes.get('/*', 
+  statics({ root: paths.PUBLIC }),
   serverRender({
     styles: [ "/statics/css/styles.css" ],
     scripts: [
@@ -107,5 +108,4 @@ routes.get('/*',
       { src: "/modules/fallback.js", nomodule: true},
     ],
   }), 
-  statics({ root: paths.PUBLIC }), 
 );

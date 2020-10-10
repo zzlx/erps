@@ -9,7 +9,7 @@ import printCharCode from '../../utils/printCharCode.mjs';
 
 import { syntaxError } from '../error/index.mjs';
 import blockStringValue from './blockStringValue.mjs';
-import tokenKind from './tokenKind.json';
+import tokenKind from './tokenKind.mjs';
 
 const charCodeAt = String.prototype.charCodeAt;
 const slice = String.prototype.slice;

@@ -6,9 +6,7 @@
  *
  */
 
-import isNullish from '../../utils/isNullish.mjs';
-import isInvalid from '../../utils/isInvalid.mjs';
-
+import { assert } from '../../utils.mjs';
 import { astFromValue } from '../utilities/astFromValue.mjs';
 import { print } from '../language/printer.mjs';
 import { isScalarType, isObjectType, isInterfaceType, isUnionType, isEnumType, isInputObjectType } from '../type/definition.mjs';
@@ -190,7 +188,7 @@ function printArgs(options, args) {
 function printInputValue(arg) {
   var argDecl = arg.name + ': ' + String(arg.type);
 
-  if (!isInvalid(arg.defaultValue)) {
+  if (!assert.isInvalid(arg.defaultValue)) {
     argDecl += " = ".concat(print(astFromValue(arg.defaultValue, arg.type)));
   }
 
@@ -208,7 +206,7 @@ function printDeprecated(fieldOrEnumVal) {
 
   var reason = fieldOrEnumVal.deprecationReason;
 
-  if (isNullish(reason) || reason === '' || reason === DEFAULT_DEPRECATION_REASON) {
+  if (assert.isNullish(reason) || reason === '' || reason === DEFAULT_DEPRECATION_REASON) {
     return ' @deprecated';
   }
 

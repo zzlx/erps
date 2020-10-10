@@ -18,12 +18,14 @@
 
 import { forEach, isCollection } from '../../utils/iterall.mjs';
 import inspect from '../../utils/inspect.mjs';
-import isNullish from '../../utils/isNullish.mjs';
-import isInvalid from '../../utils/isInvalid.mjs';
+import { assert } from '../../utils.mjs';
 
 import { Kind } from '../language/kinds.mjs';
 import { isScalarType, isEnumType, isInputObjectType, isListType, isNonNullType } from '../type/definition.mjs';
 import { GraphQLID } from '../type/scalars.mjs';
+
+const isNullish = assert.isNullish;
+const isInvalid = assert.isInvalid;
 
 export function astFromValue(value, type) {
   if (isNonNullType(type)) {

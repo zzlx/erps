@@ -3,7 +3,7 @@ import { print } from '../../language/printer.mjs';
 import { isScalarType, isEnumType, isInputObjectType, isListType, isNonNullType, isRequiredInputField, getNullableType, getNamedType } from '../../type/definition.mjs';
 
 import inspect from '../../../utils/inspect.mjs';
-import isInvalid from '../../../utils/isInvalid.mjs';
+import {assert} from '../../../utils.mjs';
 import keyMap from '../../../utils/keyMap.mjs';
 import orList from '../../../utils/orList.mjs';
 import suggestionList from '../../../utils/suggestionList.mjs';
@@ -144,7 +144,7 @@ function isValidScalar(context, node) {
     /* variables */
     );
 
-    if (isInvalid(parseResult)) {
+    if (assert.isInvalid(parseResult)) {
       context.reportError(new GraphQLError(badValueMessage(inspect(locationType), print(node)), node));
     }
   } catch (error) {

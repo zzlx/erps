@@ -690,7 +690,7 @@ function completeValue(context, returnType, fieldNodes, info, path, result) {
   } // If result value is null-ish (null, undefined, or NaN) then return null.
 
 
-  if (is(result).null) {
+  if (assert.isNullish(result)) {
     return null;
   } // If field type is List, complete each item in the list with the inner type
 
@@ -780,7 +780,7 @@ function completeLeafValue(returnType, result) {
 
   const serializedResult = returnType.serialize(result);
 
-  if (is(serializedResult).invalid) {
+  if (assert.isValid(serializedResult)) {
     throw new Error(
       `Expected a value of type ${inspect(returnType)} but received: ${inspect(result)}`
     );

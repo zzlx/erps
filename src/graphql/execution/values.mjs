@@ -6,7 +6,6 @@
  */
 
 import inspect from '../../utils/inspect.mjs';
-import invariant from '../../utils/invariant.mjs';
 import keyMap from '../../utils/keyMap.mjs';
 
 import { coerceValue } from '../utilities/coerceValue.mjs';
@@ -185,7 +184,7 @@ export function getArgumentValues(def, node, variableValues) {
         coercedValues[name] = null;
       } else if (argumentNode.value.kind === Kind.VARIABLE) {
         var _variableName2 = argumentNode.value.name.value;
-        !variableValues ? invariant(0, 'Must exist for hasValue to be true.') : void 0; // Note: This does no further checking that this variable is correct.
+        !variableValues ? assert(0, 'Must exist for hasValue to be true.') : void 0; // Note: This does no further checking that this variable is correct.
         // This assumes that this query has been validated and the variable
         // usage here is of the correct type.
 

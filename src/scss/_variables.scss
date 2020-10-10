@@ -307,7 +307,7 @@ $h6-font-size:                $font-size-base !default;
 
 $headings-margin-bottom:      $spacer / 2 !default;
 $headings-font-family:        null !default;
-$headings-font-weight:        500 !default;
+$headings-font-weight:        520 !default;
 $headings-line-height:        1.2 !default;
 $headings-color:              null !default;
 
@@ -331,7 +331,7 @@ $text-muted:                  $gray-600 !default;
 
 $blockquote-small-color:      $gray-600 !default;
 $blockquote-small-font-size:  $small-font-size !default;
-$blockquote-font-size:        $font-size-base * 1.25 !default;
+$blockquote-font-size:        $font-size-base !default;
 
 $hr-border-color:             rgba($black, .1) !default;
 $hr-border-width:             $border-width !default;
@@ -1143,5 +1143,5 @@ $user-selects: all, auto, none !default;
 
 // Printing
 
-$print-page-size:                   a3 !default;
+$print-page-size:                   a4 !default;
 $print-body-min-width:              map-get($grid-breakpoints, "lg") !default;

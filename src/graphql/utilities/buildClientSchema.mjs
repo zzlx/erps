@@ -1,5 +1,5 @@
 import inspect from '../../utils/inspect.mjs';
-import invariant from '../../utils/invariant.mjs';
+import {assert} from '../../utils.mjs';
 import keyMap from '../../utils/keyMap.mjs';
 import keyValMap from '../../utils/keyValMap.mjs';
 
@@ -85,13 +85,13 @@ export function buildClientSchema(introspection, options) {
 
   function getInputType(typeRef) {
     var type = getType(typeRef);
-    !isInputType(type) ? invariant(0, 'Introspection must provide input type for arguments, but received: ' + inspect(type) + '.') : void 0;
+    !isInputType(type) ? assert(0, 'Introspection must provide input type for arguments, but received: ' + inspect(type) + '.') : void 0;
     return type;
   }
 
   function getOutputType(typeRef) {
     var type = getType(typeRef);
-    !isOutputType(type) ? invariant(0, 'Introspection must provide output type for fields, but received: ' + inspect(type) + '.') : void 0;
+    !isOutputType(type) ? assert(0, 'Introspection must provide output type for fields, but received: ' + inspect(type) + '.') : void 0;
     return type;
   }
 

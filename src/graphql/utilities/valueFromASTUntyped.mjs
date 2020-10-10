@@ -16,7 +16,7 @@
  */
 
 import keyValMap from '../../utils/keyValMap.mjs';
-import isInvalid from '../../utils/isInvalid.mjs';
+import { assert } from '../../utils.mjs';
 import { Kind } from '../language/kinds.mjs';
 
 export function valueFromASTUntyped(valueNode, variables) {
@@ -49,7 +49,7 @@ export function valueFromASTUntyped(valueNode, variables) {
 
     case Kind.VARIABLE:
       var variableName = valueNode.name.value;
-      return variables && !isInvalid(variables[variableName]) ? variables[variableName] : undefined;
+      return variables && !assert.isInvalid(variables[variableName]) ? variables[variableName] : undefined;
   }
   /* istanbul ignore next */
 

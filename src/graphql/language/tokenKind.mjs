@@ -1,4 +1,4 @@
-{
+export default Object.freeze({
   "AMP": "&",
   "AT": "@",
   "BANG": "!",
@@ -21,4 +21,4 @@
   "SOF": "<SOF>",
   "SPREAD": "...",
   "STRING": "String"
-}
+});
