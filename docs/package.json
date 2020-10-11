@@ -1,0 +1,7 @@
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "description": "Documentation about ERP system",
+  "private": true,
+  "LICENSE": "MIT-like"
+}

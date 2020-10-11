@@ -16,9 +16,9 @@ import util from 'util';
 import Remarkable from 'remarkable';
 
 import settings from '../config/settings.mjs';
-import Router from '../src/kos/Router.mjs';
-import statics from '../src/kos/middlewares/statics.mjs';
-import serverRender from '../src/kos/middlewares/serverRender.mjs';
+import Router from '../src/koa/Router.mjs';
+import statics from '../src/koa/middlewares/statics.mjs';
+import serverRender from '../src/koa/middlewares/serverRender.mjs';
 import Html from '../src/templates/Html.mjs';
 import readDir from '../src/utils/readDir.mjs';
 

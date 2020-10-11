@@ -11,15 +11,15 @@
 
 import util from 'util';
 import settings from '../config/settings.mjs';
-import Kos from '../src/kos/Application.mjs';
-import * as M from '../src/kos/middlewares/index.mjs';
+import Koa from '../src/koa/Application.mjs';
+import * as M from '../src/koa/middlewares/index.mjs';
 import router from '../server/routes.mjs';
 
 const debug = util.debuglog('debug:main.mjs');
 const paths = settings.paths;
 
 // 初始化服务器程序
-const app = new Kos({
+const app = new Koa({
   env: process.env.NODE_ENV, // 服务器执行环境
   compressThreshold: 256,    // 压缩阈值,超过256kb的内容将被压缩后传递给客户端
 });

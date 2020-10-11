@@ -26,7 +26,7 @@ const paths = (root => {
   });
 
   return dirs;
-})(path.dirname(path.dirname(import.meta.url.substr(7))));
+})(path.dirname(path.dirname(path.dirname(import.meta.url.substr(7)))));
 
 // 从package中读项目名称
 const appName = paths.PACKAGE

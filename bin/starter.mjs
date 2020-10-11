@@ -80,6 +80,7 @@ class Watcher extends EventEmitter {
 
     for (let file of files) {
       if (!fs.existsSync(file)) return;
+      if (path.basename(file) === '.DS_Store') fs.unlinkSync(file);
 
       const content = fs.readFileSync(file, 'utf8');
       const sha1 = crypto.createHash('sha1').update(content).digest('hex');

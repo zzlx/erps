@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Statics中间件
+ * Static File Serving
  *
  * 功能描述:
  *
@@ -42,7 +42,7 @@ export default (options = {}) => {
     let url = path.resolve(opts.root, relativePath);       // 构造绝对路径
 
     // 设置响应类型
-    // 旁路掉没有扩展名的路径
+    // 旁路掉没有扩展名的目录路径
     // @todo: 提供目录服务
     if (path.extname(url) === '') return next(); 
     else ctx.type = path.extname(url);
