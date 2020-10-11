@@ -14,7 +14,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import zlib from 'zlib';
 import util from 'util';
 import { date } from '../../utils.mjs';
 
@@ -28,13 +27,9 @@ export default function logger (options = {}) {
     path: process.cwd(),
   }, typeof options === 'string' ? {path: options} : options);
 
-  let ws = null; // write stream 
+  const logFile = path.join(opts.path, 'request.log');
 
-  const getWS = file => {
-    if (ws && ws.close === false) return ws;
-    ws = fs.createWriteStream(file, {flags: 'a'}); 
-    return ws;
-  }
+  let ws = fs.createWriteStream(logFile, {flags: 'a', autoClose: false}); 
 
   return async function logMiddleware (ctx, next) {
     // 记录访问日志
@@ -50,56 +45,39 @@ export default function logger (options = {}) {
       "s-address": ctx.socket.localAddress,
       "s-port": ctx.socket.localPort,
       "s-pid": process.pid,
-      "respond-time": null,
     };
 
     try {
-      // 执行中间件栈
-      await next(); 
-
-      // 记录服务端响应信息
-      ctx.state.log['status'] = ctx.status;
-      ctx.state.log["respond-time"] = ctx.response.headers['x-response-time'];
-
+      await next(); // 执行中间件栈
     } catch (error) {
       Promise.reject(error);
     }
 
     if (ctx.state.noLog) return;
 
-    const logFile = path.join(opts.path, 'request.log');
+    ctx.state.log['status'] = ctx.status; // 记录服务端响应信息
 
-    await archiveFile(logFile); // 存档日志
+    // 存档日志
+    await archiveFile(logFile); 
 
-    if (!fs.existsSync(logFile)) {
-      if (ws) ws.end();
+    if (!ws.closed) ws.write('\n' + Object.values(ctx.state.log).join('\t'));
 
-      // 创建不存在的日志文件
-      getWS(logFile);
+    async function archiveFile (file) {
 
-      // 写入日志文件格式说明及字段对应名称
-      ws.write(Object.keys(ctx.state.log).join('\t'));
-    }
+      if (!fs.existsSync(file)) {
+        if (!ws.closed) ws.write(Object.keys(ctx.state.log).join('\t'));
+      }
+      const fileSN = sn(new Date(fs.lstatSync(file).birthtime));
+      const nowSN = sn(new Date());
+      if (fileSN === nowSN) return false;
 
-    getWS(logFile);
+      await fs.promises.copyFile(file, fileSN + "_" + file)
+        .then(() => fs.promises.unlink(file))
+        .then(() => {
+          if (!ws.closed) ws.write(Object.keys(ctx.state.log).join('\t'));
+        });
 
-    ws.write('\n' + Object.values(ctx.state.log).join('\t'));
+      return true;
+    } 
   } 
 }
-
-// 按日期存档文件
-function archiveFile (file) {
-  if (!fs.existsSync(file)) return Promise.resolve(false);
-
-  const fileSN = sn(new Date(fs.lstatSync(file).birthtime));
-  const nowSN = sn(new Date());
-  if (fileSN === nowSN) return Promise.resolve(false);
-
-  return Promise.all([
-    fs.promises.writeFile(
-      path.join(path.dirname(file), fileSN + '_' + path.basename(file) + '.br'),
-      zlib.brotliCompressSync(fs.readFileSync(file))
-    ),
-    fs.promises.unlink(file),
-  ]);
-} 

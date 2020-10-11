@@ -54,9 +54,9 @@ process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => 
     }
   }
 
-  if (pathname === '/statics/css/styles.css') {
+  if (pathname === '/assets/styles.css') {
     const scssFiles = readDir(path.join(paths.SRC, 'scss'));
-    const cssFile = path.join(paths.PUBLIC, 'statics', 'css', 'styles.css');
+    const cssFile = path.join(paths.PUBLIC, 'assets', 'styles.css');
     await fs.promises.mkdir(path.dirname(cssFile), {recursive: true});
     const cssStats = fs.lstatSync(cssFile);
 

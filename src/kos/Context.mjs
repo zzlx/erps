@@ -10,7 +10,6 @@ import assert from 'assert';
 import http from 'http';
 import http2 from 'http2';
 import net from 'net';
-import Stream from 'stream';
 import util from 'util';
 
 // @todo: 本地化第三方模块
@@ -800,7 +799,12 @@ export default class Context {
 
     // stream
     if (val && typeof val.pipe === 'function') {
-      const handler = error => debug('stream error: ', error);
+
+      const handler = err => {
+        debug('Error: ', err);
+        if (err.code === 'ENOENT') this.status = 404;
+      };
+
       if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
       if (null !== original && original != val) this.remove('Content-Length');
       if (setType) this.type = 'bin';
