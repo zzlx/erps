@@ -10,7 +10,7 @@
  */
 
 import util from 'util';
-import settings from '../config/settings.mjs';
+import settings from './config/settings.mjs';
 import Koa from '../src/koa/Application.mjs';
 import * as M from '../src/koa/middlewares/index.mjs';
 import router from '../server/routes.mjs';

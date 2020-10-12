@@ -1,13 +1,15 @@
 /**
  *
  * Progress 
+ *
+ *
  * @props striped bool 是否显示条纹样式
  *
  */
 
 import React from './React.mjs';
 
-export default class Progress extends React.PureComponent {
+export default class ProgressBar extends React.PureComponent {
   render() {
     const { 
       min, now, max, label,striped, animated
@@ -25,14 +27,4 @@ export default class Progress extends React.PureComponent {
       })
     );
   }
-}
-
-Progress.defaultProps = {
-  min: 0,
-  now: 0,
-  max: 100,
-  bg: "primary",
-  label: true,
-  animated: true,
-  striped: true,
 }

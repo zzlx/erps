@@ -7503,7 +7503,7 @@
   "text/plain": {
     "source": "iana",
     "compressible": true,
-    "extensions": ["txt","text","conf","def","list","log","in","ini","md"]
+    "extensions": ["txt","text","conf","def","list","log","in","ini"]
   },
   "text/provenance-notation": {
     "source": "iana",

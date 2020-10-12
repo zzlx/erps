@@ -15,12 +15,12 @@ import path from 'path';
 import util from 'util';
 import Remarkable from 'remarkable';
 
-import settings from '../config/settings.mjs';
+import settings from './config/settings.mjs';
 import Router from '../src/koa/Router.mjs';
 import statics from '../src/koa/middlewares/statics.mjs';
 import serverRender from '../src/koa/middlewares/serverRender.mjs';
 import Html from '../src/templates/Html.mjs';
-import readDir from '../src/utils/readDir.mjs';
+import { readDir } from '../src/utils.node.mjs';
 
 const debug = util.debuglog('debug:routes.mjs');
 const paths = settings.paths;
@@ -99,7 +99,7 @@ routes.get('/docs*', (ctx, next) => {
 // 将api路由附加至index
 routes.all('/api*', async (ctx, next) => {
   //if (ctx.pathname === 'favicon.ico') return await next();
-  const apiFile = path.join(paths.SERVER, 'apis', path.relative('/api', ctx.pathname) + '.mjs');
+  const apiFile = path.join(paths.SERVER, 'pages', path.relative('/', ctx.pathname) + '.mjs');
 
   if (fs.existsSync(apiFile)) {
     return await import(apiFile).then(m => m.default).then(app => {
@@ -114,9 +114,10 @@ routes.all('/api*', async (ctx, next) => {
   });
 
   html.body = '<div class="container markdown">' + 
-    md.render(fs.readFileSync(path.join(paths.SERVER, 'apis', 'README.md'), 'utf8')) +
+    md.render(fs.readFileSync(path.join(paths.SERVER, 'pages', 'api', 'README.md'), 'utf8')) +
   '</div>';
 
+  html.title = 'API数据服务';
   ctx.body = html.render();
 });
 

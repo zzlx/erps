@@ -18,7 +18,7 @@ import {
   parse, 
   path,
   pathToRegexp, 
-} from '../utils.mjs';
+} from '../utils.lib.mjs';
 
 const debug = util.debuglog('debug:router.mjs');
 

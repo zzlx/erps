@@ -19,28 +19,33 @@
  */
 
 import cp from 'child_process';
+import path from 'path';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
 
-import settings from '../config/settings.mjs';
-import { assert, argvParser, console } from '../src/utils.mjs';
-import readDir from '../src/utils/readDir.mjs';
+import settings from '../server/config/settings.mjs';
+import { assert, argvParser, console } from '../src/utils.lib.mjs';
+import { readDir } from '../src/utils.node.mjs';
 
+const paths = settings.paths;
 const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
 const paramMap = argvParser(ARGVS);
 
-const command = paramMap.get('command');
+//const command = paramMap.get('command');
+const command = path.join(paths.BIN, 'httpd.mjs');
 assert(command, '请提供要执行的命令!');
 
-const paths = paramMap.get('paths').split(',');
-assert(paths.length, '请提供要监测的目录!');
+const ps = paramMap.get('paths').split(',');
+assert(ps.length, '请提供要监测的目录!');
 
-const args = paramMap.get('args').split(' ');
+//const args = paramMap.get('args');
+const args = ['--restart'];
+
 let cmd = null;
 let lastPid = null;
 
-process.nextTick(() => new Watcher(...paths, () => {
+process.nextTick(() => new Watcher(...ps, () => {
   cmd = cp.spawn(command, args, { 
     stdio: [0, 1, 2], 
     detached: false 
@@ -80,7 +85,10 @@ class Watcher extends EventEmitter {
 
     for (let file of files) {
       if (!fs.existsSync(file)) return;
-      if (path.basename(file) === '.DS_Store') fs.unlinkSync(file);
+      if (path.basename(file) === '.DS_Store') {
+        fs.unlinkSync(file);
+        continue;
+      }
 
       const content = fs.readFileSync(file, 'utf8');
       const sha1 = crypto.createHash('sha1').update(content).digest('hex');

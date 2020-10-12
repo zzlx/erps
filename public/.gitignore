@@ -1,2 +1,3 @@
-# 忽略assets目录
-assets
+# 忽略目录
+css
+javascript

@@ -18,12 +18,12 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import settings from '../config/settings.mjs';
+import settings from '../server/config/settings.mjs';
 import { 
   assert, 
   argvParser, 
   console 
-} from '../src/utils.mjs';
+} from '../src/utils.lib.mjs';
 import serviceApp from '../server/main.mjs';
 
 const paths = settings.paths;

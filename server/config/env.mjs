@@ -12,7 +12,7 @@
 import fs from 'fs';
 import util from 'util';
 import paths from './paths.mjs';
-import envParser from '../src/parser/envParser.mjs';
+import { envParser } from '../../src/utils.lib.mjs';
 
 const debug = util.debuglog('debug:env.mjs');
 
