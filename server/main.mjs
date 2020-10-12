@@ -39,7 +39,6 @@ app.use(router.allowedMethods());
 // 内容压缩支持
 app.use(M.compress());             
 
-
 // 开发环境下测试的项目
 app.env === 'development' && app.use(async (ctx, next) => {
   // @Task:

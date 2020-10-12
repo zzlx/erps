@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "A ERP system platform, writen by Node.js.",
   "scripts": {
-    "dev": "./bin/starter.mjs --paths=bin,server,src",
+    "dev": "./bin/starter.mjs bin/httpd.mjs --restart --paths=bin,server,src",
     "restart": "./bin/httpd.mjs --restart",
     "start": "./bin/httpd.mjs --start",
     "stop": "./bin/httpd.mjs --stop"
   },
   "private": true,
   "dependencies": {
-    "gray-matter": "^4.0.2"
+    "gray-matter": "^4.0.2",
+    "htmlparser2": "^5.0.0"
   }
 }

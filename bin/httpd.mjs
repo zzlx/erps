@@ -52,16 +52,15 @@ function executer () {
   const paramMap = argvParser(ARGVS);
 
   // 处理环境变量配置 
-  for (let param of paramMap.keys()) { 
+  for (let param of Object.keys(paramMap)) { 
     switch(param) { 
       case 'env': 
-        settings.env = paramMap.get('env');
-
-        paramMap.delete(param); // delete param key
+        settings.env = paramMap['env'];
+        delete paramMap['env'];
         continue;
       case 'debug':
         process.env.NODE_DEBUG = 'debug:*';
-        paramMap.delete(param); // delete param key
+        delete paramMap['debug'];
         continue;
       //default:
     }
@@ -71,28 +70,28 @@ function executer () {
     console.log('There is nothing to do./@todo: Show help message.');
   }
 
-  for (let param of paramMap.keys()) {
+  for (let param of Object.keys(paramMap)) {
     switch(param) {
       case 'help':
         //showHelp();
-        paramMap.delete(param); // delete param key
+        delete paramMap['help'];
         break;
       case 'start':
-        paramMap.delete(param); // delete param key
         start();
+        delete paramMap['start'];
         break;
       case 'stop':
-        paramMap.delete(param); // delete param key
         stop();
+        delete paramMap['stop'];
         break;
       case 'restart':
-        paramMap.delete(param); // delete param key
         restart();
+        delete paramMap['restart'];
         break;
     }
 
-    if (paramMap.size > 0) {
-      console.log(`The param you provid is not supported.`);
+    if (Object.keys(paramMap).length > 0) {
+      console.log('The param: %o is not supported.', paramMap);
     }
   }
 }

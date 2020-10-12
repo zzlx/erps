@@ -17,7 +17,7 @@ import accepts from 'accepts';
 import contentType from 'content-type';
 
 import HttpError from './HttpError.mjs';
-import MemCache from '../utils/memCache.mjs';
+import { memCache } from '../utils.lib.mjs';
 import MimeTypes from './MimeTypes.mjs';
 
 const debug = util.debuglog('debug:context.mjs');
@@ -50,7 +50,7 @@ const REDIRECT_CODE = [
 
 // define constants
 const mimeTypes = new MimeTypes();
-const typeCache = new MemCache(100);
+const typeCache = memCache(100);
 
 export default class Context {
   /**

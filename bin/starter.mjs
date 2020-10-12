@@ -24,28 +24,27 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
 
-import settings from '../server/config/settings.mjs';
 import { assert, argvParser, console } from '../src/utils.lib.mjs';
-import { readDir } from '../src/utils.node.mjs';
+const ARGVS = Array.prototype.slice.call(process.argv, 3); // get argv array
+const params = argvParser(ARGVS);
 
-const paths = settings.paths;
-const ARGVS = Array.prototype.slice.call(process.argv, 2); // get argv array
-const paramMap = argvParser(ARGVS);
+const paths = params['paths'] ? params['paths'].split(',') : process.cwd();
+assert(paths.length, '请提供要监测的目录!');
+delete params['paths']
 
-//const command = paramMap.get('command');
-const command = path.join(paths.BIN, 'httpd.mjs');
+const command = path.join(process.cwd(), process.argv[2]);
 assert(command, '请提供要执行的命令!');
 
-const ps = paramMap.get('paths').split(',');
-assert(ps.length, '请提供要监测的目录!');
+const args = [];
 
-//const args = paramMap.get('args');
-const args = ['--restart'];
+for (let key of Object.keys(params)) {
+  args.push('--' + key);
+}
 
 let cmd = null;
 let lastPid = null;
 
-process.nextTick(() => new Watcher(...ps, () => {
+process.nextTick(() => new Watcher(...paths, () => {
   cmd = cp.spawn(command, args, { 
     stdio: [0, 1, 2], 
     detached: false 
@@ -128,4 +127,31 @@ function readFromStdin () {
       process.stdin.pause();
     });
   });
+}
+
+/**
+ * 循环读取目录,返回文件路径列表
+ *
+ * @param {string} dir
+ */
+
+function readDir (dir) {
+  let file_lists = []; // 文件列表
+  
+  if (Array.isArray(dir)) {
+    for (let d of dir) file_lists = file_lists.concat(readDir(d));
+  }
+
+  if (typeof dir === 'string' && fs.existsSync(dir)) {
+
+    const files = fs.readdirSync(dir, {withFileTypes: true});
+
+    for (let file of files) {
+      const filePath = path.join(dir, file.name);
+      if (file.isFile()) file_lists.push(filePath);
+      if (file.isDirectory()) file_lists = file_lists.concat(readDir(filePath));
+    }
+  }
+
+  return file_lists;
 }

@@ -1,4 +1,3 @@
-前端资源目录
+主页面
 ============
 
-Websites and web applications

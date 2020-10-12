@@ -31,7 +31,7 @@ if (fs.existsSync(paths.ENV)) {
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 process.on('exit', code => {
-  debug(`${process.title}(PID:${process.pid}) is exit with code ${code}.`);
+  debug(`PID ${process.pid} is running ${Math.ceil(process.uptime()*1000)}ms before exit.`);
 });
 
 

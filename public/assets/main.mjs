@@ -14,6 +14,7 @@ import configureStore from './store/configureStore.mjs';
 const preloadedState = globalThis.__INATIAL__STATE__ || {};
 const store = configureStore(preloadedState); 
 
+
 (async function main () {
   globalThis.React = globalThis.React || await import('React').then(m => m.default);
   const App = await import('./apps/pages.mjs').then(m => m.default); 

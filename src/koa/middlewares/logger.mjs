@@ -71,7 +71,8 @@ export default function logger (options = {}) {
       const nowSN = sn(new Date());
       if (fileSN === nowSN) return false;
 
-      await fs.promises.copyFile(file, fileSN + "_" + file)
+      const newFile = path.dirname(file) + fileSN + "_" + path.basename(file);
+      await fs.promises.copyFile(file, newFile)
         .then(() => fs.promises.unlink(file))
         .then(() => {
           if (!ws.closed) ws.write(Object.keys(ctx.state.log).join('\t'));

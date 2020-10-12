@@ -18,9 +18,9 @@ import Remarkable from 'remarkable';
 import settings from './config/settings.mjs';
 import Router from '../src/koa/Router.mjs';
 import statics from '../src/koa/middlewares/statics.mjs';
-import serverRender from '../src/koa/middlewares/serverRender.mjs';
-import Html from '../src/templates/Html.mjs';
-import { readDir } from '../src/utils.node.mjs';
+import serverRender, { 
+  HTMLTemplate as Html 
+} from '../src/koa/middlewares/serverSideRendering.mjs';
 
 const debug = util.debuglog('debug:routes.mjs');
 const paths = settings.paths;
@@ -34,37 +34,16 @@ export default routes; // 输出路由配置
 process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => {
   const pathname = ctx.pathname;
 
-  if (pathname === '/assets/react-dom.development.js' ||
-      pathname === '/assets/react-dom.production.min.js') {
-    if (!fs.existsSync(path.join(paths.PUBLIC, pathname))) {
-      const s = path.join(paths.NODE_MODULES, 'react-dom', 'umd', path.basename(pathname));
-      const o = path.join(paths.PUBLIC, pathname);
-      await fs.promises.mkdir(path.dirname(o), {recursive: true});
-      if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
-    }
-  }
-
-  if (pathname === '/assets/react.development.js' ||
-      pathname === '/assets/react.production.min.js') {
-    if (!fs.existsSync(path.join(paths.PUBLIC, pathname))) {
-      const s = path.join(paths.NODE_MODULES, 'react', 'umd', path.basename(pathname));
-      const o = path.join(paths.PUBLIC, pathname);
-      await fs.promises.mkdir(path.dirname(o), {recursive: true});
-      if (fs.existsSync(s)) await fs.promises.copyFile(s, o);
-    }
-  }
-
-  if (pathname === '/assets/styles.css') {
+  if (pathname === '/css/styles.css') {
     const scssFiles = readDir(path.join(paths.SRC, 'scss'));
-    const cssFile = path.join(paths.PUBLIC, 'assets', 'styles.css');
+    const cssFile = path.join(paths.PUBLIC, 'css', 'styles.css');
     await fs.promises.mkdir(path.dirname(cssFile), {recursive: true});
     const cssStats = fs.lstatSync(cssFile);
 
     for (let file of scssFiles) {
       const stats = fs.lstatSync(file);
       if (stats.mtime > cssStats.ctime) {
-        // @todo: 
-        await cp.spawn(path.join(paths.BIN, 'css-render.mjs'));
+        await cp.spawn(path.join(paths.SERVER, 'tasks', 'css-render.mjs'));
         break;
       }
     }
@@ -124,12 +103,39 @@ routes.all('/api*', async (ctx, next) => {
 routes.get('/*', 
   statics({ root: paths.PUBLIC }),
   serverRender({
-    styles: [ "/assets/styles.css" ],
+    styles: [ "/css/styles.css" ],
     scripts: [
-      { src: `/assets/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-      { src: `/assets/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: `/javascript/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: `/javascript/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
       { src: "/modules/main.mjs", module: true, crossorigin: true },
       { src: "/modules/fallback.js", nomodule: true},
     ],
   }), 
 );
+
+/**
+ * 循环读取目录,返回文件路径列表
+ *
+ * @param {string} dir
+ */
+
+function readDir (dir) {
+  let file_lists = []; // 文件列表
+  
+  if (Array.isArray(dir)) {
+    for (let d of dir) file_lists = file_lists.concat(readDir(d));
+  }
+
+  if (typeof dir === 'string' && fs.existsSync(dir)) {
+
+    const files = fs.readdirSync(dir, {withFileTypes: true});
+
+    for (let file of files) {
+      const filePath = path.join(dir, file.name);
+      if (file.isFile()) file_lists.push(filePath);
+      if (file.isDirectory()) file_lists = file_lists.concat(readDir(filePath));
+    }
+  }
+
+  return file_lists;
+}

@@ -13,11 +13,8 @@
  */
 
 export default function parser (argvs) {
-  // convert string to array;
-  if ('string' === typeof argvs) argvs = argvs.split(/\s+/);
-
-  const params = new Map();
-
+  if ('string' === typeof argvs) argvs = argvStr.split(/\s+/);
+  const params = Object.create(null);
 	const it = argvs[Symbol.iterator]();
 
 	let argv = null;
@@ -25,9 +22,8 @@ export default function parser (argvs) {
 
 	while ((argv = it.next().value) != null) {
 		i++; 
-
     // @todo: 是否有必要改正则匹配逻辑为字串匹配? 对性能影响极小,暂时不作修改.
-    const matcher = argv => /^(?:--(\w+)(?:=(.+))?)|(?:-(\w+))|(\w+)/g.exec(argv);
+    const matcher = argv => /^(?:--(\w+)(?:=(.+))?)|(?:-(\w+))|(.+)/g.exec(argv);
 
 		const match = matcher(argv);
 		if (null == match) continue; // bypass if no match
@@ -38,23 +34,23 @@ export default function parser (argvs) {
     const command = match[4];
 		
     if (key) {
-      params.set(key, value ? value : true);
+      params[key] = value == null ? true : value;
       
-      if (true === params.get(key) && argvs[i+1] && null == matcher(argvs[i+1])) {
-        params.set(key, argvs[i+1]);
+      if (params[key] === true && argvs[i+1] && null == matcher(argvs[i+1])) {
+        params[key] = argvs[i+1];
       }
     }
 
 		if (commands) {
       // 单参数情况时, eg. -o /home/test.txt
 			if (commands.length === 1 && argvs[i+1] && null == matcher(argvs[i+1])) {
-				params.set(commands, argvs[i+1]);
+				params[commands] = argvs[i+1];
 			} else {
-        for (let v of commands ) params.set(v, true); // multi params, eg. -abc
+        for (let v of commands ) params[v] = true; // multi params, eg. -abc
       }
 		}
 
-    if (command) params.set(command, true);
+    if (command) params[command] = true;
   }
 
   return params;
