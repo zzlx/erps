@@ -60,7 +60,7 @@ routes.get('/docs*', (ctx, next) => {
   if (!fs.existsSync(file)) return next();
 
   ctx.type = 'html';
-  const html = new Html({ styles: ['/statics/css/styles.css'], });
+  const html = new Html({ styles: ['/css/styles.css'], });
   const md = new Remarkable({
     html: true,
   });
@@ -78,7 +78,7 @@ routes.get('/docs*', (ctx, next) => {
 // 将api路由附加至index
 routes.all('/api*', async (ctx, next) => {
   //if (ctx.pathname === 'favicon.ico') return await next();
-  const apiFile = path.join(paths.SERVER, 'pages', path.relative('/', ctx.pathname) + '.mjs');
+  const apiFile = path.join(paths.SERVER, 'apis', path.relative('/api', ctx.pathname) + '.mjs');
 
   if (fs.existsSync(apiFile)) {
     return await import(apiFile).then(m => m.default).then(app => {
@@ -87,13 +87,13 @@ routes.all('/api*', async (ctx, next) => {
   }
 
   ctx.type = 'html';
-  const html = new Html({ styles: ['/assets/styles.css'], });
+  const html = new Html({ styles: ['/css/styles.css'], });
   const md = new Remarkable({
     html: true,
   });
 
   html.body = '<div class="container markdown">' + 
-    md.render(fs.readFileSync(path.join(paths.SERVER, 'pages', 'api', 'README.md'), 'utf8')) +
+    md.render(fs.readFileSync(path.join(paths.SERVER, 'apis', 'README.md'), 'utf8')) +
   '</div>';
 
   html.title = 'API数据服务';

@@ -1,14 +1,25 @@
 /**
  * *****************************************************************************
  *
- * 字符串模板替换
+ * 模板字符串工具
+ *
+ * 一个类似模板字符串``的功能
+ *
+ *
  *
  * *****************************************************************************
  */
 
 const template = (str, obj) => new Proxy({
   rawStr: str,
-  
+  obj: obj,
+}, {
+  get: function (target, property, receiver) {
+    if (property === 'toString') {
+      return () => parse.call(target);
+    }
+    return Reflect.get(target, property, receiver);
+  },
 });
 
 /**
@@ -23,9 +34,9 @@ export function parse () {
   let flag = false;
   let start;
   for (let i = 0; i < str.length; i++) {
-    if (str[i] === '{') {
+    if (str[i] === '$' && str[i+1] === "{") {
       flag = true;
-      start = i + 1;
+      start = i + 2;
       continue;
     }
     if (!flag) retval += str[i];
@@ -47,11 +58,18 @@ export function parse () {
 export function match (str, obj) { 
   let o = obj;
   const keys = str.split('.').slice(1);
-  for (let key of keys) o = o[key] || `{${str}}`;
+  for (let key of keys) {
+    if (o[key] == null) {
+      o = `{${str}}`;
+      break;
+    } else {
+      o = o[key];
+    }
+  }
   return o;
 }
 
 //console.log(match('a.b', {b: 'test'}));
-//console.log(templateStr('{a.b}', {b: 'test'}));
-//
+//console.log(parse.call({rawStr: '${a.b}', obj:{b: 'test'}}));
+console.log(String(template('${a.b}', {b:'test'})));
 export default template;
