@@ -39,6 +39,7 @@ const app = new Koa({
   handshakeTimeout: 120000, // milliseconds
 });
 
+// 重启服务前执行的任务
 app.tasksBeforeListen = [
   cp.spawn(path.join(paths.SERVER, 'tasks', 'copy-umd-to-public.mjs')),
 ];

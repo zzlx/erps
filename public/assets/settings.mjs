@@ -15,6 +15,9 @@ import path from './utils/path.mjs';
 const APP_ROOT = path.dirname(path.dirname(import.meta.url));
 const rootURL = new URL(APP_ROOT);
 
+// 前端程序执行环境设置
+global.env = rootURL.searchParams.get('env') || 'production';
+
 export default new Proxy({
   assets: path.join(APP_ROOT, 'assets'),
   modules: path.join(APP_ROOT, 'modules'),
