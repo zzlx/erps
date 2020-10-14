@@ -8,10 +8,12 @@
  * *****************************************************************************
  */
 
-import { assert } from '../../utils.mjs';
-
-import inspect from '../../utils/inspect.mjs';
-import { forEach, isCollection } from '../../utils/iterall.mjs';
+import { 
+  assert, 
+  inspect,
+  forEach, 
+  isCollection,
+} from '../../utils.lib.mjs';
 
 import memoize3 from '../utilities/memoize3.mjs';
 import promiseForObject from '../utilities/promiseForObject.mjs';

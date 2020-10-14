@@ -1,8 +1,10 @@
-import _defineProperty from '../../utils/defineProperty.mjs';
-import _objectSpread from '../../utils/objectSpread.mjs';
-import { assert } from '../../utils.mjs';
-import mapValue from '../../utils/mapValue.mjs';
-import keyValMap from '../../utils/keyValMap.mjs';
+import { 
+  defineProperty as _defineProperty,
+  objectSpread as _objectSpread,
+  assert,
+  mapValue,
+  keyValMap,
+} from '../../utils.lib.mjs';
 
 import { ASTDefinitionBuilder } from './buildASTSchema.mjs';
 import { assertValidSDLExtension } from '../validation/validate.mjs';

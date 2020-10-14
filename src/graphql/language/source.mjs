@@ -8,7 +8,7 @@
  *
  */
 
-import defineToStringTag from '../../utils/defineToStringTag.mjs';
+import { defineToStringTag } from '../../utils.lib.mjs';
 
 export class Source {
   constructor (body, name, locationOffset) {

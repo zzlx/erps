@@ -8,8 +8,11 @@
  *
  */
 
-import _defineProperty from '../../utils/defineProperty.mjs';
-import { $$asyncIterator, getAsyncIterator } from '../../utils/iterall.mjs';
+import {
+  defineProperty as _defineProperty,
+  $$asyncIterator, 
+  getAsyncIterator 
+} from '../../utils.lib.mjs';
 
 export default function mapAsyncIterator(iterable, callback, rejectCallback) {
   var iterator = getAsyncIterator(iterable);

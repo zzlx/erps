@@ -6,7 +6,7 @@
  *
  */
 
-import { assert } from '../../utils.mjs';
+import { assert } from '../../utils.lib.mjs';
 import { astFromValue } from '../utilities/astFromValue.mjs';
 import { print } from '../language/printer.mjs';
 import { isScalarType, isObjectType, isInterfaceType, isUnionType, isEnumType, isInputObjectType } from '../type/definition.mjs';

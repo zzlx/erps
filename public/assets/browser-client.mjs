@@ -9,11 +9,11 @@
  * *****************************************************************************
  */
 
-import assert from '../utils/assert.mjs';
-import global from '../utils/global.mjs';
-import console from '../utils/console.mjs';
-import path from '../utils/path.mjs';
-import settings from '../settings.mjs';
+import assert from './utils/assert.mjs';
+import global from './utils/global.mjs';
+import console from './utils/console.mjs';
+import path from './utils/path.mjs';
+import settings from './settings.mjs';
 
 const ua = global.navigator.userAgent;
 
@@ -39,15 +39,12 @@ export default function browserRender (element) {
 }
 
 function callback () {
-  if (global.env !== 'development') return;
-
-  const sysinfo = {
+  console.groupCollapsed('系统信息');
+  console.dir({
     'cookie-enabled': global.navigator.cookieEnabled,
     'ready-time': new Date().toISOString(),
-  };
-
-  console.groupCollapsed('系统信息');
-  console.dir(sysinfo);
+    'env': globalThis.env,
+  });
   console.groupEnd();
 }
 

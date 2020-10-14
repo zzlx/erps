@@ -1,8 +1,11 @@
-import { forEach, isCollection } from '../../utils/iterall.mjs';
-import inspect from '../../utils/inspect.mjs';
-import { assert } from '../../utils.mjs';
-import orList from '../../utils/orList.mjs';
-import suggestionList from '../../utils/suggestionList.mjs';
+import { 
+  assert, 
+  forEach, 
+  isCollection,
+  inspect,
+  orList,
+  suggestionList,
+} from '../../utils.lib.mjs';
 
 import { GraphQLError } from '../error/index.mjs';
 import { 

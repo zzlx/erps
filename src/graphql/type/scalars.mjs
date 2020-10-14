@@ -1,8 +1,4 @@
-/**
- * 直接量
- */
-
-import inspect from '../../utils/inspect.mjs';
+import { inspect } from '../../utils.lib.mjs';
 import { GraphQLScalarType, isNamedType } from './definition.mjs';
 import { Kind } from '../language/kinds.mjs'; 
 

@@ -1,5 +1,7 @@
-import inspect from '../../utils/inspect.mjs';
-import defineToJSON from '../../utils/defineToJSON.mjs';
+import {
+  inspect,
+  defineToJSON,
+} from '../../utils.lib.mjs';
 
 import { Lexer, TokenKind, getTokenDesc } from './lexer.mjs';
 import { DirectiveLocation } from './directiveLocation.mjs';

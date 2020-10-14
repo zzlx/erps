@@ -1,4 +1,4 @@
-import inspect from '../../../utils/inspect.mjs';
+import { inspect } from '../../../utils.lib.mjs';
 import { GraphQLError } from '../../error/index.mjs';
 import { Kind } from '../../language/kinds.mjs';
 import { isNonNullType } from '../../type/definition.mjs';

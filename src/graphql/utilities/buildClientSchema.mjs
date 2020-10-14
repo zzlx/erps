@@ -1,7 +1,9 @@
-import inspect from '../../utils/inspect.mjs';
-import {assert} from '../../utils.mjs';
-import keyMap from '../../utils/keyMap.mjs';
-import keyValMap from '../../utils/keyValMap.mjs';
+import {
+  assert,
+  inspect,
+  keyMap,
+  keyValMap,
+} from '../../utils.lib.mjs';
 
 import { valueFromAST } from './valueFromAST.mjs';
 import { parseValue } from '../language/parser.mjs';

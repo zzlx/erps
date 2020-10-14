@@ -6,6 +6,7 @@
  * an empty array if no errors were encountered and the Schema is valid.
  */
 
+import { inspect } from '../../utils.lib.mjs';
 import { 
   isObjectType, 
   isInterfaceType, 
@@ -18,7 +19,6 @@ import {
   isRequiredArgument 
 } from './definition.mjs';
 
-import inspect from '../../utils/inspect.mjs';
 import { isDirective } from './directives.mjs';
 import { isIntrospectionType } from './introspection.mjs';
 import { assertSchema } from './schema.mjs';

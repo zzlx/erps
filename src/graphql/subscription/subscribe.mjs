@@ -1,5 +1,7 @@
-import { isAsyncIterable } from '../../utils/iterall.mjs';
-import inspect from '../../utils/inspect.mjs';
+import { 
+  isAsyncIterable,
+  inspect,
+} from '../../utils.lib.mjs';
 
 import { GraphQLError, locatedError, } from '../error/index.mjs';
 import { getOperationRootType } from '../utilities/getOperationRootType.mjs';

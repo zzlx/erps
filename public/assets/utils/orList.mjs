@@ -4,7 +4,7 @@
  *
  */
 
-import {assert} from '../utils.mjs';
+import assert from './assert.mjs';
 const MAX_LENGTH = 5;
 
 export default function orList(items) {

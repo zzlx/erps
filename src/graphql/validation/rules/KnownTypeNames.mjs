@@ -1,6 +1,9 @@
+import {
+  suggestionList,
+  quotedOrList,
+} from '../../../utils.lib.mjs';
+
 import { GraphQLError } from '../../error/index.mjs';
-import suggestionList from '../../../utils/suggestionList.mjs';
-import quotedOrList from '../../../utils/quotedOrList.mjs';
 import { isTypeDefinitionNode, isTypeSystemDefinitionNode, isTypeSystemExtensionNode } from '../../language/predicates.mjs';
 import { specifiedScalarTypes } from '../../type/scalars.mjs';
 export function unknownTypeMessage(typeName, suggestedTypes) {

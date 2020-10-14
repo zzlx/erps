@@ -2,10 +2,8 @@
 /**
  * *****************************************************************************
  *
- * 守护进程启动器(Daemon Starter)
+ * Auto restart Daemon
  * 
- * ## 功能
- *
  * * 监控源码目录,有变动时触发change事件重启服务
  * * 监控命令进程,退出时进行重启 
  * * 记录命令进程启动、退出情况
@@ -73,10 +71,10 @@ class Watcher extends EventEmitter {
 
     this.on('change', (file) => {
       clearTimeout(this.timeout); 
-      this.timeout = setTimeout(() => callback(), 2000);
+      this.timeout = setTimeout(() => callback(), 1000); // 延时1s种执行任务
     });
 
-    setInterval(() => this.detect(), 1500); // 每隔s秒检测一次目录变动
+    setInterval(() => this.detect(), 850); // 每隔850ms检测一次目录变动
   }
 
   detect () {

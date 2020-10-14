@@ -5,8 +5,10 @@
  * @file values.mjs
  */
 
-import inspect from '../../utils/inspect.mjs';
-import keyMap from '../../utils/keyMap.mjs';
+import {
+  inspect,
+  keyMap,
+} from '../../utils.lib.mjs';
 
 import { coerceValue } from '../utilities/coerceValue.mjs';
 import { typeFromAST } from '../utilities/typeFromAST.mjs';

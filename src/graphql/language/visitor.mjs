@@ -1,4 +1,4 @@
-import inspect from '../../utils/inspect.mjs';
+import { inspect } from '../../utils.lib.mjs';
 
 export const QueryDocumentKeys = {
   Name: [],

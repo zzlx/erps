@@ -19,8 +19,7 @@
  *
  */
 
-import keyMap from '../../utils/keyMap.mjs';
-import { assert } from '../../utils.mjs';
+import { assert, keyMap } from '../../utils.lib.mjs';
 import { Kind } from '../language/kinds.mjs';
 import { 
   isScalarType, 

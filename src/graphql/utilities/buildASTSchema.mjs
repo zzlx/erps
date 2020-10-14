@@ -14,8 +14,10 @@
  *
  */
 
-import keyMap from '../../utils/keyMap.mjs';
-import keyValMap from '../../utils/keyValMap.mjs';
+import {
+  keyMap,
+  keyValMap,
+} from '../../utils.lib.mjs';
 
 import { valueFromAST } from './valueFromAST.mjs';
 import { assertValidSDL } from '../validation/validate.mjs';

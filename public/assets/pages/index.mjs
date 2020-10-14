@@ -24,6 +24,8 @@
  * *****************************************************************************
  */
 
+import configureStore from '../store/configureStore.mjs';
+
 import Provider from '../components/Provider.mjs';
 import Redirect from '../components/Redirect.mjs';
 import Switch from '../components/Switch.mjs';
@@ -31,7 +33,8 @@ import React from '../components/React.mjs';
 import Route from '../components/Route.mjs';
 import Spinner from '../components/Spinner.mjs';
 
-export default function App (store) {
+export default function App (initialState) {
+  const store = configureStore(initialState); 
   const routes = store.getState('routes');
   const routeArray = [];
   let i = 0;
@@ -52,4 +55,8 @@ export default function App (store) {
   }, switcher);
 
   return React.createElement(Provider, { store }, suspense);
+}
+
+export function getInitialState () {
+
 }

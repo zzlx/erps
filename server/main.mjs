@@ -9,7 +9,10 @@
  * *****************************************************************************
  */
 
+import cp from 'child_process';
+import http2 from 'http2';
 import util from 'util';
+import path from 'path';
 import settings from './config/settings.mjs';
 import Koa from '../src/koa/Application.mjs';
 import * as M from '../src/koa/middlewares/index.mjs';
@@ -20,11 +23,26 @@ const paths = settings.paths;
 
 // 初始化服务器程序
 const app = new Koa({
-  env: process.env.NODE_ENV, // 服务器执行环境
-  compressThreshold: 256,    // 压缩阈值,超过256kb的内容将被压缩后传递给客户端
+  keys: ['enpseC5vcmc='],
+  key: settings.privateKey,
+  cert: settings.cert,
+  allowHTTP1: true,
+  //ca: [fs.readFileSync('client-cert.pem')],
+  //sigalgs: 
+  //ciphers: 
+  //clientCertEngine: 
+  //dhparam
+  //ecdhCurve
+  //privateKeyEngine
+  passphrase: settings.passphrase,
+  //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+  sessionTimeout: 300, // seconds
+  handshakeTimeout: 120000, // milliseconds
 });
 
-export default app;                // 输出服务器端程序
+app.tasksBeforeListen = [
+  cp.spawn(path.join(paths.SERVER, 'tasks', 'copy-umd-to-public.mjs')),
+];
 
 // 配置服务器功能
 app.use(M.logger(paths.APP_LOG));  // 记录访问日志\中间件错误
@@ -57,3 +75,5 @@ app.env === 'development' && app.use(async (ctx, next) => {
 
   return await next(); // 传递至服务器请求处理程序
 });
+
+export default app;                // 输出服务器端程序

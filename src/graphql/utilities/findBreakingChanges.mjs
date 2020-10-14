@@ -1,5 +1,17 @@
-import { isScalarType, isObjectType, isInterfaceType, isUnionType, isEnumType, isInputObjectType, isNonNullType, isListType, isNamedType, isRequiredArgument, isRequiredInputField } from '../type/definition.mjs';
-import keyMap from '../../utils/keyMap.mjs';
+import { 
+  isScalarType, 
+  isObjectType, 
+  isInterfaceType, 
+  isUnionType, 
+  isEnumType, 
+  isInputObjectType, 
+  isNonNullType, 
+  isListType, 
+  isNamedType, 
+  isRequiredArgument, 
+  isRequiredInputField 
+} from '../type/definition.mjs';
+import { keyMap } from '../../utils.lib.mjs';
 export var BreakingChangeType = {
   FIELD_CHANGED_KIND: 'FIELD_CHANGED_KIND',
   FIELD_REMOVED: 'FIELD_REMOVED',

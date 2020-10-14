@@ -1,10 +1,8 @@
-/**
- * Sort GraphQLSchema.
- */
-
-import _defineProperty from '../../utils/defineProperty.mjs';
-import _objectSpread from '../../utils/objectSpread.mjs';
-import keyValMap from '../../utils/keyValMap.mjs';
+import {
+  defineProperty as _defineProperty,
+  objectSpread as _objectSpread,
+  keyValMap,
+} from '../../utils.lib.mjs';
 
 import { GraphQLSchema } from '../type/schema.mjs';
 import { GraphQLDirective } from '../type/directives.mjs';

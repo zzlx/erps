@@ -5,10 +5,12 @@
  *
  */
 
-import defineToStringTag from '../../utils/defineToStringTag.mjs';
-import defineToJSON from '../../utils/defineToJSON.mjs';
-import inspect from '../../utils/inspect.mjs';
-import {assert} from '../../utils.mjs';
+import {
+  assert,
+  defineToStringTag,
+  defineToJSON,
+  inspect,
+} from '../../utils.lib.mjs';
 
 import { GraphQLNonNull } from './definition.mjs';
 import { GraphQLString, GraphQLBoolean } from './scalars.mjs';

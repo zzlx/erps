@@ -4,8 +4,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 import { GraphQLError } from '../../error/index.mjs';
 import { Kind } from '../../language/kinds.mjs';
-import inspect from '../../../utils/inspect.mjs';
-import keyMap from '../../../utils/keyMap.mjs';
+import { inspect, keyMap } from '../../../utils.lib.mjs';
 import { isType, isRequiredArgument } from '../../type/definition.mjs';
 import { print } from '../../language/printer.mjs';
 import { specifiedDirectives } from '../../type/directives.mjs';

@@ -1,7 +1,9 @@
-import { GraphQLError } from '../../error/index.mjs';
-import suggestionList from '../../../utils/suggestionList.mjs';
-import quotedOrList from '../../../utils/quotedOrList.mjs';
+import {
+  suggestionList,
+  quotedOrList,
+} from '../../../utils.lib.mjs';
 
+import { GraphQLError } from '../../error/index.mjs';
 import { isObjectType, isInterfaceType, isAbstractType } from '../../type/definition.mjs';
 export function undefinedFieldMessage(fieldName, type, suggestedTypeNames, suggestedFieldNames) {
   var message = "Cannot query field \"".concat(fieldName, "\" on type \"").concat(type, "\".");

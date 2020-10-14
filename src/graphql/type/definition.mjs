@@ -1,15 +1,12 @@
-/**
- * 类型定义
- */
-
-import { assert } from '../../utils.mjs';
-import _objectSpread from '../../utils/objectSpread.mjs';
-import _defineProperty from '../../utils/defineProperty.mjs';
-import defineToJSON from '../../utils/defineToJSON.mjs';
-import defineToStringTag from '../../utils/defineToStringTag.mjs';
-import inspect from '../../utils/inspect.mjs';
-import keyMap from '../../utils/keyMap.mjs';
-import mapValue from '../../utils/mapValue.mjs';
+import { 
+  assert, 
+  inspect,
+  defineToStringTag,
+  defineToJSON,
+  objectSpread as _objectSpread,
+  keyMap,
+  mapValue,
+} from '../../utils.lib.mjs';
 
 import { Kind } from '../language/kinds.mjs';
 import { valueFromASTUntyped } from '../utilities/valueFromASTUntyped.mjs';

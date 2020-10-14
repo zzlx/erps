@@ -16,9 +16,12 @@
  *
  */
 
-import { forEach, isCollection } from '../../utils/iterall.mjs';
-import inspect from '../../utils/inspect.mjs';
-import { assert } from '../../utils.mjs';
+import { 
+  assert, 
+  inspect,
+  forEach,
+  isCollection,
+} from '../../utils.lib.mjs';
 
 import { Kind } from '../language/kinds.mjs';
 import { isScalarType, isEnumType, isInputObjectType, isListType, isNonNullType } from '../type/definition.mjs';

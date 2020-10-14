@@ -25,8 +25,10 @@
  *
  */
 
-import defineToStringTag from '../../utils/defineToStringTag.mjs';
-import inspect from '../../utils/inspect.mjs';
+import { 
+  defineToStringTag,
+  inspect,
+} from '../../utils.lib.mjs';
 
 import { 
   isAbstractType, isObjectType, isInterfaceType, 

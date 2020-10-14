@@ -105,10 +105,12 @@ routes.get('/*',
   serverRender({
     styles: [ "/css/styles.css" ],
     scripts: [
-      { src: `/javascript/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-      { src: `/javascript/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-      { src: "/modules/main.mjs", module: true, crossorigin: true },
-      { src: "/modules/fallback.js", nomodule: true},
+      //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
+      { src: `/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: `/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: `/assets/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
+      { src: "/assets/fallback.js", nomodule: true},
+
     ],
   }), 
 );

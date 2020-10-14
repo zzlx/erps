@@ -5,6 +5,7 @@
  * 
  * 为子组件提供context数据
  *
+ *
  * *****************************************************************************
  */
 
@@ -12,7 +13,6 @@ import assert from '../utils/assert.mjs';
 import Context from './Context.mjs';
 import React from './React.mjs';
 
-console.log(React);
 export default class Provider extends React.Component {
   constructor(props) {
     super(props);

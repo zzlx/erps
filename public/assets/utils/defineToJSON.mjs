@@ -1,4 +1,5 @@
 /**
+ *
  * The `defineToJSON()` defines toJSON() and inspect() prototype methods,
  * if no function provided they become aliases for toString().
  *

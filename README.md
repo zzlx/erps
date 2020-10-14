@@ -3,21 +3,29 @@
 
 A ERP service system.
 
-## 开始使用
+## 使用帮助
 
-* 启动开发环境
+### 系统依赖安装
 
 ```
-npm run devel
+npm install
 ```
 
-* 启动服务
+### 启动开发服务
+
+编辑代码后自动重启服务器
+
+```
+npm run start:dev
+```
+
+### 启动ERP服务
 
 ```
 npm run start
 ```
 
-* 停止服务
+### 停止ERP服务
 
 ```
 npm run stop

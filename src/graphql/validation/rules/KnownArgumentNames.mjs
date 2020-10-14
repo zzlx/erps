@@ -2,10 +2,12 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-import { GraphQLError } from '../../error/index.mjs';
-import suggestionList from '../../../utils/suggestionList.mjs';
-import quotedOrList from '../../../utils/quotedOrList.mjs';
+import {
+  suggestionList,
+  quotedOrList,
+} from '../../../utils.lib.mjs';
 
+import { GraphQLError } from '../../error/index.mjs';
 import { Kind } from '../../language/kinds.mjs';
 import { specifiedDirectives } from '../../type/directives.mjs';
 export function unknownArgMessage(argName, fieldName, typeName, suggestedArgs) {

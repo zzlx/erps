@@ -1,4 +1,4 @@
-import inspect from '../../../utils/inspect.mjs';
+import { inspect } from '../../../utils.lib.mjs';
 import { GraphQLError } from '../../error/index.mjs';
 import { getNamedType, isLeafType } from '../../type/definition.mjs';
 export function noSubselectionAllowedMessage(fieldName, type) {

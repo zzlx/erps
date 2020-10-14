@@ -2,8 +2,11 @@ var _defKindToExtKind;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-import quotedOrList from '../../../utils/quotedOrList.mjs';
-import suggestionList from '../../../utils/suggestionList.mjs';
+import {
+  quotedOrList,
+  suggestionList,
+} from '../../../utils.lib.mjs';
+
 import { GraphQLError } from '../../error/index.mjs';
 import { Kind } from '../../language/kinds.mjs';
 import { isTypeDefinitionNode } from '../../language/predicates.mjs';

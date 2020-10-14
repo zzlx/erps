@@ -4,11 +4,10 @@
   "description": "A ERP system platform, writen by Node.js.",
 	"main": "server/main.mjs",
   "scripts": {
-    "dev": "bin/starter.mjs bin/httpd.mjs --restart --paths=bin,server,src",
     "install:vimrc": "ln -s -f $(pwd)/.vimrc ~/.vimrc ",
-    "restart": "bin/httpd.mjs --restart",
-    "start": "bin/httpd.mjs --start",
-    "stop": "bin/httpd.mjs --stop"
+    "dev": "bin/auto-restart.mjs bin/erpd.mjs --restart --paths=bin,server,src,public/assets/utils",
+    "start": "bin/erpd.mjs --start",
+    "stop": "bin/erpd.mjs --stop"
   },
   "private": true,
   "dependencies": {

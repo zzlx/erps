@@ -4,8 +4,10 @@
  * @file lexer.mjs
  */
 
-import defineToJSON from '../../utils/defineToJSON.mjs';
-import printCharCode from '../../utils/printCharCode.mjs';
+import {
+  defineToJSON,
+  printCharCode,
+} from '../../utils.lib.mjs';
 
 import { syntaxError } from '../error/index.mjs';
 import blockStringValue from './blockStringValue.mjs';

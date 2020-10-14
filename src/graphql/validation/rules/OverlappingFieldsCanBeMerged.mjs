@@ -1,5 +1,5 @@
+import { inspect } from '../../../utils.lib.mjs';
 import { GraphQLError } from '../../error/index.mjs';
-import inspect from '../../../utils/inspect.mjs';
 import { Kind } from '../../language/kinds.mjs';
 import { print } from '../../language/printer.mjs';
 import { getNamedType, isNonNullType, isLeafType, isObjectType, isListType, isInterfaceType } from '../../type/definition.mjs';

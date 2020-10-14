@@ -2,11 +2,13 @@ import { GraphQLError } from '../../error/index.mjs';
 import { print } from '../../language/printer.mjs';
 import { isScalarType, isEnumType, isInputObjectType, isListType, isNonNullType, isRequiredInputField, getNullableType, getNamedType } from '../../type/definition.mjs';
 
-import inspect from '../../../utils/inspect.mjs';
-import {assert} from '../../../utils.mjs';
-import keyMap from '../../../utils/keyMap.mjs';
-import orList from '../../../utils/orList.mjs';
-import suggestionList from '../../../utils/suggestionList.mjs';
+import {
+  assert,
+  inspect,
+  keyMap,
+  orList,
+  suggestionList
+} from '../../../utils.lib.mjs';
 
 export function badValueMessage(typeName, valueName, message) {
   return "Expected type ".concat(typeName, ", found ").concat(valueName) + (message ? "; ".concat(message) : '.');

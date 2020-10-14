@@ -23,28 +23,23 @@ const debug = util.debuglog('node:graphql.mjs');
 const paths = settings.paths;
 const schemaPath = path.join(paths.SERVER, 'schema');
 const resolversPath = path.join(paths.SERVER, 'resolvers');
-let schema = null;
+let schemaPromise = fs.promises.readdir(schemaPath, { encoding: 'utf8' })
+.then(files => files.filter(file => file.match(/\.gql$/)))
+.then(files => Promise.all(
+  files.map(file => fs.promises.readFile(path.join(schemaPath, file), 'utf8')))
+)
+.then(content => content.join(os.EOL))
+.then(schema => {
+  const source = parse(schema);
+  return buildASTSchema(source);
+});
+
 let fieldResolver = null;
 
 export default async function graphqlAPI (ctx, next) {
-  // get schema
-  if (schema == null) {
-    schema = await fs.promises.readdir(schemaPath, { 
-      encoding: 'utf8' 
-    }).then(files => {
-      return files.filter(file => file.match(/\.gql$/))
-    }).then(files => {
-      return Promise.all(files.map(file => fs.promises.readFile(path.join(schemaPath, file), 'utf8')))
-    }).then(content => {
-      return content.join(os.EOL)
-    }).then(schema => {
-      const source = parse(schema);
-      return buildASTSchema(source);
-    });
-  }
-
   // 获取resolvers
   if (fieldResolver == null) fieldResolver = await getModules(resolversPath); 
+  const schema = await schemaPromise;
 
   let request = null;
 
