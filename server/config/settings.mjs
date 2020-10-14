@@ -24,6 +24,11 @@ import './env.mjs';
 import paths from './paths.mjs';
 import system from './system.mjs';
 
+// 保证已配置的目录已经存在
+for (let dirPath of Object.values(paths)) {
+  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+});
+
 // settings from config
 const sfc = fs.readFileSync(path.join(paths.APP_HOME, 'settings.json'), 'utf8');
 const configs = JSON.parse(sfc);
