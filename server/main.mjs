@@ -17,7 +17,6 @@ import settings from './config/settings.mjs';
 import Koa from '../src/koa/Application.mjs';
 import * as M from '../src/koa/middlewares/index.mjs';
 import router from '../server/routes.mjs';
-
 const debug = util.debuglog('debug:main.mjs');
 const paths = settings.paths;
 
