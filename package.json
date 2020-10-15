@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "install:vimrc": "ln -s -f $(pwd)/.vimrc ~/.vimrc ",
-		"commit": "bin/shell-tools.sh --commit",
+    "install:vimrc": "ln -sf $(pwd)/.vimrc ~/.vimrc ",
+		"commit": "bin/shell-tools --commit",
     "dev": "bin/auto-restart.mjs bin/erps.mjs --restart --paths=bin,server,src,public/assets/utils",
     "start": "bin/erps.mjs --start",
     "stop": "bin/erps.mjs --stop"

@@ -19,7 +19,6 @@
 
 # Node产生的文件
 node_modules
-package-lock.json
 
 # 其他临时文件
 *.log

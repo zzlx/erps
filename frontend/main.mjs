@@ -29,7 +29,7 @@
 async function renderInBrowser () {
   if (globalThis.ReactDOM == null) throw new Error('ReactDOM is needed!');
 
-  const app = await import('./pages/index.mjs').then(m => m.default);
+  const app = await import('./apps/index.mjs').then(m => m.default);
   const element = app(); 
 
   // 存在服务端渲染等页面使用hydrate方法渲染
