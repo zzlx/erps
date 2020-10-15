@@ -1,15 +1,15 @@
 {
   "name": "erps",
+  "description": "A ERP system platform.",
   "version": "1.0.0",
-  "description": "A ERP system platform, writen by Node.js.",
-	"main": "server/main.mjs",
+  "private": true,
   "scripts": {
     "install:vimrc": "ln -s -f $(pwd)/.vimrc ~/.vimrc ",
-    "dev": "bin/auto-restart.mjs bin/erpd.mjs --restart --paths=bin,server,src,public/assets/utils",
-    "start": "bin/erpd.mjs --start",
-    "stop": "bin/erpd.mjs --stop"
+		"commit": "bin/shell-tools.sh --commit",
+    "dev": "bin/auto-restart.mjs bin/erps.mjs --restart --paths=bin,server,src,public/assets/utils",
+    "start": "bin/erps.mjs --start",
+    "stop": "bin/erps.mjs --stop"
   },
-  "private": true,
   "dependencies": {
     "gray-matter": "^4.0.2",
     "htmlparser2": "^5.0.0",

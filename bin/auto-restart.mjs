@@ -22,16 +22,20 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
 
-import { assert, argvParser, console } from '../src/utils.lib.mjs';
+import { 
+  assert, 
+  argvParser, 
+  console 
+} from '../server/utils.lib.mjs';
+
 const ARGVS = Array.prototype.slice.call(process.argv, 3); // get argv array
 const params = argvParser(ARGVS);
 
 const paths = params['paths'] ? params['paths'].split(',') : process.cwd();
-assert(paths.length, '请提供要监测的目录!');
 delete params['paths']
 
-const command = path.join(process.cwd(), process.argv[2]);
-assert(command, '请提供要执行的命令!');
+if (process.argv[2] == null) process.exit();
+const command = path.join(process.cwd(), process.argv[2] || '');
 
 const args = [];
 

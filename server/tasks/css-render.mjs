@@ -17,14 +17,14 @@ import settings from '../config/settings.mjs';
 // 定义样式文件路径
 const paths = settings.paths; // 获取目录配置
 const scssEntryPoint = path.join(paths.SRC, 'scss', 'main.scss');
-const cssFile = path.join(paths.PUBLIC, 'css', 'styles.css');
+const cssFile = path.join(paths.WWW_PATH, 'assets', 'css', 'styles.css');
 
 // node-sass module
 import('node-sass').then(m => new Promise((resolve, reject) => {
   const sass = m.default ? m.default : m;
   sass.render({
     file: scssEntryPoint,
-    outputStyle: settings.env === 'production' ? 'compressed': 'nested',
+    outputStyle: process.env.NODE_ENV === 'production' ? 'compressed': 'nested',
   }, async (err, result) => {
     if (err) reject(err);
 

@@ -20,22 +20,20 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import './env.mjs';
-import paths from './paths.mjs';
-import system from './system.mjs';
-
-// 保证已配置的目录已经存在
-for (let dirPath of Object.values(paths)) {
-  if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
-});
+import './_env.mjs';
+import { paths } from './_paths.mjs';
+import system from './_system.mjs';
 
 // settings from config
-const sfc = fs.readFileSync(path.join(paths.APP_HOME, 'settings.json'), 'utf8');
+const sfc = fs.readFileSync(path.join(paths.HOME_PATH, 'settings.json'), 'utf8');
 const configs = JSON.parse(sfc);
+paths.readyPaths();
 
-export default new Proxy(Object.assign(configs, { paths: paths }, { system: system }), {
+export default new Proxy(Object.assign({}, configs, { 
+  paths: paths,
+  system: system,
+}), {
   get: function (target, property, receiver) {
-    if (property === 'env') return process.env.NODE_ENV;
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
     if (property === 'saveConfig') return () => {};
@@ -54,15 +52,6 @@ export default new Proxy(Object.assign(configs, { paths: paths }, { system: syst
 
     return Reflect.get(target, property, receiver);
   },
-
-	set: function (target, property, value) {
-    if (property === 'env') {
-      process.env.NODE_ENV = value;
-    }
-
-		target[property] = value;
-		return true;
-	},
 });
 
 /**
@@ -70,8 +59,24 @@ export default new Proxy(Object.assign(configs, { paths: paths }, { system: syst
  *
  */
 
+function getGitInfo () {
+  const HEAD = String(fs.readFileSync(path.join(paths.GIT, 'head'))).split(':')[1].trim();
+  const branch = path.basename(HEAD);
+  const hash = String(fs.readFileSync(path.join(paths.GIT, HEAD))).trim();
+
+  return {
+    branch: branch, 
+    commit: hash,
+  };
+}
+
+/**
+ *
+ *
+ */
+
 function deletePidFile () {
-  const pidFile = path.join(paths.APP_HOME, `${process.title}.pid`);
+  const pidFile = path.join(paths.HOME_PATH, `${process.title}.pid`);
   return fs.promises.unlink(pidFile);
 }
 
@@ -80,7 +85,7 @@ function deletePidFile () {
  */
 
 function writePidFile () {
-  const pidFile = path.join(paths.APP_HOME, `${process.title}.pid`);
+  const pidFile = path.join(paths.HOME_PATH, `${process.title}.pid`);
   return fs.promises.writeFile(pidFile, String(process.pid));
 }
 
@@ -89,7 +94,7 @@ function writePidFile () {
  */
 
 function readConfig () {
-  fs.open(path.join(paths.APP_HOME, 'settings.json'), 'a+', (err, fd) => {
+  fs.open(path.join(paths.HOME_PATH, 'settings.json'), 'a+', (err, fd) => {
     if (err) throw err;
     
     fs.read(fd, (err, bytesRead, buffer) => {

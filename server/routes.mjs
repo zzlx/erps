@@ -16,33 +16,27 @@ import util from 'util';
 import Remarkable from 'remarkable';
 
 import settings from './config/settings.mjs';
-import Router from '../src/koa/Router.mjs';
-import statics from '../src/koa/middlewares/statics.mjs';
+import Router from './koa/Router.mjs';
+import statics from './koa/middlewares/statics.mjs';
 import serverRender, { 
   HTMLTemplate as Html 
-} from '../src/koa/middlewares/serverSideRendering.mjs';
+} from './koa/middlewares/serverSideRendering.mjs';
 
 const debug = util.debuglog('debug:routes.mjs');
 const paths = settings.paths;
-const routes = new Router({});
-export default routes; // 输出路由配置
-
-/**
- * 当发生样式文件修改时，自动重建styles.css文件
- */
+export const routes = new Router({});
 
 process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => {
-  const pathname = ctx.pathname;
-
-  if (pathname === '/css/styles.css') {
+  if (ctx.pathname === '/assets/css/styles.css') {
     const scssFiles = readDir(path.join(paths.SRC, 'scss'));
-    const cssFile = path.join(paths.PUBLIC, 'css', 'styles.css');
+    const cssFile = path.join(paths.WWW_PATH, 'assets', 'css', 'styles.css');
     await fs.promises.mkdir(path.dirname(cssFile), {recursive: true});
     const cssStats = fs.lstatSync(cssFile);
 
     for (let file of scssFiles) {
       const stats = fs.lstatSync(file);
       if (stats.mtime > cssStats.ctime) {
+      //当发生样式文件修改时，自动重建styles.css文件
         await cp.spawn(path.join(paths.SERVER, 'tasks', 'css-render.mjs'));
         break;
       }
@@ -53,14 +47,13 @@ process.env.NODE_ENV === 'development' && routes.get('/*', async (ctx, next) => 
 });
 
 routes.get('/docs*', (ctx, next) => {
-
   let file = path.join(paths.DOCS, path.relative('/docs', ctx.pathname));
   if (file === paths.DOCS) file = path.join(file, 'README.md');
   if (path.extname(file) === '') file += '.md'
   if (!fs.existsSync(file)) return next();
 
   ctx.type = 'html';
-  const html = new Html({ styles: ['/css/styles.css'], });
+  const html = new Html({ styles: ['/assets/css/styles.css'], });
   const md = new Remarkable({
     html: true,
   });
@@ -87,7 +80,7 @@ routes.all('/api*', async (ctx, next) => {
   }
 
   ctx.type = 'html';
-  const html = new Html({ styles: ['/css/styles.css'], });
+  const html = new Html({ styles: ['/assets/css/styles.css'], });
   const md = new Remarkable({
     html: true,
   });
@@ -100,20 +93,26 @@ routes.all('/api*', async (ctx, next) => {
   ctx.body = html.render();
 });
 
-routes.get('/*', 
-  statics({ root: paths.PUBLIC }),
-  serverRender({
-    styles: [ "/css/styles.css" ],
-    scripts: [
-      //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
-      { src: `/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-      { src: `/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-      { src: `/assets/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
-      { src: "/assets/fallback.js", nomodule: true},
 
-    ],
-  }), 
-);
+const assets = new Router({ });
+assets.get('/*', statics({ root: paths.FRONTEND }));
+
+//routes.get('/assets*', assets.routes());
+routes.get('/*', statics({ root: paths.WWW_PATH }));
+
+routes.get('/*', serverRender({
+  styles: [ "/assets/css/styles.css" ],
+  scripts: [
+    //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
+    { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+    { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+    { src: `/assets/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
+    { src: "/assets/fallback.js", nomodule: true},
+
+  ],
+}));
+
+routes.use('/assets');
 
 /**
  * 循环读取目录,返回文件路径列表
