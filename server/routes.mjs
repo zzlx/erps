@@ -94,7 +94,7 @@ routes.all('/api*', async (ctx, next) => {
 });
 
 
-routes.get('/assets/*', statics({ root: paths.FRONTEND, prefix: '/assets' }));
+routes.get('/assets/*', statics({ root: paths.PUBLIC, prefix: '/assets' }));
 
 //routes.get('/assets*', assets.routes());
 routes.get('/*', statics({ root: paths.WWW_PATH }));
