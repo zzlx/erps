@@ -29,8 +29,7 @@
 async function renderInBrowser () {
   if (globalThis.ReactDOM == null) throw new Error('ReactDOM is needed!');
 
-  const app = await import('./pages/index.mjs')
-    .then(m => m.default).catch(console.error);
+  const app = await import('./pages/index.mjs').then(m => m.default);
   const element = app(); 
 
   // 存在服务端渲染等页面使用hydrate方法渲染
@@ -48,7 +47,7 @@ async function renderInNode () {
 function callback () {
   console.groupCollapsed('系统信息');
   console.dir({
-    'cookie-enabled': global.navigator.cookieEnabled,
+    'cookie-enabled': globalThis.navigator.cookieEnabled,
   });
   console.groupEnd();
 }
@@ -111,13 +110,13 @@ function detectDevice () {
  */
 
 function getElementById (id) {
-  let el = window.document.getElementById(id);
+  let element = window.document.getElementById(id);
 
   if (null == element) {
-    el = window.document.createElement('div');
-    el.id = id;
-    window.document.body.appendChild(el);
+    element = window.document.createElement('div');
+    element.id = id;
+    window.document.body.appendChild(element);
   }
 
-  return el;
+  return element;
 }

@@ -8,8 +8,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default function dropdown (props) {
   const { directions, split, className, children, ...rests } = props;
   

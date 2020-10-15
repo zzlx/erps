@@ -9,8 +9,6 @@
  */
 
 import Sprite from './Sprite.mjs';
-import React from './React.mjs';
-
 
 export default class ScrollToTop extends React.PureComponent {
   constructor(props) {

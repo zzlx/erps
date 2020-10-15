@@ -8,8 +8,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default function Badge (props) {
   const { 
     theme, 

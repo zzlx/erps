@@ -1,16 +1,15 @@
 /**
+ * *****************************************************************************
  *
  * Store configuration
  *
  *
  *
  *
- *
- *
+ * *****************************************************************************
  */ 
 
 import applyMiddleware from './applyMiddleware.mjs';
-import monitorReducers from './enhancers/monitorReducers.mjs';
 import createStore from './createStore.mjs';
 import compose from './compose.mjs';
 import * as M from './middlewares/index.mjs';
@@ -29,11 +28,13 @@ export default function configureStore (preloadedState = Object.create(null)) {
 
   const middlewareEnhancer = applyMiddleware(middlewares); 
 
+  /*
   const enhancer = monitorReducers
     ? compose(middlewareEnhancer, monitorReducers) 
     : middlewareEnhancer;
+  */
 
-  const store = createStore(reducer, preloadedState, enhancer);
+  const store = createStore(reducer, preloadedState, middlewareEnhancer);
 
   return store;
 }

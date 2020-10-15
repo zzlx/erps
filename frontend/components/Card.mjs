@@ -8,8 +8,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default class Card extends React.PureComponent {
   constructor(props) {
     super(props);

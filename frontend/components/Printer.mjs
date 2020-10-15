@@ -3,8 +3,6 @@
  *
  */
 
-import React from './React.mjs';
-
 export default class Printer extends React.PureComponent {
   render () {
   }

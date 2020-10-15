@@ -10,8 +10,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default function Layout (props) {
 
   const {

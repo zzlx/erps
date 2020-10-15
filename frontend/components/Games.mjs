@@ -1,5 +1,3 @@
-import React from './React.mjs';
-
 const el = React.createElement;
 
 function Square(props) {

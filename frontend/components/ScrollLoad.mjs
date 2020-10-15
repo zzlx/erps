@@ -6,8 +6,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default function ScrollLoad(props) {
   const { offset, target, ...rests } = props;
 

@@ -20,6 +20,7 @@ import util from 'util';
 
 export default (options = {}) => {
   const opts = Object.assign({}, {
+    prefix: '/',
     compress: false,
     directoryIndex: ['index.html'],
     immutable: false,
@@ -40,7 +41,7 @@ export default (options = {}) => {
     // body已被设置时,跳过静态资源响应
     if (ctx.body != null) return await next();
 
-    const relativePath = path.relative('/', ctx.pathname); // 获取路径
+    const relativePath = path.relative(opts.prefix, ctx.pathname); // 获取路径
     let url = path.resolve(opts.root, relativePath);       // 构造绝对路径
     // 没有扩展名的目录路径,跳过
     if (path.extname(url) === '') return await next(); 

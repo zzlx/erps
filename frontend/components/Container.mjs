@@ -12,8 +12,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default function Container (props) {
   const { 
     breakpoint, fluid, 

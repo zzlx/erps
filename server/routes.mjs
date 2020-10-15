@@ -94,8 +94,7 @@ routes.all('/api*', async (ctx, next) => {
 });
 
 
-const assets = new Router({ });
-assets.get('/*', statics({ root: paths.FRONTEND }));
+routes.get('/assets/*', statics({ root: paths.FRONTEND, prefix: '/assets' }));
 
 //routes.get('/assets*', assets.routes());
 routes.get('/*', statics({ root: paths.WWW_PATH }));
@@ -107,7 +106,7 @@ routes.get('/*', serverRender({
     { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
     { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
     { src: `/assets/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
-    { src: "/assets/fallback.js", nomodule: true},
+    { src: "/assets/noFallback.js", nomodule: true},
 
   ],
 }));

@@ -8,5 +8,4 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
 export default React.createContext(null);

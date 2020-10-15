@@ -15,7 +15,6 @@ import Footer from '../components/Footer.mjs';
 import Placeholder from '../components/Placeholder.mjs';
 import Picture from '../components/Picture.mjs';
 import Nav from '../components/Nav.mjs';
-import React from '../components/React.mjs';
 
 export default class HomePage extends React.Component {
   constructor(props, context) {

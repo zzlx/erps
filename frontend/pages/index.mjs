@@ -29,7 +29,6 @@ import configureStore from '../store/configureStore.mjs';
 import Provider from '../components/Provider.mjs';
 import Redirect from '../components/Redirect.mjs';
 import Switch from '../components/Switch.mjs';
-import React from '../components/React.mjs';
 import Route from '../components/Route.mjs';
 import Spinner from '../components/Spinner.mjs';
 

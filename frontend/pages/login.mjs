@@ -12,7 +12,6 @@ import Footer from '../components/Footer.mjs';
 import Markdown from '../components/Markdown.mjs';
 import Placeholder from '../components/Placeholder.mjs';
 import Picture from '../components/Picture.mjs';
-import React from '../components/React.mjs';
 
 export default class Login extends React.PureComponent {
   constructor(props, context) {

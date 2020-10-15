@@ -4,8 +4,6 @@
  * 
  */
 
-import React from './React.mjs';
-
 export default function withOnLine(Component) {
 
   return class extends React.Component {

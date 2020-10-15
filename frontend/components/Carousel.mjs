@@ -8,8 +8,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default class Carousel extends React.PureComponent {
   static defaultProps = {
     withControl: true,

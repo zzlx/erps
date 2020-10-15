@@ -11,7 +11,6 @@
 
 import assert from '../utils/assert.mjs';
 import Context from './Context.mjs';
-import React from './React.mjs';
 
 export default class Provider extends React.Component {
   constructor(props) {

@@ -5,8 +5,6 @@
  *
  */
 
-import React from './React.mjs';
-
 export default function Scrollspy(props) {
   const { offset, target, ...rests } = props;
 

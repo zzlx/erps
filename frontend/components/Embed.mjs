@@ -8,8 +8,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default function Embed(props) {
   const {aspectRatios, className, children, ...rests} = props;
 

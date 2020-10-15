@@ -10,7 +10,6 @@
 
 import Context from './Context.mjs';
 import matchPath from '../utils/matchPath.mjs';
-import React from './React.mjs';
 
 export default class Switch extends React.Component {
   render () {

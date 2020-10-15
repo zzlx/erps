@@ -6,8 +6,6 @@
  *
  */
 
-import React from './React.mjs';
-
 import Button from './Button.mjs';
 
 export default class PictureCollection extends React.PureComponent {

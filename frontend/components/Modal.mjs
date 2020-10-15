@@ -4,8 +4,6 @@
  *
  */
 
-import React from './React.mjs';
-
 import Button from './Button.mjs';
 const _ = React.createElement;
 

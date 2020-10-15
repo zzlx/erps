@@ -10,8 +10,6 @@
 
 import ReactContext from "./Context.mjs";
 import { types } from '../actions/index.mjs';
-import React from './React.mjs';
-
 
 import assert from '../utils/assert.mjs';
 import generatePath from "../utils/generatePath.mjs";

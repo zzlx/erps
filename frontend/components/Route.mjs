@@ -15,8 +15,6 @@
 import Context from './Context.mjs';
 import matchPath from '../utils/matchPath.mjs';
 import warning from '../utils/warning.mjs';
-import React from './React.mjs';
-
 
 export default class Route extends React.Component {
   render() {

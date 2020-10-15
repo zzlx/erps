@@ -6,8 +6,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default function AnchorLink (props) {
   const { active, disabled, src, onClick, className, ...rests } = props;
 

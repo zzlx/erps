@@ -7,8 +7,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 export default function Button (props) {
   const { 
     link, theme, outline, lg, sm, block, // 样式配置

@@ -105,9 +105,6 @@ export class HTMLTemplate {
   <body>
     <noscript>请确认已启用javascript支持.</noscript>
     <div id="root">${this.state.body || ''}</div>
-    <script>
-      window.__INITIAL__STATE__ = ${JSON.stringify(this.state.initialState)};
-    </script>
   </body>
 </html>`;
   }

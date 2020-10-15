@@ -8,8 +8,6 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-
 import Button from './Button.mjs';
 
 export default function toast (props) {

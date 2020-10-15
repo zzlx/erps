@@ -6,8 +6,6 @@
  *
  */
 
-import React from './React.mjs';
-
 export default class Header extends React.PureComponent {
 
   render() {

@@ -7,11 +7,8 @@
  *
  * 接受参数，生产svg圆形图形
  *
- * @api public
  * *****************************************************************************
  */
-
-import React from './React.mjs';
 
 export default function Circular (props) {
   const { 
