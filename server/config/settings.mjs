@@ -21,7 +21,7 @@ import path from 'path';
 import util from 'util';
 
 import './_env.mjs';
-import { paths } from './_paths.mjs';
+import { paths, appName, appVersion } from './_paths.mjs';
 import system from './_system.mjs';
 
 // settings from config
@@ -32,8 +32,11 @@ paths.readyPaths();
 export default new Proxy(Object.assign({}, configs, { 
   paths: paths,
   system: system,
+  appName,
+  appVersion,
 }), {
   get: function (target, property, receiver) {
+    if (property === 'getGitInfo') return getGitInfo;
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
     if (property === 'saveConfig') return () => {};

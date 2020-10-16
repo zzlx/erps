@@ -55,7 +55,7 @@ export const paths = new Proxy(appPaths, {
 });
 
 // 从package.json中读取项目名称
-const packageJSON = JSON.parse(fs.readFileSync(paths.PACKAGE));
+export const packageJSON = JSON.parse(fs.readFileSync(paths.PACKAGE));
 export const appName = packageJSON.name;
 export const appVersion = packageJSON.version;
 

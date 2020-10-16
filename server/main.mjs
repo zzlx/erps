@@ -56,7 +56,8 @@ app.tasksBeforeListen = [
 
 // 配置服务器功能
 app.use(M.logger(paths.LOG_PATH));  // 记录访问日志\中间件错误
-app.use(M.xResponse());            // 响应时间记录
+app.env === 'development' && 
+app.use(M.xResponse(settings));    // 响应时间记录
 app.use(M.cors());                 // 跨域访问支持
 app.use(M.cookies());              // 全局cookie支持
 
@@ -90,7 +91,8 @@ app.use((ctx, next) => {
   return next();
 });
 
-app.env === 'development' && app.use(async (ctx, next) => {
+app.env === 'development' && 
+app.use(async (ctx, next) => {
   if (ctx.pathname !== '/assets/css/styles.css') return next();
 
   const scssFiles = readDir(path.join(paths.SRC, 'scss'));
