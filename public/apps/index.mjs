@@ -24,7 +24,7 @@
  * *****************************************************************************
  */
 
-import configureStore from '../store/configureStore.mjs';
+import getStore from '../store/getStore.mjs';
 
 import Provider from '../components/Provider.mjs';
 import Redirect from '../components/Redirect.mjs';
@@ -33,7 +33,7 @@ import Route from '../components/Route.mjs';
 import Spinner from '../components/Spinner.mjs';
 
 export default function App (initialState) {
-  const store = configureStore(initialState); 
+  const store = getStore(initialState); 
   const routes = store.getState('routes');
   const routeArray = [];
   let i = 0;

@@ -31,8 +31,8 @@
  * *****************************************************************************
  */
 
-export default function getIn() {
-  const paths = Array.prototype.slice.call(arguments);
+export default function getIn(paths) {
+  if (typeof paths === 'string') paths = [paths];
   let value = this;
 
   if (null == value) return null;

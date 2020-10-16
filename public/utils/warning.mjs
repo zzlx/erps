@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Prints a warning in the console if it exists.
+ * Prints a warning message
  *
  * @param {Boolean} condition .
  * @param {String} message The warning message.

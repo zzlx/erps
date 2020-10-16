@@ -3,7 +3,6 @@
  */
 
 import { types } from '../actions/index.mjs';
-import getIn from '../utils/getIn.mjs';
 
 const routes = [
   { 

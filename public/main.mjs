@@ -4,75 +4,103 @@
  * 前端应用程序
  * ============
  *
- * 用于生成UI界面并管理用户操作及数据
- *
  * > ##### 注意:
  * > 此目录下源码模块在部署前端程序时会暴露于网络，请勿存放敏感数据.
  *
  * *****************************************************************************
  */
 
-// 执行环境设置
+const dirname = p => p.substr(0, p.lastIndexOf('/'));
 const url = new URL(import.meta.url);
-globalThis.env = url.searchParams.get('env');
+const baseURI = dirname(url.href);   
 
-(async function main () {
-  const isBrowser = globalThis.document && typeof globalThis.document === 'object';
-  if (isBrowser) return renderInBrowser(); // 浏览器客户端渲染
+// @todos: 
+// 完善客户端环境的判断 
+// Wechat客户端环境
+// Dingtalk客户端环境
+const isBrowser = globalThis.document && typeof document === 'object';
+const isNode = globalThis.process && typeof process.cwd === 'function';
+const isNative = false;
 
-  // @todos: 完善客户端环境的判断 
-  // Native环境
-  // Wechat客户端环境
-  // Dingtalk客户端环境
-  // const isNode = globalThis.process && typeof globalThis.process.exit == 'function';
-  // if (isNative) return renderInNode(); // Node服务端渲染
+// 前端执行环境配置
+globalThis.env = isBrowser ? url.searchParams.get('env') : isNode 
+  ? process.env.NODE_ENV : 'production';
 
-})().catch(console.error);
+// 前端程序执行环境配置
+if (isBrowser) browserRender(); // 浏览器客户端渲染
+if (isNative) nativeRender();  // Native环境
 
-async function renderInBrowser () {
-  if (globalThis.ReactDOM == null) throw new Error('ReactDOM is needed!');
+/**
+ * Browser client render
+ *
+ * @params {object} iniatialState 初始状态值
+ */
 
-  const app = await import('./apps/index.mjs').then(m => m.default);
-  const element = app(); 
-
-  // 存在服务端渲染等页面使用hydrate方法渲染
-  // 空的容器对象上使用render方法渲染
-  // 判断container是否存在服务端渲染内容
-  // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
-  const container = getElementById('root');
-  if (container.innerHTML) ReactDOM.hydrate(element, container, callback);
-  else ReactDOM.render(element, container, callback);  
-}
-
-async function renderInNode () {
-
-}
-
-function callback () {
-  console.groupCollapsed('系统信息');
-  console.dir({
-    'cookie-enabled': globalThis.navigator.cookieEnabled,
+export function browserRender (iniatialState = {}) {
+  import('./apps/index.mjs').then(m => {
+    const app = m.default;
+    const element = app(); 
+    // 存在服务端渲染等页面使用hydrate方法渲染
+    // 空的容器对象上使用render方法渲染
+    // 判断container是否存在服务端渲染内容
+    // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
+    const container = getElementById('root');
+    if (container.innerHTML) ReactDOM.hydrate(element, container, renderCB);
+    else ReactDOM.render(element, container, renderCB);  
   });
-  console.groupEnd();
 }
 
-async function test () {
-  const ua = window.navigator.userAgent;
-  const csv = await import('../utils/csv.mjs').then(m => m.default);
+/**
+ * Node(/server) render
+ *
+ * @params {object} iniatialState 初始状态值
+ * @return {string} staticString 返回渲染字符串
+ */
 
-  // 如果客户端时IE浏览器且版本低于IE9,提示升级浏览器
-  let ltIE9 = false;
+export function nodeRender (iniatialState = {}) {
+  globalThis.env = globalThis.process.env.NODE_ENV;
+  return import('react-dom/server').then(() => {
+  });
+}
 
-  if (/Trident/i.exec(ua)) {
-    const version = /Trident\/(\d{1,2})\.\d{1,2}/i.exec(ua);
+/**
+ * Native render
+ */
 
-    if (version !== null && version[1] < 5) {
-      ltIE9 = true;
+export function nativeRender () {
+
+}
+
+
+/**
+ * 渲染回调函数
+ */
+
+function renderCB () {
+  console.groupCollapsed('提示信息');
+  console.info('前端程序已就绪,欢迎使用!');
+
+  if (isBrowser) {
+    console.info('当前为浏览器环境.');
+    const ua = window.navigator.userAgent;
+
+    // 如果客户端时IE浏览器且版本低于IE9,提示升级浏览器
+    let ltIE9 = false;
+
+    if (/Trident/i.exec(ua)) {
+      const version = /Trident\/(\d{1,2})\.\d{1,2}/i.exec(ua);
+
+      if (version !== null && version[1] < 5) {
+        ltIE9 = true;
+      }
     }
+
+    if (ltIE9) globalThis.window.alert('建议升级浏览器至最新版本!');
   }
 
-  // 
-  backgroundWork();
+  'http:' === url.protocol && console.warn('非https协议下部分功能无法正常使用.');
+  'file:' === url.protocol && console.warn('暂不支持在浏览器本地环境中使用.');
+  console.groupEnd();
 }
 
 function backgroundWork () {
@@ -107,7 +135,6 @@ function detectDevice () {
     ua.indexOf('Windows Phone') === -1
   ) {  }
 }
-
 
 /**
  * 获取element,如不存在则创建并附加至body

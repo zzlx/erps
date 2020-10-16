@@ -1,6 +1,4 @@
 /**
- * *****************************************************************************
- *
  * Composes single-argument functions from right to left. 
  *
  * The rightmost function can take multiple arguments 
@@ -11,8 +9,6 @@
  *
  * @param {function} funcs The functions to compose.
  * @returns {Function} A function obtained by composing the argument functions from right to left. 
- *
- * *****************************************************************************
  */
 
 export default function compose() {
