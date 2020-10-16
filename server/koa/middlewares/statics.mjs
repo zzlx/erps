@@ -39,12 +39,12 @@ export default (options = {}) => {
     // 静态资源响应逻辑:
     //
     // body已被设置时,跳过静态资源响应
-    if (ctx.body != null) return await next();
+    if (ctx.body != null) return next();
 
     const relativePath = path.relative(opts.prefix, ctx.pathname); // 获取路径
     let url = path.resolve(opts.root, relativePath);       // 构造绝对路径
     // 没有扩展名的目录路径,跳过
-    if (path.extname(url) === '') return await next(); 
+    if (path.extname(url) === '') return next(); 
 
     if (fs.existsSync(url)) {
       ctx.type = path.extname(url);
@@ -74,7 +74,8 @@ export default (options = {}) => {
       const etag = `${stats.mtimeMs}`; 
 
       if (ctx.get('if-none-match') === etag) {
-        return ctx.status = 304; // not modified status
+        ctx.status = 304; // not modified status
+        return next();
       }
 
       ctx.length = stats.size;
@@ -89,6 +90,6 @@ export default (options = {}) => {
       ctx.body = fs.createReadStream(url);
     }
 
-    return await next(); // 交由下一中间件处理
+    return next(); // 交由下一中间件处理
   }
 }

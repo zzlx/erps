@@ -22,6 +22,7 @@ export default (opts) => {
 
     // 转发有扩展名的路径至下一中间件
     if (path.extname(ctx.pathname) !== '') return next();
+    if (ctx.body != null) return next();
 
     // @todo: 利用客户端路由进行匹配渲染,以优化SEO
 

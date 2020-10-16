@@ -92,6 +92,8 @@ export default async function graphqlAPI (ctx, next) {
       fieldResolver: fieldResolver,
     });
   }
+
+  return next();
 }
 
 /**

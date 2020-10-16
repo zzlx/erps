@@ -23,4 +23,5 @@ export default function logger (ctx, next) {
 
   ctx.type = 'text';
   ctx.body = fs.createReadStream(logFile);
+  return next();
 }
