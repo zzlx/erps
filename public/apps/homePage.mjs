@@ -3,18 +3,15 @@
  *
  * 主页
  *
- *
- *
- *
  * *****************************************************************************
  */
 
 import Context from '../components/Context.mjs';
 import Circular from '../components/Circular.mjs';
+import Nav from '../components/Nav.mjs';
 import Footer from '../components/Footer.mjs';
 import Placeholder from '../components/Placeholder.mjs';
 import Picture from '../components/Picture.mjs';
-import Nav from '../components/Nav.mjs';
 
 export default class HomePage extends React.Component {
   constructor(props, context) {
@@ -24,17 +21,18 @@ export default class HomePage extends React.Component {
 
   render () {
     const { store } = this.context;
+
     const header = React.createElement('header', {
-      className: 'mb-auto'
+      className: 'mb-auto container-fluid'
     }, '函证中心');
 
     const circular = React.createElement(Circular, {size: "145"});
     const footer = React.createElement(Footer, {
-      className: 'mt-auto bg-gradient-default text-white',
+      className: 'container-fluid bg-gradient-default text-white',
       fluid: true,
     }, 'Copyrigth(2020) All rights reserved.'); 
 
-    return React.createElement(React.Fragment, { }, 
+    return React.createElement(React.Fragment, {}, 
       header, 
       footer
     ); 
@@ -42,12 +40,12 @@ export default class HomePage extends React.Component {
 
   componentDidMount() {
     const store = this.context.store;
+    console.log(store.getState());
     store.dispatch({type: store.types.ZZZ});
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     console.log('shouldUpdate');
-    // 组件更新逻辑
     return false;
   }
 }

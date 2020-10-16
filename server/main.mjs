@@ -8,7 +8,6 @@
  * 💐 动态路由服务
  * 👏 API路由服务
  *
- *
  * *****************************************************************************
  */
 
@@ -64,19 +63,19 @@ app.use(router.allowedMethods());
 // 内容压缩支持
 app.use(M.compress());             
 
-// 开发环境下测试的项目
-app.env === 'development' && app.use(async (ctx, next) => {
-  // @Task:
-  // @Task: 测试请求被处理的情况
+app.env === 'development' && app.use(ctx => {
+  // dividing line
+  const line = new Array(process.stdout.getWindowSize()[0]).join('-');
   debug(`
---------------------------------------------------------------------------------
-请求已进入响应阶段...
-请求URL: ${ctx.href}
+开发环境中检查请求是否已被正确处理...
+${line}
+客户端: ${ctx.get('user-agent')}
+请求类型: ${ctx.method}
+请求路径: ${ctx.pathname}
+响应内容类型: ${ctx.type}
 响应状态: ${ctx.status}
---------------------------------------------------------------------------------
-  `);
-
-  return await next(); // 传递至服务器请求处理程序
+${line}
+`);
 });
 
 app.listen({

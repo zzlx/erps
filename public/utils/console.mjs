@@ -1,14 +1,15 @@
 /**
  * *****************************************************************************
  *
- * 控制台对象功能扩展
+ * 扩展控制台对象功能
  *
  * *****************************************************************************
  */
 
 import global from './global.mjs';
 
-const isBrowser = global.window ? true : false
+const isNode = global.process && typeof global.process.cwd === 'function';
+const isBrowser = global.window && typeof global.window === 'object';
 const isWin = !isBrowser && global.process && global.process.platform === 'win32';
 
 const MOVE_LEFT  = '\u001b[1000D';
