@@ -12,9 +12,8 @@
 import applyMiddleware from './applyMiddleware.mjs';
 import createStore from './createStore.mjs';
 import compose from './compose.mjs';
-import * as M from './middlewares/index.mjs';
+import M from './middlewares.mjs';
 import reducer from '../reducers/index.mjs';
-import global from '../utils/global.mjs';
 
 export default function configureStore (preloadedState = Object.create(null)) {
   // middleware enhancer
@@ -23,7 +22,7 @@ export default function configureStore (preloadedState = Object.create(null)) {
     M.thunk,
     M.promise,
     M.timeoutScheduler,
-    global.env === 'development' ? M.logger : false,
+    globalThis.env === 'development' ? M.logger : false,
   ].filter(Boolean);
 
   const middlewareEnhancer = applyMiddleware(middlewares); 

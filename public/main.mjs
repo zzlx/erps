@@ -12,21 +12,21 @@
  * *****************************************************************************
  */
 
-(async function main () {
-  // Browser环境
-  if (globalThis.document && typeof globalThis.document === 'object') {
-    return renderInBrowser();
-  }
+// 执行环境设置
+const url = new URL(import.meta.url);
+globalThis.env = url.searchParams.get('env');
 
-  // Node环境
-  if (globalThis.process && typeof globalThis.process.exit == 'function') {
-    return renderInNode();
-  }
+(async function main () {
+  const isBrowser = globalThis.document && typeof globalThis.document === 'object';
+  if (isBrowser) return renderInBrowser(); // 浏览器客户端渲染
 
   // @todos: 完善客户端环境的判断 
   // Native环境
   // Wechat客户端环境
   // Dingtalk客户端环境
+  // const isNode = globalThis.process && typeof globalThis.process.exit == 'function';
+  // if (isNative) return renderInNode(); // Node服务端渲染
+
 })().catch(console.error);
 
 async function renderInBrowser () {
@@ -45,6 +45,7 @@ async function renderInBrowser () {
 }
 
 async function renderInNode () {
+
 }
 
 function callback () {
