@@ -31,7 +31,6 @@ import Route from '../components/Route.mjs';
 import Spinner from '../components/Spinner.mjs';
 
 export default function App (store) {
-  console.log(store.getState('routes'));
   const routes = store.getState('routes');
   const routeArray = [];
   let i = 0;

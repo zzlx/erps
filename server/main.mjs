@@ -156,7 +156,7 @@ app.env === 'development' && app.use(ctx => {
   // dividing line
   const line = new Array(process.stdout.getWindowSize()[0]).join('-');
   debug(`
-开发环境中检查请求是否已被正确处理...
+请求已被正确处理...
 ${line}
 客户端: ${ctx.get('user-agent')}
 请求类型: ${ctx.method}
