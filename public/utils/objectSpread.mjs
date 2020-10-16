@@ -8,8 +8,6 @@
  *
  */
 
-import _defineProperty from './defineProperty.mjs';
-
 export default function _objectSpread(target) { 
   for (let i = 1; i < arguments.length; i++) { 
     const source = arguments[i] != null ? arguments[i] : {}; 
@@ -22,7 +20,9 @@ export default function _objectSpread(target) {
       })); 
     } 
 
-    ownKeys.forEach((key) => { _defineProperty(target, key, source[key]) }); 
+    ownKeys.forEach((key) => { 
+      target[key] = source[key];
+    }); 
   } 
 
   return target; 

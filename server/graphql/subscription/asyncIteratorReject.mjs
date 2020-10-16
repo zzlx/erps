@@ -8,13 +8,12 @@
  *
  */
 
-import _defineProperty from '../../utils/defineProperty';
 import { $$asyncIterator } from '../../utils/iterall.mjs';
 
 export default function asyncIteratorReject(error) {
   let isComplete = false;
 
-  return _defineProperty({
+  return Object.defineProperty({
     next: function next() {
       const result = isComplete 
         ? Promise.resolve({ value: undefined, done: true }) 
@@ -34,7 +33,7 @@ export default function asyncIteratorReject(error) {
       isComplete = true;
       return Promise.reject(error);
     }
-  }, $$asyncIterator, function () {
-    return this;
+  }, $$asyncIterator, {
+    value: function () { return this; }
   });
 }

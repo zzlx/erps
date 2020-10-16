@@ -40,7 +40,6 @@ export default class HomePage extends React.Component {
 
   componentDidMount() {
     const store = this.context.store;
-    console.log(store.getState());
     store.dispatch({type: store.types.ZZZ});
   }
 

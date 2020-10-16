@@ -16,7 +16,6 @@ export { default as assert } from '../public/utils/assert.mjs';
 export { default as console } from '../public/utils/console.mjs';
 export { default as date } from '../public/utils/date.mjs';
 export { default as defineToStringTag } from '../public/utils/defineToStringTag.mjs';
-export { default as defineProperty } from '../public/utils/defineProperty.mjs';
 export { default as defineToJSON } from '../public/utils/defineToJSON.mjs';
 export { default as envParser } from '../public/utils/envParser.mjs';
 export { default as global } from '../public/utils/global.mjs';

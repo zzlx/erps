@@ -7,7 +7,7 @@
  */
 
 import { types } from '../actions/index.mjs';
-import path from '../utils/path.mjs';
+import path from '../../utils/path.mjs';
 
 const defaultState = {
   rootURL: path.dirname(path.dirname(path.dirname(path.dirname(import.meta.url))))

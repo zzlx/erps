@@ -8,11 +8,7 @@
  *
  */
 
-import {
-  defineProperty as _defineProperty,
-  $$asyncIterator, 
-  getAsyncIterator 
-} from '../../utils.lib.mjs';
+import { $$asyncIterator, getAsyncIterator } from '../../utils.lib.mjs';
 
 export default function mapAsyncIterator(iterable, callback, rejectCallback) {
   var iterator = getAsyncIterator(iterable);
@@ -50,7 +46,7 @@ export default function mapAsyncIterator(iterable, callback, rejectCallback) {
      https://github.com/facebook/flow/issues/3258 */
 
 
-  return _defineProperty({
+  return Object.defineProperty({
     next: function next() {
       return iterator.next().then(mapResult, mapReject);
     },
@@ -68,8 +64,8 @@ export default function mapAsyncIterator(iterable, callback, rejectCallback) {
 
       return Promise.reject(error).catch(abruptClose);
     }
-  }, $$asyncIterator, function () {
-    return this;
+  }, $$asyncIterator, { 
+    value: function () { return this; }
   });
 }
 

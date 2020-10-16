@@ -1,4 +1,4 @@
-import combineReducers from '../store/combineReducers.mjs';
+import combineReducers from '../combineReducers.mjs';
 
 import data from './data.mjs';
 import files from './files.mjs';

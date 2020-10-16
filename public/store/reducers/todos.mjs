@@ -3,7 +3,6 @@
  */
 
 import { types } from '../actions/index.mjs';
-import getIn from '../utils/getIn.mjs';
 
 export default (state = {}, action) => {
   const newState = {
@@ -20,11 +19,11 @@ function todos(state = [], action) {
 
   switch (action.type) {
     case types.FETCH_DATA:
-      let newState = getIn.apply(action.payload, ['data', 'todos']);
+      let newState = action.payload.data.todos;
       return newState;
       break;
     case types.QUERY_TODO:
-      const todoData = getIn.apply(action.payload, ['data', 'todos']);
+      const todoData = action.payload.data.todos;
       if (todoData) return todoData;
       return state;
 

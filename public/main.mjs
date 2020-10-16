@@ -10,6 +10,9 @@
  * *****************************************************************************
  */
 
+import createStore from './store/createStore.mjs';
+import App from './apps/index.mjs';
+
 const dirname = p => p.substr(0, p.lastIndexOf('/'));
 const url = new URL(import.meta.url);
 const baseURI = dirname(url.href);   
@@ -26,9 +29,12 @@ const isNative = false;
 globalThis.env = isBrowser ? url.searchParams.get('env') : isNode 
   ? process.env.NODE_ENV : 'production';
 
+// 创建store对象
+const store = createStore({}); 
+
 // 前端程序执行环境配置
-if (isBrowser) browserRender(); // 浏览器客户端渲染
-if (isNative) nativeRender();  // Native环境
+if (isBrowser) browserRender(store); // 浏览器客户端渲染
+if (isNative) nativeRender(store);  // Native环境
 
 /**
  * Browser client render
@@ -36,18 +42,15 @@ if (isNative) nativeRender();  // Native环境
  * @params {object} iniatialState 初始状态值
  */
 
-export function browserRender (iniatialState = {}) {
-  import('./apps/index.mjs').then(m => {
-    const app = m.default;
-    const element = app(); 
-    // 存在服务端渲染等页面使用hydrate方法渲染
-    // 空的容器对象上使用render方法渲染
-    // 判断container是否存在服务端渲染内容
-    // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
-    const container = getElementById('root');
-    if (container.innerHTML) ReactDOM.hydrate(element, container, renderCB);
-    else ReactDOM.render(element, container, renderCB);  
-  });
+export function browserRender () {
+  const element = App(store); 
+  // 存在服务端渲染等页面使用hydrate方法渲染
+  // 空的容器对象上使用render方法渲染
+  // 判断container是否存在服务端渲染内容
+  // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
+  const container = getElementById('root');
+  if (container.innerHTML) ReactDOM.hydrate(element, container, renderCB);
+  else ReactDOM.render(element, container, renderCB);  
 }
 
 /**

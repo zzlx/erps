@@ -9,8 +9,6 @@
  */
 
 import ReactContext from "./Context.mjs";
-import { types } from '../actions/index.mjs';
-
 import assert from '../utils/assert.mjs';
 import generatePath from "../utils/generatePath.mjs";
 import path from '../utils/path.mjs';
@@ -32,6 +30,7 @@ export default class Redirect extends React.PureComponent {
       );
 
       this.timer = setTimeout(() => {
+        const types = store.types;
         store.dispatch({
           type: types.HISTORY_PUSHSTATE,
           payload: location

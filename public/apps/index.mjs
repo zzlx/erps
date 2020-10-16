@@ -24,16 +24,14 @@
  * *****************************************************************************
  */
 
-import getStore from '../store/getStore.mjs';
-
 import Provider from '../components/Provider.mjs';
 import Redirect from '../components/Redirect.mjs';
 import Switch from '../components/Switch.mjs';
 import Route from '../components/Route.mjs';
 import Spinner from '../components/Spinner.mjs';
 
-export default function App (initialState) {
-  const store = getStore(initialState); 
+export default function App (store) {
+  console.log(store.getState('routes'));
   const routes = store.getState('routes');
   const routeArray = [];
   let i = 0;

@@ -4,7 +4,7 @@
  *
  */
 
-import types from '../store/actions/types.mjs';
+import types from './types.mjs';
 
 export default function historyPushState (location) {
   // 刷新地址栏
