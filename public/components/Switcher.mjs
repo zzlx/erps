@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Switch
+ * Switcher
  *
  * 路由交换组件: 用于匹配路由,最快速的渲染匹配的子组件
  *
@@ -43,12 +43,8 @@ export default class Switch extends React.Component {
     return true;
     //return false;
   }
-}
 
-Switch.contextType = Context;
-
-if (globalThis.env === 'development') {
-  Switch.prototype.componentDidUpdate = function (prevProps) {
+  componentDidUpdate (prevProps) {
     if (this.props.location && !prevProps.location) {
       console.warn(
         '<Switch> elements should not change from uncontrolled to controlled (or vice versa).' + 
@@ -62,5 +58,8 @@ if (globalThis.env === 'development') {
         'You provided a "location" prop initially but omitted it on a subsequent render.'
       );
     }
-  }
+  } 
+
 }
+
+Switch.contextType = Context;

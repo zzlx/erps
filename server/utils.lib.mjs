@@ -12,7 +12,7 @@
  */
 
 export { default as argvParser } from '../public/utils/argvParser.mjs';
-export { default as assert } from '../public/utils/assert.mjs';
+export  * as assert from '../public/utils/assert.mjs';
 export { default as console } from '../public/utils/console.mjs';
 export { default as date } from '../public/utils/date.mjs';
 export { default as defineToStringTag } from '../public/utils/defineToStringTag.mjs';

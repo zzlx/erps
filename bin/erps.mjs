@@ -12,6 +12,7 @@
  * *****************************************************************************
  */
 
+import assert from 'assert';
 import cluster from 'cluster';
 import cp from 'child_process';
 import fs from 'fs';
@@ -20,7 +21,6 @@ import path from 'path';
 import util from 'util';
 
 import { 
-  assert, 
   argvParser, 
   console, 
 } from '../server/utils.lib.mjs';

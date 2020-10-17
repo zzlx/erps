@@ -136,12 +136,12 @@ export function addPath(prev, key) {
 
 export function assertValidExecutionArguments(schema, document, rawVariableValues) { 
   // If the schema used for execution is invalid, throw an error.
-  assert(document, 'Must provide document');
+  assert.ok(document, 'Must provide document');
 
   assertValidSchema(schema);
 
   // Variables, if provided, must be an object.
-  assert(
+  assert.ok(
     !rawVariableValues || typeof(rawVariableValues) === 'object',
     'Variables must be provided as an Object where each property is a variable value. ' + 
     'Perhaps look to see if an unparsed JSON string was provided.'
@@ -227,8 +227,8 @@ export function buildExecutionContext(
   }
 
   // assert
-  assert(operation, 'Has operation if no errors.');
-  assert(variableValues, 'Has variables if no errors.');
+  assert.ok(operation, 'Has operation if no errors.');
+  assert.ok(variableValues, 'Has variables if no errors.');
 
   return {
     schema: schema,
@@ -746,7 +746,7 @@ function completeValue(context, returnType, fieldNodes, info, path, result) {
  */
 
 function completeListValue(context, returnType, fieldNodes, info, path, result) {
-  assert(
+  assert.ok(
     isCollection(result), 
     "Expected Iterable, but did not find one for field ".concat(info.parentType.name, ".").concat(info.fieldName, ".")
   );
@@ -778,11 +778,11 @@ function completeListValue(context, returnType, fieldNodes, info, path, result) 
  */
 
 function completeLeafValue(returnType, result) {
-  assert(returnType.serialize, 'Missing serialize method on type.');
+  assert.ok(returnType.serialize, 'Missing serialize method on type.');
 
   const serializedResult = returnType.serialize(result);
 
-  if (assert.isValid(serializedResult)) {
+  if (assert.isInvalid(serializedResult)) {
     throw new Error(
       `Expected a value of type ${inspect(returnType)} but received: ${inspect(result)}`
     );

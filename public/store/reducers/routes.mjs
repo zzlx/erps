@@ -2,8 +2,6 @@
  *
  */
 
-import { types } from '../actions/index.mjs';
-
 const routes = [
   { 
     "path": "/settings/:module(\\w+)?", 

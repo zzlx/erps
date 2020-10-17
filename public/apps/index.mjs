@@ -50,7 +50,9 @@ export default function App (store) {
     fallback: React.createElement(Spinner, null, '加载中...'),
   }, switcher);
 
-  return React.createElement(Provider, { store }, suspense);
+  return React.createElement(Provider, { 
+    store 
+  }, suspense);
 }
 
 export function getInitialState () {

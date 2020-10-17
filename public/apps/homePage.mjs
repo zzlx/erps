@@ -12,11 +12,17 @@ import Nav from '../components/Nav.mjs';
 import Footer from '../components/Footer.mjs';
 import Placeholder from '../components/Placeholder.mjs';
 import Picture from '../components/Picture.mjs';
+import TodoList from '../components/TodoList.mjs';
+import Button from '../components/Button.mjs';
 
 export default class HomePage extends React.Component {
   constructor(props, context) {
     super(props);
-    this.state = { };
+    this.state = { 
+    };
+  }
+
+  static test () {
   }
 
   render () {
@@ -32,8 +38,17 @@ export default class HomePage extends React.Component {
       fluid: true,
     }, 'Copyrigth(2020) All rights reserved.'); 
 
+    const todoList = React.createElement(TodoList, {
+      title: '待办列表',
+    });
+
+    const container = React.createElement('div', {
+      className: 'container'
+    }, todoList);
+
     return React.createElement(React.Fragment, {}, 
       header, 
+      container,
       footer
     ); 
   }

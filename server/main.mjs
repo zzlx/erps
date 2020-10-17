@@ -18,11 +18,11 @@ import util from 'util';
 
 import Remarkable from 'remarkable';
 
+//import createStore from '../public/store/createStore.mjs';
 import settings from './config/settings.mjs';
 import Koa from './koa/Application.mjs';
 import * as M from './koa/middlewares/index.mjs';
 //import { routes as router } from './routes.mjs';
-
 import { HTMLTemplate } from './koa/middlewares/serverSideRendering.mjs';
 
 process.title = 'erps.httpd'; // 设置进程名称

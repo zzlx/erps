@@ -14,18 +14,19 @@ export default function Button (props) {
     type, role, value, className, children, ...rests // 元素属性
   } = props;
 
-  // 构造className样式
-  const cn = [];
-  cn.push('btn');
-  if (theme) cn.push('btn-theme');
-  cn.push('d-print-none');
-  if (outline) cn.push('btn-outline');
-  if (lg ^ sm && lg) cn.push('btn-lg');
-  if (sm ^ lg && sm) cn.push('btn-sm');
-  if (link) cn.push('btn-link');
-  if (block) cn.push('btn-block');
-  if (props.disabled) cn.push('disabled');
-  if (className) cn.push(className);
+  const cn = [
+    'btn',
+    theme && `btn-${theme}`,
+    'd-print-none',
+    outline && 'btn-outline',
+    lg ^ sm && lg && 'btn-lg',
+    sm ^ lg && sm && 'btn-sm',
+    link && 'btn-link',
+    block && 'btn-block',
+    props.disabled && 'disabled',
+    className,
+  ].filter(Boolean).join(' ');
+
 
   // 设置button类型
   const button = type && /submit|reset/.test(type) 
@@ -33,12 +34,10 @@ export default function Button (props) {
     : props.href ? 'a' : 'button';
 
   return React.createElement(button, {
-
-    // 绑定事件处理器
     onClick: onClick ? onClick : actionHandler,
     onKeyDown: onKeyDown ? onKeyDown : actionHandler,
 
-    className: cn.length ? cn.join(' ') : null, 
+    className: cn,
     type: type ? type : button === 'a' ? null : 'button',
     role: role ? role : button === 'a' ? 'button' : null,
     value: button === 'input' ? value ? value : children : null,

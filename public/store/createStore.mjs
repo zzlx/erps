@@ -6,14 +6,15 @@
  * *****************************************************************************
  */
 
-import { types } from './actions/index.mjs';
-import compose from './compose.mjs';
-import assert from '../utils/assert.mjs';
-import reducer from './reducers/index.mjs';
+import { ok, isPlainObject } from '../utils/assert.mjs';
 import M from './middlewares.mjs';
+import { types } from './actions/index.mjs';
+import * as reducers from './reducers/index.mjs';
 
 export default function createStore(preloadedState = {}) {
+
   const store = new StateManager(preloadedState);
+
   const middlewares = [
     M.crashReporter, 
     M.thunk,
@@ -39,16 +40,16 @@ export default function createStore(preloadedState = {}) {
  */
 
 class StateManager {
-  constructor (preloadedState) {
-    this.currentState = preloadedState;
-    this.currentReducer = reducer;
+  constructor (state) {
+    this.currentState = state;
+    this.currentReducer = this.combineReducers(reducers);
     this.currentListeners = [];
     this.nextListeners = [];
     this.isDispatching = false;
     this.types = types;
 
     this.dispatch = this.dispatch.bind(this);
-    this.dispatch({ type: types.INIT });
+    this.dispatch({ type: types.INIT }); // 初始化state
   }
 
   getState() {
@@ -63,23 +64,16 @@ class StateManager {
     let value = this.currentState;
     const paths = Array.prototype.slice.call(arguments);
     for (let path of paths) if (null == (value = value[path])) break;
-    return value
+    return value;
   }
 
   subscribe(listener) {
-    if (typeof listener !== 'function') {
-      throw new Error('Expected the listener to be a function.');
-    }
-
-    if (this.isDispatching) {
-      throw new Error(
-        'You may not call store.subscribe() while the reducer is executing.'
-      );
-    }
+    ok(typeof listener === 'function', 'Expected the listener to be a function.');
+    ok(!this.isDispatching, 
+      'Can not call store.subscribe() while the reducer is executing.');
 
     let isSubscribed = true;
 
-    //
     this.ensureCanMutateNextListeners();
 
     this.nextListeners.push(listener);
@@ -87,13 +81,8 @@ class StateManager {
     // unsubscribe
     return () => {
       if (!this.isSubscribed) { return; }
-
-      if (this.isDispatching) {
-        throw new Error(
-          'You may not unsubscribe from a store listener while the reducer is executing. '
-        );
-      }
-
+      ok(!this.isDispatching, 
+          'You may not unsubscribe a listener while the reducer is executing.');
       this.isSubscribed = false;
       this.ensureCanMutateNextListeners();
       const index = this.nextListeners.indexOf(listener);
@@ -102,45 +91,66 @@ class StateManager {
   }
 
   dispatch (action) {
-    if (!assert.isPlainObject(action)) {
-      throw new Error(
-        'Actions must be plain objects. Use custom middleware for async actions.'
-      );
-    }
+    ok(isPlainObject(action), 
+      'Actions must be plain objects. Use custom middleware for async actions.');
 
-    if (typeof action.type === 'undefined') {
-      throw new Error(
-        'Actions may not have an undefined "type" property. ' + 
-        'Have you misspelled a constant?'
-      );
-    }
+    ok(typeof action.type !== 'undefined', 
+      'Actions may not have an undefined "type" property. ' + 
+      'Have you misspelled a constant?');
 
-    if (!this.types.has(action.type)) {
-      console.warn(`${action.type} is not a valid action.`);
-    }
+    ok(this.types.has(action.type), `Action type ${action.type} is not defined.`);
 
-    if (this.isDispatching) throw new Error('Reducers may not dispatch actions.');
+    ok(!this.isDispatching, 'Reducers may not dispatch actions while another one.');
 
     try {
       this.isDispatching = true;
-      this.currentState = this.currentReducer(this.currentState, action);
+      this.currentState = this.currentReducer(this.currentState, action); 
+    } catch (e) { 
+      console.error(e) 
     } finally {
       this.isDispatching = false;
-    }
+    } 
 
     const listeners = this.currentListeners = this.nextListeners;
-
     for (let listener of listeners) listener();
 
     return action;
   }
 
   /**
+   * combine reduces
+   */
+
+  combineReducers (reducers) {
+
+    return function combinateReducer (state = Object.create(null), action) {
+      let hasChanged = false;
+      const newState = {};
+
+      for (const key of Object.keys(reducers)) {
+        const reducer = reducers[key];
+
+        const previousStateForKey = state[key];
+
+        if (typeof reducer !== 'function') {
+          throw new Error(`${key} reducer is not a function!`);
+        }
+
+        const newStateForKey = reducer(previousStateForKey, action);
+        newState[key] = newStateForKey;
+        hasChanged = hasChanged || newStateForKey !== previousStateForKey;
+      }
+
+      return hasChanged ? newState : state;
+    }
+  }
+
+  /**
    * Replaces the reducer currently used by the store to calculate the state.
    *
    * You might need this if your app implements code splitting and you want to
-   * load some of the reducers dynamically. You might also need this if you
-   * implement a hot reloading mechanism for Redux.
+   * load some of the reducers dynamically. 
+   * You might also need this if you implement a hot reloading mechanism for Redux.
    *
    * @param {Function} nextReducer The reducer for the store to use instead.
    * @returns {void}
@@ -152,7 +162,7 @@ class StateManager {
     }
 
     this.currentReducer = nextReducer;
-    this.dispatch({ type: types.REPLACE });
+    this.dispatch({ type: types.REPLACE_REDUCER });
   }
 
   ensureCanMutateNextListeners() {
@@ -160,4 +170,29 @@ class StateManager {
       this.nextListeners = this.currentListeners.slice();
     }
   }
+}
+
+/**
+ * Composes single-argument functions from right to left. 
+ *
+ * The rightmost function can take multiple arguments 
+ * as it provides the signature for the resulting composite function.
+ *
+ * For example:
+ * compose(f, g, h) is identical to doing (...args) => f(g(h(...args))).
+ *
+ * @param {function} funcs The functions to compose.
+ * @returns {Function} A function obtained by composing the argument functions from right to left. 
+ */
+
+function compose() {
+  const functions = Array.prototype.slice.call(arguments)
+
+  for (let fn of functions) {
+    if (typeof fn !== 'function') {
+      throw new TypeError('Must be compose of functions.');
+    }
+  }
+
+  return functions.reduce((a, b) => (...args) => a(b(...args)));
 }

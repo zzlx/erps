@@ -1,10 +1,3 @@
-/**
- *
- *
- *
- * @file values.mjs
- */
-
 import {
   inspect,
   keyMap,

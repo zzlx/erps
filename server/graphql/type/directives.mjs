@@ -23,14 +23,14 @@ export class GraphQLDirective {
     this.locations = config.locations;
     this.astNode = config.astNode;
 
-    assert(config.name, 'Directive must be named.');
-    assert(Array.isArray(config.locations), 
+    assert.ok(config.name, 'Directive must be named.');
+    assert.ok(Array.isArray(config.locations), 
       "@".concat(config.name, " locations must be an Array.")
     ); 
 
     const args = config.args || {};
 
-    assert(
+    assert.ok(
       typeof args === 'object' && !Array.isArray(args),
       `@${config.name} args must be an object with argument names as keys.`
     ); 
@@ -148,10 +148,8 @@ export function isDirective(directive) {
 }
 
 export function assertDirective(directive) {
-  !isDirective(directive) 
-    ? assert(0, 
-      "Expected ".concat(inspect(directive), " to be a GraphQL directive.")
-    ) 
-    : void 0;
+  assert.ok(
+    isDirective(directive), 
+    "Expected ".concat(inspect(directive), " to be a GraphQL directive."));
   return directive;
 }

@@ -3,19 +3,11 @@
  *
  * Fetch
  *
- * 浏览器不支持fetch时提供备选方案
- *
  * *****************************************************************************
  */
 
-export default globalThis.fetch || new Fetch();
-
-class Fetch {
-  constructor() {
-    console.log('// @todo: 未完成');
-  }
-
-  getXhr() {
+let fetch =  globalThis.fetch ? globalThis.fetch : function fetch () {
+  function getXhr() {
     const noXhrPatch =
       typeof window !== 'undefined' && !!window.ActiveXObject &&
         !(window.XMLHttpRequest && (new XMLHttpRequest).dispatchEvent);
@@ -28,3 +20,5 @@ class Fetch {
     return new XMLHttpRequest();
   }
 }
+
+export default fetch;

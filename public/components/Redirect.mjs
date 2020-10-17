@@ -32,7 +32,7 @@ export default class Redirect extends React.PureComponent {
       this.timer = setTimeout(() => {
         const types = store.types;
         store.dispatch({
-          type: types.HISTORY_PUSHSTATE,
+          type: 'HISTORY_PUSHSTATE',
           payload: location
         });
       }, 500);

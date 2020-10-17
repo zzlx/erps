@@ -46,7 +46,7 @@ const thunk = store => next => action => {
 const logger = store => next => action => {
   const type = store.types.getType(action.type);
 
-  console.group(`${action ? action.type : 'Unknown Action'}_${type.desc}`);
+  console.group(`${action ? action.type : 'Undefined_Action'}_${type.desc}`);
   console.log('state_prev:', store.getState());
   console.info('dispatching:', action);
 

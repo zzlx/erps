@@ -3,13 +3,12 @@
  *
  * Provider
  * 
- * 为子组件提供context数据
- *
+ * 为子组件提供Context对象
  *
  * *****************************************************************************
  */
 
-import assert from '../utils/assert.mjs';
+import { shallowEqual } from '../utils/assert.mjs';
 import Context from './Context.mjs';
 
 export default class Provider extends React.Component {
@@ -62,7 +61,7 @@ export default class Provider extends React.Component {
 
       this.setState(prevState => {
         // If the value is the same, skip the unnecessary state update.
-        if (assert.shallowEqual(prevState.storeState, newState)) {
+        if (shallowEqual(prevState.storeState, newState)) {
           return null;
         }
 

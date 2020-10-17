@@ -10,13 +10,12 @@
  */
 
 export default function Graphql () {
-  // 如果没有提供opts.url,则使用同域名下3000端口 
   const url = opts.url 
     ? new URL(opts.url)
     : new URL(window.location.href);
   
   url.protocol = 'https:'; // 强制使用https
-  url.port = 3000; // 统一配置api端口
+  url.port = 8888; // 统一配置api端口
   if (url.pathname === '/') url.pathname = '/api/graphql';
 
   const graphql = (opts) => fetch(url.href, {
@@ -37,7 +36,6 @@ export default function Graphql () {
     }),
   }).then(response => {
     if (response.ok) return response.json();
-
     // 错误响应信息
     if (console && console.warn) console.warn(response);
   });

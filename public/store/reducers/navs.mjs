@@ -8,8 +8,6 @@
  *
  */
 
-import { types } from '../actions/index.mjs';
-
 const initialState = [
   {name: 'HomePage', url: '/HomePage', active: true},
   {name: 'About', url: '/HomePage', active: false},
@@ -17,8 +15,8 @@ const initialState = [
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case types.QUERY_NAVS:
-    case types.REVEIVE_NAVS:
+    case 'QUERY_NAVS':
+    case 'REVEIVE_NAVS':
       return Object.assign({}, state, action.payload.stats);
     default:
       return state;

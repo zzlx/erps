@@ -1,27 +1,15 @@
-import combineReducers from '../combineReducers.mjs';
+/**
+ * Reducers
+ */
 
-import data from './data.mjs';
-import files from './files.mjs';
-import location from './location.mjs';
-import messages from './messages.mjs';
-import modal from './modal.mjs';
-import navs from './navs.mjs';
-import profiles from './profiles.mjs';
-import routes from './routes.mjs';
-import settings from './settings.mjs';
-import todos from './todos.mjs';
-import users from './users.mjs';
-
-export default combineReducers({
-  data,
-  files,
-  location,
-  messages,
-  modal,
-  navs,
-  profiles,
-  routes,
-  settings,
-  todos,
-  users,
-});
+export { default as data } from './data.mjs';
+export { default as files } from './files.mjs';
+export { default as location } from './location.mjs';
+export { default as messages } from './messages.mjs';
+export { default as modal } from './modal.mjs';
+export { default as navs } from './navs.mjs';
+export { default as profiles } from './profiles.mjs';
+export { default as routes } from './routes.mjs';
+export { default as settings } from './settings.mjs';
+export { default as todos } from './todos.mjs';
+export { default as users } from './users.mjs';

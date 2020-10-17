@@ -7,6 +7,7 @@
  * *****************************************************************************
  */
 
+// 适合数据库存储的Action types
 const types = [
   { name: 'API_QUERY', desc: '执行API查询' },
   { name: 'DRAG', desc: '拖动操作' },
@@ -41,10 +42,8 @@ const types = [
 
 export default new Proxy(types, {
   get: function(target, property, receiver) {
-
-    if (property === 'toString') {
-      return JSON.stringify(target);
-    }
+    if (property === 'toString') return JSON.stringify(target);
+    if (property === 'toJSON') return target;
 
     if (property === 'has') {
       return name => {
@@ -77,11 +76,7 @@ export default new Proxy(types, {
     }
 
     // 直接访问name, 若存在则返回name
-    for (let type of target) {
-      if (type.name === property) {
-        return type.name;
-      }
-    }
+    for (let type of target) if (type.name === property) return type.name;
 
 		return Reflect.get(target, property, receiver);
   }

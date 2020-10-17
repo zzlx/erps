@@ -6,71 +6,44 @@
  * *****************************************************************************
  */
 
-export default new Proxy(assert, {
-  apply: function(target, thisArg, argumentsList) {
-    return target.apply(thisArg, argumentsList);
-  },
-  get: function (target, property, receiver) {
-    if (/plainObject/i.test(property)) return isPlainObject;
-    if (/email/i.test(property)) return isEmail;
-    if (/invalid/i.test(property)) return isInvalid;
-    if (/int/i.test(property)) return isInteger;
-    if (/id/i.test(property)) return isIDNumber;
-    if (/json/i.test(property)) return isJSON;
-    if (/number/i.test(property)) return isNumber;
-    if (/null/i.test(property)) return isNullish;
-    if (/phone/i.test(property)) return isPhone;
-    if (/promise/i.test(property)) return isPromise;
-    if (/url/i.test(property)) return isUrl;
-    if (/[zh|cn]/i.test(property)) return isZhCN;
-
-    if (property === 'is') return is;
-    if (property === 'shallowEqual') return shallowEqual;
-    if (property === 'valueEqual') return valueEqual;
-
-    return Reflect.get(target, property, receiver);
-  },
-});
+export default ok;
 
 /**
- * *****************************************************************************
- *
- * assert
+ * isOk
  *
  * @param {} value
  * @param {string} message
  * @return
- * *****************************************************************************
  */
 
-function assert (condition, message) {
+export function ok (condition, message) {
   if (condition) return;
   const err = new Error(message || `Assertion failed.`);
-  if (Error.captureStackTrace) Error.captureStackTrace(err, assert);
+  if (Error.captureStackTrace) Error.captureStackTrace(err, isOk);
   throw err;
 }
 
-function isEmail (v) {
+export function isEmail (v) {
   return /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/.test(String(v));
 }
 
-function isIDNumber (v) {
+export function isIDNumber (v) {
   return /^\d{15}|\d{18}$/.test(String(v));
 }
 
-function isInvalid (v) {
+export function isInvalid (v) {
   return v === undefined || v !== v;
 }
 
-function isInteger (v) {
+export function isInteger (v) {
   return typeof v === 'number' && Number.isFinite(v) && Math.floor(v) === v;
 }
 
-function isJSON (v) {
+export function isJSON (v) {
   return /^[\x20\x09\x0a\x0d]*(\[|\{)/.test(String(v));
 }
 
-function isNumber (v) {
+export function isNumber (v) {
   const decimalsRegExp = /(?:\.0*|(\.[^0]+)0+)$/;
   const thousandsFormatRegExp = /\B(?=(\d{3})+(?!\d))/g;
 
@@ -79,27 +52,27 @@ function isNumber (v) {
   return false;
 }
 
-function isNullish (v) {
+export function isNullish (v) {
   return v === null || v === undefined || v !== v;
 }
 
-function isUrl (v) {
+export function isUrl (v) {
   return /[a-zA-z]+:\/\/[^\s]*/.test(str);
 }
 
-function isPromise (v) {
+export function isPromise (v) {
   return Boolean(v && typeof v.then === 'function');
 }
 
-function isZhCN (v) {
+export function isZhCN (v) {
   return /[\u4e00-\u9fa5]/.test(String(v));
 }
 
-function isPhone (v) {
+export function isPhone (v) {
   return /(?:^\d{3,4}-\d{7,8}$)|(?:^\d{10}$)/.test(String(v));
 }
 
-function isPlainObject(obj) {
+export function isPlainObject(obj) {
   if (typeof obj !== 'object' || obj === null) return false
 
   let proto = Object.getPrototypeOf(obj)
@@ -128,7 +101,7 @@ function isPlainObject(obj) {
  * *****************************************************************************
  */
 
-function shallowEqual(objA, objB) {
+export function shallowEqual(objA, objB) {
   if (is(objA, objB)) return true;
 
   if ( typeof objA !== 'object' || objA === null ||
@@ -163,7 +136,7 @@ function shallowEqual(objA, objB) {
   return true
 }
 
-function is (x, y) {
+export function is (x, y) {
   // SameValue algorithm
   if (x === y) {
    // 处理为+0 != -0的情况
@@ -174,7 +147,7 @@ function is (x, y) {
   }
 }
 
-function valueEqual(a, b) {
+export function valueEqual(a, b) {
 	const valueOf = obj => obj.valueOf 
 		? obj.valueOf() 
 		: Object.prototype.valueOf.call(obj);
