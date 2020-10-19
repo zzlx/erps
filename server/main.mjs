@@ -17,6 +17,7 @@ import path from 'path';
 import util from 'util';
 
 import Remarkable from 'remarkable';
+import {inspect} from './utils.lib.mjs';
 
 //import createStore from '../public/store/createStore.mjs';
 import settings from './config/settings.mjs';
@@ -112,20 +113,25 @@ app.use(async (ctx, next) => {
   return next();
 });
 
+// 静态资源服务
+app.use(M.statics({ root: paths.WWW_PATH }));
+app.use(M.statics({ root: paths.PUBLIC, prefix: '/assets' }));
+
+
+// API服务
 app.use(async (ctx, next) => {
   if (!/^\/api/.test(ctx.pathname)) return next();
   const apiFile = path.join(paths.SERVER, 'apis', path.relative('/api', ctx.pathname) + '.mjs');
 
   if (fs.existsSync(apiFile)) {
-    return await import(apiFile).then(m => m.default).then(app => {
-      app(ctx, next);
-    });
+    const api = await import(apiFile).then(m => m.default);
+    await api.call(ctx, ctx);
+    return next();
   }
 
   ctx.type = 'html';
   const html = new HTMLTemplate({ styles: ['/assets/css/styles.css'], });
   const md = new Remarkable({ html: true, });
-
   html.body = '<div class="container markdown">' + 
     md.render(fs.readFileSync(path.join(paths.SERVER, 'apis', 'README.md'), 'utf8')) +
   '</div>';
@@ -134,10 +140,6 @@ app.use(async (ctx, next) => {
   ctx.body = html.render();
   return next();
 });
-
-// 静态资源服务
-app.use(M.statics({ root: paths.WWW_PATH }));
-app.use(M.statics({ root: paths.PUBLIC, prefix: '/assets' }));
 
 app.use(M.serverSideRendering({
   styles: [ "/assets/css/styles.css" ],
@@ -151,23 +153,27 @@ app.use(M.serverSideRendering({
   ],
 }));
 
-// 内容压缩支持
-app.use(M.compress());             
-
-app.env === 'development' && app.use(ctx => {
-  // dividing line
+app.env === 'development' && app.use((ctx, next) => {
   const line = new Array(process.stdout.getWindowSize()[0]).join('-');
   debug(`
-请求已被正确处理...
+请求已被服务程序处理至respond阶段...
 ${line}
 客户端: ${ctx.get('user-agent')}
 请求类型: ${ctx.method}
 请求路径: ${ctx.pathname}
-响应内容类型: ${ctx.type}
 响应状态: ${ctx.status}
+响应内容类型: ${ctx.type}
+响应内容: ${inspect(ctx.body)}
 ${line}
-`);
+  `);
+
+  return next();
 });
+
+
+
+// 内容压缩
+app.use(M.compress());             
 
 app.listen({
   ipv6Only: false, // 是否仅开启IPV6

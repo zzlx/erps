@@ -63,22 +63,20 @@ export default function logger (options = {}) {
     if (!ws.closed) ws.write('\n' + Object.values(ctx.state.log).join('\t'));
 
     async function archiveFile (file) {
-
       if (!fs.existsSync(file)) {
         if (!ws.closed) ws.write(Object.keys(ctx.state.log).join('\t'));
       }
       const fileSN = sn(new Date(fs.lstatSync(file).birthtime));
       const nowSN = sn(new Date());
-      if (fileSN === nowSN) return false;
+      if (fileSN === nowSN) return;
 
       const newFile = path.join(path.dirname(file), fileSN + "_" + path.basename(file));
-      await fs.promises.copyFile(file, newFile)
+
+      return fs.promises.copyFile(file, newFile)
         .then(() => fs.promises.unlink(file))
         .then(() => {
           if (!ws.closed) ws.write(Object.keys(ctx.state.log).join('\t'));
         });
-
-      return true;
     } 
   } 
 }

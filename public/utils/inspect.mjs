@@ -8,7 +8,15 @@
  * *****************************************************************************
  */
 
+import {
+  unicode_to_utf8,
+  utf8_to_unicode,
+} from './utf8.mjs';
+
 export default function inspect(value) {
+
+  //if (value instanceof Uint8Array) return value.toString('hex');
+        
   switch (typeof(value)) {
     case 'string':
       return JSON.stringify(value);
@@ -18,6 +26,7 @@ export default function inspect(value) {
 
     case 'object':
       if (value) {
+
         const customInspectFn = getCustomFn(value);
 
         if (customInspectFn) {

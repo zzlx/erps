@@ -14,6 +14,7 @@ import assert from 'assert';
 import EventEmitter from 'events'; 
 import http2 from 'http2';
 import util from 'util';
+import { inspect } from '../utils.lib.mjs';
 import Context from './Context.mjs';
 import compose from './compose.mjs';
 
@@ -115,20 +116,14 @@ export default class Application extends EventEmitter {
   }
 
   /**
-   * 处理请求
+   * Handle request
    */
 
   handleRequest (ctx, fn) {
     return fn(ctx).then(() => respond(ctx)).catch(err => {
-      // 处理捕获到的中间件返回的错误
-      if (err.code === 'ENOENT') {
-        ctx.status = 404;
-        ctx.body = err.message
-      } else {
-        ctx.status = 500;
-        ctx.body = err.message
-      }
-
+      if (err.code === 'ENOENT') ctx.status = 404;
+      else ctx.status = 500;
+      if (ctx.app.env === 'development') ctx.body = err.message;
       respond(ctx);
     });
   }
@@ -156,46 +151,23 @@ export default class Application extends EventEmitter {
  */
 
 function respond (ctx) {
-  // allow bypassing response
-  if (ctx.respond === false) return ctx.stream.end();
+  if (ctx.respond === false) return ctx.stream.end(); // allow bypassing respond
+  if (null == ctx.status) ctx.status = 404; // set 404 status
+  if (null == ctx.body) ctx.body = ctx.message; // set string message
 
-  // ensure status is exists
-  if (null == ctx.body) {
-    ctx.status = ctx.status || 404;
-    ctx.body = ctx.message;
-  }
-
-  // response headers, if headers has not been send
+  // response headers
   ctx.headersSent === false && ctx.stream.respond(ctx.response.headers, {
     endStream: [ 204, 205, 304 ].includes(ctx.status) ? true : false, 
     waitForTrailers: false, 
   });
 
-  // response content
-  //
-  // writable
-  if (ctx.writable === false) return ctx.stream.end();
-
+  // respond contents
   if ('HEAD' === ctx.method)  return ctx.stream.end();
-
-  // buffer/string
-  if (Buffer.isBuffer(ctx.body) || typeof ctx.body === 'string') {
-    return ctx.stream.end(ctx.body);
-  }
-
-  // stream
-  if (ctx.body && typeof ctx.body.pipe === 'function') {
-    return ctx.body.pipe(ctx.stream);
-  }
-
-  // json
-  if (typeof ctx.body === 'object') {
-    ctx.type = 'json';
-    ctx.body = JSON.stringify(ctx.body);
-    return ctx.stream.end(ctx.body);
-  }
-
-  return ctx.stream.end();
+  if (ctx.writable === false) return ctx.stream.end();
+  if (Buffer.isBuffer(ctx.body)) return ctx.stream.end(ctx.body);
+  if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
+  if (typeof ctx.body.pipe === 'function') return ctx.body.pipe(ctx.stream);
+  return ctx.stream.end(); // respond with no content
 }
 
 // attach

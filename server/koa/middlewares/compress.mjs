@@ -17,7 +17,8 @@ export default function (opts) {
     if (null == ctx.body) return next();
 
     // threshold size
-    const size = ctx.app.opts.compressThreshold * 1024;
+    const size = ctx.app.compressThreshold * 1024;
+
     if (ctx.length && ctx.length <= size) return next();
 
     // stream时暂不进行压缩

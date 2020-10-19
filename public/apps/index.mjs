@@ -26,7 +26,7 @@
 
 import Provider from '../components/Provider.mjs';
 import Redirect from '../components/Redirect.mjs';
-import Switch from '../components/Switch.mjs';
+import Switcher from '../components/Switcher.mjs';
 import Route from '../components/Route.mjs';
 import Spinner from '../components/Spinner.mjs';
 
@@ -45,7 +45,7 @@ export default function App (store) {
     }
   }
 
-  const switcher = React.createElement(Switch, null, routeArray);
+  const switcher = React.createElement(Switcher, null, routeArray);
   const suspense = React.createElement(React.Suspense, {
     fallback: React.createElement(Spinner, null, '加载中...'),
   }, switcher);

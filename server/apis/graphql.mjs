@@ -38,7 +38,8 @@ let schemaPromise = fs.promises.readdir(schemaPath, { encoding: 'utf8' })
 
 let fieldResolver = null;
 
-export default async function graphqlAPI (ctx, next) {
+export default async function graphqlAPI () {
+  const ctx = this;
   // 获取resolvers
   if (fieldResolver == null) fieldResolver = await getModules(resolversPath); 
   const schema = await schemaPromise;
@@ -92,8 +93,6 @@ export default async function graphqlAPI (ctx, next) {
       fieldResolver: fieldResolver,
     });
   }
-
-  return next();
 }
 
 /**

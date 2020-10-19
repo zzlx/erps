@@ -55,7 +55,7 @@ export default new Proxy({}, {
  * @return {array}
  */
 
-function unicode_to_utf8 (bin) {
+export function unicode_to_utf8 (bin) {
   const u8a = [];
 
   for (let b32 of bin) {
@@ -99,7 +99,7 @@ function unicode_to_utf8 (bin) {
  * convert utf8 to unicode
  */
 
-function utf8_to_unicode (utf8String) {
+export function utf8_to_unicode (utf8String) {
   const bin = [];
 
   for (let c of utf8String) {

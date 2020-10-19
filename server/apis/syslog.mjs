@@ -13,7 +13,8 @@ import fs from 'fs';
 import path from 'path';
 import settings from '../config/settings.mjs';
 
-export default function logger (ctx, next) {
+export default function logger () {
+  const ctx = this;
   ctx.state.noLog = true;
   const logFile = path.join(settings.paths.LOG_PATH, 'request.log');
   if (!fs.existsSync(logFile)) {
@@ -23,5 +24,4 @@ export default function logger (ctx, next) {
 
   ctx.type = 'text';
   ctx.body = fs.createReadStream(logFile);
-  return next();
 }

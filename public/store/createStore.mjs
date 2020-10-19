@@ -42,14 +42,14 @@ export default function createStore(preloadedState = {}) {
 class StateManager {
   constructor (state) {
     this.currentState = state;
-    this.currentReducer = this.combineReducers(reducers);
+    this.currentReducer = combineReducers(reducers);
     this.currentListeners = [];
     this.nextListeners = [];
     this.isDispatching = false;
     this.types = types;
 
     this.dispatch = this.dispatch.bind(this);
-    this.dispatch({ type: types.INIT }); // 初始化state
+    this.dispatch({ type: 'INIT' }); // 初始化state
   }
 
   getState() {
@@ -118,34 +118,6 @@ class StateManager {
   }
 
   /**
-   * combine reduces
-   */
-
-  combineReducers (reducers) {
-
-    return function combinateReducer (state = Object.create(null), action) {
-      let hasChanged = false;
-      const newState = {};
-
-      for (const key of Object.keys(reducers)) {
-        const reducer = reducers[key];
-
-        const previousStateForKey = state[key];
-
-        if (typeof reducer !== 'function') {
-          throw new Error(`${key} reducer is not a function!`);
-        }
-
-        const newStateForKey = reducer(previousStateForKey, action);
-        newState[key] = newStateForKey;
-        hasChanged = hasChanged || newStateForKey !== previousStateForKey;
-      }
-
-      return hasChanged ? newState : state;
-    }
-  }
-
-  /**
    * Replaces the reducer currently used by the store to calculate the state.
    *
    * You might need this if your app implements code splitting and you want to
@@ -162,7 +134,7 @@ class StateManager {
     }
 
     this.currentReducer = nextReducer;
-    this.dispatch({ type: types.REPLACE_REDUCER });
+    this.dispatch({ type: 'REPLACE_REDUCER' });
   }
 
   ensureCanMutateNextListeners() {
@@ -185,7 +157,7 @@ class StateManager {
  * @returns {Function} A function obtained by composing the argument functions from right to left. 
  */
 
-function compose() {
+export function compose() {
   const functions = Array.prototype.slice.call(arguments)
 
   for (let fn of functions) {
@@ -195,4 +167,31 @@ function compose() {
   }
 
   return functions.reduce((a, b) => (...args) => a(b(...args)));
+}
+
+/**
+ * combine reduces
+ */
+
+export function combineReducers (reducers) {
+  return function combinedReducer (state = Object.create(null), action) {
+    let hasChanged = false;
+    const newState = {};
+
+    for (const key of Object.keys(reducers)) {
+      const reducer = reducers[key];
+
+      const previousStateForKey = state[key];
+
+      if (typeof reducer !== 'function') {
+        throw new Error(`${key} reducer is not a function!`);
+      }
+
+      const newStateForKey = reducer(previousStateForKey, action);
+      newState[key] = newStateForKey;
+      hasChanged = hasChanged || newStateForKey !== previousStateForKey;
+    }
+
+    return hasChanged ? newState : state;
+  }
 }
