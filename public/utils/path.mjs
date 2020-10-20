@@ -129,7 +129,6 @@ function dirname(path) {
 
   // 倒序检测字符是否为path separator
   for (let i = path.length -1; i >= 1; --i) {
-
     // 监测到path separator,记录位置,终止检测
     if (isPathSeparator(path.charCodeAt(i))) {
       end = i; 

@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * web socket
+ * Web Socket
  *
  * API Reference:
  *
@@ -24,6 +24,9 @@
  * *****************************************************************************
  */
 
+const dirname = p => p.substr(0, p.lastIndexOf('/'));
+const url = new URL(import.meta.url);
+const baseURI = dirname(url.href);   
 const location = globalThis.location || {};
 const hostname = location.hostname;
 const port = location.port === "" ? "" : ":" + location.port;

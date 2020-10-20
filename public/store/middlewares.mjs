@@ -6,7 +6,6 @@
  * *****************************************************************************
  */
 
-
 /**
  * crashReporter middleware
  */
@@ -44,15 +43,13 @@ const thunk = store => next => action => {
  */
 
 const logger = store => next => action => {
-  const type = store.types.getType(action.type);
-
-  console.group(`${action ? action.type : 'Undefined_Action'}_${type.desc}`);
-  console.log('state_prev:', store.getState());
-  console.info('dispatching:', action);
+  console.group('Action');
+  console.log('State_Prev:', store.getState());
+  console.info('Dispatching action:', action);
 
   const result = next(action);
 
-  console.log('state_new:', store.getState());
+  console.log('State_New:', store.getState());
   console.groupEnd();
 
   return result;
@@ -118,10 +115,30 @@ const timestamp = store => next => action => {
   return next(action);
 }
 
+/**
+ * 标准化action
+ */
+
+const normalization = store => next => action => {
+  const { type, meta, payload, error, ...rests } = action;
+  const newAction = Object.create(null);
+  newAction.type = type || 'Unknown_Action';
+  newAction.payload = Object.assign({}, payload, rests);
+  if (meta) newAction.meta = meta;
+  if (error) newAction.error = error;
+
+  return next(newAction);
+}
+
+/**
+ *
+ */
+
 export default {
   crashReporter,
   logger,
   promise,
+  normalization,
   thunk,
   timeoutScheduler,
   timestamp,

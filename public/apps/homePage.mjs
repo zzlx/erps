@@ -11,9 +11,8 @@ import Circular from '../components/Circular.mjs';
 import Nav from '../components/Nav.mjs';
 import Footer from '../components/Footer.mjs';
 import Placeholder from '../components/Placeholder.mjs';
-import Picture from '../components/Picture.mjs';
+import PictureCollection from '../components/PictureCollection.mjs';
 import TodoList from '../components/TodoList.mjs';
-import Button from '../components/Button.mjs';
 
 export default class HomePage extends React.Component {
   constructor(props, context) {
@@ -51,16 +50,6 @@ export default class HomePage extends React.Component {
       container,
       footer
     ); 
-  }
-
-  componentDidMount() {
-    const store = this.context.store;
-    store.dispatch({type: store.types.ZZZ});
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    console.log('shouldUpdate');
-    return false;
   }
 }
 

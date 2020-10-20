@@ -1,10 +1,7 @@
 /**
  * *****************************************************************************
  *
- * # Route
- *
- * 路由组件,用于渲染匹配到的路由组件
- *
+ * Route 路由组件
  *
  * @param {object} props
  * @return {object} element
@@ -12,17 +9,12 @@
  * *****************************************************************************
  */
 
-import Context from './Context.mjs';
 import matchPath from '../utils/matchPath.mjs';
 import warning from '../utils/warning.mjs';
 
 export default class Route extends React.Component {
   render() {
-    if (this.props.title) {
-      if (window && window.document) window.document.title = this.props.title;
-    }
-
-    const location = this.props.location ? this.props.location : window.location;
+    const location = this.props.location;
 
     const match = this.props.match
       ? this.props.match
@@ -30,7 +22,7 @@ export default class Route extends React.Component {
         ? matchPath(location.pathname, this.props)
         : false;
 
-    if (!match) return null;
+    if (!match) return null; // 未匹配到路由
 
     const props = { location, match };
 
@@ -63,12 +55,8 @@ export default class Route extends React.Component {
     if (this.props == nextProps) return false;
     else return true;
   }
-}
 
-Route.contextType = Context;
- 
-if (globalThis.env === 'development') {
-  Route.prototype.componentDidMount = function() {
+  componentDidMount () {
     const isEmptyChildren = (children) => React.Children.count(children) === 0;
 
     warning(
@@ -93,9 +81,9 @@ if (globalThis.env === 'development') {
       !(this.props.component && this.props.render),
       "You should not use <Route component> and <Route render> in the same route; <Route render> will be ignored"
     );
-  };
+  }
 
-  Route.prototype.componentDidUpdate = function(prevProps) {
+  componentDidUpdate (prevProps) {
     warning(
       !(this.props.location && !prevProps.location),
       '<Route> elements should not change from uncontrolled to controlled (or vice versa). You initially used no "location" prop and then provided one on a subsequent render.'
@@ -105,5 +93,5 @@ if (globalThis.env === 'development') {
       !(!this.props.location && prevProps.location),
       '<Route> elements should not change from controlled to uncontrolled (or vice versa). You provided a "location" prop initially but omitted it on a subsequent render.'
     );
-  };
+  }
 }

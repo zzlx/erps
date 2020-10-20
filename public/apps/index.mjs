@@ -28,7 +28,7 @@ import Provider from '../components/Provider.mjs';
 import Redirect from '../components/Redirect.mjs';
 import Switcher from '../components/Switcher.mjs';
 import Route from '../components/Route.mjs';
-import Spinner from '../components/Spinner.mjs';
+import Suspense from '../components/Suspense.mjs';
 
 export default function App (store) {
   const routes = store.getState('routes');
@@ -37,7 +37,6 @@ export default function App (store) {
 
   for (let route of routes) {
     const component = React.lazy(() => import(`./${route.view}.mjs`));
-
     if (route.from) {
       routeArray.push(React.createElement(Redirect, { key: i++, ...route, component }));
     } else {
@@ -46,13 +45,8 @@ export default function App (store) {
   }
 
   const switcher = React.createElement(Switcher, null, routeArray);
-  const suspense = React.createElement(React.Suspense, {
-    fallback: React.createElement(Spinner, null, '加载中...'),
-  }, switcher);
-
-  return React.createElement(Provider, { 
-    store 
-  }, suspense);
+  const suspense = React.createElement(Suspense, null, switcher);
+  return React.createElement(Provider, { store }, suspense);
 }
 
 export function getInitialState () {

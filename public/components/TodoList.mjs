@@ -12,6 +12,8 @@ export default class TodoList extends React.Component {
   constructor(props) {
     super(props);
     this.state = { items: [], text: '' };
+
+    // bind this
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -39,7 +41,9 @@ export default class TodoList extends React.Component {
       ? React.createElement('h5', null, this.props.title)
       : '待办事项';
 
-    const form = React.createElement('form', null, input, button);
+    const form = React.createElement('form', {
+      onSubmit: this.handleSubmit,
+    }, input, button);
 
     return React.createElement(React.Fragment, null, 
       todolist,

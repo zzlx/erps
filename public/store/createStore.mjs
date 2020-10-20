@@ -20,6 +20,7 @@ export default function createStore(preloadedState = {}) {
     M.thunk,
     M.promise,
     M.timeoutScheduler,
+    M.normalization,
     globalThis.env === 'development' && M.logger,
   ].filter(Boolean);
 
@@ -91,14 +92,11 @@ class StateManager {
   }
 
   dispatch (action) {
+    // check action
     ok(isPlainObject(action), 
       'Actions must be plain objects. Use custom middleware for async actions.');
 
-    ok(typeof action.type !== 'undefined', 
-      'Actions may not have an undefined "type" property. ' + 
-      'Have you misspelled a constant?');
-
-    ok(this.types.has(action.type), `Action type ${action.type} is not defined.`);
+    ok(this.types.has(action.type), `Undefined action type: "${action.type}".`);
 
     ok(!this.isDispatching, 'Reducers may not dispatch actions while another one.');
 

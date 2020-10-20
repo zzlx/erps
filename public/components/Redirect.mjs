@@ -8,42 +8,34 @@
  * *****************************************************************************
  */
 
-import ReactContext from "./Context.mjs";
-import assert from '../utils/assert.mjs';
+import Context from "./Context.mjs";
+import Countdown from './Countdown.mjs';
+
 import generatePath from "../utils/generatePath.mjs";
 import path from '../utils/path.mjs';
-import warning from '../utils/warning.mjs';
 
 export default class Redirect extends React.PureComponent {
   render () {
-    const Context = this.props.context || ReactContext; 
-    return React.createElement(Context.Consumer, null, (context) => {
-      const { match, to, push  } = this.props;
-      const { store } = context;
+    const { match, to, push  } = this.props;
+    const location = path.createLocation(
+      match 
+        ? typeof to === "string"
+          ? generatePath(to, match.params)
+          : { ...to, pathname: generatePath(to.pathname, match.params)}
+        : to
+    );
 
-      const location = path.createLocation(
-        match 
-          ? typeof to === "string"
-            ? generatePath(to, match.params)
-            : { ...to, pathname: generatePath(to.pathname, match.params)}
-          : to
-      );
-
-      this.timer = setTimeout(() => {
-        const types = store.types;
-        store.dispatch({
-          type: 'HISTORY_PUSHSTATE',
-          payload: location
-        });
-      }, 500);
-
-      const message = `您访问的页面${window.location.pathname}不存在，页面重定向到: ${location.pathname}`;
-
-      return React.createElement('p', null, message);
+    const message = `您访问的页面${window.location.pathname}不存在，页面将重定向到: ${location.pathname}`;
+    const countdown = React.createElement(Countdown, {
+      count: 5,
+      callback: () => this.context.store.dispatch({ type: 'HISTORY_PUSH_STATE', payload: location }),
     });
+
+    return React.createElement('div', null, message, countdown);
   }
 
-  componentWillUnmount() {
-    clearTimeout(this.timer);
+  componentDidMount() {
   }
 }
+
+Redirect.contextType = Context;

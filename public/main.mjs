@@ -32,6 +32,24 @@ globalThis.env = isBrowser ? url.searchParams.get('env') : isNode
 // 创建store对象
 const store = createStore({}); 
 
+// 订阅更新
+store.subscribe(() => {
+  const location = store.getState('location');
+})
+
+// 注册浏览器全局事件
+if (isBrowser) {
+
+  // 页面重新加载或刷新后，需要获取浏览器location
+  const currentLocation = window.location;
+  const location = store.getState('location');
+  if (currentLocation.pathname !== location.pathname) {
+    store.dispatch({type: 'HISTORY_PUSH_STATE', pathname: currentLocation.pathname});
+  }
+  //window.addEventListener('');
+
+}
+
 // 前端程序执行环境配置
 if (isBrowser) browserRender(store); // 浏览器客户端渲染
 if (isNative) nativeRender(store);  // Native环境
@@ -84,7 +102,6 @@ function renderCB () {
   console.info('前端程序已就绪,欢迎使用!');
 
   if (isBrowser) {
-    console.info('当前为浏览器环境.');
     const ua = window.navigator.userAgent;
 
     // 如果客户端时IE浏览器且版本低于IE9,提示升级浏览器
@@ -98,7 +115,7 @@ function renderCB () {
       }
     }
 
-    if (ltIE9) globalThis.window.alert('建议升级浏览器至最新版本!');
+    if (ltIE9) console.warn('建议升级浏览器至最新版本!');
   }
 
   'http:' === url.protocol && console.warn('非https协议下部分功能无法正常使用.');
@@ -153,4 +170,8 @@ function getElementById (id) {
   }
 
   return element;
+}
+
+function registerEvents () {
+
 }

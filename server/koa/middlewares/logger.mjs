@@ -28,8 +28,7 @@ export default function logger (options = {}) {
   }, typeof options === 'string' ? {path: options} : options);
 
   const logFile = path.join(opts.path, 'request.log');
-
-  let ws = fs.createWriteStream(logFile, {flags: 'a', autoClose: false}); 
+  const errorFile = path.join(opts.path, 'error.log');
 
   return async function logMiddleware (ctx, next) {
     // 记录访问日志
@@ -49,34 +48,49 @@ export default function logger (options = {}) {
 
     try {
       await next(); // 执行中间件栈
-    } catch (error) {
-      Promise.reject(error);
+
+      ctx.state.log['status'] = ctx.status;
+      if (ctx.state.noLog) return; // 记录request log
+
+      logWriter(logFile, ctx.state.log);
+    } catch (err) {
+      writeLog(errorFile, err);
+      Promise.reject(err);
     }
-
-    if (ctx.state.noLog) return;
-
-    ctx.state.log['status'] = ctx.status; // 记录服务端响应信息
-
-    // 存档日志
-    await archiveFile(logFile); 
-
-    if (!ws.closed) ws.write('\n' + Object.values(ctx.state.log).join('\t'));
-
-    async function archiveFile (file) {
-      if (!fs.existsSync(file)) {
-        if (!ws.closed) ws.write(Object.keys(ctx.state.log).join('\t'));
-      }
-      const fileSN = sn(new Date(fs.lstatSync(file).birthtime));
-      const nowSN = sn(new Date());
-      if (fileSN === nowSN) return;
-
-      const newFile = path.join(path.dirname(file), fileSN + "_" + path.basename(file));
-
-      return fs.promises.copyFile(file, newFile)
-        .then(() => fs.promises.unlink(file))
-        .then(() => {
-          if (!ws.closed) ws.write(Object.keys(ctx.state.log).join('\t'));
-        });
-    } 
   } 
+}
+
+/**
+ *
+ *
+ */
+
+const wsMap = new Map();
+
+const getWS = file => {
+  let ws = wsMap.get(file);
+  if (ws && ws.closed !==false) return ws;
+  ws = fs.createWriteStream(file, {flags: 'a', autoClose: false});
+  wsMap.set(file, ws);
+
+  return ws;
+}
+
+/**
+ * 日志记录器
+ */
+
+export function logWriter (file, log) {
+  if (!fs.existsSync(file)) getWS(file).write(Object.keys(log).join('\t') + '\n');
+  const fileSN = sn(new Date(fs.lstatSync(file).birthtime));
+  const nowSN = sn(new Date());
+
+  if (fileSN !== nowSN) {
+    const bakFile = path.join(path.dirname(file), fileSN + "_" + path.basename(file));
+    fs.copyFileSync(file, bakFile);
+    fs.unlinkSync(file);
+    getWS(file).write(Object.keys(ctx.state.log).join('\t') + '\n');
+  }
+
+  getWS(file).write(Object.values(log).join('\t') + '\n');
 }

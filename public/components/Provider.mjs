@@ -8,8 +8,8 @@
  * *****************************************************************************
  */
 
-import { shallowEqual } from '../utils/assert.mjs';
 import Context from './Context.mjs';
+import { shallowEqual } from '../utils/assert.mjs';
 
 export default class Provider extends React.Component {
   constructor(props) {
