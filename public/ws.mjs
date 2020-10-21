@@ -54,3 +54,30 @@ ws.onmessage = function(evt) {
 ws.onclose = function(evt) {
   console.log("Connection closed.");
 };
+
+function () {
+
+  const url = 'wss://localhost:8080';
+  const protocols = ['protocolOne', protocolTwo];
+  const socket = new WebSocket(url, protocols);
+
+  const selectedProtocol = null;
+
+
+  // Send message to server
+  socket.addEventListener('open', (event) => {
+    selectedProtocol = socket.protocol;
+
+    socket.send('Hello socket server.');
+  });
+
+  // Receiving messages from server
+  socket.addEventListener('message', (event) => {
+    console.log('receive message from server.', event.data);
+  });
+
+}
+
+function eventHandler (event) {
+
+}

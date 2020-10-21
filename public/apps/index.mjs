@@ -26,9 +26,9 @@
 
 import Provider from '../components/Provider.mjs';
 import Redirect from '../components/Redirect.mjs';
-import Switcher from '../components/Switcher.mjs';
 import Route from '../components/Route.mjs';
 import Suspense from '../components/Suspense.mjs';
+import Switcher from '../components/Switcher.mjs';
 
 export default function App (store) {
   const routes = store.getState('routes');
@@ -36,7 +36,7 @@ export default function App (store) {
   let i = 0;
 
   for (let route of routes) {
-    const component = React.lazy(() => import(`./${route.view}.mjs`));
+    const component = React.lazy(() => import(`./${route.app}.mjs`));
     if (route.from) {
       routeArray.push(React.createElement(Redirect, { key: i++, ...route, component }));
     } else {

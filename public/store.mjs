@@ -1,46 +1,16 @@
+import assert, { ok, isPlainObject } from './utils/assert.mjs';
+import { types } from './actions/index.mjs';
+import * as reducers from './reducers/index.mjs';
+
 /**
  * *****************************************************************************
  * 
- * 前端应用状态管理器
+ * 前端状态管理器
  *
  * *****************************************************************************
  */
 
-import { ok, isPlainObject } from '../utils/assert.mjs';
-import M from './middlewares.mjs';
-import { types } from './actions/index.mjs';
-import * as reducers from './reducers/index.mjs';
-
-export default function createStore(preloadedState = {}) {
-
-  const store = new StateManager(preloadedState);
-
-  const middlewares = [
-    M.crashReporter, 
-    M.thunk,
-    M.promise,
-    M.timeoutScheduler,
-    M.normalization,
-    globalThis.env === 'development' && M.logger,
-  ].filter(Boolean);
-
-  return new Proxy(store, { 
-    get: function (target, property, receiver) {
-      if ('dispatch' === property) {
-        const chain = middlewares.map(m => m(receiver));
-        return compose.apply(null, chain)(target.dispatch);
-      }
-
-      return Reflect.get(target, property, receiver);
-    }
-  });
-}
-
-/**
- * Store对象
- */
-
-class StateManager {
+export class StateStore {
   constructor (state) {
     this.currentState = state;
     this.currentReducer = combineReducers(reducers);
@@ -172,19 +142,15 @@ export function compose() {
  */
 
 export function combineReducers (reducers) {
-  return function combinedReducer (state = Object.create(null), action) {
+
+  return function combined (state = Object.create(null), action) {
     let hasChanged = false;
     const newState = {};
 
     for (const key of Object.keys(reducers)) {
       const reducer = reducers[key];
-
+      assert(typeof reducer === 'function', `${key} is not a function!`);
       const previousStateForKey = state[key];
-
-      if (typeof reducer !== 'function') {
-        throw new Error(`${key} reducer is not a function!`);
-      }
-
       const newStateForKey = reducer(previousStateForKey, action);
       newState[key] = newStateForKey;
       hasChanged = hasChanged || newStateForKey !== previousStateForKey;
@@ -193,3 +159,162 @@ export function combineReducers (reducers) {
     return hasChanged ? newState : state;
   }
 }
+
+/**
+ * *****************************************************************************
+ *
+ * Redux middlewares
+ *
+ * *****************************************************************************
+ */
+
+/**
+ * crashReporter middleware
+ */
+
+const crashReporter = store => next => action => {
+  try {
+    return next(action);
+  } catch (err) {
+    console.error('Action crashed: ', err);
+  }
+}
+
+/**
+ * Lets you dispatch a function instead of an action.
+ * This function will receive `dispatch` and `getState` as arguments.
+ * Useful for early exits (conditions over `getState()`), as well
+ * as for async control flow (it can `dispatch()` something else).
+ *
+ * `dispatch` will return the return value of the dispatched function.
+ */
+
+const thunk = store => next => action => {
+  if (action == null) throw new TypeError('Action must not be null.');
+  if (typeof action === 'function') return action(store);
+  if (typeof action === 'object') return next(action);
+  throw new TypeError('Action must not be null.');
+}
+
+/**
+ * logger middleware
+ */
+
+const logger = store => next => action => {
+  console.group('Action');
+  console.log('State_Prev:', store.getState());
+  console.info('Dispatching action:', action);
+
+  const result = next(action);
+
+  console.log('State_New:', store.getState());
+  console.groupEnd();
+
+  return result;
+}
+
+/**
+ * promise middleware
+ */
+
+const promise = store => next => action => {
+  const isPromise = v => v && typeof v.next === 'function';
+  // promise action
+  if (isPromise(action)) return action.then(result => next(result)); 
+
+  // promise payload
+  if (action && isPromise(action.payload)) {
+    return action.payload.then(
+      result => {
+        next(Object.assign({}, action, { payload: result }));
+      },
+      error  => {
+        next(Object.assign({}, action, { payload: error, error: true,}));
+      }
+    );
+  }
+
+  return next(action); 
+}
+
+/**
+ * Scheduler actions with { meta: { delay: N } } to be delayed by N milliseconds.
+ * Makes `dispatch` return a function to cancel the timeout. 
+ */
+
+const timeoutScheduler = store => next => action => {
+  if (action && action.meta && action.meta.delay) {
+
+    const timeout = setTimeout(
+      () => next(action),
+      action.meta.delay
+    );
+
+    return () => clearTimeout(timeout);
+  }
+
+  return next(action);
+}
+
+/**
+ * add timestamp to action.meta.timestamp
+ */
+
+const timestamp = store => next => action => {
+  if (action) {
+
+    const newAction = Object.assign({}, action, {
+      meta: Object.assign({}, action.meta, { timestamp: Date.now() })
+    });
+
+    return next(newAction);
+  }
+
+  return next(action);
+}
+
+/**
+ * 标准化action
+ */
+
+const normalization = store => next => action => {
+  const { type, meta, payload, error, ...rests } = action;
+  const newAction = Object.create(null);
+  newAction.type = type || 'Unknown_Action';
+  newAction.payload = Object.assign({}, payload, rests);
+  if (meta) newAction.meta = meta;
+  if (error) newAction.error = error;
+
+  return next(newAction);
+}
+
+/**
+ * *****************************************************************************
+ *
+ * create store
+ *
+ * *****************************************************************************
+ */
+
+const createStore = preloadState => new Proxy(new StateStore(preloadState), {
+  get: function (target, property, receiver) {
+    if ('dispatch' === property) {
+
+      const middlewares = [
+        crashReporter, 
+        thunk,
+        promise,
+        timeoutScheduler,
+        normalization,
+        globalThis.env === 'development' && logger,
+      ].filter(Boolean);
+
+      const chain = middlewares.map(m => m(receiver));
+      return compose.apply(null, chain)(target.dispatch);
+    }
+
+    return Reflect.get(target, property, receiver);
+  }
+});
+
+export default createStore();

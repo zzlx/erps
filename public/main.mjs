@@ -10,9 +10,6 @@
  * *****************************************************************************
  */
 
-import createStore from './store/createStore.mjs';
-import App from './apps/index.mjs';
-
 const dirname = p => p.substr(0, p.lastIndexOf('/'));
 const url = new URL(import.meta.url);
 const baseURI = dirname(url.href);   
@@ -29,30 +26,32 @@ const isNative = false;
 globalThis.env = isBrowser ? url.searchParams.get('env') : isNode 
   ? process.env.NODE_ENV : 'production';
 
-// 创建store对象
-const store = createStore({}); 
+(async function main () {
+  const store = await import('./store.mjs').then(m => m.default); 
+  const App = await import('./apps/index.mjs').then(m => m.default);
 
-// 订阅更新
-store.subscribe(() => {
-  const location = store.getState('location');
-})
+  // 订阅更新
+  store.subscribe(() => {
+    const location = store.getState('location');
+  })
 
-// 注册浏览器全局事件
-if (isBrowser) {
+  // 前端程序执行环境配置
+  if (isBrowser) browserRender(App(store)); // 浏览器客户端渲染
+  if (isNative) nativeRender(store);  // Native环境
 
-  // 页面重新加载或刷新后，需要获取浏览器location
-  const currentLocation = window.location;
-  const location = store.getState('location');
-  if (currentLocation.pathname !== location.pathname) {
-    store.dispatch({type: 'HISTORY_PUSH_STATE', pathname: currentLocation.pathname});
+  // 注册浏览器全局事件
+  if (isBrowser) {
+    // 对比浏览器与location
+    const currentLocation = window.location;
+    const location = store.getState('location');
+    if (currentLocation.pathname !== location.pathname) {
+      store.dispatch({type: 'HISTORY_PUSH_STATE', pathname: currentLocation.pathname});
+    }
+    //window.addEventListener('');
+
   }
-  //window.addEventListener('');
 
-}
-
-// 前端程序执行环境配置
-if (isBrowser) browserRender(store); // 浏览器客户端渲染
-if (isNative) nativeRender(store);  // Native环境
+})().catch(console.error);
 
 /**
  * Browser client render
@@ -60,8 +59,7 @@ if (isNative) nativeRender(store);  // Native环境
  * @params {object} iniatialState 初始状态值
  */
 
-export function browserRender () {
-  const element = App(store); 
+export function browserRender (element) {
   // 存在服务端渲染等页面使用hydrate方法渲染
   // 空的容器对象上使用render方法渲染
   // 判断container是否存在服务端渲染内容
