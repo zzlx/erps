@@ -1,4 +1,4 @@
-import assert, { ok, isPlainObject } from './utils/assert.mjs';
+import assert, { isPlainObject } from './utils/assert.mjs';
 import { types } from './actions/index.mjs';
 import * as reducers from './reducers/index.mjs';
 
@@ -24,13 +24,11 @@ export class StateStore {
   }
 
   getState() {
-    if (this.isDispatching) {
-      throw new Error(
-        'You may not call store.getState() while the reducer is executing. ' + 
-        'The reducer has already received the state as an argument. ' + 
-        'Pass it down from the top reducer instead of reading it from the store.'
-      );
-    }
+    assert(!this.isDispatching,
+      'You may not call store.getState() while the reducer is executing. ' + 
+      'The reducer has already received the state as an argument. ' + 
+      'Pass it down from the top reducer instead of reading it from the store.'
+    );
 
     let value = this.currentState;
     const paths = Array.prototype.slice.call(arguments);
@@ -39,8 +37,8 @@ export class StateStore {
   }
 
   subscribe(listener) {
-    ok(typeof listener === 'function', 'Expected the listener to be a function.');
-    ok(!this.isDispatching, 
+    assert(typeof listener === 'function', 'Expected the listener to be a function.');
+    assert(!this.isDispatching, 
       'Can not call store.subscribe() while the reducer is executing.');
 
     let isSubscribed = true;
@@ -52,7 +50,7 @@ export class StateStore {
     // unsubscribe
     return () => {
       if (!this.isSubscribed) { return; }
-      ok(!this.isDispatching, 
+      assert(!this.isDispatching, 
           'You may not unsubscribe a listener while the reducer is executing.');
       this.isSubscribed = false;
       this.ensureCanMutateNextListeners();
@@ -63,12 +61,10 @@ export class StateStore {
 
   dispatch (action) {
     // check action
-    ok(isPlainObject(action), 
+    assert(isPlainObject(action), 
       'Actions must be plain objects. Use custom middleware for async actions.');
-
-    ok(this.types.has(action.type), `Undefined action type: "${action.type}".`);
-
-    ok(!this.isDispatching, 'Reducers may not dispatch actions while another one.');
+    assert(this.types.has(action.type), `Undefined action type: "${action.type}".`);
+    assert(!this.isDispatching, 'Reducers may not dispatch actions while another one.');
 
     try {
       this.isDispatching = true;
