@@ -31,7 +31,7 @@ export default class Application extends EventEmitter {
     this.protocol = 'http2';
     this.proxy = opts.proxy ? 'true' : false;
     this.subdomainOffset = opts.subdomainOffset || 2;
-    this.compressThreshold = opts.compressThresshold || 128;
+    this.compressThreshold = opts.compressThresshold || 256 * 1024;
     if (opts.keys) this.keys = opts.keys;
     this.silent = opts.silent ? true : false;
 
@@ -108,8 +108,6 @@ export default class Application extends EventEmitter {
       ctx.headers = headers;
       ctx.flags = flags;
       ctx.stream = stream;
-      ctx.errors = []; // 错误存储器
-      ctx.state = Object.create(null); // 存储器
 
       return this.handleRequest(ctx, fn);
     }

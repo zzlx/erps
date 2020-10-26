@@ -9,8 +9,6 @@
  * *****************************************************************************
  */
 
-import assert from './assert.mjs';
-
 export default new Proxy({
   dirname,
   extname,
@@ -153,7 +151,9 @@ function join() {
 }
 
 function extname (path) {
-  assert(typeof(path) === 'string', `Path: ${path} must be string.`)
+  if (typeof path === 'string') {
+    throw new TypeError(`Path: ${path} must be string.`);
+  }
 
   let index = path.length;
 
@@ -181,7 +181,9 @@ function relative (from, to) {
  */
 
 function basename (path, ext) {
-  assert(typeof(path) === 'string', `Path: ${path} must be string.`)
+  if (typeof path === 'string') {
+    throw new TypeError(`Path: ${path} must be string.`);
+  }
 
   let index = 0;
 

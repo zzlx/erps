@@ -1,15 +1,24 @@
 /**
+ * *****************************************************************************
  *
+ * profiles 配置文件
+ *
+ * *****************************************************************************
  */
 
-const profiles = {
+const initialState = {
   api_address: null,
   themes: ['primary', 'secondary', 'success', 'info', 'warning', 'light', 'dark'],
   theme: 'primary',
   userName: 'anonymous',
+  messages: [
+    { message: 'test'},
+    { message: 'test_2'},
+  ], 
 }
 
-export default (state = profiles, action) => {
+export default function profiles (state = initialState, action) {
+
   switch(action.type){
     case 'GET_API_ADDRESS':
       return Object.assign({}, state, {api_address: action.payload.api_address}); 

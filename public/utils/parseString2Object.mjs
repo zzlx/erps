@@ -3,7 +3,6 @@
  *
  * @param {(string|Buffer)} src - source to be parsed
  * @returns {Object} keys and values from src
- * @file: 
  */
 
 export default function parseString2Object(src) {

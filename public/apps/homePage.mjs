@@ -1,7 +1,9 @@
 /**
  * *****************************************************************************
  *
- * 主页
+ * 程序主界面
+ *
+ *
  *
  * *****************************************************************************
  */
@@ -21,17 +23,18 @@ export default class HomePage extends React.Component {
     };
   }
 
-  static test () {
-  }
-
   render () {
-    const { store } = this.context;
+    const store = this.context.store;
+    const messages = store.getState({profiles: { messages: 1 } });
 
     const header = React.createElement('header', {
       className: 'mb-auto container-fluid'
     }, '函证中心');
 
-    const circular = React.createElement(Circular, {size: "145"});
+    const circular = React.createElement(Circular, {
+      size: "145"
+    });
+
     const footer = React.createElement(Footer, {
       className: 'container-fluid bg-gradient-default text-white',
       fluid: true,

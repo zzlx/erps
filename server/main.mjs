@@ -153,6 +153,11 @@ app.use(M.serverSideRendering({
   ],
 }));
 
+// 启用内容压缩支持
+app.use(M.compress({threshold: app.compressThreshold}));             
+
+// @TEST
+// 开发环境下控制台输出respond信息
 app.env === 'development' && app.use((ctx, next) => {
   const line = new Array(process.stdout.getWindowSize()[0]).join('-');
   debug(`
@@ -162,6 +167,7 @@ ${line}
 请求类型: ${ctx.method}
 请求路径: ${ctx.pathname}
 响应状态: ${ctx.status}
+响应内容编码: ${ctx.get('content-encoding')}
 响应内容类型: ${ctx.type}
 响应内容: ${inspect(ctx.body)}
 ${line}
@@ -169,11 +175,6 @@ ${line}
 
   return next();
 });
-
-
-
-// 内容压缩
-app.use(M.compress());             
 
 app.listen({
   ipv6Only: false, // 是否仅开启IPV6

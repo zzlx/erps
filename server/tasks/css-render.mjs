@@ -18,6 +18,7 @@ import settings from '../config/settings.mjs';
 const paths = settings.paths; // 获取目录配置
 const scssEntryPoint = path.join(paths.SRC, 'scss', 'main.scss');
 const cssFile = path.join(paths.WWW_PATH, 'assets', 'css', 'styles.css');
+const isDevel = process.env.NODE_ENV === 'developemnt' ? true : false;
 
 // node-sass module
 import('node-sass').then(m => new Promise((resolve, reject) => {
@@ -33,8 +34,9 @@ import('node-sass').then(m => new Promise((resolve, reject) => {
 
     const tasks = Promise.all([
       fs.promises.writeFile(cssFile, result.css),
-      fs.promises.writeFile(cssFile + '.br', zlib.brotliCompressSync(result.css)),
-    ]);
+      !isDevel && fs.promises.writeFile(cssFile + '.br', zlib.deflateCompressSync(result.css)),
+      !isDevel && fs.promises.writeFile(cssFile + '.br', zlib.brotliCompressSync(result.css)),
+    ].fileter(Boolean));
 
     resolve(tasks);
   });

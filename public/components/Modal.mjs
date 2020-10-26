@@ -1,11 +1,12 @@
 /**
+ * *****************************************************************************
  *
  * Modal
  *
+ * *****************************************************************************
  */
 
 import Button from './Button.mjs';
-const _ = React.createElement;
 
 export default function Modal(props) {
   const children = props.children;
@@ -15,25 +16,38 @@ export default function Modal(props) {
   if (props.show) { cn_modal.push('show'); }
 
   const cn_dialog = ['modal-dialog'];
+
   if (props.scrollable) cn_dialog.push('modal-dialog-scrollable');
   if (props.centered) cn_dialog.push('modal-dialog-centered');
 
-  const title  = _('h5',  { className: 'modal-title'}, props.title || 'Untitled');
-  const span   = _('span', { 'aria-hidden': "true"}, 'x');
-  const close  = _(Button, { 
+  const title  = React.createElement('h5', { 
+    className: 'modal-title'
+  }, props.title || 'Untitled');
+
+  const span   = React.createElement('span', { 
+    'aria-hidden': "true"
+  }, 'x');
+
+  const close  = React.createElement(Button, { 
     className: 'close', 
     'data-dismiss': "modal", 
     nostyle: 'true',
   }, span);
 
-  const header = _('div', { className: 'modal-header'}, title, close);
-  const content= _('div', { className: 'modal-content'}, header, children);
-  const dialog = _('div', { 
+  const header = React.createElement('div', { 
+    className: 'modal-header'
+  }, title, close);
+
+  const content= React.createElement('div', { 
+    className: 'modal-content'
+  }, header, children);
+
+  const dialog = React.createElement('div', { 
     className: cn_dialog.join(' '), 
     role: 'document'
   }, content);
 
-  const modal = _('div', { 
+  const modal = React.createElement('div', { 
     className: cn_modal.join(' '), 
     tabIndex: '-1', 
     role: 'dialog' 

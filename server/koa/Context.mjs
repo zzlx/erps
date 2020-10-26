@@ -53,6 +53,12 @@ const mimeTypes = new MimeTypes();
 const typeCache = memCache(100);
 
 export default class Context {
+  constructor () {
+    this[RES_HEADERS] = Object.create(null);
+    this.errors = []; // 错误存储器
+    this.state = Object.create(null); // state存储器
+  }
+  
   /**
    * get request raw body
    */
@@ -532,7 +538,7 @@ export default class Context {
    * @api public
    */
 
-  append(field, val) {
+  append (field, val) {
     const prev = this[RES_HEADERS][field];
 
     if (prev) {
@@ -551,7 +557,7 @@ export default class Context {
    * @api public
    */
 
-  remove(field) {
+  remove (field) {
     if (this.headerSent) return;
 
     if (this[RES_HEADERS][field]) {
@@ -560,7 +566,7 @@ export default class Context {
   }
 
   /**
-   * Return request header.
+   * Return header settings.
    *
    * The `Referrer` header field is special-cased,
    * both `Referrer` and `Referer` are interchangeable.
@@ -581,13 +587,14 @@ export default class Context {
    * @api public
    */
 
-  get(field) {
+  get (field) {
     switch (field = field.toLowerCase()) {
       case 'referer':
       case 'referrer':
         return this.headers[http2.constants.HTTP2_HEADER_REFERER] || '';
       default:
-        return this.headers[field] || '';
+        // 从request、response中返回头字段设置
+        return this.headers[field] || this[RES_HEADERS][field] || '';
     }
   }
 
@@ -803,12 +810,15 @@ export default class Context {
       return;
     }
 
+    // object to string
     if (typeof val === 'object') {
       this[RES_BODY] = JSON.stringify(val);
       if (!this.has('content-type')) this.type = 'json';
       this.length = Buffer.byteLength(this[RES_BODY]);
       return;
     }
+
+    this.throw(500, 'Error in body setting.')
   }
 }
 

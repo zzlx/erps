@@ -31,7 +31,8 @@ import Suspense from '../components/Suspense.mjs';
 import Switcher from '../components/Switcher.mjs';
 
 export default function App (store) {
-  const routes = store.getState('routes');
+  const data = store.getState({ routes: 1 });
+  const routes = data.routes;
   const routeArray = [];
   let i = 0;
 

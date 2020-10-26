@@ -1,4 +1,5 @@
 import assert, { isPlainObject } from './utils/assert.mjs';
+import find from './utils/find.mjs';
 import { types } from './actions/index.mjs';
 import * as reducers from './reducers/index.mjs';
 
@@ -10,9 +11,9 @@ import * as reducers from './reducers/index.mjs';
  * *****************************************************************************
  */
 
-export class StateStore {
-  constructor (state) {
-    this.currentState = state;
+export class Store {
+  constructor (stateProp) {
+    this.currentState = stateProp;
     this.currentReducer = combineReducers(reducers);
     this.currentListeners = [];
     this.nextListeners = [];
@@ -30,10 +31,8 @@ export class StateStore {
       'Pass it down from the top reducer instead of reading it from the store.'
     );
 
-    let value = this.currentState;
-    const paths = Array.prototype.slice.call(arguments);
-    for (let path of paths) if (null == (value = value[path])) break;
-    return value;
+    // 应用find工具提供的查找逻辑
+    return find.apply(this.currentState, arguments);
   }
 
   subscribe(listener) {
@@ -292,10 +291,9 @@ const normalization = store => next => action => {
  * *****************************************************************************
  */
 
-const createStore = preloadState => new Proxy(new StateStore(preloadState), {
+export default preloadState => new Proxy(new Store(preloadState), {
   get: function (target, property, receiver) {
     if ('dispatch' === property) {
-
       const middlewares = [
         crashReporter, 
         thunk,
@@ -312,5 +310,3 @@ const createStore = preloadState => new Proxy(new StateStore(preloadState), {
     return Reflect.get(target, property, receiver);
   }
 });
-
-export default createStore();

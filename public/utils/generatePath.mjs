@@ -6,10 +6,7 @@
  * *****************************************************************************
  */
 
-import { 
-  pathToRegexp, 
-  compile 
-} from "./path-to-regexp.mjs";
+import { compile } from "./path-to-regexp.mjs";
 
 const cache = {};
 const cacheLimit = 10000;

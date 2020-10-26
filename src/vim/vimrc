@@ -93,6 +93,10 @@ set hlsearch
 set incsearch    " 实时搜索功能
 set ignorecase   " 搜索时大小写不敏感
 
+" 标签页配置
+set tabpagemax=12
+set showtabline=1
+
 " 语法高亮
 syntax on
 syntax enable

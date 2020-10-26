@@ -13,145 +13,96 @@
 const dirname = p => p.substr(0, p.lastIndexOf('/'));
 const url = new URL(import.meta.url);
 const baseURI = dirname(url.href);   
-
-// @todos: 
-// 完善客户端环境的判断 
-// Wechat客户端环境
-// Dingtalk客户端环境
 const isBrowser = globalThis.document && typeof document === 'object';
-const isNode = globalThis.process && typeof process.cwd === 'function';
 const isNative = false;
+const isNode = globalThis.process && typeof process.cwd === 'function';
+if (!(isBrowser ^ isNode)) throw new Error('Environment detect error');
 
-// 前端执行环境配置
-globalThis.env = isBrowser ? url.searchParams.get('env') : isNode 
-  ? process.env.NODE_ENV : 'production';
+// 前端程序执行环境配置
+globalThis.env = isBrowser 
+  ? url.searchParams.get('env') || 'production' 
+  : isNode 
+    ? process.env.NODE_ENV || 'production' 
+    : 'production';
+
+/**
+ * 前端主程序
+ *
+ */
 
 (async function main () {
-  const store = await import('./store.mjs').then(m => m.default); 
+  if (isNode) globalThis.React = await import('react').then(m => m.default);
+  const createStore = await import('./store.mjs').then(m => m.default);
   const App = await import('./apps/index.mjs').then(m => m.default);
+
+  const store = createStore();
 
   // 订阅更新
   store.subscribe(() => {
-    const location = store.getState('location');
   })
-
-  // 前端程序执行环境配置
-  if (isBrowser) browserRender(App(store)); // 浏览器客户端渲染
-  if (isNative) nativeRender(store);  // Native环境
 
   // 注册浏览器全局事件
   if (isBrowser) {
     // 对比浏览器与location
     const currentLocation = window.location;
-    const location = store.getState('location');
+    const { location } = store.getState({ location: 1 });
     if (currentLocation.pathname !== location.pathname) {
-      store.dispatch({type: 'HISTORY_PUSH_STATE', pathname: currentLocation.pathname});
+      store.dispatch({
+        type: 'HISTORY_PUSH_STATE', 
+        pathname: currentLocation.pathname
+      });
     }
     //window.addEventListener('');
-
   }
 
-})().catch(console.error);
+  // 前端程序执行环境配置
+  if (isBrowser) browserRender(App(store)); // 浏览器客户端渲染
+  if (isNode) nodeRender(store);  // Node环境下渲染
+})().catch(console.error)
 
 /**
- * Browser client render
+ * Browser client render method
  *
  * @params {object} iniatialState 初始状态值
  */
 
-export function browserRender (element) {
+function browserRender (element) {
   // 存在服务端渲染等页面使用hydrate方法渲染
   // 空的容器对象上使用render方法渲染
   // 判断container是否存在服务端渲染内容
   // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
   const container = getElementById('root');
-  if (container.innerHTML) ReactDOM.hydrate(element, container, renderCB);
-  else ReactDOM.render(element, container, renderCB);  
+  if (container.innerHTML) ReactDOM.hydrate(element, container, renderCallback);
+  else ReactDOM.render(element, container, renderCallback);  
 }
 
 /**
- * Node(/server) render
+ * Native app render method
  *
- * @params {object} iniatialState 初始状态值
- * @return {string} staticString 返回渲染字符串
  */
 
-export function nodeRender (iniatialState = {}) {
-  globalThis.env = globalThis.process.env.NODE_ENV;
-  return import('react-dom/server').then(() => {
-  });
+function nativeRender () {
+
 }
 
 /**
- * Native render
+ * Node render method
+ *
+ * Node渲染时需要传入路径信息
  */
 
-export function nativeRender () {
+function nodeRender () {
 
 }
-
 
 /**
  * 渲染回调函数
  */
 
-function renderCB () {
-  console.groupCollapsed('提示信息');
-  console.info('前端程序已就绪,欢迎使用!');
-
-  if (isBrowser) {
-    const ua = window.navigator.userAgent;
-
-    // 如果客户端时IE浏览器且版本低于IE9,提示升级浏览器
-    let ltIE9 = false;
-
-    if (/Trident/i.exec(ua)) {
-      const version = /Trident\/(\d{1,2})\.\d{1,2}/i.exec(ua);
-
-      if (version !== null && version[1] < 5) {
-        ltIE9 = true;
-      }
-    }
-
-    if (ltIE9) console.warn('建议升级浏览器至最新版本!');
-  }
-
-  'http:' === url.protocol && console.warn('非https协议下部分功能无法正常使用.');
-  'file:' === url.protocol && console.warn('暂不支持在浏览器本地环境中使用.');
+function renderCallback () {
+  console.groupCollapsed('系统提示:');
+  console.info('前端程序已就绪!');
   console.groupEnd();
-}
-
-function backgroundWork () {
-  if (global.Worker) {
-
-    const worker = new Worker(`${settings.rootURL}/modules/web-work.mjs`);
-
-    worker.postMessage({cmd: 'start', msg: ['work']});
-
-    worker.onmessage = function(e) {
-      //result.textContent = e.data;
-      console.log('Message received from worker: ' + e.data);
-    }
-
-    worker.addEventListener('error', function (e) {
-       console.log([
-        'ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message
-      ].join(''));
-    });
-
-  } else {
-    console.warn('Your browser doesn\'t support web workers.')
-  }
-}
-
-function detectDevice () {
-  const ua = window.navigator.userAgent;
-  if ((
-    ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1 ) && 
-    ua.indexOf('Mobile Safari') !== -1 && 
-    ua.indexOf('Chrome') === -1 && 
-    ua.indexOf('Windows Phone') === -1
-  ) {  }
 }
 
 /**
@@ -168,8 +119,4 @@ function getElementById (id) {
   }
 
   return element;
-}
-
-function registerEvents () {
-
 }

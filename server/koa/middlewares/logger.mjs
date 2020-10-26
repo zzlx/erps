@@ -54,7 +54,7 @@ export default function logger (options = {}) {
 
       logWriter(logFile, ctx.state.log);
     } catch (err) {
-      writeLog(errorFile, err);
+      logWriter(errorFile, err);
       Promise.reject(err);
     }
   } 

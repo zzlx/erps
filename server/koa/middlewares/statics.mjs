@@ -5,6 +5,8 @@
  *
  * 静态资源服务
  *
+ * 仅支持GET和HEAD请求
+ *
  * 功能描述:
  *
  * 内容协商
@@ -38,8 +40,10 @@ export default (options = {}) => {
   return async function staticsMiddleware (ctx, next) {
     // 静态资源响应逻辑:
     //
-    // body已被设置时,跳过静态资源响应
+    // body已被设置时,旁路静态资源响应
     if (ctx.body != null) return next();
+    // 仅支持GET、HEAD方法
+    if (!(ctx.method === 'GET' || ctx.method === 'HEAD')) return next();
 
     const relativePath = path.relative(opts.prefix, ctx.pathname); // 获取路径
     let url = path.resolve(opts.root, relativePath);       // 构造绝对路径
