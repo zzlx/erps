@@ -3,12 +3,10 @@
  *
  * Http error
  *
- *
- *
  * *****************************************************************************
  */
 
-import http from 'http';
+import { HTTP_STATUS_CODES } from './constants.mjs';
 
 export default class HttpError extends Error {
   constructor() {
@@ -25,13 +23,13 @@ export default class HttpError extends Error {
       let code = Number.parseInt(arguemnts[0], 10)
       let message = arguments[1]
         ? arguments[1]
-        : http.STATUS_CODES[code];
+        : HTTP_STATUS_CODES[code];
 
       if (message) {
         super(message);
         this.status = code;
       } else {
-        super(http.STATUS_CODES[500]);
+        super(HTTP_STATUS_CODES[500]);
         this.status = 500;
       }
     }
@@ -51,7 +49,7 @@ export default class HttpError extends Error {
   checkErrorCode () {
     if ('ENOENT' == this.code) this.status = 404;
 
-    if (!http.STATUS_CODES[this.status] && (this.status < 400 || this.status >= 600)) {
+    if (!HTTP_STATUS_CODES[this.status] && (this.status < 400 || this.status >= 600)) {
       this.status = 500
     }
   }

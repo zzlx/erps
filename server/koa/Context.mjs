@@ -1,52 +1,37 @@
 /**
  * *****************************************************************************
- * context上下文对象 
  *
- * @file context.mjs
+ * Context对象 
+ *
  * *****************************************************************************
  */
 
-import assert from 'assert';
-import http from 'http';
-import http2 from 'http2';
 import net from 'net';
-import util from 'util';
 
 // @todo: 本地化第三方模块
 import accepts from 'accepts';
-import contentType from 'content-type';
+//import contentType from 'content-type';
 
 import HttpError from './HttpError.mjs';
 import { memCache } from '../utils.lib.mjs';
 import MimeTypes from './MimeTypes.mjs';
 
-const debug = util.debuglog('debug:context.mjs');
+import { 
+  HTTP2_METHOD, 
+  HTTP2_HEADER, 
+  HTTP_STATUS, 
+  HTTP_STATUS_CODES, 
+  HTTP_STATUS_EMPTY_CODES, 
+  HTTP_STATUS_REDIRECT_CODES, 
 
-// define symbol constants
-const ACCEPT = Symbol('context#accept');
-
-const REQ_BODY    = Symbol('context#request-body');
-const REQ_HEADERS = Symbol('context#request-headers');
-const REQ_URL     = Symbol('context#request-URL');
-const REQ_IP      = Symbol('context#request-ip');
-const RES_BODY    = Symbol('context#response-body');
-const RES_HEADERS = Symbol('context#response-headers');
-
-const EMPTY_CODE = [
-	204, // no content
-	205, // reset content
-	304, // not modified
-];
-
-const REDIRECT_CODE = [
-	300,  // MULTIPLE_CHOICES 
-	301,  // MOVED_PERMANENTLY
-	302,  // FOUND
-	303,  // SEE_OTHER
-	305,  // USE_PROXY
-	307,  // TEMPORARY_REDIRECT
-	308,  // PERMANENT_REDIRECT
-];
+  ACCEPT,
+  REQ_BODY,
+  REQ_HEADERS,
+  REQ_URL,
+  REQ_IP,
+  RES_BODY,
+  RES_HEADERS,
+} from './constants.mjs'
 
 // define constants
 const mimeTypes = new MimeTypes();
@@ -169,7 +154,7 @@ export default class Context {
    */
 
   get status() {
-    const statusKey = http2.constants.HTTP2_HEADER_STATUS;
+    const statusKey = HTTP2_HEADER.STATUS;
     return this[RES_HEADERS][statusKey];
   }
 
@@ -182,10 +167,13 @@ export default class Context {
 
   set status(code) {
     const sKey = this.httpVersion == 2 
-      ? http2.constants.HTTP2_HEADER_STATUS 
+      ? HTTP2_HEADER.STATUS 
       : 'status';
     const sCode = Number.parseInt(code);
-    assert(http.STATUS_CODES[sCode], `Settings status ${code} is invalid.`);
+
+    if (HTTP_STATUS_CODES[sCode] == null) {
+      this.throw(500, `Settings status ${code} is invalid.`);
+    }
 
     this.set(sKey, sCode);
   }
@@ -198,7 +186,7 @@ export default class Context {
    */
 
   get message() {
-    return http.STATUS_CODES[this.status];
+    return HTTP_STATUS_CODES[this.status];
   }
 
   /**
@@ -209,7 +197,7 @@ export default class Context {
    */
 
   get method() {
-    return this.headers[http2.constants.HTTP2_HEADER_METHOD];
+    return this.headers[HTTP2_HEADER.METHOD];
   }
 
   /**
@@ -218,7 +206,7 @@ export default class Context {
    */
 
   set method(method) {
-    this.headers[http2.constants.HTTP2_HEADER_METHOD] = method;
+    this.headers[HTTP2_HEADER.METHOD] = method;
   }
 
   /**
@@ -227,9 +215,9 @@ export default class Context {
 
   get URL() {
     if (!this[REQ_URL]) {
-      const schema = this.headers[http2.constants.HTTP2_HEADER_SCHEME];
-      const authority = this.headers[http2.constants.HTTP2_HEADER_AUTHORITY];
-      const path =  this.headers[http2.constants.HTTP2_HEADER_PATH];
+      const schema = this.headers[HTTP2_HEADER.SCHEME];
+      const authority = this.headers[HTTP2_HEADER.AUTHORITY];
+      const path =  this.headers[HTTP2_HEADER.PATH];
 
       try {
         this[REQ_URL] = new URL(`${schema}://${authority}${path}`);
@@ -292,7 +280,7 @@ export default class Context {
 
   get host() {
     const proxy = this.app.proxy;
-    let host = proxy && this.get(http2.constants.HTTP2_HEADER_X_FORWARDED_FOR);
+    let host = proxy && this.get(HTTP2_HEADER.X_FORWARDED_FOR);
     if (!host) host = this.URL.host;
     if (!host) return '';
     return host.split(/\s*,\s*/, 1)[0];
@@ -383,7 +371,7 @@ export default class Context {
    */
 
   get length() {
-    const len = this[RES_HEADERS][http2.constants.HTTP2_HEADER_CONTENT_LENGTH];
+    const len = this[RES_HEADERS][HTTP2_HEADER.CONTENT_LENGTH];
     return ~~len; // ~~'' => 0
   }
 
@@ -454,7 +442,7 @@ export default class Context {
     this.set('Location', encodeURL(url));
 
     // status
-    if (!REDIRECT_CODE[this.status]) this.status = 302;
+    if (!HTTP_STATUS_REDIRECT_CODES[this.status]) this.status = 302;
 
     // html
     if (this.accepts('html')) {
@@ -489,7 +477,7 @@ export default class Context {
    */
 
   get type() {
-    const type = this[RES_HEADERS][http2.constants.HTTP2_HEADER_CONTENT_TYPE];
+    const type = this[RES_HEADERS][HTTP2_HEADER.CONTENT_TYPE];
     if (!type) return '';
     return type.split(';')[0];
   }
@@ -518,8 +506,8 @@ export default class Context {
       typeCache.set(type, mimeType);
     }
 
-    if (mimeType) this.set(http2.constants.HTTP2_HEADER_CONTENT_TYPE, mimeType);
-    else this.remove(http2.constants.HTTP2_HEADER_CONTENT_TYPE);
+    if (mimeType) this.set(HTTP2_HEADER.CONTENT_TYPE, mimeType);
+    else this.remove(HTTP2_HEADER.CONTENT_TYPE);
   }
 
   /**
@@ -591,7 +579,7 @@ export default class Context {
     switch (field = field.toLowerCase()) {
       case 'referer':
       case 'referrer':
-        return this.headers[http2.constants.HTTP2_HEADER_REFERER] || '';
+        return this.headers[HTTP2_HEADER.REFERER] || '';
       default:
         // 从request、response中返回头字段设置
         return this.headers[field] || this[RES_HEADERS][field] || '';
@@ -700,9 +688,9 @@ export default class Context {
   get fresh () {
     const CACHE_CONTROL_NO_CACHE_REGEXP = /(?:^|,)\s*?no-cache\s*?(?:,|$)/
 
-    const cache_control = this.headers[http2.constants.HTTP2_HEADER_CACHE_CONTROL];
-    const modifiedSince = this.headers[http2.constants.HTTP2_HEADER_IF_MODIFIED_SINCE];
-    const noneMatch     = this.headers[http2.constants.HTTP2_HEADER_IF_NONE_MATCH];
+    const cache_control = this.headers[HTTP2_HEADER.CACHE_CONTROL];
+    const modifiedSince = this.headers[HTTP2_HEADER.IF_MODIFIED_SINCE];
+    const noneMatch     = this.headers[HTTP2_HEADER.IF_NONE_MATCH];
 
     const method = this.method;
     const s = this.status;
@@ -760,8 +748,8 @@ export default class Context {
 
     // no content
     if (null == val || val === false || true === val) {
-      if (EMPTY_CODE.includes(this.status)) {
-        this.status = http2.constants['HTTP_STATUS_NO_CONTENT']; // 204
+      if (HTTP_STATUS_EMPTY_CODES.includes(this.status)) {
+        this.status = HTTP_STATUS.NO_CONTENT; // 204
       }
 
       this.remove('Content-Type');
@@ -771,7 +759,7 @@ export default class Context {
     }
 
     // set a proper status
-    if (this.status == null) this.status = http2.constants['HTTP_STATUS_OK']; // 200
+    if (this.status == null) this.status = HTTP_STATUS.OK; // 200
 
     // if set string body, 
     // set type and length header
@@ -799,10 +787,7 @@ export default class Context {
     // stream
     if (val && typeof val.pipe === 'function') {
 
-      const handler = err => {
-        debug('Error: ', err);
-        if (err.code === 'ENOENT') this.status = 404;
-      };
+      const handler = err => { this.throw(err); };
 
       if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
       if (null !== original && original != val) this.remove('Content-Length');

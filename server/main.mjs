@@ -69,7 +69,11 @@ app.use(M.cookies());              // 全局cookie支持
 
 // 静态资源服务
 app.use(M.statics({ root: paths.WWW_PATH }));
-app.use(M.statics({ root: paths.PUBLIC, prefix: '/assets' }));
+app.use(M.statics({ root: paths.PUBLIC, prefix: '/assets', }));
+app.use(M.statics({ 
+  root: paths.DOCS, prefix: '/docs', 
+  directoryIndex: 'README.md' 
+}));
 
 // API服务
 app.use(async (ctx, next) => {

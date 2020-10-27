@@ -5,8 +5,6 @@
  *
  * 服务核心程序
  *
- *
- *
  * *****************************************************************************
  */
 
@@ -14,9 +12,11 @@ import assert from 'assert';
 import EventEmitter from 'events'; 
 import http2 from 'http2';
 import util from 'util';
+
 import { inspect } from '../utils.lib.mjs';
 import Context from './Context.mjs';
 import compose from './compose.mjs';
+import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
 
 // 调试信息打印工具
 const debug = util.debuglog('debug:application.mjs');
@@ -154,7 +154,7 @@ function respond (ctx) {
 
   // response headers
   ctx.headersSent === false && ctx.stream.respond(ctx.response.headers, {
-    endStream: [ 204, 205, 304 ].includes(ctx.status) ? true : false, 
+    endStream: HTTP_STATUS_EMPTY_CODES.includes(ctx.status) ? true : false, 
     waitForTrailers: false, 
   });
 

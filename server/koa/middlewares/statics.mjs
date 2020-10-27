@@ -18,6 +18,7 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
+import { HTTP_STATUS } from '../constants.mjs';
 
 export default function statics (options = {}) {
   const opts = Object.assign({
@@ -26,6 +27,7 @@ export default function statics (options = {}) {
     maxAge: 3600, // 默认缓存1小时(3600s)
     prefix: '/',
     root: null,
+    redirect: true, // 默认会重定向到索引文件
   }, typeof options === 'string' ? { root: options } : options);
 
   if (opts.root == null) throw new Error('Static service`s root path is not set.');
@@ -49,7 +51,18 @@ export default function statics (options = {}) {
       // 匹配目录索引文件
       for (const index of opts.directoryIndex) {
         const indexPath = path.join(url, index);
-        if (fs.existsSync(indexPath)) { url = indexPath; break; }
+        if (fs.existsSync(indexPath)) { 
+          url = indexPath; 
+          // 重定向
+          if (opts.redirect) {
+            const location = path.join(opts.prefix, path.relative(opts.root, url));
+            ctx.set('location', location);
+            ctx.status = HTTP_STATUS.TEMPORARY_REDIRECT; // 307
+            return next();
+          } else {
+            break;
+          }
+        }
       }
     }
 
