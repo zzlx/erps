@@ -30,6 +30,7 @@ process.title = 'erps.httpd'; // 设置进程名称
 const debug = util.debuglog('debug:main.mjs');
 const paths = settings.paths;
 
+
 // 初始化服务器程序
 const app = new Koa({
   keys: ['enpseC5vcmc='],
@@ -49,79 +50,31 @@ const app = new Koa({
   handshakeTimeout: 120000, // milliseconds
 });
 
-// 重启服务前执行的任务
+// 服务启动前执行的任务:
+// 准备前端项目的依赖文件
 app.tasksBeforeListen = [
-  cp.spawn(path.join(paths.SERVER, 'tasks', 'copy-umd-to-public.mjs')),
-  cp.spawn(path.join(paths.SERVER, 'tasks', 'css-render.mjs')),
+  cp.spawn(path.join(paths.TASKS, 'copy-umd-to-public.mjs')),
+  cp.spawn(path.join(paths.TASKS, 'css-render.mjs')),
 ];
 
 // 配置服务器功能
-app.use(M.logger(paths.LOG_PATH));  // 记录访问日志\中间件错误
+app.use(M.error(paths.LOG_PATH));  // 记录中间件错误
+app.use(M.logger(paths.LOG_PATH));  // 记录访问日志
 app.env === 'development' && 
 app.use(M.xResponse(settings));    // 响应时间记录
 app.use(M.cors());                 // 跨域访问支持
 app.use(M.cookies());              // 全局cookie支持
 
-// 配置服务器端路由
-//app.use(router.routes());
-//app.use(router.allowedMethods());
-//
-//routes.get('/assets*', assets.routes());
-//
-app.use((ctx, next) => {
-  if (!/^\/docs/.test(ctx.pathname)) return next();
-  let file = path.join(paths.DOCS, path.relative('/docs', ctx.pathname));
-  if (file === paths.DOCS) file = path.join(file, 'README.md');
-  if (path.extname(file) === '') file += '.md'
-  if (!fs.existsSync(file)) return next();
-
-  ctx.type = 'html';
-  const html = new HTMLTemplate({ styles: ['/assets/css/styles.css'], });
-  const md = new Remarkable({
-    html: true,
-  });
-
-  const content = fs.readFileSync(file, 'utf8');
-  const body = ctx.searchParams.get('raw') 
-      ? `<pre contenteditable="true">${content}</pre>` 
-      : md.render(content);
-
-  html.body = `<div class="container markdown">${body}</div>`;
-
-  ctx.body = html.render();
-  return next();
-});
-
-app.env === 'development' && 
-app.use(async (ctx, next) => {
-  if (ctx.pathname !== '/assets/css/styles.css') return next();
-
-  const scssFiles = readDir(path.join(paths.SRC, 'scss'));
-  const cssFile = path.join(paths.WWW_PATH, 'assets', 'css', 'styles.css');
-  await fs.promises.mkdir(path.dirname(cssFile), {recursive: true});
-  const cssStats = fs.lstatSync(cssFile);
-
-  for (let file of scssFiles) {
-    const stats = fs.lstatSync(file);
-    if (stats.mtime > cssStats.ctime) {
-    //当发生样式文件修改时，自动重建styles.css文件
-      await cp.spawn(path.join(paths.SERVER, 'tasks', 'css-render.mjs'));
-      break;
-    }
-  }
-
-  return next();
-});
+// @TODO: 内存缓存服务
 
 // 静态资源服务
 app.use(M.statics({ root: paths.WWW_PATH }));
 app.use(M.statics({ root: paths.PUBLIC, prefix: '/assets' }));
 
-
 // API服务
 app.use(async (ctx, next) => {
   if (!/^\/api/.test(ctx.pathname)) return next();
-  const apiFile = path.join(paths.SERVER, 'apis', path.relative('/api', ctx.pathname) + '.mjs');
+  const apiFile = path.join(paths.SERVER, 'pages', path.relative('/', ctx.pathname) + '.mjs');
 
   if (fs.existsSync(apiFile)) {
     const api = await import(apiFile).then(m => m.default);
@@ -129,15 +82,6 @@ app.use(async (ctx, next) => {
     return next();
   }
 
-  ctx.type = 'html';
-  const html = new HTMLTemplate({ styles: ['/assets/css/styles.css'], });
-  const md = new Remarkable({ html: true, });
-  html.body = '<div class="container markdown">' + 
-    md.render(fs.readFileSync(path.join(paths.SERVER, 'apis', 'README.md'), 'utf8')) +
-  '</div>';
-
-  html.title = 'API数据服务';
-  ctx.body = html.render();
   return next();
 });
 
@@ -149,7 +93,6 @@ app.use(M.serverSideRendering({
     { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
     { src: `/assets/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
     { src: "/assets/noFallback.js", nomodule: true},
-
   ],
 }));
 
@@ -161,7 +104,7 @@ app.use(M.compress({threshold: app.compressThreshold}));
 app.env === 'development' && app.use((ctx, next) => {
   const line = new Array(process.stdout.getWindowSize()[0]).join('-');
   debug(`
-请求已被服务程序处理至respond阶段...
+响应内容监测信息:
 ${line}
 客户端: ${ctx.get('user-agent')}
 请求类型: ${ctx.method}

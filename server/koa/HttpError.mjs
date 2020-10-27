@@ -14,8 +14,10 @@ export default class HttpError extends Error {
   constructor() {
     if (arguments[0] instanceof Error) {
       super();
-      this.message = arguments[0].message;
-      this.stack = arguments[0].stack;
+      const err = arguments[0];
+      this.message = err.message;
+      this.stack = err.stack;
+      this.code = err.code;
       this.status = 500;
     }
 
@@ -47,7 +49,6 @@ export default class HttpError extends Error {
    */
 
   checkErrorCode () {
-    // ENOENT support
     if ('ENOENT' == this.code) this.status = 404;
 
     if (!http.STATUS_CODES[this.status] && (this.status < 400 || this.status >= 600)) {

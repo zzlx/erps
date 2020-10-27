@@ -28,12 +28,6 @@ export default class Message extends React.PureComponent {
       startTouchList: null,
       moveTouchList: null,
     };
-
-    // 绑定this
-    this.handleCloseClick = handleCloseClick.bind(this);
-    this.handleTouchStart = handleTouchStart.bind(this);
-    this.handleTouchMove = handleTouchMove.bind(this);
-    this.handleTouchEnd = handleTouchEnd.bind(this);
   }
 
   render () {
@@ -45,7 +39,7 @@ export default class Message extends React.PureComponent {
     // 构造className
     const cn_alert = [
       'alert',
-      `alert-${theme ? theme : 'primary'}`,
+      `alert-${theme ? theme : 'default'}`,
       (dismissible || (timeout && timeout > 0)) ? 'alert-dismissible' : null,
       this.state.disappear ? 'd-none': null,
       className,
@@ -56,7 +50,7 @@ export default class Message extends React.PureComponent {
       className: "close",
       'data-dismiss': "alert",
       'aria-label': "Close",
-      onClick: this.handleCloseClick,
+      onClick: handleCloseClick.bind(this),
     }, 'x') : null;
 
     // 
@@ -83,9 +77,9 @@ export default class Message extends React.PureComponent {
       className: cn_alert,
       draggable: true,
       role: 'alert',
-      onTouchStart: dismissible ? null : this.handleTouchStart, 
-      onTouchMove: dismissible ? null : this.handleTouchMove, 
-      onTouchEnd: dismissible ? null : this.handleTouchEnd, 
+      onTouchStart: dismissible ? null : handleTouchStart.bind(this), 
+      onTouchMove: dismissible ? null : handleTouchMove.bind(this), 
+      onTouchEnd: dismissible ? null : handleTouchEnd.bind(this), 
       ...rest,
     }, newChildren, closeButton);
   }

@@ -22,7 +22,8 @@ export default function inspect(value) {
       return JSON.stringify(value);
 
     case 'function':
-      return value.name ? `[function ${value.name}]` : '[function unnamed]';
+      return value.toString();
+      //return value.name ? `[function ${value.name}]` : '[function unnamed]';
 
     case 'object':
       if (value) {

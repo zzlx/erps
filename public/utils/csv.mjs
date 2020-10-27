@@ -3,6 +3,7 @@
  *
  * CSV processor -- CSV处理函数
  *
+ *
  * 转换关联数组为csv字符串数组
  * Convert array object to csv string
  * @todo: 增加buffer\stream支持
@@ -10,14 +11,12 @@
  * *****************************************************************************
  */
 
-import assert from './assert.mjs';
-
-export default function (value) {
+export default function csvProcessor (value) {
   const target = {};
 
   if (typeof(value) === 'string' && isCSV(value)) {
     target.csv = value;
-    target.value = csvParser(value);
+    target.value = parser(value);
   }
 
   if (Array.isArray(value)) {
@@ -44,7 +43,7 @@ export default function (value) {
   });
 }
 
-function toCSV (value) {
+export function toCSV (value) {
 
 	if (!Array.isArray(value)) throw new TypeError('仅支持将数组对象转为CSV.');
 
@@ -104,8 +103,15 @@ function makeIterator (array) {
 	}
 }
 
-function csvParser(csv) {
-  assert('string' === typeof csv, 'Value Must be a string.');
+/**
+ *
+ * 
+ *
+ *
+ */
+
+export function parser(csv, seprator = ',') {
+  if ('string' !== typeof csv) throw new TypeError('Value Must be a string.');
 
   const retval = [];
   const lines = csv.split(/\r\n|\n/);
@@ -145,7 +151,7 @@ function csvParser(csv) {
   return retval;
 }
 
-function isCSV (value) {
+export function isCSV (value) {
   const csvValidRegExp = /^\s*(?:\'[^\'\\]*(?:\\[\S\s][^\'\\]*)*\'|\"[^\"\\]*(?:\\[\S\s][^\"\\]*)*\"|[^,\'\"\s\\]*(?:\s+[^,\'"\s\\]+)*)\s*(?:,\s*(?:\'[^\'\\]*(?:\\[\S\s][^\'\\]*)*\'|\"[^\"\\]*(?:\\[\S\s][^\"\\]*)*\"|[^,\'\"\s\\]*(?:\s+[^,\'\"\s\\]+)*)\s*)*$/;
 
   return typeof(value) === 'string' && csvValidRegExp.test(value);

@@ -11,7 +11,7 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
-import settings from '../config/settings.mjs';
+import settings from '../server/config/settings.mjs';
 
 // 定义样式文件路径
 const paths = settings.paths; // 获取目录配置

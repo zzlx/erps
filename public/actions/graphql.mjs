@@ -18,7 +18,7 @@ export default function Graphql () {
   url.port = 8888; // 统一配置api端口
   if (url.pathname === '/') url.pathname = '/api/graphql';
 
-  const graphql = (opts) => fetch(url.href, {
+  return (opts) => fetch(url.href, {
     method: opts.method || 'POST',
     mode: opts.mode || 'cors',
     //cache: 'default',

@@ -881,6 +881,5 @@ Context.prototype.set = function (field, val) {
  */
 
 Context.prototype.throw = function (...args) {
-  const error = new HttpError(...args);
-  throw error;
+  throw new HttpError(...args);
 }

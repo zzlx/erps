@@ -3,70 +3,74 @@
  *
  * 待办事项列表
  *
+ *
  * *****************************************************************************
  */
 
 import Button from './Button.mjs';
+import Message from './Message.mjs';
+import Form from './Form.mjs';
 
 export default class TodoList extends React.Component {
   constructor(props) {
     super(props);
     this.state = { items: [], text: '' };
-
-    // bind this
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   render () {
     const input = React.createElement('input', {
       id: "new-todo", 
-      onChange: this.handleChange,
+      onChange: this.handleChange.bind(this),
+      onKeyDown: this.handleKeyDown.bind(this),
       value: this.state.text,
     });
 
-    const lists = this.state.items.map(
-      item => React.createElement('li', { key: item.id, }, item.text)
-    );
-    const todolist = React.createElement('ul', null, lists);
+    const lists = this.state.items.map(item => 
+      React.createElement(Message, { key: item.id, }, item.text));
+    const todolist = React.createElement('div', null, lists);
 
     const button = React.createElement(Button, {
-      theme: 'primary',
-      sm: true,
-      onClick: this.handleSubmit,
-      block: true,
+      onClick: this.handleClick.bind(this),
     }, `Add #${this.state.items.length + 1}`);
 
     const title = this.props.title 
       ? React.createElement('h5', null, this.props.title)
       : '待办事项';
+    const group = React.createElement('div', null, input, button);
 
-    const form = React.createElement('form', {
-      onSubmit: this.handleSubmit,
-    }, input, button);
+    const form = React.createElement(Form, {
+      onSubmit: this.handleSubmit.bind(this, this.state.items),
+    }, group);
 
-    return React.createElement(React.Fragment, null, 
-      todolist,
-      title, 
-      form,
-    );
+    return React.createElement('div', {
+
+    }, title, form, todolist);
   }
 
   handleChange(e) {
     this.setState({ text: e.target.value });
   }
 
-  handleSubmit(e) {
-    e.preventDefault();
-
-    if (this.state.text.length === 0) {
-      return;
+  handleKeyDown (e) {
+    if (e.keyCode === 13) {
+      e.preventDefault();
+      this.handleClick.call(this)
     }
+  }
 
-    const newItem = {
-      text: this.state.text,
-      id: Date.now()
-    };
+  handleSubmit(items, e) {
+    //e.preventDefault();
+    e.stopPropagation(); // 阻止冒泡
+    console.log(e.currentTarget);
+  }
+
+  handleClick(e) {
+    //e.preventDefault();
+    //e.stopPropagation();
+
+    if (this.state.text.length === 0) return;
+
+    const newItem = { text: this.state.text, id: Date.now() };
 
     this.setState(state => ({
       items: state.items.concat(newItem),

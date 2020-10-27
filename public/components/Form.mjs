@@ -102,18 +102,29 @@ export default class Form extends React.PureComponent {
   }
 
   render() {
-    const {inline, className, validate, ...rests} = this.props;
+    const { 
+      inline, 
+      validate, 
+      onSubmit,
+      className, 
+      ...rests 
+    } = this.props;
 
-    const cn = [];
-    if (inline) cn.push('form-inline');
-    if (validate) cn.push('needs-validation');
-    if (className) cn.push(className);
+    const cn = [
+      inline && 'form-inline',
+      validate && 'needs-validation',
+      className,
+    ].filter(Boolean).join(' ');
+
 
     return React.createElement('form', {
       ref: this.Ref,
-      onSubmit: e => e.preventDefault(),
-      className: cn.join(' ') || null,
+      onSubmit: e => { e.preventDefault(); onSubmit()},
+      className: cn,
       ...rests,
     });
   }
+}
+
+export function InputGroup () {
 }

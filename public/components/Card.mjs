@@ -93,7 +93,7 @@ Card.prototype.componentDidMount = function () {
 }
 
 // Card group
-Card.Group = (props) => {
+export function CardGroup (props) {
   const {group, deck, columns, className, ...rests} = props;
   const cn = [];
   if (group || (!columns && !deck)) cn.push('card-group');

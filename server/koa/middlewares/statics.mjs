@@ -1,17 +1,16 @@
 /**
  * *****************************************************************************
  *
- * Static service
+ * SRS Middleware
+ * ==============
  *
- * 静态资源服务
+ * 静态资源服务(Static resource service,SRS), 提供静态资源服务器功能.
  *
- * 仅支持GET和HEAD请求
+ * ## 功能特性 
  *
- * 功能描述:
- *
- * 内容协商
- * 缓存策略支持:通过ETag实现缓存逻辑
- * 压缩版本支持
+ * * 支持内容协商: 静态资源压缩版本选择
+ * * 支持服务缓存策略: ETag响应等
+ * * 仅支持GET、HEAD两种请求方法
  *
  * *****************************************************************************
  */ 
@@ -20,80 +19,87 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
-export default (options = {}) => {
-  const opts = Object.assign({}, {
-    prefix: '/',
-    compress: false,
-    directoryIndex: ['index.html'],
+export default function statics (options = {}) {
+  const opts = Object.assign({
+    directoryIndex: 'index.html',
     immutable: false,
-    index: 'index.html',
-    maxAge: 1*60*60, // 默认缓存1小时
+    maxAge: 3600, // 默认缓存1小时(3600s)
+    prefix: '/',
     root: null,
-    lastModified: true,
-    rewrite: true, // 重定向
   }, typeof options === 'string' ? { root: options } : options);
 
-  if (opts.root == null) {
-    throw new Error('You must provider the static path as the root path.');
+  if (opts.root == null) throw new Error('Static service`s root path is not set.');
+  if ('string' === typeof opts.directoryIndex) {
+    opts.directoryIndex = opts.directoryIndex.split(',');
   }
 
-  return async function staticsMiddleware (ctx, next) {
-    // 静态资源响应逻辑:
-    //
-    // body已被设置时,旁路静态资源响应
-    if (ctx.body != null) return next();
-    // 仅支持GET、HEAD方法
-    if (!(ctx.method === 'GET' || ctx.method === 'HEAD')) return next();
+  if (!Array.isArray(opts.directoryIndex)) opts.directoryIndex = false;
 
-    const relativePath = path.relative(opts.prefix, ctx.pathname); // 获取路径
-    let url = path.resolve(opts.root, relativePath);       // 构造绝对路径
-    // 没有扩展名的目录路径,跳过
-    if (path.extname(url) === '') return next(); 
+  return function staticsMiddleware (ctx, next) {
+    // 旁路规则:
+    if (!/GET|HEAD/.test(ctx.method)) return next(); // 1. 非GET、HEAD请求方法时
+    if (ctx.body != null) return next(); // 2. body已被设置时
 
-    if (fs.existsSync(url)) {
-      ctx.type = path.extname(url);
+    // Response static resource:
+    const relativePath = path.relative(opts.prefix, ctx.pathname);
+    const absolutePath = path.resolve(opts.root, relativePath);
+    let url = absolutePath;
 
-      // 内容协商算法:
-      // Vary 是一个HTTP响应头部信息，
-      // 它决定了对于未来的一个请求头，
-      // 应该用一个缓存的回复(response)还是向源服务器请求一个新的回复。
-      // 在响应状态码为 304 Not Modified  的响应中，
-      // 也要设置 Vary 首部，而且要与相应的 200 OK 响应设置得一模一样。
-      //ctx.set('vary', 'accept-encoding');
-      ctx.set('vary', 'User-Agent');
-
-      const accetpEncoding = ctx.get('accept-encoding'); // get accept encoding
-      if (/\bbr\b/.test(accetpEncoding) && fs.existsSync(url + '.br')) {
-        ctx.set('content-encoding', 'br');
-        url += '.br';
-      } else if (/\bdeflate\b/.test(accetpEncoding) && fs.existsSync(url + '.deflate')) {
-        ctx.set('content-encoding', 'deflate');
-        url += '.deflate';
-      } else if (/\bgzip\b/.test(accetpEncoding) && fs.existsSync(url + '.gz')) {
-        ctx.set('content-encoding', 'gzip');
-        url += '.gz';
+    if (path.extname(url) === '' && fs.existsSync(url)) {
+      // 匹配目录索引文件
+      for (const index of opts.directoryIndex) {
+        const indexPath = path.join(url, index);
+        if (fs.existsSync(indexPath)) { url = indexPath; break; }
       }
-
-      const stats = fs.lstatSync(url);
-      const etag = `${stats.mtimeMs}`; 
-
-      if (ctx.get('if-none-match') === etag) {
-        ctx.status = 304; // not modified status
-        return next();
-      }
-
-      ctx.length = stats.size;
-
-      // 客户端缓存配置
-      ctx.set({
-        'etag': etag, // 开启服务端资源验证逻辑
-        //'last-modified': stats.mtime, // 开启浏览器端缓存
-        'cache-control': `max-age=${ctx.app.env === 'development' ? 0 : opts.maxAge}`,
-      }); 
-
-      ctx.body = fs.createReadStream(url);
     }
 
-    return next(); // 交由下一中间件处理
+    // 未匹配到目录索引文件时不再响应
+    if (path.extname(url) === '') return next(); 
+    if (!fs.existsSync(url)) return next(); // 文件不存在时,不再响应
+
+    ctx.type = path.extname(url);
+
+    // 内容协商算法:
+    // Vary 是一个HTTP响应头部信息，
+    // 它决定了对于未来的一个请求头，
+    // 应该用一个缓存的回复(response)还是向源服务器请求一个新的回复。
+    // 在响应状态码为 304 Not Modified  的响应中，
+    // 也要设置 Vary 首部，而且要与相应的 200 OK 响应设置得一模一样。
+    //ctx.set('vary', 'accept-encoding');
+    ctx.set('vary', 'User-Agent');
+
+    // 支持静态资源压缩版本
+    const accetpEncoding = ctx.get('accept-encoding');
+
+    if (/deflate/.test(accetpEncoding) && fs.existsSync(url + '.deflate')) {
+      ctx.set('content-encoding', 'deflate');
+      url += '.deflate';
+    } else if (/\bgzip\b/.test(accetpEncoding) && fs.existsSync(url + '.gz')) {
+      ctx.set('content-encoding', 'gzip');
+      url += '.gz';
+    } else if (/br/.test(accetpEncoding) && fs.existsSync(url + '.br')) {
+      ctx.set('content-encoding', 'br');
+      url += '.br';
+    } 
+
+    const stats = fs.lstatSync(url);
+    const etag = `${stats.mtimeMs}`; 
+
+    if (ctx.get('if-none-match') === etag) {
+      ctx.status = 304;
+      return next();
+    }
+
+    // 客户端缓存配置
+    ctx.set({
+      'etag': etag, // 开启服务端资源验证逻辑
+      //'last-modified': stats.mtime, // 开启浏览器端缓存
+      'cache-control': `max-age=${ctx.app.env === 'development' ? 0 : opts.maxAge}`,
+    }); 
+
+    ctx.length = stats.size;
+    ctx.body = fs.createReadStream(url);
+
+    return next();
   }
 }

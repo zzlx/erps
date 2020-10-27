@@ -1,15 +1,18 @@
 /**
  * *****************************************************************************
  *
- * 配置信息
+ * 前端配置信息
+ *
+ * 支持配置项目
  *
  * *****************************************************************************
  */
 
-const defaultState = {
-};
+const initialState = [
+  { type: 'theme', breakpoint: 'md', },
+];
 
-export default (state = defaultState, action) => {
+export default (state = initialState, action) => {
   switch(action.type){ 
     case 'LOGIN_SUCCESS': 
       return action.payload; 

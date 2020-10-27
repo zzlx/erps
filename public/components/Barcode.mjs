@@ -40,7 +40,7 @@ export default class Barcode extends React.PureComponent {
   }
 }
 
-class Drawer {
+export class Drawer {
   constructor(element) {
       this.ctx = element.getContext('2d');
       const rect = element.getBoundingClientRect();

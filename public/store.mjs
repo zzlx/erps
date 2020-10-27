@@ -199,12 +199,9 @@ const logger = store => next => action => {
   console.group('Action');
   console.log('State_Prev:', store.getState());
   console.info('Dispatching action:', action);
-
   const result = next(action);
-
   console.log('State_New:', store.getState());
   console.groupEnd();
-
   return result;
 }
 

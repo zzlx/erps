@@ -28,10 +28,8 @@ export default function logger (options = {}) {
   }, typeof options === 'string' ? {path: options} : options);
 
   const logFile = path.join(opts.path, 'request.log');
-  const errorFile = path.join(opts.path, 'error.log');
 
   return async function logMiddleware (ctx, next) {
-    // 记录访问日志
     ctx.state.log = {
       "datetime": date.toISOString(),
       "c-address": ctx.socket.remoteAddress,
@@ -46,17 +44,11 @@ export default function logger (options = {}) {
       "s-pid": process.pid,
     };
 
-    try {
-      await next(); // 执行中间件栈
+    await next(); // 执行中间件栈
 
-      ctx.state.log['status'] = ctx.status;
-      if (ctx.state.noLog) return; // 记录request log
-
-      logWriter(logFile, ctx.state.log);
-    } catch (err) {
-      logWriter(errorFile, err);
-      Promise.reject(err);
-    }
+    ctx.state.log['status'] = ctx.status;
+    if (ctx.state.noLog) return; // 记录request log
+    logWriter(logFile, ctx.state.log);
   } 
 }
 

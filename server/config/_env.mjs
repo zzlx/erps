@@ -41,12 +41,12 @@ process.on('exit', code => {
 // 被捕获的exception\rejection,需要进行妥善处理
 // 不应出现未经管理的exception
 process.on('uncaughtException', (error, origin) => {
-  console.error('Caught Exception: %o', error);
+  console.error('Uncaught Exception: %o', error);
   console.error('Origin Exception: %s', origin);
 });
 
 // 系统不应出现未经管理的rejection
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Caught Rejection: %o', reason);
+  console.error('Uncaught Rejection: %o', reason);
 });
 

@@ -160,7 +160,7 @@ import vim
 import webbrowser
 
 re_url = re.compile(r'https?://[a-zA-Z0-9-./"#$%&\':?=_]+')
-re_path = re.compile('\.{1,2}/[a-zA-Z0-9._/]+')
+re_path = re.compile('\.{1,2}/[a-zA-Z0-9._\-/]+')
 line = vim.current.line
 match_url = re_url.search(line)
 match_path = re_path.search(line)

@@ -33,7 +33,7 @@ globalThis.env = isBrowser
 (async function main () {
   if (isNode) globalThis.React = await import('react').then(m => m.default);
   const createStore = await import('./store.mjs').then(m => m.default);
-  const App = await import('./apps/index.mjs').then(m => m.default);
+  const App = await import('./containers/index.mjs').then(m => m.default);
 
   const store = createStore();
 

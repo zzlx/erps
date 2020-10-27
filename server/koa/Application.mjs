@@ -40,7 +40,6 @@ export default class Application extends EventEmitter {
     // 中间件栈
     this.middlewares = [];
     this.tasksBeforeListen = [];
-
   }
 
   /**
@@ -117,11 +116,11 @@ export default class Application extends EventEmitter {
    * Handle request
    */
 
-  handleRequest (ctx, fn) {
-    return fn(ctx).then(() => respond(ctx)).catch(err => {
+  handleRequest (ctx, fnMiddleware) {
+    fnMiddleware(ctx).then(() => respond(ctx)).catch(err => {
       if (err.code === 'ENOENT') ctx.status = 404;
       else ctx.status = 500;
-      if (ctx.app.env === 'development') ctx.body = err.message;
+      if (ctx.app.env === 'development') ctx.body = err.stack;
       respond(ctx);
     });
   }

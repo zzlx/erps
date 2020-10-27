@@ -8,13 +8,20 @@
  * *****************************************************************************
  */
 
+import cp from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import settings from '../../config/settings.mjs';
 
-export default function logger (ctx) {
+export default function logger () {
+  const ctx = this;
   ctx.state.noLog = true;
+  const logFile = path.join(settings.paths.LOG_PATH, 'request.log');
+  if (!fs.existsSync(logFile)) {
+    ctx.status = 404;
+    return;
+  }
+
   ctx.type = 'text';
-  const logFile = path.join(settings.paths.APP_LOG, 'request.log');
   ctx.body = fs.createReadStream(logFile);
 }
