@@ -99,7 +99,7 @@ export default function statics (options = {}) {
     const etag = `${stats.mtimeMs}`; 
 
     if (ctx.get('if-none-match') === etag) {
-      ctx.status = 304;
+      ctx.status = HTTP_STATUS.NOT_MODIFIED; // 304
       return next();
     }
 
