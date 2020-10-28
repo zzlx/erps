@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Web Socket
+ * Web Socket Client
  *
  * API Reference:
  *
@@ -20,64 +20,36 @@
  * *  webSocket.onerror
  *   用于指定报错时的回调函数
  *
- *
  * *****************************************************************************
  */
 
-const dirname = p => p.substr(0, p.lastIndexOf('/'));
 const url = new URL(import.meta.url);
-const baseURI = dirname(url.href);   
-const location = globalThis.location || {};
-const hostname = location.hostname;
-const port = location.port === "" ? "" : ":" + location.port;
-const protocol = location.protocol === 'https:' ? 'wss': 'ws';
-const url = `${protocol}://${hostname}${port}`;
-const ws = new WebSocket(url);
+const protocol = url.protocol === 'https:' ? 'wss' : 'ws';
+const webSocket = new WebSocket(`${protocol}://${url.host}/api/socket`);
 
-ws.onopen = function(evt) {
+webSocket.onopen = function (e) {
   console.log("Connection open ...");
-  ws.send("Hello WebSockets!");
+  this.send("Hello WebSockets!");
 };
 
-ws.onmessage = function(evt) {
-  if(typeof event.data === 'string') {
+webSocket.onerror = function (error) {
+  console.log(error);
+}
+
+webSocket.onmessage = function (e) {
+  console.log('Receiving a message');
+
+  if(typeof e.data === 'string') {
     console.log("Received data string");
   }
 
-  if(event.data instanceof ArrayBuffer){
-    var buffer = event.data;
+  if(e.data instanceof ArrayBuffer){
+    const buffer = e.data;
     console.log("Received arraybuffer");
   }
-  ws.close();
+  webSocket.close();
 };
 
-ws.onclose = function(evt) {
+webSocket.onclose = function (e) {
   console.log("Connection closed.");
 };
-
-function () {
-
-  const url = 'wss://localhost:8080';
-  const protocols = ['protocolOne', protocolTwo];
-  const socket = new WebSocket(url, protocols);
-
-  const selectedProtocol = null;
-
-
-  // Send message to server
-  socket.addEventListener('open', (event) => {
-    selectedProtocol = socket.protocol;
-
-    socket.send('Hello socket server.');
-  });
-
-  // Receiving messages from server
-  socket.addEventListener('message', (event) => {
-    console.log('receive message from server.', event.data);
-  });
-
-}
-
-function eventHandler (event) {
-
-}

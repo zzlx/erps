@@ -31,6 +31,7 @@ globalThis.env = isBrowser
  */
 
 (async function main () {
+  import('./ws.mjs'); // 载入ws
   if (isNode) globalThis.React = await import('react').then(m => m.default);
   const createStore = await import('./store.mjs').then(m => m.default);
   const App = await import('./containers/index.mjs').then(m => m.default);

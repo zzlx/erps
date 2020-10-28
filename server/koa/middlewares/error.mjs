@@ -7,7 +7,7 @@
  */
 
 import path from 'path';
-import { logWriter } from './logger.mjs';
+import logWriter from '../logWriter.mjs';
 
 export default function error (options = {}) {
   const opts = Object.assign({}, {

@@ -16,11 +16,9 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 import { date } from '../../utils.lib.mjs';
+import logWriter from '../logWriter.mjs';
 
 const debug = util.debuglog('debug:logger.mjs');
-
-const fmt = v => `0${v}`.substr(-2);
-const sn = d => `${d.getFullYear()}${fmt(d.getMonth() + 1)}${fmt(d.getDate())}`; 
 
 export default function logger (options = {}) {
   const opts = Object.assign({}, {
@@ -48,41 +46,7 @@ export default function logger (options = {}) {
 
     ctx.state.log['status'] = ctx.status;
     if (ctx.state.noLog) return; // 记录request log
+
     logWriter(logFile, ctx.state.log);
   } 
-}
-
-/**
- *
- *
- */
-
-const wsMap = new Map();
-
-const getWS = file => {
-  let ws = wsMap.get(file);
-  if (ws && ws.closed !==false) return ws;
-  ws = fs.createWriteStream(file, {flags: 'a', autoClose: false});
-  wsMap.set(file, ws);
-
-  return ws;
-}
-
-/**
- * 日志记录器
- */
-
-export function logWriter (file, log) {
-  if (!fs.existsSync(file)) getWS(file).write(Object.keys(log).join('\t') + '\n');
-  const fileSN = sn(new Date(fs.lstatSync(file).birthtime));
-  const nowSN = sn(new Date());
-
-  if (fileSN !== nowSN) {
-    const bakFile = path.join(path.dirname(file), fileSN + "_" + path.basename(file));
-    fs.copyFileSync(file, bakFile);
-    fs.unlinkSync(file);
-    getWS(file).write(Object.keys(ctx.state.log).join('\t') + '\n');
-  }
-
-  getWS(file).write(Object.values(log).join('\t') + '\n');
 }

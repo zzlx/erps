@@ -9,10 +9,11 @@
  */
 
 import assert from 'assert';
+import cp from 'child_process';
 import EventEmitter from 'events'; 
-import http2 from 'http2';
 import util from 'util';
 
+import createServer from './createServer.mjs';
 import { inspect } from '../utils.lib.mjs';
 import Context from './Context.mjs';
 import compose from './compose.mjs';
@@ -35,41 +36,23 @@ export default class Application extends EventEmitter {
     if (opts.keys) this.keys = opts.keys;
     this.silent = opts.silent ? true : false;
 
-    if (this.sessionStore == null) this.sessionStore = new Map(); 
-
     // 中间件栈
     this.middlewares = [];
     this.tasksBeforeListen = [];
   }
 
   /**
-   *
-   *
+   * Listen
+   * 开启服务器监听
    */
 
-  async listen () {
-    //await Promise.all(this.tasksBeforeListen); // 执行启动前任务
-
-    this.server = http2.createSecureServer({
-      allowHTTP1: true,
-      key: this.opts.key,
-      cert: this.opts.cert,
-      //ca: [fs.readFileSync('client-cert.pem')],
-      //sigalgs: 
-      //ciphers: 
-      //clientCertEngine: 
-      //dhparam
-      //ecdhCurve
-      //privateKeyEngine
-      passphrase: this.opts.passphrase,
-      //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-      sessionTimeout: 300, // seconds
-      handshakeTimeout: 120000, // milliseconds
+  listen () {
+    // 执行完配置任务后再开启服务器监听
+    Promise.all(this.tasksBeforeListen.map(task => cp.spawn(task))).then(() => {
+      this.server = createServer(this.opts);
+      this.server.on('stream', this.callback());
+      this.server.listen(...arguments);
     });
-
-    attachServerEvent.call(this, this.server);
-    this.server.on('stream', this.callback());
-    this.server.listen(...arguments);
   }
 
   /**
@@ -165,95 +148,4 @@ function respond (ctx) {
   if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
   if (typeof ctx.body.pipe === 'function') return ctx.body.pipe(ctx.stream);
   return ctx.stream.end(); // respond with no content
-}
-
-// attach
-function attachServerEvent (server) {
-
-  server.on('keylog', (line, tlsSocket) => {
-    debug('keylog event with line:', line.toString());
-  });
-
-  server.on('secureConnection', socket => {
-    debug('secureConnection event ');
-  });
-
-  server.on('newSession', (id, data, cb) => {
-    debug('newSession event with sessionId: %s', id.toString('hex'));
-    this.sessionStore.set(id.toString('hex'), data);
-    cb();
-  });
-
-  server.on('OCSPRequest', (certificate, issuer, callback) => {
-    debug('OCSPRequest event with certificate: %o, issuer: %o', 
-      certificate.toString('hex'),
-      issuer,
-    );
-    callback();
-  });
-
-  server.on('resumeSession', (id, cb) => {
-    debug('resumeSession event with id: %s', id.toString('hex'));
-    cb(null, this.sessionStore.get(id.toString('hex')) || null);
-  });
-
-  server.on('sessionError', err => {
-    debug('sessionError');
-  });
-
-  server.on('unknownProtocol', socket => {
-    debug('unknownProtocol');
-  });
-
-  server.on('error', function(err) {
-    if (err.code === 'EADDRINUSE') {
-      console.error(`Port ${err.port} is used, try again later.`);
-    }
-
-    debug(err);
-  });
-
-  server.on('close', function () {
-    debug(this);
-  });
-
-  server.on('listening', function () {
-    console.log('The %s Server is running on %o.', process.env.NODE_ENV, this.address());
-  });
-
-}
-
-function attachStreamEvents (stream) {
-
-  stream.on('aborted', () => {
-    debug('Stream is aborted.');
-  });
-
-  stream.on('close', () => {
-    debug('Stream is closed.');
-  });
-
-  stream.on('error', error => {
-    debug('Stream error: ', error);
-  });
-
-  stream.on('frameError', (err) => {
-    debug('Stream frameError: ', err);
-  });
-
-  stream.on('ready', () => {
-    debug('Stream is ready.');
-  });
-
-  stream.on('timeout', () => {
-    debug('Stream is timeout.');
-  });
-
-  stream.on('trailers', (headers, flags) => {
-    debug(headers);
-  });
-
-  stream.on('wantTrailers', () => {
-    debug('Stream want trailers.');
-  });
 }
