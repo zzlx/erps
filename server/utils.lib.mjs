@@ -37,4 +37,5 @@ export { default as orList } from '../public/utils/orList.mjs';
 export { default as quotedOrList } from '../public/utils/quotedOrList.mjs';
 export { default as suggestionList } from '../public/utils/suggestionList.mjs';
 export { default as keyValMap } from '../public/utils/keyValMap.mjs';
+export { default as uuid } from '../public/utils/uuid.mjs';
 export { compile, parse, pathToRegexp } from '../public/utils/path-to-regexp.mjs';

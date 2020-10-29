@@ -31,7 +31,6 @@ globalThis.env = isBrowser
  */
 
 (async function main () {
-  import('./ws.mjs'); // 载入ws
   if (isNode) globalThis.React = await import('react').then(m => m.default);
   const createStore = await import('./store.mjs').then(m => m.default);
   const App = await import('./containers/index.mjs').then(m => m.default);
@@ -59,6 +58,8 @@ globalThis.env = isBrowser
   // 前端程序执行环境配置
   if (isBrowser) browserRender(App(store)); // 浏览器客户端渲染
   if (isNode) nodeRender(store);  // Node环境下渲染
+
+  import('./ws.mjs'); // 测试websocket
 })().catch(console.error)
 
 /**

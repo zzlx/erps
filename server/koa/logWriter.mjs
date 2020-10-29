@@ -46,7 +46,10 @@ export default function logWriter (file, log) {
   const nowSN = sn(new Date());
 
   if (fileSN !== nowSN) {
-    const bakFile = path.join(path.dirname(file), fileSN + "_" + path.basename(file));
+    const dirname = path.dirname(file);
+    const extname = path.extname(file);
+    const basename = path.basename(file, extname);
+    const bakFile = path.join(dirname, basename + "_" + fileSN + extname);
     fs.copyFileSync(file, bakFile);
     fs.unlinkSync(file);
     getWS(file).write(header);

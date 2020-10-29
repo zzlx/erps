@@ -101,21 +101,6 @@ export default class Context {
     return Boolean(this[RES_HEADERS][field.toLowerCase()]);
   }
 
-
-  /**
-   * Return httpVersion
-   *
-   * @api public
-   */
-
-  get httpVersion () {
-    if (this.stream.closed) {
-      return this.app.protocol === 'http2' ? '2' : '1';
-    }
-
-    return this.stream.session.alpnProtocol === 'h2' ? '2' : '1';
-  }
-
   /**
    * Return the request socket.
    *
@@ -166,16 +151,13 @@ export default class Context {
    */
 
   set status(code) {
-    const sKey = this.httpVersion == 2 
-      ? HTTP2_HEADER.STATUS 
-      : 'status';
     const sCode = Number.parseInt(code);
 
     if (HTTP_STATUS_CODES[sCode] == null) {
       this.throw(500, `Settings status ${code} is invalid.`);
     }
 
-    this.set(sKey, sCode);
+    this.set(HTTP2_HEADER.STATUS, sCode);
   }
 
   /**

@@ -24,32 +24,24 @@
  */
 
 const url = new URL(import.meta.url);
-const protocol = url.protocol === 'https:' ? 'wss' : 'ws';
-const webSocket = new WebSocket(`${protocol}://${url.host}/api/socket`);
+const ws = new WebSocket(`wss://${url.host}/api/socket`);
 
-webSocket.onopen = function (e) {
-  console.log("Connection open ...");
-  this.send("Hello WebSockets!");
+ws.onopen = (event) => {
+  console.log('webSocket is connected.');
+  this.send("from client: Hello!");
 };
 
-webSocket.onerror = function (error) {
-  console.log(error);
-}
-
-webSocket.onmessage = function (e) {
-  console.log('Receiving a message');
-
-  if(typeof e.data === 'string') {
-    console.log("Received data string");
-  }
+ws.onmessage = (e) => {
+  if(typeof e.data === 'string') console.log("from server: ", e.data);
 
   if(e.data instanceof ArrayBuffer){
     const buffer = e.data;
     console.log("Received arraybuffer");
   }
-  webSocket.close();
-};
 
-webSocket.onclose = function (e) {
-  console.log("Connection closed.");
-};
+  // 不主动关闭ws连接
+  //wsc.close();
+}
+
+ws.onclose = () => console.warn("Connection is closed.");
+ws.onerror = error => console.error(error);

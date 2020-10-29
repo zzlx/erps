@@ -13,7 +13,6 @@ import cp from 'child_process';
 import EventEmitter from 'events'; 
 import util from 'util';
 
-import createServer from './createServer.mjs';
 import { inspect } from '../utils.lib.mjs';
 import Context from './Context.mjs';
 import compose from './compose.mjs';
@@ -39,6 +38,8 @@ export default class Application extends EventEmitter {
     // 中间件栈
     this.middlewares = [];
     this.tasksBeforeListen = [];
+
+    this.server = opts.server;
   }
 
   /**
@@ -47,9 +48,10 @@ export default class Application extends EventEmitter {
    */
 
   listen () {
+    assert(this.server, 'server is not avilable.');
+
     // 执行完配置任务后再开启服务器监听
     Promise.all(this.tasksBeforeListen.map(task => cp.spawn(task))).then(() => {
-      this.server = createServer(this.opts);
       this.server.on('stream', this.callback());
       this.server.listen(...arguments);
     });

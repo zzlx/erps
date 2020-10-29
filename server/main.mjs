@@ -18,10 +18,10 @@ import util from 'util';
 import Remarkable from 'remarkable';
 import {inspect} from './utils.lib.mjs';
 
-//import createStore from '../public/store/createStore.mjs';
 import settings from './config/settings.mjs';
 import Koa from './koa/Application.mjs';
 import * as M from './koa/middlewares/index.mjs';
+import server from './koa/https.mjs';
 //import { routes as router } from './routes.mjs';
 import { HTMLTemplate } from './koa/middlewares/serverSideRendering.mjs';
 
@@ -31,10 +31,8 @@ const paths = settings.paths;
 
 // 初始化服务器程序
 const app = new Koa({
-  keys: ['enpseC5vcmc='],
-  key: settings.privateKey,
-  cert: settings.cert,
-  passphrase: settings.passphrase,
+  //keys: ['enpseC5vcmc='],
+  server: server,
 });
 
 // 服务启动前执行的任务:
