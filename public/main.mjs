@@ -7,6 +7,8 @@
  * > ##### 注意:
  * > 此目录下源码模块在部署前端程序时会暴露于网络，请勿存放敏感数据.
  *
+ * * webSocket支持
+ *
  * *****************************************************************************
  */
 
@@ -16,18 +18,15 @@ const baseURI = dirname(url.href);
 const isBrowser = globalThis.document && typeof document === 'object';
 const isNative = false;
 const isNode = globalThis.process && typeof process.cwd === 'function';
+const ua = isBrowser ? window.navigator.userAgent : null;
 if (!(isBrowser ^ isNode)) throw new Error('Environment detect error');
 
 // 前端程序执行环境配置
-globalThis.env = isBrowser 
-  ? url.searchParams.get('env') || 'production' 
-  : isNode 
-    ? process.env.NODE_ENV || 'production' 
-    : 'production';
+if (isBrowser) globalThis.env = url.searchParams.get('env') || 'production';
+if (isNode) globalThis.env = process.env.NODE_ENV || 'production';
 
 /**
- * 前端主程序
- *
+ * 主控制程序
  */
 
 (async function main () {
@@ -59,7 +58,8 @@ globalThis.env = isBrowser
   if (isBrowser) browserRender(App(store)); // 浏览器客户端渲染
   if (isNode) nodeRender(store);  // Node环境下渲染
 
-  import('./ws.mjs'); // 测试websocket
+  getWS(); // 开启websocket
+
 })().catch(console.error)
 
 /**
@@ -80,7 +80,6 @@ function browserRender (element) {
 
 /**
  * Native app render method
- *
  */
 
 function nativeRender () {
@@ -89,8 +88,6 @@ function nativeRender () {
 
 /**
  * Node render method
- *
- * Node渲染时需要传入路径信息
  */
 
 function nodeRender () {
@@ -98,7 +95,7 @@ function nodeRender () {
 }
 
 /**
- * 渲染回调函数
+ * 渲染回调
  */
 
 function renderCallback () {
@@ -121,4 +118,31 @@ function getElementById (id) {
   }
 
   return element;
+}
+
+/**
+ * web socket client
+ */
+
+function getWS () {
+  // 
+  const ws = new WebSocket(`wss://${url.host}/api/socket`);
+
+  ws.onopen = (event) => {
+    console.log('webSocket is connected.');
+    this.send("Client: Hello!");
+  };
+
+  ws.onmessage = (e) => {
+    if(typeof e.data === 'string') console.log("from server: ", e.data);
+
+    if(e.data instanceof ArrayBuffer){
+      const buffer = e.data;
+      console.log("Received arraybuffer");
+    }
+  }
+
+  ws.onclose = () => console.warn("Connection is closed.");
+
+  return ws;
 }

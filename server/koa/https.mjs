@@ -4,6 +4,8 @@
  * Http server
  *
  *
+ *
+ *
  * *****************************************************************************
  */
 
@@ -27,11 +29,8 @@ const server = http2.createSecureServer({
   //ca: [fs.readFileSync('client-cert.pem')],
   key: settings.privateKey,
   cert: settings.cert,
-  passphrase: settings.passphrase,
-
-  // @todo: 客户端证书支持
-  // 默认false,设置后需要客户端提供cert
-  //requestCert: true, 
+  passphrase: settings.passphrase, // 证书passphrase
+  requestCert: settings.requestCert ? true : false, // 客户端证书支持
   
   //sigalgs: 
   //ciphers: 
@@ -41,12 +40,10 @@ const server = http2.createSecureServer({
   //origins: [],
   //privateKeyEngine
   //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-  handshakeTimeout: 120000, // milliseconds
+  handshakeTimeout: 120 * 1000, // milliseconds
   ticketKeys: crypto.randomBytes(48), 
   sessionTimeout: 300, // seconds
 });
-
-export const wss = new WebSocket(server); // 应用ws
 
 // handle tls server events:
 
@@ -64,13 +61,11 @@ server.on('connection', socket => {
 // as it allows captured TLS traffic to be decrypted. 
 // It may be emitted multiple times for each socket.
 server.on('keylog', (line, tlsSocket) => {
-  debug('keylog event: %o', {
-    address: tlsSocket.remoteAddress,
-    line: line.toString(),
-  });
+  debug('keylog:', line.toString());
   logWriter(path.join(paths.LOG_PATH, 'ssl-keys.log'), line.toString());
 });
 
+/*
 // The 'newSession' event is emitted upon creation of a new TLS session. 
 // This may be used to store sessions in external storage. 
 // The data should be provided to the 'resumeSession' callback.
@@ -79,6 +74,7 @@ server.on('newSession', (sessionId, sessionData, cb) => {
   sessionStore.set(sessionId.toString('hex'), sessionData);
   cb();
 });
+*/
 
 // event is emitted when the client sends a certificate status request. 
 server.on('OCSPRequest', (certificate, issuer, cb) => {
@@ -87,6 +83,7 @@ server.on('OCSPRequest', (certificate, issuer, cb) => {
   cb(null, null);
 });
 
+/*
 // The 'resumeSession' event is emitted 
 // when the client requests to resume a previous TLS session. 
 server.on('resumeSession', (id, cb) => {
@@ -100,19 +97,12 @@ server.on('resumeSession', (id, cb) => {
     cb(null, null);
   }
 });
+*/
 
 // he 'secureConnection' event is emitted after the handshaking process 
 // for a new connection has successfully completed. 
 server.on('secureConnection', tlsSocket => {
   debug('secureConnection');
-  tlsSocket.alpnProtocol !== 'h2' && debug('tlsSocket: %o', {
-    authorized: tlsSocket.authorized,
-    alpnProtocol: tlsSocket.alpnProtocol,
-    servername: tlsSocket.servername,
-    ticket: tlsSocket.getTLSTicket(),
-    //certificate: tlsSocket.getCertificate(),
-    //cipher: tlsSocket.getCipher(),
-  });
 });
 
 // event is emitted when an error occurs before a secure connection is established.
@@ -126,10 +116,6 @@ server.on('unknownProtocol', (error) => {
   debug('unknownProtocol');
 });
 
-server.on('stream', (stream, headers) => {
-
-});
-
 server.on('error', (err) => {
   debug(err);
 
@@ -141,5 +127,7 @@ server.on('error', (err) => {
 server.on('close', () => {
   console.log('server is closed');
 });
+
+export const wss = new WebSocket(server); // 应用ws
 
 export default server;

@@ -28,11 +28,13 @@ export const RES_HEADERS = Symbol('context#response-headers');
 // 遍历赋值
 for (const key of Object.keys(http2.constants)) {
   if (key.substr(0, 12) === 'HTTP2_HEADER') {
-    HTTP2_HEADER[key.substr(13)] = http2.constants[key]; continue;
+    HTTP2_HEADER[key.substr(13)] = http2.constants[key]; 
+    continue;
   }
 
   if (key.substr(0, 12) === 'HTTP2_METHOD') {
-    HTTP2_METHOD.push(http2.constants[key]); continue;
+    HTTP2_METHOD.push(http2.constants[key]); 
+    continue;
   }
 
   if (key.substr(0, 11) === 'HTTP_STATUS') {

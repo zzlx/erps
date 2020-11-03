@@ -87,6 +87,11 @@ app.use(M.serverSideRendering({
   ],
 }));
 
+'development' === app.env && app.use((ctx, next) => {
+  ctx.push('/assets/img/classic1.gif');
+  next();
+});
+
 // 启用内容压缩支持
 app.use(M.compress({threshold: app.compressThreshold}));             
 

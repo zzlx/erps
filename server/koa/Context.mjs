@@ -7,8 +7,6 @@
  */
 
 import net from 'net';
-
-// @todo: 本地化第三方模块
 import accepts from 'accepts';
 //import contentType from 'content-type';
 
@@ -849,4 +847,17 @@ Context.prototype.set = function (field, val) {
 
 Context.prototype.throw = function (...args) {
   throw new HttpError(...args);
+}
+
+/**
+ * push stream
+ *
+ */
+
+Context.prototype.push = function (pathname) {
+  this.stream.pushStream({':path': pathname }, (err, pushStream, headers) => {
+    if (err) this.throw(err);
+    pushStream.respond({ ':status': 200 });
+    pushStream.end('some pushed data');
+  });
 }

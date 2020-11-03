@@ -21,6 +21,7 @@ fs.mkdirSync(destPath, {recursive: true});
 // 执行拷贝任务
 Promise.all([ 
   // source files
+  path.join('@babel', 'polyfill', 'dist', 'polyfill.min.js'),
   path.join('react', 'umd', 'react.development.js'),
   path.join('react', 'umd', 'react.production.min.js'),
   path.join('react-dom', 'umd', 'react-dom.development.js'),

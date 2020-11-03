@@ -12,6 +12,7 @@
     "stop": "bin/erps.mjs --stop"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
     "chart": "^0.1.2",
     "d3": "^5.9.7",
     "gray-matter": "^4.0.2",
