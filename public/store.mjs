@@ -1,167 +1,37 @@
-import assert, { isPlainObject } from './utils/assert.mjs';
-import find from './utils/find.mjs';
-import { types } from './actions/index.mjs';
-import * as reducers from './reducers/index.mjs';
-
 /**
  * *****************************************************************************
  * 
- * 前端状态管理器
+ * Store creator
+ *
+ * @param {object} preload state
+ * @param {object} store
  *
  * *****************************************************************************
  */
 
-export class Store {
-  constructor (stateProp) {
-    this.currentState = stateProp;
-    this.currentReducer = combineReducers(reducers);
-    this.currentListeners = [];
-    this.nextListeners = [];
-    this.isDispatching = false;
-    this.types = types;
+import assert, { isPlainObject } from './utils/assert.mjs';
+import find from './utils/find.mjs';
+import * as reducers from './reducers/index.mjs';
 
-    this.dispatch = this.dispatch.bind(this);
-    this.dispatch({ type: 'INIT' }); // 初始化state
-  }
+export default state => new Proxy(new StateHandler(state), {
+  get: function (target, property, receiver) {
+    if ('dispatch' === property) {
+      const middlewares = [
+        crashReporter, 
+        thunk,
+        promise,
+        timeoutScheduler,
+        normalization,
+        'development' === globalThis.env && logger,
+      ].filter(Boolean);
 
-  getState() {
-    assert(!this.isDispatching,
-      'You may not call store.getState() while the reducer is executing. ' + 
-      'The reducer has already received the state as an argument. ' + 
-      'Pass it down from the top reducer instead of reading it from the store.'
-    );
-
-    // 应用find工具提供的查找逻辑
-    return find.apply(this.currentState, arguments);
-  }
-
-  subscribe(listener) {
-    assert(typeof listener === 'function', 'Expected the listener to be a function.');
-    assert(!this.isDispatching, 
-      'Can not call store.subscribe() while the reducer is executing.');
-
-    let isSubscribed = true;
-
-    this.ensureCanMutateNextListeners();
-
-    this.nextListeners.push(listener);
-
-    // unsubscribe
-    return () => {
-      if (!this.isSubscribed) { return; }
-      assert(!this.isDispatching, 
-          'You may not unsubscribe a listener while the reducer is executing.');
-      this.isSubscribed = false;
-      this.ensureCanMutateNextListeners();
-      const index = this.nextListeners.indexOf(listener);
-      this.nextListeners.splice(index, 1);
-    };
-  }
-
-  dispatch (action) {
-    // check action
-    assert(isPlainObject(action), 
-      'Actions must be plain objects. Use custom middleware for async actions.');
-    assert(this.types.has(action.type), `Undefined action type: "${action.type}".`);
-    assert(!this.isDispatching, 'Reducers may not dispatch actions while another one.');
-
-    try {
-      this.isDispatching = true;
-      this.currentState = this.currentReducer(this.currentState, action); 
-    } catch (e) { 
-      console.error(e) 
-    } finally {
-      this.isDispatching = false;
-    } 
-
-    const listeners = this.currentListeners = this.nextListeners;
-    for (let listener of listeners) listener();
-
-    return action;
-  }
-
-  /**
-   * Replaces the reducer currently used by the store to calculate the state.
-   *
-   * You might need this if your app implements code splitting and you want to
-   * load some of the reducers dynamically. 
-   * You might also need this if you implement a hot reloading mechanism for Redux.
-   *
-   * @param {Function} nextReducer The reducer for the store to use instead.
-   * @returns {void}
-   */
-
-  replaceReducer(nextReducer) {
-    if (typeof nextReducer !== 'function') {
-      throw new Error('Expected the nextReducer to be a function.');
+      const chain = middlewares.map(m => m(receiver));
+      return compose.apply(null, chain)(target.dispatch);
     }
 
-    this.currentReducer = nextReducer;
-    this.dispatch({ type: 'REPLACE_REDUCER' });
+    return Reflect.get(target, property, receiver);
   }
-
-  ensureCanMutateNextListeners() {
-    if (this.nextListeners === this.currentListeners) {
-      this.nextListeners = this.currentListeners.slice();
-    }
-  }
-}
-
-/**
- * Composes single-argument functions from right to left. 
- *
- * The rightmost function can take multiple arguments 
- * as it provides the signature for the resulting composite function.
- *
- * For example:
- * compose(f, g, h) is identical to doing (...args) => f(g(h(...args))).
- *
- * @param {function} funcs The functions to compose.
- * @returns {Function} A function obtained by composing the argument functions from right to left. 
- */
-
-export function compose() {
-  const functions = Array.prototype.slice.call(arguments)
-
-  for (let fn of functions) {
-    if (typeof fn !== 'function') {
-      throw new TypeError('Must be compose of functions.');
-    }
-  }
-
-  return functions.reduce((a, b) => (...args) => a(b(...args)));
-}
-
-/**
- * combine reduces
- */
-
-export function combineReducers (reducers) {
-
-  return function combined (state = Object.create(null), action) {
-    let hasChanged = false;
-    const newState = {};
-
-    for (const key of Object.keys(reducers)) {
-      const reducer = reducers[key];
-      assert(typeof reducer === 'function', `${key} is not a function!`);
-      const previousStateForKey = state[key];
-      const newStateForKey = reducer(previousStateForKey, action);
-      newState[key] = newStateForKey;
-      hasChanged = hasChanged || newStateForKey !== previousStateForKey;
-    }
-
-    return hasChanged ? newState : state;
-  }
-}
-
-/**
- * *****************************************************************************
- *
- * Redux middlewares
- *
- * *****************************************************************************
- */
+});
 
 /**
  * crashReporter middleware
@@ -281,29 +151,147 @@ const normalization = store => next => action => {
 }
 
 /**
- * *****************************************************************************
+ * Composes single-argument functions from right to left. 
  *
- * create store
+ * The rightmost function can take multiple arguments 
+ * as it provides the signature for the resulting composite function.
  *
- * *****************************************************************************
+ * For example:
+ * compose(f, g, h) is identical to doing (...args) => f(g(h(...args))).
+ *
+ * @param {function} funcs The functions to compose.
+ * @returns {Function} A function obtained by composing the argument functions from right to left. 
  */
 
-export default preloadState => new Proxy(new Store(preloadState), {
-  get: function (target, property, receiver) {
-    if ('dispatch' === property) {
-      const middlewares = [
-        crashReporter, 
-        thunk,
-        promise,
-        timeoutScheduler,
-        normalization,
-        globalThis.env === 'development' && logger,
-      ].filter(Boolean);
+export function compose() {
+  const functions = Array.prototype.slice.call(arguments)
 
-      const chain = middlewares.map(m => m(receiver));
-      return compose.apply(null, chain)(target.dispatch);
+  for (let fn of functions) {
+    if (typeof fn !== 'function') {
+      throw new TypeError('Must be compose of functions.');
+    }
+  }
+
+  return functions.reduce((a, b) => (...args) => a(b(...args)));
+}
+
+/**
+ * combine reduces
+ */
+
+export function combineReducers (reducers) {
+
+  return function combined (state = Object.create(null), action) {
+    let hasChanged = false;
+    const newState = {};
+
+    for (const key of Object.keys(reducers)) {
+      const reducer = reducers[key];
+      assert(typeof reducer === 'function', `${key} is not a function!`);
+      const previousStateForKey = state[key];
+      const newStateForKey = reducer(previousStateForKey, action);
+      newState[key] = newStateForKey;
+      hasChanged = hasChanged || newStateForKey !== previousStateForKey;
     }
 
-    return Reflect.get(target, property, receiver);
+    return hasChanged ? newState : state;
   }
-});
+}
+
+/**
+ * 程序状态管理器
+ */
+
+class StateHandler {
+  constructor (state) {
+    this.currentState = state;
+    this.currentReducer = combineReducers(reducers);
+    this.currentListeners = [];
+    this.nextListeners = [];
+    this.isDispatching = false;
+
+    this.dispatch = this.dispatch.bind(this);
+    this.dispatch({ type: 'INIT' }); // 初始化state
+  }
+
+  getState() {
+    assert(!this.isDispatching,
+      'You may not call store.getState() while the reducer is executing. ' + 
+      'The reducer has already received the state as an argument. ' + 
+      'Pass it down from the top reducer instead of reading it from the store.'
+    );
+
+    // 应用find工具提供的查找逻辑
+    return find.apply(this.currentState, arguments);
+  }
+
+  subscribe(listener) {
+    assert(typeof listener === 'function', 'Expected the listener to be a function.');
+    assert(!this.isDispatching, 
+      'Can not call store.subscribe() while the reducer is executing.');
+
+    let isSubscribed = true;
+
+    this.ensureCanMutateNextListeners();
+
+    this.nextListeners.push(listener);
+
+    // unsubscribe
+    return () => {
+      if (!this.isSubscribed) { return; }
+      assert(!this.isDispatching, 
+          'You may not unsubscribe a listener while the reducer is executing.');
+      this.isSubscribed = false;
+      this.ensureCanMutateNextListeners();
+      const index = this.nextListeners.indexOf(listener);
+      this.nextListeners.splice(index, 1);
+    };
+  }
+
+  dispatch (action) {
+    // check action
+    assert(isPlainObject(action), 
+      'Actions must be plain objects. Use custom middleware for async actions.');
+    assert(!this.isDispatching, 'Reducers may not dispatch actions while another one.');
+
+    try {
+      this.isDispatching = true;
+      this.currentState = this.currentReducer(this.currentState, action); 
+    } catch (e) { 
+      console.error(e) 
+    } finally {
+      this.isDispatching = false;
+    } 
+
+    const listeners = this.currentListeners = this.nextListeners;
+    for (let listener of listeners) listener();
+
+    return action;
+  }
+
+  /**
+   * Replaces the reducer currently used by the store to calculate the state.
+   *
+   * You might need this if your app implements code splitting and you want to
+   * load some of the reducers dynamically. 
+   * You might also need this if you implement a hot reloading mechanism for Redux.
+   *
+   * @param {Function} nextReducer The reducer for the store to use instead.
+   * @returns {void}
+   */
+
+  replaceReducer(nextReducer) {
+    if (typeof nextReducer !== 'function') {
+      throw new Error('Expected the nextReducer to be a function.');
+    }
+
+    this.currentReducer = nextReducer;
+    this.dispatch({ type: 'REPLACE_REDUCER' });
+  }
+
+  ensureCanMutateNextListeners() {
+    if (this.nextListeners === this.currentListeners) {
+      this.nextListeners = this.currentListeners.slice();
+    }
+  }
+}

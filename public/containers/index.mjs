@@ -49,6 +49,3 @@ export default function App (store) {
   const suspense = React.createElement(Suspense, null, switcher);
   return React.createElement(Provider, { store }, suspense);
 }
-
-export function getInitialState () {
-}

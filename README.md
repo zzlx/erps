@@ -31,3 +31,6 @@ npm run start
 npm run stop
 ```
 
+## 开发帮助
+
+* 模块输出约定: index.mjs模块使用export方法输出, 不提供default模块

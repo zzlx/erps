@@ -21,7 +21,7 @@ import {inspect} from './utils.lib.mjs';
 import settings from './config/settings.mjs';
 import Koa from './koa/Application.mjs';
 import * as M from './koa/middlewares/index.mjs';
-import server from './koa/https.mjs';
+import server from './koa/http2-server.mjs';
 //import { routes as router } from './routes.mjs';
 import { HTMLTemplate } from './koa/middlewares/serverSideRendering.mjs';
 
@@ -82,7 +82,7 @@ app.use(M.serverSideRendering({
     //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
     { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
     { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/assets/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
+    { src: `/assets/index.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
     { src: "/assets/noFallback.js", nomodule: true},
   ],
 }));
