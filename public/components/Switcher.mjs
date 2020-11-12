@@ -13,9 +13,9 @@ import matchPath from '../utils/matchPath.mjs';
 
 export default class Switch extends React.Component {
   render () {
-    const location = this.props.location 
-      ? this.props.location 
-      : { pathname: window.location.pathname };
+    const profiles = this.context.store.getState({profiles: true});
+    const location = this.props.location || profiles.location; 
+    console.log(profiles);
 
     let element, match;
 

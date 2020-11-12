@@ -8,6 +8,9 @@
  * 💐 动态路由服务
  * 👏 API路由服务
  *
+ * @TODOS:
+ * 1. 读取log/request.log时,readStream无法关闭
+ *
  * *****************************************************************************
  */
 
@@ -16,14 +19,11 @@ import path from 'path';
 import util from 'util';
 
 import Remarkable from 'remarkable';
-import {inspect} from './utils.lib.mjs';
-
-import settings from './config/settings.mjs';
+import settings from './settings.mjs';
 import Koa from './koa/Application.mjs';
 import * as M from './koa/middlewares/index.mjs';
-import server from './koa/http2-server.mjs';
+import server from './http2-server.mjs';
 //import { routes as router } from './routes.mjs';
-import { HTMLTemplate } from './koa/middlewares/serverSideRendering.mjs';
 
 process.title = 'erps.httpd'; // 设置进程名称
 const debug = util.debuglog('debug:main.mjs');
@@ -38,62 +38,36 @@ const app = new Koa({
 // 服务启动前执行的任务:
 // 准备前端项目的依赖文件
 app.tasksBeforeListen = [
-  path.join(paths.TASKS, 'copy-umd-to-public.mjs'),
-  path.join(paths.TASKS, 'css-render.mjs'),
+  path.join(paths.BIN, 'copy-umd-to-public.mjs'),
+  path.join(paths.BIN, 'css-render.mjs'),
 ];
 
 // 配置服务器功能
-app.use(M.error(paths.LOG_PATH));  // 记录中间件错误
-app.use(M.logger(paths.LOG_PATH));  // 记录访问日志
-app.env === 'development' && 
-app.use(M.xResponse(settings));    // 响应时间记录
-app.use(M.cors());                 // 跨域访问支持
-app.use(M.cookies());              // 全局cookie支持
+app.use(M.error(paths.LOG_PATH)); // 记录中间件错误
+app.use(M.logger(paths.LOG_PATH)); // 记录访问日志
+app.env === 'development' && app.use(M.xResponse(settings)); // 响应时间记录
+app.use(M.cors()); // 跨域访问支持
+app.use(M.cookies()); // 全局cookie支持
 
 // @TODO: 内存缓存服务
 
-// 静态资源服务
+// 静态资源服务配置
 app.use(M.statics({ root: paths.WWW_PATH, directoryIndex: 'index.html' }));
 app.use(M.statics({ root: paths.PUBLIC, prefix: '/assets', }));
 app.use(M.statics({ root: paths.DOCS, prefix: '/docs', 
   directoryIndex: 'README.md' 
 }));
 
-'development' === app.env && 
-app.use(M.statics({ root: paths.LOG_PATH, prefix: '/log' }));
-
-// API服务
-app.use(async (ctx, next) => {
-  if (!/^\/api/.test(ctx.pathname)) return next();
-  const apiFile = path.join(paths.SERVER, 'pages', path.relative('/', ctx.pathname) + '.mjs');
-
-  if (fs.existsSync(apiFile)) {
-    const api = await import(apiFile).then(m => m.default);
-    await api.call(ctx, ctx);
-    return next();
-  }
-
-  return next();
-});
-
-app.use(M.serverSideRendering({
-  styles: [ "/assets/css/styles.css" ],
-  scripts: [
-    //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
-    { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/assets/index.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
-    { src: "/assets/noFallback.js", nomodule: true},
-  ],
+// @TODO: 读取request.log时存在错误
+'development' === app.env && app.use(M.statics({ root: paths.LOG_PATH, 
+  prefix: '/log' 
 }));
 
-'development' === app.env && app.use((ctx, next) => {
-  ctx.push('/assets/img/classic1.gif');
-  next();
-});
+// pages目录路由配置
+app.use(M.dynamics({ path: paths.PAGES }));
 
-// 启用内容压缩支持
-app.use(M.compress({threshold: app.compressThreshold}));             
+// 启用内容压缩
+//app.use(M.compress({threshold: app.compressThreshold}));             
 
 app.listen({
   ipv6Only: false, // 是否仅开启IPV6

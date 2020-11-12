@@ -1,48 +1,16 @@
 /**
  * *****************************************************************************
  *
- * 服务器渲染中间件
- * ===============
- *
- * # ReactDOMServer API
- *
- * * renderToString(element)
- * * renderToStaticMarkup(element)
- * * renderToNodeStream(element)
- * * renderToStaticNodeStream(element)
+ * HTML模板
  *
  * *****************************************************************************
  */
 
-import ReactDOMServer from 'react-dom/server.js'
-import path from 'path';
-
-export default function serverSideRender (opts = {}) {
-
-  return function serverSideRenderMiddleware(ctx, next) {
-
-    // 转发有扩展名的路径至下一中间件
-    if (path.extname(ctx.pathname) !== '') return next();
-    if (ctx.body != null) return next();
-
-    const ua = ctx.get('user-agent');
-    const isIE = /MSIE/.test(ua);
-
-    // @todo: 利用客户端路由进行匹配渲染,以优化SEO
-
-    const options = JSON.parse(JSON.stringify(opts));
-    if (isIE) options.scripts.unshift({ src: '/assets/js/polyfill.min.js'});
-
-    // template
-    const html = new HTMLTemplate(options);
-    ctx.type = 'html';
-    ctx.body = html.render();
-
-    return next();
-  }
+export default function (opts) {
+  return new HTMLTemplate(opts);
 }
 
-export class HTMLTemplate {
+class HTMLTemplate {
   constructor(props) {
     this.state = Object.assign({}, {
       title: 'Untitled',

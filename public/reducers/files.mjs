@@ -2,6 +2,6 @@
  * files
  */
 
-export default (state = {}, action) => {
+export default (state = [], action) => {
   return state;
 }

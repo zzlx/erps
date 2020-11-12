@@ -1,7 +1,9 @@
 /**
  * *****************************************************************************
  *
- * Route 路由组件
+ * Route 
+ *
+ * 路由组件, 支持重定向
  *
  * @param {object} props
  * @return {object} element
@@ -9,6 +11,7 @@
  * *****************************************************************************
  */
 
+import Context from "./Context.mjs";
 import matchPath from '../utils/matchPath.mjs';
 import warning from '../utils/warning.mjs';
 
@@ -18,9 +21,7 @@ export default class Route extends React.Component {
 
     const match = this.props.match
       ? this.props.match
-      : this.props.path
-        ? matchPath(location.pathname, this.props)
-        : false;
+      : this.props.path ? matchPath(location.pathname, this.props) : false;
 
     if (!match) return null; // 未匹配到路由
 
@@ -95,3 +96,5 @@ export default class Route extends React.Component {
     );
   }
 }
+
+Route.contextType = Context;

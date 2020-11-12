@@ -113,7 +113,7 @@ export default function statics (options = {}) {
     }); 
 
     ctx.length = stats.size;
-    ctx.body = fs.createReadStream(url);
+    ctx.body = fs.createReadStream(url, { emitClose: true, autoClose: true,});
 
     return next();
   }

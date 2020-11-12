@@ -134,14 +134,21 @@ export default class Application extends EventEmitter {
 
 function respond (ctx) {
   if (ctx.respond === false) return ctx.stream.end(); // allow bypassing respond
+
+  // 设置status为默认值为404
   if (null == ctx.status) ctx.status = 404; // set 404 status
-  if (null == ctx.body) ctx.body = ctx.message; // set string message
+
+  if (null == ctx.body) {
+    ctx.body = ctx.status + ": " + ctx.message; // set string message
+  }
 
   // response headers
-  ctx.headersSent === false && ctx.stream.respond(ctx.response.headers, {
-    endStream: HTTP_STATUS_EMPTY_CODES.includes(ctx.status) ? true : false, 
-    waitForTrailers: false, 
-  });
+  if (ctx.headersSent === false) {
+    ctx.stream.respond(ctx.response.headers, {
+      endStream: HTTP_STATUS_EMPTY_CODES.includes(ctx.status) ? true : false, 
+      waitForTrailers: false, 
+    });
+  }
 
   // respond contents
   if ('HEAD' === ctx.method)  return ctx.stream.end();

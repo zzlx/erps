@@ -2,16 +2,7 @@
  *
  */
 
-export default (state = {}, action) => {
-  const newState = {
-    todos: todos(state.todos, action),
-    visibilityFilter: visibilityFilter(state.visibilityFilter, action),
-  };
-
-  return newState;
-}
-
-function todos(state = [], action) {
+export default function todos(state = [], action) {
   if (action.error) return state;
   if (action.payload && action.payload.error) return state;
 
@@ -44,8 +35,4 @@ function todos(state = [], action) {
     default:
       return state;
   }
-}
-
-function visibilityFilter (state = 'SHOW_ALL', action) {
-  return state;
 }

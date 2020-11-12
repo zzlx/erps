@@ -3,7 +3,7 @@
  *
  * Http server
  *
- *
+ * HTTP2 protocol
  *
  *
  * *****************************************************************************
@@ -13,10 +13,10 @@ import assert from 'assert';
 import crypto from 'crypto';
 import http2 from 'http2';
 import path from 'path';
-import { inspect, } from '../utils.lib.mjs';
-import WebSocket from './WebSocket.mjs'
-import logWriter from './logWriter.mjs';
-import settings from '../config/settings.mjs';
+import WebSocket from './koa/WebSocket.mjs'
+import { inspect, } from './utils.lib.mjs';
+import logWriter from './utils/logWriter.mjs';
+import settings from './settings.mjs';
 import util from 'util';
 
 // 调试信息打印工具

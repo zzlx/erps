@@ -15,7 +15,7 @@
 import assert from 'assert';
 import fs from 'fs';
 import util from 'util';
-import { paths, appName } from './_paths.mjs';
+import { paths, appName } from './paths.mjs';
 import { envParser } from '../utils.lib.mjs';
 
 const debug = util.debuglog('debug:env.mjs');

@@ -6,16 +6,11 @@
  * *****************************************************************************
  */
 
-const initialState = {
-  api_address: null,
-  themes: ['primary', 'secondary', 'success', 'info', 'warning', 'light', 'dark'],
-  theme: 'primary',
-  userName: 'anonymous',
-  messages: [
-    { message: 'test'},
-    { message: 'test_2'},
-  ], 
-}
+const initialState = [
+  { name: 'themeList', value: ['primary', 'secondary', 'success', 'info', 'warning', 'light', 'dark'] },
+  { name: 'theme', value: 'default'},
+  { name: 'location', value: { pathname: '/' } },
+];
 
 export default function profiles (state = initialState, action) {
 

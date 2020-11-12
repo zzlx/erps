@@ -8,8 +8,7 @@
 
 import Context from '../components/Context.mjs';
 import Circular from '../components/Circular.mjs';
-import Footer from '../components/Footer.mjs';
-import Markdown from '../components/Markdown.mjs';
+import { Footer } from '../components/Layout.mjs';
 import Placeholder from '../components/Placeholder.mjs';
 import Picture from '../components/Picture.mjs';
 
@@ -26,7 +25,8 @@ export default class Login extends React.PureComponent {
     }, 'login');
 
     const circular = React.createElement(Circular, {size: "145"});
-    const footer_inner = React.createElement(Markdown, null,'Copyritht All rights reserved.');
+    const footer_inner = React.createElement('div', null,'Copyritht All rights reserved.');
+
     const footer = React.createElement(Footer, {
       className: 'mt-auto bg-gradient-default text-white',
       fluid: true,
@@ -46,4 +46,4 @@ export default class Login extends React.PureComponent {
   }
 }
 
-HomePage.contextType = Context;
+Login.contextType = Context;

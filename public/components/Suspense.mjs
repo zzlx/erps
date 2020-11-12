@@ -10,10 +10,17 @@
 
 import Spinner from './Spinner.mjs';
 
-export default function Suspense(props) {
+export default class Suspense extends React.PureComponent {
+  constructor(props) {
+    super();
+  }
 
-  return React.createElement(React.Suspense, {
-    fallback: React.createElement(Spinner, null, '加载中...'),
-    ...props,
-  });
+  render () {
+    const { fallback, children } = this.props;
+
+    return React.createElement(React.Suspense, {
+      fallback: React.createElement(Spinner, null, '加载中...'),
+      ...props,
+    });
+  }
 }

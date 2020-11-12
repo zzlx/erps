@@ -12,7 +12,7 @@ import Context from './Context.mjs';
 import { shallowEqual } from '../utils/assert.mjs';
 
 export default class Provider extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props);
     this.state = {
       store: props.store,
@@ -20,23 +20,23 @@ export default class Provider extends React.Component {
     }
   }
 
-  render() {
+  render () {
     return React.createElement(Context.Provider, {
       value: this.state,
       children: this.props.children,
     });
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this._isMounted = true;
     this.subscribe(); // 订阅store更新
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate (nextProps, nextState) {
     return true; // always update?
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate (prevProps, prevState, snapshot) {
     // update后若重置store，则重新订阅store更新
     if (this.props.store !== prevProps.store) {
       if (this.unsubscribe) this.unsubscribe();
@@ -44,12 +44,12 @@ export default class Provider extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     if (this.unsubscribe) this.unsubscribe();
     this._isMounted = false;
   }
 
-  subscribe() {
+  subscribe () {
     const store = this.props.store;
 
     this.unsubscribe = store.subscribe(() => {

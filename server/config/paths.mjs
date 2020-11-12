@@ -60,7 +60,7 @@ export const appName = packageJSON.name;
 export const appVersion = packageJSON.version;
 
 // 配置的目录路径
-paths.HOME_PATH = path.join(HOME, '.config', appName);
+paths.HOME_PATH = path.join(HOME, `.${appName}`);
 paths.DATA_PATH = path.join(paths.HOME_PATH, 'data');
 paths.LOG_PATH  = path.join(paths.HOME_PATH, 'log');
 paths.WWW_PATH  = path.join(paths.HOME_PATH, 'www');

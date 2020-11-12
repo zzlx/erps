@@ -19,7 +19,7 @@ export default ok;
 export function ok (condition, message) {
   if (condition) return;
   const err = new Error(message || `Assertion failed.`);
-  if (Error.captureStackTrace) Error.captureStackTrace(err, isOk);
+  if (Error.captureStackTrace) Error.captureStackTrace(err, ok);
   throw err;
 }
 

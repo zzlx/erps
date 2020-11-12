@@ -20,9 +20,9 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import './_env.mjs';
-import { paths, appName, appVersion } from './_paths.mjs';
-import system from './_system.mjs';
+import './config/env.mjs';
+import { paths, appName, appVersion } from './config/paths.mjs';
+import system from './config/system.mjs';
 
 // settings from config
 const sfc = fs.readFileSync(path.join(paths.HOME_PATH, 'settings.json'), 'utf8');

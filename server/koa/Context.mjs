@@ -3,6 +3,7 @@
  *
  * Context对象 
  *
+ *
  * *****************************************************************************
  */
 
@@ -137,8 +138,7 @@ export default class Context {
    */
 
   get status() {
-    const statusKey = HTTP2_HEADER.STATUS;
-    return this[RES_HEADERS][statusKey];
+    return this[RES_HEADERS][HTTP2_HEADER.STATUS];
   }
 
   /**
@@ -767,7 +767,9 @@ export default class Context {
     // stream
     if (val && typeof val.pipe === 'function') {
 
-      const handler = err => { this.throw(err); };
+      const handler = err => { 
+        this.throw(err); 
+      };
 
       if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
       if (null !== original && original != val) this.remove('Content-Length');

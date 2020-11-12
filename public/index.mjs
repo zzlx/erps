@@ -1,24 +1,61 @@
 /**
  * *****************************************************************************
  * 
- * 前端UI Application
- * ===================
+ * 前端主程序
+ * ===========
+ *
+ * 执行前端程序生成UI
  *
  * *****************************************************************************
  */
 
-// 前端程序执行环境配置
+import Store from './utils/ReduxStore.mjs';
+
+// 准备执行环境
 const __dirname = p => p.substr(0, p.lastIndexOf('/'));
-const isBrowser = globalThis.document && typeof document === 'object';
-const isNative = false;
-const isNode = globalThis.process && typeof process.cwd === 'function';
 const appURL = new URL(import.meta.url);
-const pathname = isBrowser ? location.pathname : '/'; // 获取当前pathname
+const store = new Store();
 
-// 执行前端程序
-if (isBrowser) browserRender(); // 浏览器客户端渲染
+if (globalThis.document && typeof document === 'object') {
+  globalThis.env = appURL.searchParams.get('env') || 'production';
+  browserRender(); // 浏览器客户端渲染
+}
 
-// 服务器端渲染使用export nodeRender模块
+/**
+ * 浏览器渲染
+ */
+
+async function browserRender () {
+  const App = await import('./ReactApp.mjs').then(m => m.default); 
+
+  // 创建程序状态管理器
+  const element = App(); 
+
+  // 存在服务端渲染等页面使用hydrate方法渲染
+  // 空的容器对象上使用render方法渲染
+  // 判断container是否存在服务端渲染内容
+  // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
+  let container = window.document.getElementById('root');
+
+  if (null == container) {
+    container = window.document.createElement('div');
+    container.id = id;
+    window.document.body.appendChild(container);
+  }
+
+  const ua = window.navigator.userAgent;
+  if (/MSIE/.test(ua)) return container.innerHTML = '请使用Edge浏览器继续访问!';
+
+  const renderCallback = () => {
+    console.groupCollapsed('系统提示:');
+    console.info('前端程序已就绪!');
+    console.groupEnd();
+    getWebSocket(); // 开启websocket
+  }
+
+  if (container.innerHTML) ReactDOM.hydrate(element, container, renderCallback);
+  else ReactDOM.render(element, container, renderCallback);  
+}
 
 /**
  * web socket client
@@ -66,61 +103,4 @@ function getWebWorker () {
         self.postMessage('Unknown command: ' + data.msg);
     };
   }, false);
-}
-
-/**
- * 服务器端渲染方法
- */
-
-export async function nodeRender () {
-  globalThis.env = process.env.NODE_ENV || 'production';
-  globalThis.React = await import('react').then(m => m.default);
-}
-
-/**
- * Native渲染方法
- */
-
-export function nativeRender () {
-
-}
-
-/**
- * 浏览器渲染方法
- */
-
-export async function browserRender () {
-  globalThis.env = appURL.searchParams.get('env') || 'production';
-  const storeCreator = await import('./store.mjs').then(m => m.default);
-
-  // 创建程序状态管理器
-  const store = storeCreator({location: { pathname: pathname }});
-
-  const App = await import('./containers/index.mjs').then(m => m.default);
-  const element = App(store); 
-
-  // 存在服务端渲染等页面使用hydrate方法渲染
-  // 空的容器对象上使用render方法渲染
-  // 判断container是否存在服务端渲染内容
-  // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
-  let container = window.document.getElementById('root');
-
-  if (null == container) {
-    container = window.document.createElement('div');
-    container.id = id;
-    window.document.body.appendChild(container);
-  }
-
-  const ua = window.navigator.userAgent;
-  if (/MSIE/.test(ua)) return container.innerHTML = '请使用Edge浏览器继续访问!';
-
-  const renderCallback = () => {
-    console.groupCollapsed('系统提示:');
-    console.info('前端程序已就绪!');
-    console.groupEnd();
-    getWebSocket(); // 开启websocket
-  }
-
-  if (container.innerHTML) ReactDOM.hydrate(element, container, renderCallback);
-  else ReactDOM.render(element, container, renderCallback);  
 }
