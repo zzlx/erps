@@ -7,14 +7,16 @@
     "install:vimrc": "ln -sf $(pwd)/src/vim/vimrc ~/.vimrc ",
     "commit": "bin/tools.sh --commit",
     "version": "bin/tools.sh --version",
-    "dev": "bin/auto-restart.mjs bin/erps.mjs --restart --paths=bin,pages,public,server,src",
-    "start": "bin/erps.mjs --start",
-    "stop": "bin/erps.mjs --stop"
+    "dev": "bin/auto-restart.mjs start.mjs --restart --paths=bin,pages,public,server,src,uis",
+    "start": "./start.mjs --start",
+    "stop": "./start.mjs --stop"
   },
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
     "chart": "^0.1.2",
     "d3": "^5.9.7",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
     "gray-matter": "^4.0.2",
     "htmlparser2": "^5.0.0",
     "jsbarcode": "^3.11.0",

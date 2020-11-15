@@ -1,12 +1,13 @@
 /**
  * *****************************************************************************
  * 
+ * Router
  * 
+ * 服务器端路由器
  *
  * *****************************************************************************
  */
 
-import util from 'util';
 import compose from './compose.mjs';
 import HttpError from './HttpError.mjs';
 import { 
@@ -17,9 +18,8 @@ import {
   pathToRegexp, 
 } from '../utils.lib.mjs';
 
-const debug = util.debuglog('debug:router.mjs');
-
 export default class Router {
+
   /**
    * constructor
    *
@@ -31,10 +31,13 @@ export default class Router {
 
   constructor (opts = {}) {
     this.opts = Object.assign({}, {
+      caseSensitive: true,
+      strict: true,
+      mergeParams: false,
       methods: [ 'GET', 'HEAD', 'OPTIONS', 'POST' ],
     }, opts);
 
-    this.methods = this.opts.methods;
+    this.methods = opts.methods || ['GET', 'HEAD', 'OPTIONS', 'POST' ];
     this.params = {};
     this.stack  = [];
 
@@ -70,7 +73,7 @@ export default class Router {
 
   param (param, middleware) {
     this.params[param] = middleware;
-    for (let route of this.stack) route.param(param, middleware);
+    for (const route of this.stack) route.param(param, middleware);
     return this;
   }
 
@@ -111,10 +114,11 @@ export default class Router {
    */
 
   route (routeName) {
-    for (let route of this.stack) {
+    for (const route of this.stack) {
       if (route.name && route.name === routeName) return route;
     }
 
+    // @todo: 创建一个新的route
     return false;
   }
 
@@ -122,7 +126,6 @@ export default class Router {
    * Generate URL for route. 
    *
    * Takes a route name and map of named params
-   *
    *
    * @param {string} name route name
    * @param {object} params url parameters

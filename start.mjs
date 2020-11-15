@@ -23,9 +23,9 @@ import util from 'util';
 import { 
   argvParser, 
   console, 
-} from '../server/utils.lib.mjs';
+} from './src/utils.lib.mjs';
 
-import settings from '../server/settings.mjs';
+import settings from './src/settings.mjs';
 
 const paths = settings.paths;
 

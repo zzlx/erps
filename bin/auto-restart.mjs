@@ -26,7 +26,7 @@ import {
   assert, 
   argvParser, 
   console 
-} from '../server/utils.lib.mjs';
+} from '../src/utils.lib.mjs';
 
 const ARGVS = Array.prototype.slice.call(process.argv, 3); // get argv array
 const params = argvParser(ARGVS);

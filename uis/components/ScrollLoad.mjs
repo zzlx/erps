@@ -14,8 +14,7 @@ export default function ScrollLoad(props) {
     "data-target": target,
     "data-offset": offset,
     onScroll: scrollHandler,
-    className: 'position-relative overflow-y-auto',
-    ...rests
+    className: 'position-relative overflow-y-auto', ...rests
   });
 }
 

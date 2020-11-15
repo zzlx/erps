@@ -4,7 +4,7 @@
  * SRS Middleware
  * ==============
  *
- * 静态资源服务(Static resource service,SRS), 提供静态资源服务器功能.
+ * 静态资源服务(Static resource service,SRS), 提供托管静态资源服务功能.
  *
  * ## 功能特性 
  *
@@ -12,25 +12,33 @@
  * * 支持服务缓存策略: ETag响应等
  * * 仅支持GET、HEAD两种请求方法
  *
+ * @param {string} root, The root directory from which to serve static assets.
+ * @param {object} options
+ *
  * *****************************************************************************
  */ 
 
+import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
 import { HTTP_STATUS } from '../constants.mjs';
 
-export default function statics (options = {}) {
+export default function statics (root, options = {}) {
+  assert('string' === typeof root, 'The root directory must be setting.');
+
   const opts = Object.assign({
+    dotfiles: 'ignore',
+    etag: true,
     directoryIndex: 'index.html',
+    extensions: [ 'html' ],
+    index: false,
     immutable: false,
     maxAge: 3600, // 默认缓存1小时(3600s)
     prefix: '/',
-    root: null,
     redirect: true, // 默认会重定向到索引文件
-  }, typeof options === 'string' ? { root: options } : options);
+  }, options);
 
-  if (opts.root == null) throw new Error('Static service`s root path is not set.');
   if ('string' === typeof opts.directoryIndex) {
     opts.directoryIndex = opts.directoryIndex.split(',');
   }
@@ -46,7 +54,7 @@ export default function statics (options = {}) {
 
     // Response static resource:
     const relativePath = path.relative(opts.prefix, ctx.pathname);
-    const absolutePath = path.resolve(opts.root, relativePath);
+    const absolutePath = path.resolve(root, relativePath);
     let url = absolutePath;
 
     if (path.extname(url) === '' && fs.existsSync(url)) {
@@ -57,7 +65,7 @@ export default function statics (options = {}) {
           url = indexPath; 
           // 重定向
           if (opts.redirect) {
-            const location = path.join(opts.prefix, path.relative(opts.root, url));
+            const location = path.join(opts.prefix, path.relative(root, url));
             ctx.set('location', location);
             ctx.status = HTTP_STATUS.TEMPORARY_REDIRECT; // 307
             return next();
@@ -98,18 +106,18 @@ export default function statics (options = {}) {
     } 
 
     const stats = fs.lstatSync(url);
-    const etag = `${stats.mtimeMs}`; 
+    const ETag = etag(stats); 
 
-    if (ctx.get('if-none-match') === etag) {
+    if (ctx.get('if-none-match') === ETag) {
       ctx.status = HTTP_STATUS.NOT_MODIFIED; // 304
       return next();
     }
 
     // 客户端缓存配置
+    opts.etag && ctx.set('etag', ETag);
     ctx.set({
-      'etag': etag, // 开启服务端资源验证逻辑
       //'last-modified': stats.mtime, // 开启浏览器端缓存
-      'cache-control': `max-age=${ctx.app.env === 'development' ? 0 : opts.maxAge}`,
+      //'cache-control': `max-age=${ctx.app.env === 'development' ? 0 : opts.maxAge}`,
     }); 
 
     ctx.length = stats.size;
@@ -117,4 +125,101 @@ export default function statics (options = {}) {
 
     return next();
   }
+}
+
+/**
+ * Generate a tag for a stat.
+ *
+ * @param {object} stat
+ * @return {string}
+ * @private
+ */
+
+function statTag (stat) {
+  const mtime = stat.mtime.getTime().toString(16);
+  const size = stat.size.toString(16);
+
+  return '"' + size + '-' + mtime + '"';
+}
+/**
+ * Determine if object is a Stats object.
+ *
+ * @param {object} obj
+ * @return {boolean}
+ * @api private
+ */
+
+function isstats (obj) {
+  // genuine fs.Stats
+  if (typeof Stats === 'function' && obj instanceof Stats) {
+    return true
+  }
+
+  // quack quack
+  return obj && typeof obj === 'object' &&
+    'ctime' in obj && toString.call(obj.ctime) === '[object Date]' &&
+    'mtime' in obj && toString.call(obj.mtime) === '[object Date]' &&
+    'ino' in obj && typeof obj.ino === 'number' &&
+    'size' in obj && typeof obj.size === 'number'
+}
+
+/**
+ * Generate an entity tag.
+ *
+ * @param {Buffer|string} entity
+ * @return {string}
+ * @private
+ */
+
+function entitytag (entity) {
+  if (entity.length === 0) {
+    // fast-path empty
+    return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"'
+  }
+
+  // compute hash of entity
+  var hash = crypto
+    .createHash('sha1')
+    .update(entity, 'utf8')
+    .digest('base64')
+    .substring(0, 27)
+
+  // compute length of entity
+  var len = typeof entity === 'string'
+    ? Buffer.byteLength(entity, 'utf8')
+    : entity.length
+
+  return '"' + len.toString(16) + '-' + hash + '"'
+}
+
+/**
+ * Create a simple ETag.
+ *
+ * @param {string|Buffer|Stats} entity
+ * @param {object} [options]
+ * @param {boolean} [options.weak]
+ * @return {String}
+ * @public
+ */
+
+function etag (entity, options) {
+  if (entity == null) {
+    throw new TypeError('argument entity is required')
+  }
+
+  // support fs.Stats object
+  const isStats = isstats(entity);
+  const weak = options && typeof options.weak === 'boolean'
+    ? options.weak
+    : isStats;
+
+  // validate argument
+  if (!isStats && typeof entity !== 'string' && !Buffer.isBuffer(entity)) {
+    throw new TypeError('argument entity must be string, Buffer, or fs.Stats')
+  }
+
+  // generate entity tag
+  const tag = isStats ? statTag(entity) : entitytag(entity);
+
+  return weak ? 'W/' + tag : tag
 }

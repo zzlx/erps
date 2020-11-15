@@ -15,8 +15,8 @@
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import { date } from '../../utils.lib.mjs';
-import logWriter from '../../utils/logWriter.mjs';
+import { date } from '../../../src/utils.lib.mjs';
+import logWriter from '../logWriter.mjs';
 
 const debug = util.debuglog('debug:logger.mjs');
 

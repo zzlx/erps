@@ -3,8 +3,6 @@
  *
  * Kernel of services
  *
- * 服务核心程序
- *
  * *****************************************************************************
  */
 
@@ -17,6 +15,8 @@ import { inspect } from '../utils.lib.mjs';
 import Context from './Context.mjs';
 import compose from './compose.mjs';
 import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
+import * as middlewares from './middlewares/index.mjs'; 
+import Router from './Router.mjs';
 
 // 调试信息打印工具
 const debug = util.debuglog('debug:application.mjs');
@@ -88,10 +88,10 @@ export default class Application extends EventEmitter {
 
     return (stream, headers, flags) => {
       const ctx = new Context();
-      ctx.app = this;
+      ctx.stream = stream;
       ctx.headers = headers;
       ctx.flags = flags;
-      ctx.stream = stream;
+      ctx.app = this;
 
       return this.handleRequest(ctx, fn);
     }
@@ -101,8 +101,8 @@ export default class Application extends EventEmitter {
    * Handle request
    */
 
-  handleRequest (ctx, fnMiddleware) {
-    fnMiddleware(ctx).then(() => respond(ctx)).catch(err => {
+  handleRequest (ctx, fn) {
+    fn(ctx).then(() => respond(ctx)).catch(err => {
       if (err.code === 'ENOENT') ctx.status = 404;
       else ctx.status = 500;
       if (ctx.app.env === 'development') ctx.body = err.stack;
@@ -157,4 +157,11 @@ function respond (ctx) {
   if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
   if (typeof ctx.body.pipe === 'function') return ctx.body.pipe(ctx.stream);
   return ctx.stream.end(); // respond with no content
+}
+
+Application.compose = compose;
+Application.Router = Router;
+
+for (const key of Object.keys(middlewares)) {
+  Application[key] = middlewares[key];
 }

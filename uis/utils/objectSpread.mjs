@@ -8,7 +8,7 @@
  *
  */
 
-export default function _objectSpread(target) { 
+export default function objectSpread(target) { 
   for (let i = 1; i < arguments.length; i++) { 
     const source = arguments[i] != null ? arguments[i] : {}; 
 
@@ -20,9 +20,7 @@ export default function _objectSpread(target) {
       })); 
     } 
 
-    ownKeys.forEach((key) => { 
-      target[key] = source[key];
-    }); 
+    ownKeys.forEach(key => { target[key] = source[key]; }); 
   } 
 
   return target; 

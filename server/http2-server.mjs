@@ -13,10 +13,10 @@ import assert from 'assert';
 import crypto from 'crypto';
 import http2 from 'http2';
 import path from 'path';
-import WebSocket from './koa/WebSocket.mjs'
-import { inspect, } from './utils.lib.mjs';
-import logWriter from './utils/logWriter.mjs';
-import settings from './settings.mjs';
+import WebSocket from '../src/koa/WebSocket.mjs'
+import { inspect, } from '../src/utils.lib.mjs';
+import logWriter from '../src/koa/logWriter.mjs';
+import settings from '../src/settings.mjs';
 import util from 'util';
 
 // 调试信息打印工具

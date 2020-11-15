@@ -16,7 +16,7 @@
 import path from 'path';
 import ReactDOMServer from 'react-dom/server.js';
 
-import htmlTemplate from '../server/utils/htmlTemplate.mjs';
+import htmlTemplate from '../utils/htmlTemplate.mjs';
 //import reactApp from '../public/reactApp.mjs'; // @caution: async module
 //import Store from '../public/utils/ReduxStore.mjs';
 

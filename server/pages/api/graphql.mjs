@@ -18,8 +18,8 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import { graphql, buildASTSchema, parse, Source } from '../server/graphql/index.mjs';
-import settings from '../server/settings.mjs';
+import { graphql, buildASTSchema, parse, Source } from '../../src/graphql/index.mjs';
+import settings from '../../src/settings.mjs';
 
 const debug = util.debuglog('node:graphql.mjs');
 const paths = settings.paths;
