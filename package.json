@@ -6,10 +6,8 @@
   "scripts": {
     "install:vimrc": "ln -sf $(pwd)/src/vim/vimrc ~/.vimrc ",
     "commit": "bin/tools.sh --commit",
-    "version": "bin/tools.sh --version",
-    "dev": "bin/auto-restart.mjs start.mjs --restart --paths=bin,pages,public,server,src,uis",
-    "start": "./start.mjs --start",
-    "stop": "./start.mjs --stop"
+    "start": "bin/auto-restart.mjs bin/erps.mjs --restart --paths=bin,pages,public,server,src",
+    "version": "bin/tools.sh --version"
   },
   "dependencies": {
     "@babel/polyfill": "^7.12.1",

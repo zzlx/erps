@@ -7,30 +7,31 @@
  * *****************************************************************************
  */
 
-export { default as argvParser } from '../uis/utils/argvParser.mjs';
-export  * as assert from '../uis/utils/assert.mjs';
-export { default as console } from '../uis/utils/console.mjs';
-export { default as date } from '../uis/utils/date.mjs';
-export { default as defineToStringTag } from '../uis/utils/defineToStringTag.mjs';
-export { default as defineToJSON } from '../uis/utils/defineToJSON.mjs';
-export { default as global } from '../uis/utils/global.mjs';
-export { default as objectSpread } from '../uis/utils/objectSpread.mjs';
-export { default as path } from '../uis/utils/path.mjs';
-export { default as inspect } from '../uis/utils/inspect.mjs';
-export { default as memCache } from '../uis/utils/memCache.mjs';
-export { default as mapValue } from '../uis/utils/mapValue.mjs';
-export { default as printCharCode } from '../uis/utils/printCharCode.mjs';
+export { default as argvParser } from '../public/uis/utils/argvParser.mjs';
+export  * as assert from '../public/uis/utils/assert.mjs';
+export { default as console } from '../public/uis/utils/console.mjs';
+export { default as camelCase } from '../public/uis/utils/camelCase.mjs';
+export { default as date } from '../public/uis/utils/date.mjs';
+export { default as defineToStringTag } from '../public/uis/utils/defineToStringTag.mjs';
+export { default as defineToJSON } from '../public/uis/utils/defineToJSON.mjs';
+export { default as global } from '../public/uis/utils/global.mjs';
+export { default as objectSpread } from '../public/uis/utils/objectSpread.mjs';
+export { default as path } from '../public/uis/utils/path.mjs';
+export { default as inspect } from '../public/uis/utils/inspect.mjs';
+export { default as memCache } from '../public/uis/utils/memCache.mjs';
+export { default as mapValue } from '../public/uis/utils/mapValue.mjs';
+export { default as printCharCode } from '../public/uis/utils/printCharCode.mjs';
 export { 
   isAsyncIterable,
   forEach, 
   isCollection,
   $$asyncIterator, 
   getAsyncIterator, 
-} from '../uis/utils/iterall.mjs';
-export { default as keyMap } from '../uis/utils/keyMap.mjs';
-export { default as orList } from '../uis/utils/orList.mjs';
-export { default as quotedOrList } from '../uis/utils/quotedOrList.mjs';
-export { default as suggestionList } from '../uis/utils/suggestionList.mjs';
-export { default as keyValMap } from '../uis/utils/keyValMap.mjs';
-export { default as uuid } from '../uis/utils/uuid.mjs';
-export { compile, parse, pathToRegexp } from '../uis/utils/path-to-regexp.mjs';
+} from '../public/uis/utils/iterall.mjs';
+export { default as keyMap } from '../public/uis/utils/keyMap.mjs';
+export { default as orList } from '../public/uis/utils/orList.mjs';
+export { default as quotedOrList } from '../public/uis/utils/quotedOrList.mjs';
+export { default as suggestionList } from '../public/uis/utils/suggestionList.mjs';
+export { default as keyValMap } from '../public/uis/utils/keyValMap.mjs';
+export { default as uuid } from '../public/uis/utils/uuid.mjs';
+export { compile, parse, pathToRegexp } from '../public/uis/utils/path-to-regexp.mjs';

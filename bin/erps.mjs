@@ -23,9 +23,9 @@ import util from 'util';
 import { 
   argvParser, 
   console, 
-} from './src/utils.lib.mjs';
+} from '../src/utils.lib.mjs';
 
-import settings from './src/settings.mjs';
+import settings from '../src/settings.mjs';
 
 const paths = settings.paths;
 
@@ -91,6 +91,7 @@ function main () {
 
 async function start () {
   cp.spawn('node', [ path.join(paths.SERVER, 'main.mjs'), ], {
+    argv0: 'erps.httpd',
     detached: process.env.NODE_ENV === 'development' ? false : true,
     stdio: [0,1,2],
   });

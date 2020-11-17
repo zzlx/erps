@@ -13,10 +13,11 @@ import util from 'util';
 
 import { inspect } from '../utils.lib.mjs';
 import Context from './Context.mjs';
-import compose from './compose.mjs';
 import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
-import * as middlewares from './middlewares/index.mjs'; 
-import Router from './Router.mjs';
+import compose from './compose.mjs';
+
+export * from './middlewares/index.mjs'; 
+export { default as Router } from './router/Router.mjs';
 
 // 调试信息打印工具
 const debug = util.debuglog('debug:application.mjs');
@@ -31,7 +32,6 @@ export default class Application extends EventEmitter {
     this.protocol = 'http2';
     this.proxy = opts.proxy ? 'true' : false;
     this.subdomainOffset = opts.subdomainOffset || 2;
-    this.compressThreshold = opts.compressThresshold || 256 * 1024;
     if (opts.keys) this.keys = opts.keys;
     this.silent = opts.silent ? true : false;
 
@@ -157,11 +157,4 @@ function respond (ctx) {
   if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
   if (typeof ctx.body.pipe === 'function') return ctx.body.pipe(ctx.stream);
   return ctx.stream.end(); // respond with no content
-}
-
-Application.compose = compose;
-Application.Router = Router;
-
-for (const key of Object.keys(middlewares)) {
-  Application[key] = middlewares[key];
 }

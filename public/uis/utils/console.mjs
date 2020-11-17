@@ -1,7 +1,12 @@
 /**
  * *****************************************************************************
  *
- * 扩展控制台对象功能
+ * 控制台功能扩展
+ *
+ *
+ * * 增加命令行格式化显示
+ * * 整屏打印输出
+ * * 进度条打印
  *
  * *****************************************************************************
  */
@@ -19,11 +24,7 @@ const CLEAR_PAGE = isWin ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H';
 
 export default new Proxy(console, {
 	get: function (target, property, receiver) {
-
-		if (property === 'print') {
-      return (str) => process.stdout.write(MOVE_LEFT + CLEAR_LINE+String(str));
-		}
-
+		if (property === 'monitor') return monitor;
 		if (property === 'progressBar') receiver.progressBar = progressBar;
 		if (property === 'clearLine') return () => process.stdout.write(CLEAR_LINE);
 
@@ -32,12 +33,17 @@ export default new Proxy(console, {
 });
 
 /**
- *
+ * 打印
  */
 
-function print(string) {
-  if (!isBrowser) return process.stdout.write(String(string));
-  console.log(string);
+function monitor () {
+  // Dividing line
+  const dl = new Array(process.stdout.columns).join('=');
+
+  console.log(dl);
+  console.log.apply(null, arguments);
+  console.log('');
+  console.log(dl);
 }
 
 /**
@@ -63,5 +69,5 @@ function progressBar (counter, total, length = 100) {
   barString += Array(Number.parseInt(length - percent)).join(blocks.empty);
 	barString += `进度:[${counter}/${total}]${percent}%`;
 
-	print(MOVE_LEFT + CLEAR_LINE + barString);
+	process.stdout.write(MOVE_LEFT + CLEAR_LINE + barString);
 }

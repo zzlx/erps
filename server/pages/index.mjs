@@ -27,8 +27,8 @@ const opts = {
     //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
     { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
     { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/assets/index.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
-    { src: "/assets/noFallback.js", nomodule: true},
+    { src: `/uis/index.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
+    { src: "/uis/noFallback.js", nomodule: true},
   ],
 };
 
