@@ -20,7 +20,7 @@ import Remarkable from 'remarkable';
 import { camelCase, console } from '../src/utils.lib.mjs';
 import settings from '../src/settings.mjs';
 import Koa, { 
-  error, logger, cors, cookies, dynamics, statics, xResponse,
+  error, logger, cors, cookies, dynamics, xResponse,
   compress,
 } from '../src/koa/Application.mjs';
 import server from './http2-server.mjs';
@@ -53,6 +53,9 @@ app.use(cookies()); // 全局cookie支持
 // 执行服务端路由配置
 app.use(Index.routes());
 app.use(Index.allowedMethods());
+
+// pages目录路由配置
+app.use(dynamics({ path: path.join(paths.SERVER, 'pages') }));
 
 // 启用内容压缩-超过512kb时启用压缩
 app.use(compress({ threshold: 512 * 1024 }));

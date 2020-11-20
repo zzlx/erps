@@ -194,7 +194,10 @@ Router.prototype.use = function () {
 
       for (let j = 0; j < cloneRouter.stack.length; j++) {
         const nestedLayer = cloneRouter.stack[j]; // nested layer
-        const cloneLayer = Object.assign(Object.create(Layer.prototype), nestedLayer);
+        const cloneLayer = Object.assign(
+          Object.create(Layer.prototype), 
+          nestedLayer
+        );
 
         // layer添加前缀
         if (path) cloneLayer.setPrefix(path);
@@ -233,17 +236,16 @@ Router.prototype.use = function () {
 Router.prototype.routes = function () {
   const router = this;
 
-  async function routerMiddleware (ctx, next) {
+  function dispatch (ctx, next) {
+
+    // get path from ...
     const path = router.opts.routerPath || ctx.routerPath || ctx.pathname;
     const matched = router.match(path, ctx.method);
 
-    let layerChain;
+    let layerChain; // route layer chain
 
-    if (ctx.matched) {
-      ctx.matched.push.apply(ctx.matched, matched.path);
-    } else {
-      ctx.matched = matched.path;
-    }
+    if (ctx.matched) ctx.matched.push(...matched.path);
+    else ctx.matched = matched.path;
 
     ctx.router = router;
 
@@ -259,7 +261,6 @@ Router.prototype.routes = function () {
     if (mostSpecificLayer.name) ctx._matchedRouteName = mostSpecificLayer.name;
 
     layerChain = matchedLayers.reduce((memo, layer) => {
-
       memo.push((ctx, next) => {
         ctx.captures = layer.captures(path, ctx.captures);
         ctx.params = layer.params(path, ctx.captures, ctx.params);
@@ -270,14 +271,12 @@ Router.prototype.routes = function () {
       return memo.concat(layer.stack);
     }, []);
 
-    await compose(layerChain)(ctx);
-
-    return await next();
+    return compose(layerChain)(ctx, next);
   }
 
-  routerMiddleware.router = this;
+  dispatch.router = this;
 
-  return routerMiddleware;
+  return dispatch;
 }
 
 /**
@@ -421,15 +420,15 @@ Router.prototype.register = function (path, methods, middleware, opts = {}) {
  */
 
 Router.prototype.match = function (path, method) {
-  const layers = this.stack;
-
   const matched = {
     path: [],
     pathAndMethod: [],
     route: false,
   };
 
-  for (let layer of layers) {
+  const layers = this.stack;
+
+  for (const layer of layers) {
     if (layer.match(path)) {
       matched.path.push(layer);
 
