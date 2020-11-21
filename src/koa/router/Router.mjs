@@ -3,6 +3,21 @@
  * 
  * Router
  * 
+ * RESTful resource routing middleware
+ *
+ *
+ * ```javascript
+ *
+ * const app = new Koa();
+ * const router = new Router();
+ * router.get('/', (ctx, next) => {
+ *   // ctx.router available
+ * });
+ *
+ * app
+ *   .use(router.routes())
+ *   .use(router.allowedMethods());
+ * ```
  *
  * @param {object} opts
  * @param {string} opts.prefix
@@ -19,14 +34,14 @@ export default class Router {
   constructor (opts = {}) {
     this.opts = Object.assign({
       prefix: '',
-      methods: ['GET', 'HEAD', 'OPTIONS', 'POST' ],
-      params: {},
+      methods: [ 'GET', 'HEAD', 'OPTIONS', 'POST' ],
     }, opts);
 
-    this.methods = this.opts.methods;
-    this.params = {};
-    this.stack  = [];
+    this.methods = this.opts.methods; 
     this.prefix = this.opts.prefix || '';
+
+    this.params = this.opts.params || {};
+    this.stack  = [];
 
     this.addMethods();
   }

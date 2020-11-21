@@ -23,7 +23,7 @@ import Koa, {
   error, logger, cors, cookies, dynamics, xResponse,
   compress,
 } from '../src/koa/Application.mjs';
-import server from './http2-server.mjs';
+import createServer from './http2-server.mjs';
 import Index from './routes/Index.mjs';
 
 const debug = util.debuglog('debug:main.mjs');
@@ -32,7 +32,7 @@ const paths = settings.paths;
 // 初始化服务器程序
 const app = new Koa({
   keys: settings.keys || 'erps',
-  server: server,
+  serverCreator: createServer,
 });
 
 // 服务启动前执行的任务:

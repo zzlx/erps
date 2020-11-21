@@ -42,7 +42,6 @@ function monitor () {
 
   console.log(dl);
   console.log.apply(null, arguments);
-  console.log('');
   console.log(dl);
 }
 

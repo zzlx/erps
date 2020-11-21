@@ -38,8 +38,6 @@ export default class Application extends EventEmitter {
     // 中间件栈
     this.middlewares = [];
     this.tasksBeforeListen = [];
-
-    this.server = opts.server;
   }
 
   /**
@@ -48,8 +46,8 @@ export default class Application extends EventEmitter {
    */
 
   listen () {
-    assert(this.server, 'server is not avilable.');
-
+    assert(this.opts.serverCreator, 'server creator is not avilable.');
+    if (this.server == null) this.server = this.opts.serverCreator();
     // 执行完配置任务后再开启服务器监听
     Promise.all(this.tasksBeforeListen.map(task => cp.spawn(task))).then(() => {
       this.server.on('stream', this.callback());
