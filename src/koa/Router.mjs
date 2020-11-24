@@ -42,6 +42,29 @@ export default class Router {
 
     this.addMethods();
   }
+
+  /**
+   * Generate URL from url pattern and given `params`.
+   *
+   * 静态方法
+   * API Reference: Router.url(path, params) ⇒ String
+   *
+   * # example
+   *
+   * ```javascript
+   * const url = Router.url('/users/:id', {id: 1}); // => "/users/1"
+   * ```
+   *
+   * @param {String} path url pattern
+   * @param {Object} params url parameters
+   * @returns {String}
+   *
+   */
+
+  static url (path) {
+    const args = Array.prototype.slice.call(arguments, 1);
+    return Layer.prototype.url.apply({ path: path }, args);
+  }
 }
 
 /**
@@ -97,6 +120,8 @@ Router.prototype.addMethods = function () {
  * Run middleware for named route parameters. 
  * useful for auto-loading or validation
  *
+ * API Reference: this.param(param, middleware) ⇒ Router
+ *
  * @param {string} param
  * @param {function} middleware
  * @returns {Router}
@@ -132,6 +157,8 @@ Router.prototype.route = function (routeName) {
  *
  * Takes a route name and map of named params
  *
+ * API Reference: this.url(name, params, [options]) ⇒ String | Error
+ *
  * @param {string} name route name
  * @param {object} params url parameters
  * @param {object} [options]
@@ -145,13 +172,14 @@ Router.prototype.url = function (name, params) {
 
   if (route) {
     const args = Array.prototype.slice.call(arguments, 1);
-    return route.url.apply(route, args);
+    return route.url(args);
   }
 }
 
 /**
  * Set the path prefix for a Router instance that was already initialized.
  *
+ * .prefix(prefix) ⇒ Router
  *
  * Example:
  *
@@ -175,10 +203,10 @@ Router.prototype.prefix = function (prefix) {
 /**
  * Use middleware
  *
- * @param {String=} path
- * @param {Function} middleware
- * @param {Function=} ...
+ * .use([path], middleware) ⇒ Router
  *
+ * @param {String} path
+ * @param {Function} middleware
  * @returns {Router}
  */
 
@@ -291,6 +319,8 @@ Router.prototype.routes = function () {
 /**
  *
  * Returns separate middleware for responding to `OPTIONS` requests 
+ *
+ * API Reference: .allowedMethods([options]) ⇒ function
  *
  * with an `Allow` header containing the allowed methods, 
  * as well as responding with `405 Method Not Allowed` 
@@ -449,25 +479,4 @@ Router.prototype.match = function (path, method) {
   }
 
   return matched;
-}
-
-/**
- *
- * Generate URL from url pattern and given `params`.
- *
- * # example
- *
- * ```javascript
- * const url = Router.url('/users/:id', {id: 1}); // => "/users/1"
- * ```
- *
- * @param {String} path url pattern
- * @param {Object} params url parameters
- * @returns {String}
- *
- */
-
-Router.url = function (path) {
-  const args = Array.prototype.slice.call(arguments, 1);
-  return Layer.prototype.url.apply({ path: path }, args);
 }

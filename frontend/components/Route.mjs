@@ -35,13 +35,12 @@ export default class Route extends React.Component {
     }
 
     if (component) {
-      if (typeof component === 'function') {
-        return component(props);
-      }
 
       if (typeof component.constructor === 'function') {
         return React.createElement(component, props);
       }
+
+      if (typeof component === 'function') return component(props);
     }
 
     if (render && typeof render === 'function') {

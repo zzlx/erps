@@ -23,7 +23,7 @@ async function browserRender () {
   const App = await import('./ReactApp.mjs').then(m => m.default); 
 
   // 创建程序状态管理器
-  const element = App(); 
+  const element = await App(); 
 
   // 存在服务端渲染等页面使用hydrate方法渲染
   // 空的容器对象上使用render方法渲染

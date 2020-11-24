@@ -34,6 +34,7 @@ const app = new Koa({
 // 服务重启时执行的任务清单:
 // 无保证的任务
 app.tasksBeforeListen = [
+  path.join(paths.BIN, 'copy-public-to-www.mjs'),
   path.join(paths.BIN, 'copy-umd-to-www.mjs'),
   path.join(paths.BIN, 'css-render.mjs'),
 ];

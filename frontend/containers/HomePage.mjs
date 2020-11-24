@@ -19,6 +19,7 @@ import TodoList from '../components/TodoList.mjs';
 export default class HomePage extends React.Component {
   constructor(props, context) {
     super(props);
+
     this.state = { 
     };
   }
@@ -27,8 +28,7 @@ export default class HomePage extends React.Component {
     const store = this.context.store;
     const messages = store.getState({profiles: { messages: 1 } });
 
-    const header = React.createElement(Header, {
-    }, '函证中心');
+    const header = React.createElement(Header, { }, '函证中心');
 
     const circular = React.createElement(Circular, {
       size: "145"

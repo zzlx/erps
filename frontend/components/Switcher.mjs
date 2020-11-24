@@ -13,10 +13,8 @@ import matchPath from '../utils/matchPath.mjs';
 
 export default class Switch extends React.Component {
   render () {
-    const profiles = this.context.store.getState({profiles: true});
-    const location = this.props.location || profiles.location; 
-    console.log(profiles);
-
+    const doc = this.context.store.getState('profiles').findOne({ name: 'location' });
+    const location = this.props.location || doc.value; 
     let element, match;
 
     for (let child of this.props.children) {

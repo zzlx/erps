@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  * 
- * Redux store
+ * UI state
  *
  * 用于管理UI状态
  *
@@ -15,7 +15,7 @@
 import assert, { isPlainObject } from './assert.mjs';
 import * as reducers from '../reducers/index.mjs';
 
-export default class ReduxStore {
+export default class UIState {
   constructor (state) {
     this.currentState = state;
     this.currentReducer = combineReducers(reducers);
@@ -71,28 +71,22 @@ export default class ReduxStore {
   }
 
   /**
+   * get state from curentState
    *
-   *
-   * @param {object} projection
-   * @return {object} state
+   * @param {string} key
+   * @return {object}
    */
 
-  getState(projection) {
+  getState(key) {
     assert(!this.isDispatching,
       'You may not call store.getState() while the reducer is executing. ' + 
       'The reducer has already received the state as an argument. ' + 
       'Pass it down from the top reducer instead of reading it from the store.'
     );
 
-    if (projection == null) return this.currentState;
-
-    const retval = {};
-
-    for (const key of Object.keys(projection)) {
-      if (this.currentState[key]) retval[key] = this.currentState[key];
-    }
-
-    return retval;
+    if (key == null) return this.currentState
+    if (this.currentState[key]) return dataProxy(this.currentState[key]);
+    return null;
   }
 
   subscribe(listener) {
@@ -306,4 +300,40 @@ export function combineReducers (reducers) {
 
     return hasChanged ? newState : state;
   }
+}
+
+function dataProxy (data) {
+  return new Proxy(data, {
+    get: function (target, property, receiver) {
+      if ('findOne' === property) {
+        return findOneFromArray.bind(target);
+      }
+
+      return null;
+    },
+    enumerate: function (target, sKey) {
+      return target.keys();
+    },
+  });
+}
+
+function findOneFromArray (query = {}) {
+  const data = this; 
+
+  let retval = null;
+
+  for (const doc of data) {
+    for (const key of Object.keys(query)) {
+      if ('string' === typeof query[key]) {
+        if (doc[key] === query[key]) {
+          retval = doc;
+          break;
+        }
+      }
+    }
+
+    if (retval) break;
+  }
+
+  return retval;
 }

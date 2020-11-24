@@ -12,7 +12,6 @@ import jsdom from 'jsdom';
 import Router from '../../src/koa/Router.mjs';
 import { statics, dynamics } from '../../src/koa/middlewares/index.mjs';
 import settings from '../../src/settings.mjs';
-import docsRouter
 
 const paths = settings.paths;
 const templates = settings.templates;
@@ -57,7 +56,16 @@ router.get('indexes', '/*',  (ctx, next) => {
   if (ctx.body) return next();
 
   const dom = new jsdom.JSDOM(templates.html)
-  dom.window.document.title = 'TEST';
+  const document = dom.window.document;
+  document.title = 'TEST';
+
+  // 添加scripts
+  addScript.bind(document)({src: "/assets/js/react.development.js"});
+  addScript.bind(document)({src: "/assets/js/react-dom.development.js"});
+  addScript.bind(document)({src: '/webUI/index.mjs', type: 'module'})
+
+  const container = document.getElementById('root');
+  if (container) container.innerHTML = 'test'; // React服务端渲染内容
 
   ctx.body = dom.serialize();
 
@@ -65,3 +73,10 @@ router.get('indexes', '/*',  (ctx, next) => {
 });
 
 export default router;
+
+function addScript (props) {
+  const document = this;
+  const script = document.createElement("script");
+  for (const key of Object.keys(props)) script[key] = props[key];
+  document.head.appendChild(script);
+}
