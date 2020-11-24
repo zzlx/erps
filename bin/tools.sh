@@ -771,10 +771,10 @@ _commit_and_push() {
 			if [[ -n ${message} ]]; then
 				git -C $_ROOT commit -m "${message}"
 			else
-				git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") 自动化提交"
+				git -C $_ROOT commit -m "自动化存档提交 $(date "+%Y-%m-%d %H:%M:%S")"
 			fi
 		else
-			git -C $_ROOT commit -m "$(date "+%Y-%m-%d %H:%M:%S") ${1}"
+			git -C $_ROOT commit -m "${1} $(date "+%Y-%m-%d %H:%M:%S")"
 		fi
   fi
 
