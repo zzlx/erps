@@ -25,22 +25,20 @@
  * *****************************************************************************
  */
 
-import { compile, parse, path, pathToRegexp } from '../utils.lib.mjs';
+import { assert, path, pathToRegexp } from '../utils.lib.mjs';
 import compose from './compose.mjs';
 import HttpError from './HttpError.mjs';
+import Route from './Route.mjs';
 
 export default class Router {
   constructor (opts = {}) {
     this.opts = Object.assign({
-      prefix: '',
-      methods: [ 'GET', 'HEAD', 'OPTIONS', 'POST' ],
+      prefix: null,
     }, opts);
 
-    this.methods = this.opts.methods; 
-    this.prefix = this.opts.prefix || '';
-
-    this.params = this.opts.params || {};
-    this.stack  = [];
+    this.methods = this.opts.methods || [ 'HEAD', 'GET', 'OPTIONS', 'POST' ];
+    this.stack  = []; // route stacks
+    this.params = {};
 
     this.addMethods();
   }
@@ -152,23 +150,24 @@ Router.prototype.url = function (name, params) {
 }
 
 /**
- * Set the path prefix for a Router instance
+ * Set the path prefix for a Router instance that was already initialized.
+ *
  *
  * Example:
- * router.prefix('/users')
- * router.get('/:id', ...)  => "/users/:id"
+ *
+ *  ```javascript
+ * router.prefix('/things/:thing_id')
+ * ```
  *
  * @param {String} prefix
  * @returns {Router}
  */
 
 Router.prototype.prefix = function (prefix) {
-  if (typeof prefix !== 'string') {
-    throw new TypeError('prefix paramater must be string.');
-  }
+  assert(typeof prefix === 'string', 'prefix paramater must be string.');
 
-  prefix = stripTrailingSlash(prefix);
-  this.prefix = prefix;
+  prefix = stripTrailingSlash(prefix); // strip trailing slash
+  this.opts.prefix = prefix;
   for (let route of this.stack) route.setPrefix(prefix);
   return this;
 }
@@ -189,10 +188,7 @@ Router.prototype.use = function () {
 
   // support array of paths 
   if (Array.isArray(middleware[0])) {
-    for (const p of middleware[0]) {
-      this.use.apply(this, [p].concat(middleware.slice(1)));
-    }
-
+    for (const p of middleware[0]) this.use.apply(this, [p].concat(middleware.slice(1)));
     return this;
   }
 
@@ -201,6 +197,7 @@ Router.prototype.use = function () {
 
   // iterator middleware arguments
   for (const m of middleware) {
+    // router middleware
     if (m.router) {
       const cloneRouter = Object.assign(Object.create(Router.prototype), m.router, {
         stack: m.router.stack.slice(0) 
@@ -208,29 +205,27 @@ Router.prototype.use = function () {
 
       for (let j = 0; j < cloneRouter.stack.length; j++) {
         const nestedLayer = cloneRouter.stack[j]; // nested layer
-        const cloneLayer = Object.assign(
-          Object.create(Layer.prototype), 
-          nestedLayer
-        );
+        const cloneLayer = Object.assign(new Layer(), nestedLayer);
 
         // layer添加前缀
         if (path) cloneLayer.setPrefix(path);
-        if (router.opts.prefix) cloneLayer.setPrefix(router.opts.prefix);
+        if (this.opts.prefix) cloneLayer.setPrefix(this.opts.prefix);
 
-        router.stack.push(cloneLayer);
+        this.stack.push(cloneLayer);
         cloneRouter.stack[j] = cloneLayer;
-      } // end of for j
-
-      if (router.params) {
-        const routerParams = Object.keys(router.params);
-        for (const key of routerParams) cloneRouter.param(key, router.params[key]);
       }
+
+      // 
+      for (const key of Object.keys(this.params)) {
+        cloneRouter.param(key, this.params[key]);
+      }
+
     } else {
       const keys = [];
-      pathToRegexp(this.prefix || '', keys);
-      const routerPrefixHasParam = this.prefix && keys.length;
+      pathToRegexp(this.opts.prefix || '', keys);
+      const routerPrefixHasParam = this.opts.prefix && keys.length;
 
-      this.register(path || '(.*)', [], m, {
+      this.register(path || '([^\/]*)', [], m, {
         end: false, 
         ignoreCaptures: !hasPath && !routerPrefixHasParam
       });
@@ -248,25 +243,25 @@ Router.prototype.use = function () {
  */
 
 Router.prototype.routes = function () {
-  const router = this;
 
-  function dispatch (ctx, next) {
-
+  // dispatch route middleware
+  const dispatch =  (ctx, next) => {
     // get path from ...
-    const path = router.opts.routerPath || ctx.routerPath || ctx.pathname;
-    const matched = router.match(path, ctx.method);
+    const path = this.opts.routerPath || ctx.routerPath || ctx.pathname;
+    const matched = this.match(path, ctx.method);
 
     let layerChain; // route layer chain
 
     if (ctx.matched) ctx.matched.push(...matched.path);
     else ctx.matched = matched.path;
 
-    ctx.router = router;
+    ctx.router = this;
 
     if (!matched.route) return next();
 
-    const matchedLayers = matched.pathAndMethod;
+    const matchedLayers = matched.pathAndMethod; /// matched
 
+    // 
     // most specific layer
     const mostSpecificLayer = matchedLayers[matchedLayers.length - 1];
 
@@ -403,7 +398,7 @@ Router.prototype.register = function (path, methods, middleware, opts = {}) {
   }
 
   // route
-  const route = new Layer(path, methods, middleware, {
+  const route = new Route(path, methods, middleware, {
     end: opts.end === false ? opts.end : true,
     name: opts.name,
     sensitive: opts.sensitive || false,
@@ -412,7 +407,7 @@ Router.prototype.register = function (path, methods, middleware, opts = {}) {
     ignoreCaptures: opts.ignoreCaptures,
   });
 
-  if (this.prefix) route.setPrefix(this.prefix);
+  if (this.opts.prefix) route.setPrefix(this.prefix);
 
   // add parameter middleware
   for (let p of Object.keys(this.params)) route.param(p, this.params[p]);
@@ -475,223 +470,4 @@ Router.prototype.match = function (path, method) {
 Router.url = function (path) {
   const args = Array.prototype.slice.call(arguments, 1);
   return Layer.prototype.url.apply({ path: path }, args);
-}
-
-/**
- * Route Layer
- */
-
-class Layer {
-  /**
-   * Initialize a new routing Layer with given `method`, `path`, and `middleware`.
-   *
-   * @param {String|RegExp} path Path string or regular expression.
-   * @param {Array} methods Array of HTTP verbs.
-   * @param {Array} middleware Layer callback/middleware or series of.
-   * @param {Object=} opts
-   * @param {String=} opts.name route name
-   * @param {String=} opts.sensitive case sensitive (default: false)
-   * @param {String=} opts.strict require the trailing slash (default: false)
-   * @returns {Layer}
-   * @private
-   */
-  constructor (path, methods, middleware, opts = {}) {
-    this.opts = Object.assign({}, opts);
-    this.name = this.opts.name || null;
-    this.methods = []; // 方法
-    this.paramNames = []; // 参数
-    this.stack = Array.isArray(middleware) ? middleware : [middleware];
-
-    for (let method of methods) {
-      const len = this.methods.push(method.toUpperCase());
-      if (this.methods[len-1] === 'GET') this.methods.unshift('HEAD');
-    }
-
-    for (let fn of this.stack) {
-      if (typeof fn !== 'function') {
-        throw new Error(`${fn} must be a function.`);
-      }
-    }
-
-    this.path = path;
-    
-    this.regexp = pathToRegexp(path, this.paramNames, this.opts);
-  }
-
-  /**
-   * Prefix route path.
-   *
-   * @param {String} prefix
-   * @returns {Layer}
-   * @private
-   */
-
-  setPrefix (prefix) {
-    if (this.path) {
-      this.path = this.path !== '/' || this.opts.strict === true
-        ? `${prefix}${this.path}` 
-        : prefix;
-
-      this.paramNames = []; // reset this.paramNames
-      this.regexp = pathToRegexp(this.path, this.paramNames, this.opts);
-    }
-
-    return this; // return route
-  }
-
-  /**
-   * Returns map of URL parameters for given `path` and `paramNames`.
-   *
-   * @param {String} path
-   * @param {Array.<String>} captures
-   * @param {Object=} existingParams
-   * @returns {Object}
-   * @private
-   */
-
-  params (path, captures, existingParams) {
-    const params = existingParams || {};
-
-    for (let i = 0; i < captures.length; i++) {
-      if (this.paramNames[i]) {
-        const cap = captures[i];
-        params[this.paramNames[i].name] = cap ? decodeURIComponent(cap) : cap;
-      }
-    }
-
-    return params;
-  }
-
-  /**
-   *
-   * Run validations on route named parameters
-   *
-   * @example
-   *
-   * ```javascript
-   * router
-   *   .param('user', function (id, ctx, next) {
-   *     ctx.user = users[id];
-   *     if (!user) return ctx.status = 404;
-   *     next();
-   *   })
-   *   .get('/users/:user', function (ctx, next) {
-   *     ctx.body = ctx.user;
-   *   });
-   * ```
-   *
-   * @param {string} param
-   * @param {function} middleware
-   * @returns {Layer}
-   * @private
-   */
-
-  param (param, fn) {
-    const stack = this.stack;
-    const params = this.paramNames;
-
-    const middleware = function (ctx, next) {
-      return fn.call(this, ctx.params[param], ctx, next);
-    }
-
-    middleware.param = param;
-
-    const names = params.map(p => p.name);
-
-    const x = names.indexOf(param);
-
-    if (x > -1) {
-      stack.some((fn, i) => {
-        if (!fn.param || names.indexOf(fn.param) > x) {
-          stack.splice(i, 0, middleware);
-          return true;
-        }
-      });
-    }
-
-    return this;
-  }
-
-  /**
-   * Returns whether request `path` matches route.
-   *
-   * @param {String} path
-   * @returns {Boolean}
-   * @private
-   */
-
-  match (path) {
-    return this.regexp.test(path);
-  }
-
-  /**
-   * Returns array of regexp url path captures.
-   *
-   * @param {String} path
-   * @returns {Array.<String>}
-   * @private
-   */
-
-  captures (path) {
-    return this.opts.ignoreCaptures ? [] : path.match(this.regexp).slice(1);
-  }
-
-  /**
-   * Generate URL for route using given `params`.
-   *
-   * ```javascript
-   * const route = new Layer('/users/:id', ['GET'], fn);
-   * route.url({ id: 123 }); // => "/users/123"
-   * ```
-   * @param {Object} params url parameters
-   * @returns {String} url string
-   * @private
-   *
-   */
-
-  url (params, options) {
-    let args = params;
-    let replace = {};
-
-    if (typeof params !== 'object') {
-      args = Array.prototype.slice.call(arguments);
-
-      if (typeof args[args.length - 1] === 'object') {
-        options = args[args.length -1];
-        args = args.slice(0, args.length -1);
-      }
-    }
-
-    const url = this.path.replace(/\(\.\*\)/g, '');
-    const tokens = parse(url);
-
-    if (Array.isArray(args)) {
-      let j = 0;
-      for (let token of tokens) {
-        if (token.name) replace[token.name] = args[j++];
-      }
-    } else if (tokens.some(token => token.name)) {
-      replace = params;
-    } else {
-      options = params;
-    }
-
-    const toPath = compile(url, options);
-
-    let replaced = toPath(replace);
-
-    if (options && options.query) {
-      replaced = new URL(replaced);
-
-      if (typeof options.query === 'string') {
-        replaced.search = options.query;
-      } else {
-        replaced.search = undefined;
-      }
-
-      return replaced.href;
-    }
-
-    return replaced;
-  }
 }

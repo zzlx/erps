@@ -1,28 +1,22 @@
 /**
  * *****************************************************************************
  * 
- * 前端主程序
+ * web端UI程序
  * ===========
- *
- * 执行前端程序生成UI
  *
  * *****************************************************************************
  */
 
-import Store from './utils/ReduxStore.mjs';
-
 // 准备执行环境
 const __dirname = p => p.substr(0, p.lastIndexOf('/'));
 const appURL = new URL(import.meta.url);
-const store = new Store();
-
 if (globalThis.document && typeof document === 'object') {
   globalThis.env = appURL.searchParams.get('env') || 'production';
   browserRender(); // 浏览器客户端渲染
 }
 
 /**
- * 浏览器渲染
+ * 浏览器渲染程序
  */
 
 async function browserRender () {

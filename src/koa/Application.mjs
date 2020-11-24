@@ -16,9 +16,6 @@ import Context from './Context.mjs';
 import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
 import compose from './compose.mjs';
 
-export * from './middlewares/index.mjs'; 
-export { default as Router } from './Router.mjs';
-
 // 调试信息打印工具
 const debug = util.debuglog('debug:application.mjs');
 

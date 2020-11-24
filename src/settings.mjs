@@ -23,6 +23,7 @@ import util from 'util';
 import './config/env.mjs';
 import { paths, appName, appVersion } from './config/paths.mjs';
 import system from './config/system.mjs';
+import templates from './config/templates.mjs';
 
 // settings from config
 const sfc = fs.readFileSync(path.join(paths.HOME_PATH, 'settings.json'), 'utf8');
@@ -33,9 +34,11 @@ export default new Proxy(Object.assign({}, configs, {
   paths: paths,
   system: system,
   appName,
+  templates,
   appVersion,
 }), {
   get: function (target, property, receiver) {
+    if (property === 'isDevel') return process.env.NODE_ENV === 'development';
     if (property === 'getGitInfo') return getGitInfo;
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;

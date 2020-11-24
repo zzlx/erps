@@ -1,7 +1,8 @@
 /**
  * *****************************************************************************
  *
- * process配置
+ *
+ * 运行环境配置程序
  *
  * 配置项目的优先级: 
  *
@@ -9,15 +10,16 @@
  * * 文件配置项: ※※ dotenv文件配置项覆盖默认值
  * * 命令行配置: ※※※ 命令行配置具有最高优先级
  *
+ * @TODOS:
+ * dotenv文件
+ * 记录命令行环境配置项,下次启动时继续使用
+ *
  * *****************************************************************************
  */
 
 import assert from 'assert';
 import fs from 'fs';
-import util from 'util';
 import { paths, appName } from './paths.mjs';
-
-const debug = util.debuglog('debug:env.mjs');
 
 if (fs.existsSync(paths.ENV)) {
   const dotenvObj = envParser(fs.readFileSync(paths.ENV));
@@ -34,7 +36,8 @@ process.on('exit', code => {
   const uptime = Math.ceil(process.uptime()*1000);
   const pid = process.pid;
   const title = process.title ? String(process.title).toUpperCase() : 'Process';
-  debug(`${title}(PID:${pid}) is running ${uptime}ms before exit.`);
+  process.env.NODE_ENV === 'development' && 
+  console.info(`${title}(PID:${pid}) is running ${uptime}ms before exit.`);
 });
 
 // 被捕获的exception\rejection,需要进行妥善处理

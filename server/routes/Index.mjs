@@ -7,10 +7,14 @@
  */
 
 import path from 'path';
-import { Router, statics, dynamics } from '../../src/koa/Application.mjs';
+import jsdom from 'jsdom';
+
+import Router from '../../src/koa/Router.mjs';
+import { statics, dynamics } from '../../src/koa/middlewares/index.mjs';
 import settings from '../../src/settings.mjs';
 
 const paths = settings.paths;
+const templates = settings.templates;
 
 const { 
   FRONTEND,
@@ -21,60 +25,42 @@ const {
   SERVER,
 } = settings.paths;
 
-const Index = new Router(); // 路由配置
-export default Index;
+const router = new Router(); // 路由配置
 
 // 静态资源服务配置
 //
 // 配置前端资源
-Index.get('/ESModules', statics(paths.FRONTEND, { prefix: '/ESModules' }));
+router.get('/webUI/*', statics(paths.FRONTEND, { prefix: '/webUI' }));
 
-Index.get('api', (ctx, next) => {
+router.get('/api', (ctx, next) => {
   ctx.type = 'html';
   const html = new HTMLTemplate({ styles: ['/assets/css/styles.css'], });
   const md = new Remarkable({ html: true, });
   html.body = '<div class="container markdown">' + 
-    md.render(fs.readFileSync(path.join(paths.SERVER, 'pages', 'api', 'README.md'), 'utf8')) +
+    md.render(fs.readFileSync(path.join(paths.SERVER, 'README.md'), 'utf8')) +
   '</div>';
 
   html.title = 'API数据服务';
   ctx.body = html.render();
 });
 
-Index.get('/docs', statics(DOCS, {
-  prefix: '/docs', 
-  directoryIndex: 'README.md'
-}), async (ctx, next) => {
-  // 用于对输出的markdown文档片段进行处理
-  if ('text/markdown' === ctx.type && ctx.searchParams.get('raw') !== "true") {
-    if (ctx.body && typeof ctx.body.pipe === 'function') {
-      const content = await new Promise((resolve, reject) => {
-        ctx.body.on('readable', () => {
-          let data = '';
-          let chunk = null;
-          while (null != (chunk = ctx.body.read())) data += chunk;
-          resolve(data);
-        });
-      });
+//
+// @TODOS:
+// 1. 读取log/request.log时,readStream无法关闭
+settings.isDevel && router.get('/log/*', statics(LOG_PATH, { prefix: '/log' }));
 
-      ctx.body = content;
-    }
+router.get('www', '/*', statics(WWW_PATH, { directoryIndex: 'index.html'}));
 
-    ctx.type = 'html';
-    const md = new Remarkable();
-    ctx.body = md.render(ctx.body);
-  }
+// indexes route
+router.get('indexes', '/*',  (ctx, next) => {
+  if (ctx.body) return next();
+
+  const dom = new jsdom.JSDOM(templates.html)
+  dom.window.document.title = 'TEST';
+
+  ctx.body = dom.serialize();
 
   return next();
 });
 
-//
-// @TODOS:
-// 1. 读取log/request.log时,readStream无法关闭
-'development' === process.env.NODE_ENV &&
-Index.get('/log', statics(LOG_PATH, {prefix: '/log'}));
-
-//statics(WWW_PATH, { directoryIndex: 'index.html'}));
-Index.get('/', (ctx, next) => {
-  ctx.body = 'test';
-});
+export default router;

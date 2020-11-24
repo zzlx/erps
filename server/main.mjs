@@ -13,20 +13,16 @@
 
 import fs from 'fs';
 import path from 'path';
-import util from 'util';
-
-import Remarkable from 'remarkable';
 
 import { camelCase, console } from '../src/utils.lib.mjs';
 import settings from '../src/settings.mjs';
-import Koa, { 
-  error, logger, cors, cookies, dynamics, xResponse,
-  compress,
-} from '../src/koa/Application.mjs';
+import Koa from '../src/koa/Application.mjs';
+import { 
+  error, logger, cors, cookies, xResponse, compress, 
+} from '../src/koa/middlewares/index.mjs';
 import createServer from './http2-server.mjs';
-import Index from './routes/Index.mjs';
+import router from './routes/index.mjs';
 
-const debug = util.debuglog('debug:main.mjs');
 const paths = settings.paths;
 
 // 初始化服务器程序
@@ -35,31 +31,29 @@ const app = new Koa({
   serverCreator: createServer,
 });
 
-// 服务启动前执行的任务:
-// 准备前端项目的依赖文件
+// 服务重启时执行的任务清单:
+// 无保证的任务
 app.tasksBeforeListen = [
-  path.join(paths.BIN, 'copy-umd-to-public.mjs'),
+  path.join(paths.BIN, 'copy-umd-to-www.mjs'),
   path.join(paths.BIN, 'css-render.mjs'),
 ];
 
 // 服务器基础功能配置
 app.use(error(paths.LOG_PATH)); // 记录中间件错误
 app.use(logger(paths.LOG_PATH)); // 记录访问日志
-app.env === 'development' && 
-app.use(xResponse(settings)); // 响应时间记录
+settings.isDevel && app.use(xResponse(settings)); // 响应时间记录
 app.use(cors()); // 跨域访问支持
 app.use(cookies()); // 全局cookie支持
 
 // 执行服务端路由配置
-app.use(Index.routes());
-app.use(Index.allowedMethods());
-
-// pages目录路由配置
-app.use(dynamics({ path: path.join(paths.SERVER, 'pages') }));
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 // 启用内容压缩-超过512kb时启用压缩
-app.use(compress({ threshold: 512 * 1024 }));
+// 压缩超过512kb的资源
+app.use(compress({ threshold: 512 * 1024 })); 
 
+// 开启监听
 app.listen({
   ipv6Only: false, // 是否仅开启IPV6
   host: settings.system.ipv6 ? '::' : '0.0.0.0',
@@ -68,7 +62,7 @@ app.listen({
 }, function () { 
   // 打印服务器状态信息
   console.monitor(
-    `${camelCase(process.env.NODE_ENV)} Server is running on : %o.`, 
+    `${camelCase(process.env.NODE_ENV)} server is running on : %o.`, 
     this.address()
   ); 
 });

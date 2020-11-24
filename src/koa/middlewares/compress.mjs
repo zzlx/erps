@@ -18,19 +18,15 @@ export default function (options = {}) {
   }, options);
 
   return function compressMiddleware (ctx, next) {
-    // 未设置body时不压缩
-    if (null == ctx.body) return next(); 
-
-    // 未设置length时不压缩
-    if (ctx.length && ctx.length <= opts.threshold) return next();
-
-    // 已设置content-encoding时不压缩
-    if (ctx.get('content-encoding') !== '') return next();
+    if (null == ctx.body) return next(); // null body
+    if (ctx.length && ctx.length <= opts.threshold) return next(); // length threshold
+    if (ctx.get('content-encoding') !== '') return next(); // 已设置content-encoding时不压缩
 
     ctx.set('vary', 'accept-encoding');
     const encoding = this.get('accept-encoding');
     const body = ctx.body;
     const isStream = body && typeof body.pipe === 'function';
+    if (isStream) return next();
 
     if (/\bdeflate\b/.test(encoding)) {
       ctx.set('content-encoding', 'deflate');
@@ -46,9 +42,8 @@ export default function (options = {}) {
       else ctx.body = zlib.brotliCompressSync(ctx.body);
     } 
 
-    if (!isStream) {
-      ctx.length = Buffer.byteLength(ctx.body); // 重新计算内容大小
-    }
+    if (!isStream) ctx.length = Buffer.byteLength(ctx.body); // 重新计算内容大小
+    else ctx.remove('content-encoding');
 
     return next();
   } 

@@ -30,7 +30,7 @@ export default function statics (root, options = {}) {
   const opts = Object.assign({
     dotfiles: 'ignore',
     etag: true,
-    directoryIndex: 'index.html',
+    directoryIndex: [ 'index.html' ],
     extensions: [ 'html' ],
     index: false,
     immutable: false,
@@ -46,6 +46,7 @@ export default function statics (root, options = {}) {
   if (!Array.isArray(opts.directoryIndex)) opts.directoryIndex = false;
 
   return function staticsMiddleware (ctx, next) {
+
     // 旁路规则:
     if (!/GET|HEAD/.test(ctx.method)) return next(); // 1. 非GET、HEAD请求方法时
     if (ctx.body != null) return next(); // 2. body已被设置时
