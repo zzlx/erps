@@ -12,6 +12,7 @@ import jsdom from 'jsdom';
 import Router from '../../src/koa/Router.mjs';
 import { statics, dynamics } from '../../src/koa/middlewares/index.mjs';
 import settings from '../../src/settings.mjs';
+import docsRouter
 
 const paths = settings.paths;
 const templates = settings.templates;
