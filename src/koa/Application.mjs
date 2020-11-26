@@ -9,20 +9,15 @@
 import assert from 'assert';
 import cp from 'child_process';
 import EventEmitter from 'events'; 
-import util from 'util';
 
-import { inspect } from '../utils.lib.mjs';
 import Context from './Context.mjs';
-import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
 import compose from './compose.mjs';
-
-// 调试信息打印工具
-const debug = util.debuglog('debug:application.mjs');
+import respond from './respond.mjs';
+import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
 
 export default class Application extends EventEmitter {
   constructor(opts) {
     super();
-    this.opts = opts;
 
     // setting properties
     this.env = opts.env || process.env.NODE_ENV || 'production';
@@ -31,31 +26,29 @@ export default class Application extends EventEmitter {
     this.subdomainOffset = opts.subdomainOffset || 2;
     if (opts.keys) this.keys = opts.keys;
     this.silent = opts.silent ? true : false;
+    this.serverCreator = opts.serverCreator || null;
 
-    // 中间件栈
-    this.middlewares = [];
-    this.tasksBeforeListen = [];
+    // app storage
+    this.middlewares = []; // store middlewares
+    this.tasksBeforeListen = []; // store tasks
+    this.queueList = [];
+
   }
 
   /**
-   * Listen
    * 开启服务器监听
    */
 
   listen () {
-    assert(this.opts.serverCreator, 'server creator is not avilable.');
-    if (this.server == null) this.server = this.opts.serverCreator();
+    assert(this.serverCreator, 'server creator is not avilable.');
+
+    if (this.server == null) this.server = this.serverCreator();
     // 执行完配置任务后再开启服务器监听
     Promise.all(this.tasksBeforeListen.map(task => cp.spawn(task))).then(() => {
       this.server.on('stream', this.callback());
       this.server.listen(...arguments);
     });
   }
-
-  /**
-   *
-   *
-   */
 
   /**
    * Use the given middleware 'fn'
@@ -119,37 +112,6 @@ export default class Application extends EventEmitter {
     if (this.silent) return;
 
     const msg = err.stack || err.toString();
-    debug(msg.replace(/^/gm, '  '));
+    console.error(msg.replace(/^/gm, '  '));
   }
-}
-
-/**
- * 服务器端响应程序
- */
-
-function respond (ctx) {
-  if (ctx.respond === false) return ctx.stream.end(); // allow bypassing respond
-
-  // 设置status为默认值为404
-  if (null == ctx.status) ctx.status = 404; // set 404 status
-
-  if (null == ctx.body) {
-    ctx.body = ctx.status + ": " + ctx.message; // set string message
-  }
-
-  // response headers
-  if (ctx.headersSent === false) {
-    ctx.stream.respond(ctx.response.headers, {
-      endStream: HTTP_STATUS_EMPTY_CODES.includes(ctx.status) ? true : false, 
-      waitForTrailers: false, 
-    });
-  }
-
-  // respond contents
-  if ('HEAD' === ctx.method)  return ctx.stream.end();
-  if (ctx.writable === false) return ctx.stream.end();
-  if (Buffer.isBuffer(ctx.body)) return ctx.stream.end(ctx.body);
-  if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
-  if (typeof ctx.body.pipe === 'function') return ctx.body.pipe(ctx.stream);
-  return ctx.stream.end(); // respond with no content
 }

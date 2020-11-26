@@ -18,7 +18,7 @@ import { camelCase, console } from '../src/utils.lib.mjs';
 import settings from '../src/settings.mjs';
 import Koa from '../src/koa/Application.mjs';
 import { 
-  error, logger, cors, cookies, xResponse, compress, 
+  error, logger, cors, cookies, xResponse, compress, serverRender, 
 } from '../src/koa/middlewares/index.mjs';
 import createServer from './http2-server.mjs';
 import router from './routes/index.mjs';

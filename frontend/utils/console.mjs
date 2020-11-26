@@ -20,10 +20,11 @@ const isWin = !isBrowser && global.process && global.process.platform === 'win32
 const MOVE_LEFT  = '\u001b[1000D';
 const MOVE_UP    = '\u001b[1A';
 const CLEAR_LINE = '\u001b[0K';
-const CLEAR_PAGE = isWin ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H';
+const CLEAR_PAGE = isWin ?  '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H';
 
 export default new Proxy(console, {
 	get: function (target, property, receiver) {
+
 		if (property === 'monitor') return monitor;
 		if (property === 'progressBar') receiver.progressBar = progressBar;
 		if (property === 'clearLine') return () => process.stdout.write(CLEAR_LINE);

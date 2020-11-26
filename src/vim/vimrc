@@ -120,6 +120,7 @@ autocmd vimenter * if !argc() | :E | endif " 未提供参数时显示目录列�
 function! SetTheme()
 
 let Now=strftime("%H") " 获取当前时间
+
 if Now > 6 && Now < 23
   set background=light
 else
@@ -137,7 +138,7 @@ endif
 if &background == "dark"
   "hi Normal ctermfg=LightCyan ctermbg=0
   hi Comment ctermfg=white ctermbg=None font='Monospace 16'
-  hi StatusLine ctermfg=white ctermbg=DarkRed
+  hi StatusLine ctermfg=blue ctermbg=DarkRed
 endif
 
 endfunction

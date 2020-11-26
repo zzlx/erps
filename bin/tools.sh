@@ -766,16 +766,16 @@ _commit_and_push() {
 	# 比对工作区与仓库差异
   if [[ -n $(git -C $_ROOT diff HEAD) ]]; then
     git -C $_ROOT add -A
-		datetime=$(date "+%Y-%m-%d %H:%M:%S")
+
 		if [[ -z $1 ]]; then
 			read -p "变更提交说明:" message
 			if [[ -n ${message} ]]; then
-				git -C $_ROOT commit -m "${message} ${datetime}"
+				git -C $_ROOT commit -m "${message} $(_utc_date)"
 			else
-				git -C $_ROOT commit -m "自动化存档提交 ${datetime}"
+				git -C $_ROOT commit -m "自动化存档提交 $(_utc_date)"
 			fi
 		else
-			git -C $_ROOT commit -m "${1} ${datetime}"
+			git -C $_ROOT commit -m "${1} $(_utc_date)"
 		fi
   fi
 
@@ -790,7 +790,7 @@ _commit_and_push() {
       ;;
   esac
 
-  echo "$(_utc_date) 自动化提交完成 $MESSAGE"
+  echo "自动化提交完成 $MESSAGE"
 
 }
 

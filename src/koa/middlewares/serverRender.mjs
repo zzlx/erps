@@ -15,41 +15,59 @@
 
 import path from 'path';
 import ReactDOMServer from 'react-dom/server.js';
+import React from 'react';
+import jsdom from 'jsdom';
 
-import htmlTemplate from '../utils/htmlTemplate.mjs';
 //import reactApp from '../public/reactApp.mjs'; // @caution: async module
 //import Store from '../public/utils/ReduxStore.mjs';
+globalThis.React = React;
 
 // 服务端渲染
 const opts = {
-  styles: [ "/assets/css/styles.css" ],
-  scripts: [
-    //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
-    { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/uis/index.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, module: true, crossorigin: true },
-    { src: "/uis/noFallback.js", nomodule: true},
-  ],
 };
 
-export default async function (ctx) {
-  // 转发有扩展名的路径至下一中间件
-  if (path.extname(ctx.pathname) !== '') return;
-  if (ctx.body != null) return;
+export default function serverRender (options) {
+  const opts = Object.assign({
+  }, options);
 
-  const ua = ctx.get('user-agent');
-  const isIE = /MSIE/.test(ua);
+  return async function serverRenderMiddleware (ctx, next) {
+    // 转发有扩展名的路径至下一中间件
+    if (path.extname(ctx.pathname) !== '') return;
+    // @
+    if (ctx.body) return next();
 
-  // @todo: 利用客户端路由进行匹配渲染,以优化SEO
+    const ua = ctx.get('user-agent');
+    const isIE = /MSIE/.test(ua);
 
-  const options = JSON.parse(JSON.stringify(opts));
-  if (isIE) options.scripts.unshift({ src: '/assets/js/polyfill.min.js'});
+    // @todo: 利用客户端路由进行匹配渲染,以优化SEO
+    //const options = JSON.parse(JSON.stringify(opts));
+    //if (isIE) options.scripts.unshift({ src: '/assets/js/polyfill.min.js'});
 
-  // template
-  const html = htmlTemplate(options);
-  //const store = createStore({location: {pathname: ctx.pathname}});
-  //html.body = ReactDOMServer.renderToString(element);
-  html.body = ctx.pathname;
-  ctx.type = 'html';
-  ctx.body = html.render();
+    const dom = new jsdom.JSDOM(opts.template)
+    const document = dom.window.document;
+    document.title = 'TEST';
+
+    [
+      //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
+      { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
+      { src: `/webUI/index.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
+    ].forEach(v => {
+      addScript.bind(document)(v);
+    });
+
+    const container = document.getElementById('root');
+    if (container) container.innerHTML = 'test'; // React服务端渲染内容
+
+    ctx.body = dom.serialize();
+
+    return next();
+  }
+}
+
+function addScript (props) {
+  const document = this;
+  const script = document.createElement("script");
+  for (const key of Object.keys(props)) script[key] = props[key];
+  document.head.appendChild(script);
 }

@@ -29,6 +29,7 @@
     "remarkable": "^1.7.1",
     "socket.io": "^2.3.0",
     "tedious": "^9.2.1",
+    "whatwg-fetch": "^3.5.0",
     "xlsx": "^0.14.5"
   }
 }
