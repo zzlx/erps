@@ -7,48 +7,22 @@
  * *****************************************************************************
  */
 
+import DOMRender from './utils/DOMRender.mjs';
+import App from './ReactApp.mjs';
+
 // 准备执行环境
-const __dirname = p => p.substr(0, p.lastIndexOf('/'));
 const appURL = new URL(import.meta.url);
-if (globalThis.document && typeof document === 'object') {
-  globalThis.env = appURL.searchParams.get('env') || 'production';
-  browserRender(); // 浏览器客户端渲染
-}
+const ua = window.navigator.userAgent;
+if (/MSIE/.test(ua)) container.innerHTML = '请使用Edge浏览器继续访问!';
+globalThis.env = appURL.searchParams.get('env') || 'production';
 
-/**
- * 浏览器渲染程序
- */
+DOMRender(App(), 'root', callback); // 浏览器客户端渲染
 
-async function browserRender () {
-  const App = await import('./ReactApp.mjs').then(m => m.default); 
-
-  // 创建程序状态管理器
-  const element = await App(); 
-
-  // 存在服务端渲染等页面使用hydrate方法渲染
-  // 空的容器对象上使用render方法渲染
-  // 判断container是否存在服务端渲染内容
-  // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
-  let container = window.document.getElementById('root');
-
-  if (null == container) {
-    container = window.document.createElement('div');
-    container.id = id;
-    window.document.body.appendChild(container);
-  }
-
-  const ua = window.navigator.userAgent;
-  if (/MSIE/.test(ua)) return container.innerHTML = '请使用Edge浏览器继续访问!';
-
-  const renderCallback = () => {
-    console.groupCollapsed('系统提示:');
-    console.info('前端程序已就绪!');
-    console.groupEnd();
-    getWebSocket(); // 开启websocket
-  }
-
-  if (container.innerHTML) ReactDOM.hydrate(element, container, renderCallback);
-  else ReactDOM.render(element, container, renderCallback);  
+function callback () {
+  console.groupCollapsed('系统提示:');
+  console.info('前端程序已就绪!');
+  console.groupEnd();
+  //getWebSocket(); // 开启websocket
 }
 
 /**

@@ -6,6 +6,8 @@
  * 
  */
 
+import React from './_React.mjs';
+
 export default class Form extends React.PureComponent {
   constructor(props) {
     super(props);

@@ -8,6 +8,8 @@
  * *****************************************************************************
  */
 
+import React from './_React.mjs';
+
 export default function Table (props) {
   const { 
     data, 

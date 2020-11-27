@@ -8,7 +8,7 @@
  * *****************************************************************************
  */
 
-import Context from './Context.mjs';
+import React, { Context } from './_React.mjs';
 import { shallowEqual } from '../utils/assert.mjs';
 
 export default class Provider extends React.Component {

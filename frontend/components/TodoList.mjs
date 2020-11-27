@@ -7,6 +7,7 @@
  * *****************************************************************************
  */
 
+import React from './_React.mjs';
 import Button from './Button.mjs';
 import Message from './Message.mjs';
 import Form from './Form.mjs';

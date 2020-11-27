@@ -54,6 +54,11 @@ app.use(router.allowedMethods());
 // 压缩超过512kb的资源
 app.use(compress({ threshold: 512 * 1024 })); 
 
+app.use((ctx, next) => {
+  console.log('end');
+});
+
+
 // 开启监听
 app.listen({
   ipv6Only: false, // 是否仅开启IPV6

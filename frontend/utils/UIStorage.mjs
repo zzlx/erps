@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  * 
- * UI state
+ * UI storage
  *
  * 用于管理UI状态
  *
@@ -15,7 +15,7 @@
 import assert, { isPlainObject } from './assert.mjs';
 import * as reducers from '../reducers/index.mjs';
 
-export default class UIState {
+export default class UIStorage {
   constructor (state) {
     this.currentState = state;
     this.currentReducer = combineReducers(reducers);

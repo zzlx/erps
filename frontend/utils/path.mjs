@@ -119,6 +119,7 @@ function isAbsolute(path) {
  */
 
 function dirname(path) {
+  // const __dirname = p => p.substr(0, p.lastIndexOf('/'));
   if (path.length === 0) return '.';
 
   const isAbsolutePath = isAbsolute(path);

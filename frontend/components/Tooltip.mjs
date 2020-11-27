@@ -6,6 +6,7 @@
  *
  */
 
+import React from './_React.mjs';
 export default function tooltip (props) {
   return React.createElement(Tooltip, props);
 }

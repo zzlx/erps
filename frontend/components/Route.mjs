@@ -11,7 +11,7 @@
  * *****************************************************************************
  */
 
-import Context from "./Context.mjs";
+import React, { Context } from './_React.mjs';
 import matchPath from '../utils/matchPath.mjs';
 import warning from '../utils/warning.mjs';
 

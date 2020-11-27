@@ -5,6 +5,7 @@
  * @api public
  */
 
+import React from './_React.mjs';
 export default function Sprite (props = {}) {
   const { 
     showAll, 

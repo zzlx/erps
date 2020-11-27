@@ -8,6 +8,8 @@
  * *****************************************************************************
  */
 
+import React from './_React.mjs';
+
 export default function Figure (props) {
   const { className, ...rests } = props;
   const cn = [

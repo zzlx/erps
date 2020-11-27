@@ -8,7 +8,8 @@
  * *****************************************************************************
  */
 
-import Context from "./Context.mjs";
+import React from './_React.mjs';
+import { Context } from "./_React.mjs";
 import Countdown from './Countdown.mjs';
 
 import generatePath from "../utils/generatePath.mjs";

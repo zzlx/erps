@@ -15,6 +15,8 @@
  * *****************************************************************************
  */
 
+import React from './_React.mjs';
+
 export default function Picture (props) {
   const { src, sources, ...rests } = props;
 

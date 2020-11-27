@@ -7,6 +7,8 @@
  *
  */
 
+import React from './_React.mjs';
+
 export default class ProgressBar extends React.PureComponent {
   render() {
     const { 

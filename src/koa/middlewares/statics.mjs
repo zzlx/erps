@@ -58,6 +58,11 @@ export default function statics (root, options = {}) {
     const absolutePath = path.resolve(root, relativePath);
     let url = absolutePath;
 
+    // @todo: 完善重定向功能
+    if (path.basename(url) === '_React.mjs') {
+      url = path.join(path.dirname(url), '_React.browser.mjs');
+    }
+
     if (path.extname(url) === '' && fs.existsSync(url)) {
       // 匹配目录索引文件
       for (const index of opts.directoryIndex) {

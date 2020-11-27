@@ -19,31 +19,30 @@ export default function (options = {}) {
 
   return function compressMiddleware (ctx, next) {
     if (null == ctx.body) return next(); // null body
-    if (ctx.length && ctx.length <= opts.threshold) return next(); // length threshold
-    if (ctx.get('content-encoding') !== '') return next(); // 已设置content-encoding时不压缩
+    // length threshold
+    if (ctx.length && ctx.length <= opts.threshold) return next(); 
+    // 已设置content-encoding时不压缩
+    if (ctx.get('content-encoding') !== '') return next(); 
 
     ctx.set('vary', 'accept-encoding');
     const encoding = this.get('accept-encoding');
     const body = ctx.body;
-    const isStream = body && typeof body.pipe === 'function';
-    if (isStream) return next();
+
+    // stream 模式不启用压缩
+    if (body && typeof body.pipe === 'function') return next();
 
     if (/\bdeflate\b/.test(encoding)) {
       ctx.set('content-encoding', 'deflate');
-      if (isStream) ctx.body = body.pipe(zlib.createDeflate());
-      else ctx.body = zlib.deflateCompressSync(body);
+      ctx.body = zlib.deflateCompressSync(body);
     } else if (/\bgzip\b/.test(encoding)) {
       ctx.set('content-encoding', 'gzip');
-      if (isStream) ctx.body = body.pipe(zlib.createGzip());
-      else ctx.body = zlib.gzipSync(ctx.body);
+      ctx.body = zlib.gzipSync(ctx.body);
     } else if (/\bbr\b/.test(encoding)) {
       ctx.set('content-encoding', 'br');
-      if (isStream) ctx.body = body.pipe(zlib.createBrotliCompress());
-      else ctx.body = zlib.brotliCompressSync(ctx.body);
+      ctx.body = zlib.brotliCompressSync(ctx.body);
     } 
 
-    if (!isStream) ctx.length = Buffer.byteLength(ctx.body); // 重新计算内容大小
-    else ctx.remove('content-encoding');
+    ctx.length = Buffer.byteLength(ctx.body); // 重新计算内容大小
 
     return next();
   } 

@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import Context from '../components/Context.mjs';
+import React, {Context} from '../components/_React.mjs';
 import Circular from '../components/Circular.mjs';
 import { Footer } from '../components/Layout.mjs';
 import Placeholder from '../components/Placeholder.mjs';

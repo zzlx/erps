@@ -8,6 +8,8 @@
  * *****************************************************************************
  */
 
+import React from './_React.mjs';
+
 export default function Blockquote(props = {}) {
   const { className, children, ...rests } = props;
 

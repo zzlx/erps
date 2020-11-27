@@ -8,7 +8,8 @@
  * *****************************************************************************
  */
 
-import Context from './Context.mjs';
+import React from './_React.mjs';
+import { Context } from './_React.mjs';
 
 export default class Nav extends React.PureComponent {
     constructor(props) {

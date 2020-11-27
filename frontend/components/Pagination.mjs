@@ -11,6 +11,8 @@
  *
  */
 
+import React from './_React.mjs';
+
 import Anchor from './Anchor.mjs';
 
 export default function Pagination (props) {

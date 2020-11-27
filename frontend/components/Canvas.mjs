@@ -7,6 +7,8 @@
  * *****************************************************************************
  */
 
+import React from './_React.mjs';
+
 export default class Canvas extends React.PureComponent {
   constructor(props) {
     super(props);

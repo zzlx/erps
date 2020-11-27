@@ -18,10 +18,6 @@ import ReactDOMServer from 'react-dom/server.js';
 import React from 'react';
 import jsdom from 'jsdom';
 
-//import reactApp from '../public/reactApp.mjs'; // @caution: async module
-//import Store from '../public/utils/ReduxStore.mjs';
-globalThis.React = React;
-
 // 服务端渲染
 const opts = {
 };
@@ -68,6 +64,20 @@ export default function serverRender (options) {
 function addScript (props) {
   const document = this;
   const script = document.createElement("script");
-  for (const key of Object.keys(props)) script[key] = props[key];
+
+  for (const key of Object.keys(props)) {
+
+    /*
+    if (props[key] === 'module') {
+      // 预加载模块
+      const link = document.createElement('link');
+      link.rel= 'modulepreload';
+      link.href= props.src;
+      document.head.appendChild(link);
+    }
+    */
+
+    script[key] = props[key];
+  }
   document.head.appendChild(script);
 }

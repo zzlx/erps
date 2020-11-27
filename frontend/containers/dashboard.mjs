@@ -6,6 +6,7 @@
  * *****************************************************************************
  */
 
+import React from '../components/_React.mjs';
 import Card from '../components/Card.mjs';
 
 export default function Dashboard (props) {

@@ -8,6 +8,8 @@
  * *****************************************************************************
  */
 
+import React from './_React.mjs';
+
 export default function List (props) {
   const {
     action, disabled, row, flush,

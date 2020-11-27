@@ -11,6 +11,8 @@
  * *****************************************************************************
  */
 
+import React from './_React.mjs';
+
 export default function Breadcrumb(props) {
   const { data, children, ...rests } = props;
 

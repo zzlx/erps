@@ -1,11 +1,10 @@
 /**
  * *****************************************************************************
- *
- * Context
- *
- * 为子组件提供上下文数据
+ * 
+ * React module support
  *
  * *****************************************************************************
  */
 
-export default React.createContext(null);
+export const Context = globalThis.React.createContext(null);
+export default globalThis.React;

@@ -8,6 +8,7 @@
  * *****************************************************************************
  */
 
+import React from './_React.mjs';
 import Spinner from './Spinner.mjs';
 
 export default class Suspense extends React.PureComponent {

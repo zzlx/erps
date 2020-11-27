@@ -10,14 +10,18 @@
  * *****************************************************************************
  */
 
+import React from './components/_React.mjs';
 import Provider from './components/Provider.mjs';
 import Switcher from './components/Switcher.mjs';
 import Redirect from './components/Redirect.mjs';
 import Route from './components/Route.mjs';
-import UIState from './utils/UIState.mjs';
+import UIStorage from './utils/UIStorage.mjs';
 
-export default async function App () {
-  const store = new UIState();
+import HomePage from './containers/HomePage.mjs';
+
+
+export default function App () {
+  const store = new UIStorage();
 
   const routesArray = [];
 
@@ -27,7 +31,7 @@ export default async function App () {
   const routes = doc ? doc.value : [];
 
   for (const route of routes) {
-    const component = await import(`./containers/${route.app}.mjs`).then(m => m.default);
+    const component = import(`./containers/${route.app}.mjs`).then(m => m.default);
 
     if (route.from) {
       routesArray.push(React.createElement(Redirect, { key: i++, ...route, component }));
