@@ -766,10 +766,7 @@ export default class Context {
 
     // stream
     if (val && typeof val.pipe === 'function') {
-
-      const handler = err => { 
-        this.throw(err); 
-      };
+      const handler = err => this.throw(err);
 
       if (!~val.listeners('error').indexOf(handler)) val.on('error', handler);
       if (null !== original && original != val) this.remove('Content-Length');

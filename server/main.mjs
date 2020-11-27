@@ -39,23 +39,19 @@ app.tasksBeforeListen = [
   path.join(paths.BIN, 'css-render.mjs'),
 ];
 
-// 服务器基础功能配置
-app.use(error(paths.LOG_PATH)); // 记录中间件错误
+// 配置服务器基础功能
+app.use(error(paths.LOG_PATH));  // 记录中间件错误
 app.use(logger(paths.LOG_PATH)); // 记录访问日志
-settings.isDevel && app.use(xResponse(settings)); // 响应时间记录
-app.use(cors()); // 跨域访问支持
-app.use(cookies()); // 全局cookie支持
-
-// 执行服务端路由配置
-app.use(router.routes());
-app.use(router.allowedMethods());
-
-// 启用内容压缩-超过512kb时启用压缩
-// 压缩超过512kb的资源
-app.use(compress({ threshold: 512 * 1024 })); 
-
-app.use((ctx, next) => {
-  console.log('end');
+app.use(xResponse(settings));    // 响应时间记录
+app.use(cors());                 // 跨域访问支持
+app.use(cookies());              // 全局cookie支持
+app.use(router.routes()); // 执行服务端路由配置
+app.use(router.allowedMethods()); // 路由方法
+app.use(compress({ threshold: app.compressThreshold })); // 启用内容压缩
+app.env === 'development' && app.use((ctx, next) => {
+  console.log(ctx.pathname);
+  console.log(ctx.response.headers);
+  return next();
 });
 
 

@@ -8,7 +8,7 @@
  */
 
 import DOMRender from './utils/DOMRender.mjs';
-import App from './ReactApp.mjs';
+import ReactApp from './ReactApp.mjs';
 
 // 准备执行环境
 const appURL = new URL(import.meta.url);
@@ -16,7 +16,7 @@ const ua = window.navigator.userAgent;
 if (/MSIE/.test(ua)) container.innerHTML = '请使用Edge浏览器继续访问!';
 globalThis.env = appURL.searchParams.get('env') || 'production';
 
-DOMRender(App(), 'root', callback); // 浏览器客户端渲染
+DOMRender(ReactApp(), 'root', callback); // 浏览器客户端渲染
 
 function callback () {
   console.groupCollapsed('系统提示:');

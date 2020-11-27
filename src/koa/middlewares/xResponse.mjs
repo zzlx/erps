@@ -9,14 +9,12 @@
  * @param {string|object} format
  * @return {function} middleware
  * @api public
- *
  * *****************************************************************************
  */
 
-import os from 'os';
-
 export default function xResponse(opts = {}) {
   const gitINFO = opts.getGitInfo();
+
 	return async function xResponseMiddleware (ctx, next) {
     let timer= process.hrtime(); // use process.uptime can be efficient
     //const start = Date.now();
@@ -29,7 +27,7 @@ export default function xResponse(opts = {}) {
     const interval = Math.round(timer[0] * 1000 + timer[1] / 1000000);
     //const ms = Date.now() - start;
 
-    const platform = `${os.platform()}_${os.arch()}`;
+    const platform = `${opts.system.platform}_${opts.system.arch}`;
     const nodejs = `${process.release.name}@${process.version}`; 
     const git = `${gitINFO.branch}:${gitINFO.commit.substr(0,6)}`;
     const appInfo = `${opts.appName}@v${opts.appVersion}/${git}`;

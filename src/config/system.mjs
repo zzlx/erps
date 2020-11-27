@@ -9,7 +9,7 @@
 import os from 'os';
 
 export default new Proxy({
-  EOL: os.EOL,
+  totalmem: os.totalmem(),
   arch: os.arch(),
   cpus: os.cpus(),
   endianness: os.endianness(),
@@ -21,13 +21,14 @@ export default new Proxy({
   port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 8888,
   pidPrefix: 'org.zzlx',
   platform: os.platform(),
-  totalmem: os.totalmem(),
   type: os.type(),
   version: os.version(),
+  EOL: os.EOL,
 },{
   get: function (target, property, receiver) {
+
     if (property === 'freemem') return os.freemem();
-    if (property === 'sysUptime') return os.uptime();
+    if (property === 'osUptime') return os.uptime();
     if (property === 'processUptime') return process.uptime();
 
     return Reflect.get(target, property, receiver);

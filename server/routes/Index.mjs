@@ -58,4 +58,3 @@ settings.isDevel && router.get('/log/*', statics(LOG_PATH, { prefix: '/log' }));
 // 命名路由
 router.get('www', '/*', statics(WWW_PATH, { directoryIndex: 'index.html'}));
 router.get('indexes', '/*',  serverRender({ template: settings.templates.html}));
-

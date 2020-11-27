@@ -10,6 +10,8 @@
  * * renderToNodeStream(element) 
  * * renderToStaticNodeStream(element)
  *
+ * @param {object} options
+ *
  * *****************************************************************************
  */
 
@@ -18,19 +20,16 @@ import ReactDOMServer from 'react-dom/server.js';
 import React from 'react';
 import jsdom from 'jsdom';
 
-// 服务端渲染
-const opts = {
-};
-
 export default function serverRender (options) {
   const opts = Object.assign({
+    template: null,
   }, options);
 
   return async function serverRenderMiddleware (ctx, next) {
     // 转发有扩展名的路径至下一中间件
-    if (path.extname(ctx.pathname) !== '') return;
+    if (path.extname(ctx.pathname) !== '') return next();
     // @
-    if (ctx.body) return next();
+    if (ctx.body != null) return next();
 
     const ua = ctx.get('user-agent');
     const isIE = /MSIE/.test(ua);

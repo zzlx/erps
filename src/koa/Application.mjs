@@ -27,6 +27,8 @@ export default class Application extends EventEmitter {
     if (opts.keys) this.keys = opts.keys;
     this.silent = opts.silent ? true : false;
     this.serverCreator = opts.serverCreator || null;
+    this.compressThreshold = opts.compressThreshold || 512*1024; // compress threshold
+    this.streamThreshod = opts.streamThreshold || 5*1024*1024; // 5M
 
     // app storage
     this.middlewares = []; // store middlewares

@@ -14,11 +14,12 @@
  *
  * @param {string} root, The root directory from which to serve static assets.
  * @param {object} options
- *
+ * @return {function} middleware
  * *****************************************************************************
  */ 
 
 import assert from 'assert';
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
@@ -127,26 +128,48 @@ export default function statics (root, options = {}) {
     }); 
 
     ctx.length = stats.size;
-    ctx.body = fs.createReadStream(url, { emitClose: true, autoClose: true,});
+
+    // 如果内容大于app.streamThreshold,以stream传输数据
+    if (ctx.length > ctx.app.streamThreshold) {
+      ctx.body = fs.createReadStream(url, { emitClose: true, autoClose: true,});
+    } else {
+      ctx.body = fs.readFileSync(url, { encoding: 'utf8', flag: 'r'});
+    }
 
     return next();
   }
 }
 
 /**
- * Generate a tag for a stat.
+ * Create a simple ETag.
  *
- * @param {object} stat
- * @return {string}
- * @private
+ * @param {string|Buffer|Stats} entity
+ * @param {object} [options]
+ * @param {boolean} [options.weak]
+ * @return {String}
+ * @public
  */
 
-function statTag (stat) {
-  const mtime = stat.mtime.getTime().toString(16);
-  const size = stat.size.toString(16);
+export function etag (entity, options) {
+  if (entity == null) throw new TypeError('argument entity is required');
 
-  return '"' + size + '-' + mtime + '"';
+  // support fs.Stats object
+  const isStats = isstats(entity);
+  const weak = options && typeof options.weak === 'boolean'
+    ? options.weak
+    : isStats;
+
+  // validate argument
+  if (!isStats && typeof entity !== 'string' && !Buffer.isBuffer(entity)) {
+    throw new TypeError('argument entity must be string, Buffer, or fs.Stats')
+  }
+
+  // generate entity tag
+  const tag = isStats ? statTag(entity) : entitytag(entity);
+
+  return weak ? 'W/' + tag : tag
 }
+
 /**
  * Determine if object is a Stats object.
  *
@@ -156,10 +179,8 @@ function statTag (stat) {
  */
 
 function isstats (obj) {
-  // genuine fs.Stats
-  if (typeof Stats === 'function' && obj instanceof Stats) {
-    return true
-  }
+  // genune fs.Stats
+  if (typeof Stats === 'function' && obj instanceof Stats) return true
 
   // quack quack
   return obj && typeof obj === 'object' &&
@@ -178,54 +199,36 @@ function isstats (obj) {
  */
 
 function entitytag (entity) {
-  if (entity.length === 0) {
-    // fast-path empty
-    return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"'
-  }
+  // fast-path empty
+  if (entity.length === 0) return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"'
 
   // compute hash of entity
-  var hash = crypto
+  const hash = crypto
     .createHash('sha1')
     .update(entity, 'utf8')
     .digest('base64')
     .substring(0, 27)
 
   // compute length of entity
-  var len = typeof entity === 'string'
-    ? Buffer.byteLength(entity, 'utf8')
-    : entity.length
+  const len = typeof entity === 'string' 
+    ? Buffer.byteLength(entity, 'utf8') 
+    : entity.length;
 
-  return '"' + len.toString(16) + '-' + hash + '"'
+  return '"' + len.toString(16) + '-' + hash + '"';
 }
 
+
 /**
- * Create a simple ETag.
+ * Generate a tag for a stat.
  *
- * @param {string|Buffer|Stats} entity
- * @param {object} [options]
- * @param {boolean} [options.weak]
- * @return {String}
- * @public
+ * @param {object} stat
+ * @return {string}
+ * @private
  */
 
-function etag (entity, options) {
-  if (entity == null) {
-    throw new TypeError('argument entity is required')
-  }
+function statTag (stat) {
+  const mtime = stat.mtime.getTime().toString(16);
+  const size = stat.size.toString(16);
 
-  // support fs.Stats object
-  const isStats = isstats(entity);
-  const weak = options && typeof options.weak === 'boolean'
-    ? options.weak
-    : isStats;
-
-  // validate argument
-  if (!isStats && typeof entity !== 'string' && !Buffer.isBuffer(entity)) {
-    throw new TypeError('argument entity must be string, Buffer, or fs.Stats')
-  }
-
-  // generate entity tag
-  const tag = isStats ? statTag(entity) : entitytag(entity);
-
-  return weak ? 'W/' + tag : tag
+  return '"' + size + '-' + mtime + '"';
 }
