@@ -13,25 +13,29 @@
 
 import fs from 'fs';
 import path from 'path';
-import util from 'util';
 
 import { camelCase, console } from '../src/utils.lib.mjs';
 import settings from '../src/settings.mjs';
 import Koa from '../src/koa/Application.mjs';
 import { 
-  error, logger, cors, cookies, xResponse, compress, serverRender, 
+  error, 
+  logger, 
+  cors, 
+  cookies, 
+  xResponse, 
+  compress, 
+  serverRender, 
 } from '../src/koa/middlewares/index.mjs';
 import createServer from './http2-server.mjs';
 import { router } from './routes/index.mjs';
 
 const paths = settings.paths;
-const debug = util.debuglog('debug:main.mjs');
 
 // 初始化服务器程序
 const app = new Koa({
-  keys: settings.keys || 'erps',
-  serverCreator: createServer,
-  compressThreshold: 1*1024,
+  serverCreator: createServer,     // 服务器
+  keys: settings.keys || 'erps',   // 设置key值
+  contentNegotiation: false,       // 是否开启内容协商
 });
 
 // 服务重启时执行的任务清单:

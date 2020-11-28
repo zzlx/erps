@@ -57,6 +57,8 @@ export default function statics (root, options = {}) {
     // Response static resource:
     const relativePath = path.relative(opts.prefix, ctx.pathname);
     const absolutePath = path.resolve(root, relativePath);
+
+    // 实际文件路径
     let url = absolutePath;
 
     if (path.extname(url) === '' && fs.existsSync(url)) {
@@ -93,19 +95,26 @@ export default function statics (root, options = {}) {
     //ctx.set('vary', 'accept-encoding');
     ctx.set('vary', 'User-Agent');
 
-    // 支持静态资源压缩版本
-    const accetpEncoding = ctx.get('accept-encoding');
+    // content negotiation
+    if (this.app.opts.contentNegotiation) {
+      // 支持静态资源压缩版本
+      const accetpEncodings = ctx.get('accept-encoding');
 
-    if (/deflate/.test(accetpEncoding) && fs.existsSync(url + '.deflate')) {
-      ctx.set('content-encoding', 'deflate');
-      url += '.deflate';
-    } else if (/\bgzip\b/.test(accetpEncoding) && fs.existsSync(url + '.gz')) {
-      ctx.set('content-encoding', 'gzip');
-      url += '.gz';
-    } else if (/br/.test(accetpEncoding) && fs.existsSync(url + '.br')) {
-      ctx.set('content-encoding', 'br');
-      url += '.br';
-    } 
+      // 获取可接受的编码列表
+      // 使用获取的编码列表做类型判断
+      // console.log(accetpEncodings.split(/,\b/));
+
+      if (/deflate/.test(accetpEncodings) && fs.existsSync(url + '.deflate')) {
+        ctx.set('content-encoding', 'deflate');
+        url += '.deflate';
+      } else if (/\bgzip\b/.test(accetpEncodings) && fs.existsSync(url + '.gz')) {
+        ctx.set('content-encoding', 'gzip');
+        url += '.gz';
+      } else if (/br/.test(accetpEncodings) && fs.existsSync(url + '.br')) {
+        ctx.set('content-encoding', 'br');
+        url += '.br';
+      } 
+    }
 
     const stats = fs.lstatSync(url);
     const ETag = etag(stats); 
@@ -134,6 +143,7 @@ export default function statics (root, options = {}) {
     return next();
   }
 }
+
 
 /**
  * Create a simple ETag.

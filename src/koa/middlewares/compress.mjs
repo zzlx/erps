@@ -22,7 +22,7 @@ export default function compress (options = {}) {
   return function compressMiddleware (ctx, next) {
     if (!(Buffer.isBuffer(ctx.body) || typeof ctx.body === 'string')) return next();
     if (opts.encodings.includes(ctx.get('content-encoding'))) return next();
-    if (ctx.length && ctx.length <= opts.threshold) return next(); // threshold
+    if (ctx.length && ctx.length <= opts.threshold) return next();
     contentCompress(ctx); // 内容压缩
     return next();
   } 
@@ -41,7 +41,7 @@ export function contentCompress (ctx) {
 
   if (/\bdeflate\b/.test(encoding)) {
     ctx.set('content-encoding', 'deflate');
-    ctx.body = zlib.deflateCompressSync(body);
+    ctx.body = zlib.deflateSync(body);
   } else if (/\bgzip\b/.test(encoding)) {
     ctx.set('content-encoding', 'gzip');
     ctx.body = zlib.gzipSync(ctx.body);
