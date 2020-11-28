@@ -59,11 +59,6 @@ export default function statics (root, options = {}) {
     const absolutePath = path.resolve(root, relativePath);
     let url = absolutePath;
 
-    // @todo: 完善重定向功能
-    if (path.basename(url) === '_React.mjs') {
-      url = path.join(path.dirname(url), '_React.browser.mjs');
-    }
-
     if (path.extname(url) === '' && fs.existsSync(url)) {
       // 匹配目录索引文件
       for (const index of opts.directoryIndex) {
@@ -122,15 +117,15 @@ export default function statics (root, options = {}) {
 
     // 客户端缓存配置
     opts.etag && ctx.set('etag', ETag);
+
     ctx.set({
       //'last-modified': stats.mtime, // 开启浏览器端缓存
       //'cache-control': `max-age=${ctx.app.env === 'development' ? 0 : opts.maxAge}`,
     }); 
 
-    ctx.length = stats.size;
-
     // 如果内容大于app.streamThreshold,以stream传输数据
-    if (ctx.length > ctx.app.streamThreshold) {
+    if (stats.size > ctx.app.streamThreshold) {
+      ctx.length = stats.size;
       ctx.body = fs.createReadStream(url, { emitClose: true, autoClose: true,});
     } else {
       ctx.body = fs.readFileSync(url, { encoding: 'utf8', flag: 'r'});

@@ -22,8 +22,9 @@ const appPaths = (root => {
 
   fs.readdirSync(root, {withFileTypes: true}).forEach(file => {
     const name = String(file.name)
-      .replace(/^(\.)/, '')
-      .replace(/(\..+)$/, '')
+      .replace(/^(\.)/, '')       // 去掉dot前缀
+      .replace(/(\..+)$/, '')     // 去掉dot扩展名后缀
+      .replace('-', '_')
       .toUpperCase(); 
 
     Object.defineProperty(dirs, name, {
@@ -37,9 +38,8 @@ const appPaths = (root => {
   return dirs;
 })(path.dirname(path.dirname(path.dirname(import.meta.url.substr(7)))));
 
-export const paths = new Proxy(appPaths, {
+const paths = new Proxy(appPaths, {
   get: function (target, property, receiver) {
-    if (property === 'readyPaths') return () => mkdirs(target);
     return Reflect.get(target, property, receiver);
   },
 	set: function (target, property, value) {
@@ -63,15 +63,4 @@ paths.DATA_PATH = path.join(paths.HOME_PATH, 'data');
 paths.LOG_PATH  = path.join(paths.HOME_PATH, 'log');
 paths.WWW_PATH  = path.join(paths.HOME_PATH, 'www');
 
-/**
- * 创建目录
- *
- * @param {object} pathsObj
- * @param {object} options
- */
-
-export function mkdirs (pathsObj) {
-  for (let dir of Object.values(pathsObj)) {
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  }
-}
+export default paths;

@@ -9,8 +9,6 @@
 import path from 'path';
 import jsdom from 'jsdom';
 
-import ReactDOMServer from 'react-dom/server.js';
-import App from '../../frontend/ReactApp.mjs';
 import Router from '../../src/koa/Router.mjs';
 import { 
   statics, 
@@ -21,24 +19,13 @@ import settings from '../../src/settings.mjs';
 
 const paths = settings.paths;
 
-const { 
-  FRONTEND,
-  PUBLIC,
-  LOG_PATH,
-  WWW_PATH,
-  DOCS,
-  SERVER,
-} = settings.paths;
-
-const router = new Router(); // 路由配置
-export default router;
-
+export const router = new Router(); // 路由配置
 // 静态资源服务配置
 //
 // 配置前端资源
-router.get('/webUI/*', statics(paths.FRONTEND, { prefix: '/webUI' }));
+router.get('/webUI/*', statics(paths.REACT_CLIENT, { prefix: '/webUI' }));
 
-router.get('/api', (ctx, next) => {
+router.get('/api', async (ctx, next) => {
   ctx.type = 'html';
   const html = new HTMLTemplate({ styles: ['/assets/css/styles.css'], });
   const md = new Remarkable({ html: true, });
@@ -53,8 +40,12 @@ router.get('/api', (ctx, next) => {
 //
 // @TODOS:
 // 1. 读取log/request.log时,readStream无法关闭
-settings.isDevel && router.get('/log/*', statics(LOG_PATH, { prefix: '/log' }));
+settings.isDevel && router.get('/log/*', statics(paths.LOG_PATH, { prefix: '/log' }));
 
 // 命名路由
-router.get('www', '/*', statics(WWW_PATH, { directoryIndex: 'index.html'}));
-router.get('indexes', '/*',  serverRender({ template: settings.templates.html}));
+router.get('www', '/*', statics(paths.WWW_PATH, { directoryIndex: 'index.html'}));
+
+router.get('indexes', '/*',  serverRender({ 
+  root: paths.REACT_CLIENT,
+  template: settings.templates.HomePageHtml,
+}));

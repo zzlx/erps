@@ -16,14 +16,18 @@
  */
 
 import path from 'path';
-import ReactDOMServer from 'react-dom/server.js';
 import React from 'react';
+import ReactDOMServer from 'react-dom/server.js';
 import jsdom from 'jsdom';
+
+globalThis.React = React;
 
 export default function serverRender (options) {
   const opts = Object.assign({
     template: null,
   }, options);
+
+  const ReactApp = import(`${opts.root}/ReactApp.mjs`).then(m => m.default);
 
   return async function serverRenderMiddleware (ctx, next) {
     // 转发有扩展名的路径至下一中间件

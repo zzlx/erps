@@ -16,11 +16,10 @@ import Switcher from './components/Switcher.mjs';
 import Redirect from './components/Redirect.mjs';
 import Route from './components/Route.mjs';
 import UIStorage from './utils/UIStorage.mjs';
-
 import HomePage from './containers/HomePage.mjs';
 
 
-export default function App () {
+export default async function App () {
   const store = new UIStorage();
 
   const routesArray = [];

@@ -20,11 +20,10 @@ export default function compress (options = {}) {
   }, options);
 
   return function compressMiddleware (ctx, next) {
-    // 支持的压缩类型: Buffer/String
     if (!(Buffer.isBuffer(ctx.body) || typeof ctx.body === 'string')) return next();
+    if (opts.encodings.includes(ctx.get('content-encoding'))) return next();
     if (ctx.length && ctx.length <= opts.threshold) return next(); // threshold
-    if (opts.encodings.include(ctx.get('content-encoding'))) return next();
-    contentCompress(ctx); // 内容压缩算法
+    contentCompress(ctx); // 内容压缩
     return next();
   } 
 } 
@@ -35,6 +34,7 @@ export default function compress (options = {}) {
  */
 
 export function contentCompress (ctx) {
+  
   ctx.set('vary', 'accept-encoding');
   const body = ctx.body; // get ctx.body
   const encoding = ctx.get('accept-encoding');
@@ -49,6 +49,4 @@ export function contentCompress (ctx) {
     ctx.set('content-encoding', 'br');
     ctx.body = zlib.brotliCompressSync(ctx.body);
   } 
-
-  ctx.length = Buffer.byteLength(ctx.body); // 重新计算内容大小
 }

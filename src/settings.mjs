@@ -20,22 +20,22 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import './config/env.mjs';
-import { paths, appName, appVersion } from './config/paths.mjs';
-import system from './config/system.mjs';
-import templates from './config/templates.mjs';
+import './settings/env.mjs';
+import paths, { appName, appVersion } from './settings/paths.mjs';
+import system from './settings/system.mjs';
+import templates from './settings/templates.mjs';
 
 // settings from config
-const sfc = fs.readFileSync(path.join(paths.HOME_PATH, 'settings.json'), 'utf8');
+const sfc = fs.readFileSync(paths.CONFIG, 'utf8');
 const configs = JSON.parse(sfc);
-paths.readyPaths();
+mkdirs(paths);
 
 export default new Proxy(Object.assign({}, configs, { 
-  paths: paths,
-  system: system,
+  paths,
+  system,
   appName,
-  templates,
   appVersion,
+  templates,
 }), {
   get: function (target, property, receiver) {
     if (property === 'isDevel') return process.env.NODE_ENV === 'development';
@@ -120,3 +120,15 @@ function readConfig () {
   });
 }
 
+/**
+ * 创建目录
+ *
+ * @param {object} pathsObj
+ * @param {object} options
+ */
+
+export function mkdirs (pathsObj) {
+  for (let dir of Object.values(pathsObj)) {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  }
+}

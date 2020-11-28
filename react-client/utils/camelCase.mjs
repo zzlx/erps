@@ -13,9 +13,9 @@
  */
 
 export default function camelCase (value, capitalized = true) {
-  return value
-    .toLowerCase()
+  return value.toLowerCase()
+    .replace(/\./g, '-')
     .replace(/(\b|-|_)\w/g, m => m.toUpperCase())
+    .replace(/_|-|\s+\W/g, '')
     .replace(/^\w/, m => capitalized ? m : m.toLowerCase())
-    .replace(/_|-|\s+|\W/, '');
 }

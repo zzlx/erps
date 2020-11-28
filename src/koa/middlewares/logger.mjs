@@ -12,20 +12,15 @@
  * *****************************************************************************
  */
 
-import fs from 'fs';
-import path from 'path';
-import util from 'util';
+import assert from 'assert';
 import { date } from '../../../src/utils.lib.mjs';
 import logWriter from '../logWriter.mjs';
 
-const debug = util.debuglog('debug:logger.mjs');
-
 export default function logger (options = {}) {
-  const opts = Object.assign({}, {
-    path: process.cwd(),
-  }, typeof options === 'string' ? {path: options} : options);
+  const opts = Object.assign({
+  }, typeof options === 'string' ? { logFile: options } : options);
 
-  const logFile = path.join(opts.path, 'request.log');
+  assert(opts.logFile, 'opts.logFile must be setting.');
 
   return async function logMiddleware (ctx, next) {
     ctx.state.log = {
@@ -47,6 +42,6 @@ export default function logger (options = {}) {
     ctx.state.log['status'] = ctx.status;
     if (ctx.state.noLog) return; // 记录request log
 
-    logWriter(logFile, ctx.state.log);
+    logWriter(opts.logFile, ctx.state.log);
   } 
 }

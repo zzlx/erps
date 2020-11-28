@@ -6,15 +6,11 @@
  * *****************************************************************************
  */
 
-import path from 'path';
 import logWriter from '../logWriter.mjs';
 
 export default function error (options = {}) {
-  const opts = Object.assign({}, {
-    path: process.cwd(),
-  }, typeof options === 'string' ? {path: options} : options);
-
-  const logFile = path.join(opts.path, 'error.log');
+  const opts = Object.assign({
+  }, typeof options === 'string' ? { logFile: options } : options);
 
   return async function errorMiddleware (ctx, next) {
     try {
@@ -22,7 +18,7 @@ export default function error (options = {}) {
 
       await next();
     } catch (err) {
-      logWriter(logFile, err);
+      logWriter(opts.logFile, err);
       return Promise.reject(err);
     }
   } 

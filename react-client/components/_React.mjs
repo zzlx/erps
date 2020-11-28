@@ -6,5 +6,6 @@
  * *****************************************************************************
  */
 
-export const Context = globalThis.React.createContext(null);
-export default globalThis.React;
+const React = globalThis.React;
+export const Context = React.createContext(null);
+export default React;

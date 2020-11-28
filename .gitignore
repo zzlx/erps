@@ -25,6 +25,7 @@ node_modules
 *.local
 *.local.conf
 *.local.json
+.config.json
 
 # C编译产生的文件
 *.o

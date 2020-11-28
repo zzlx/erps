@@ -13,6 +13,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import util from 'util';
 
 import { camelCase, console } from '../src/utils.lib.mjs';
 import settings from '../src/settings.mjs';
@@ -21,14 +22,16 @@ import {
   error, logger, cors, cookies, xResponse, compress, serverRender, 
 } from '../src/koa/middlewares/index.mjs';
 import createServer from './http2-server.mjs';
-import router from './routes/index.mjs';
+import { router } from './routes/index.mjs';
 
 const paths = settings.paths;
+const debug = util.debuglog('debug:main.mjs');
 
 // 初始化服务器程序
 const app = new Koa({
   keys: settings.keys || 'erps',
   serverCreator: createServer,
+  compressThreshold: 1*1024,
 });
 
 // 服务重启时执行的任务清单:
@@ -40,20 +43,14 @@ app.tasksBeforeListen = [
 ];
 
 // 配置服务器基础功能
-app.use(error(paths.LOG_PATH));  // 记录中间件错误
-app.use(logger(paths.LOG_PATH)); // 记录访问日志
+app.use(error(path.join(paths.LOG_PATH, 'error.log')));  // 记录中间件错误
+app.use(logger(path.join(paths.LOG_PATH, 'request.log'))); // 记录访问日志
 app.use(xResponse(settings));    // 响应时间记录
 app.use(cors());                 // 跨域访问支持
 app.use(cookies());              // 全局cookie支持
 app.use(router.routes()); // 执行服务端路由配置
 app.use(router.allowedMethods()); // 路由方法
 app.use(compress({ threshold: app.compressThreshold })); // 启用内容压缩
-app.env === 'development' && app.use((ctx, next) => {
-  console.log(ctx.pathname);
-  console.log(ctx.response.headers);
-  return next();
-});
-
 
 // 开启监听
 app.listen({

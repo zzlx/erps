@@ -19,7 +19,7 @@
 
 import assert from 'assert';
 import fs from 'fs';
-import { paths, appName } from './paths.mjs';
+import paths, { appName } from './paths.mjs';
 
 if (fs.existsSync(paths.ENV)) {
   const dotenvObj = envParser(fs.readFileSync(paths.ENV));
