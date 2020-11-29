@@ -16,7 +16,8 @@ import Switcher from './components/Switcher.mjs';
 import Redirect from './components/Redirect.mjs';
 import Route from './components/Route.mjs';
 import UIStorage from './utils/UIStorage.mjs';
-import HomePage from './containers/HomePage.mjs';
+
+import HomePage from './apps/HomePage.mjs';
 
 
 export default async function App () {

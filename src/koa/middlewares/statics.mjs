@@ -19,11 +19,11 @@
  */ 
 
 import assert from 'assert';
-import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
 import { HTTP_STATUS } from '../constants.mjs';
+import etag from '../utils/etag.mjs';
 
 export default function statics (root, options = {}) {
   assert('string' === typeof root, 'The root directory must be setting.');
@@ -92,27 +92,27 @@ export default function statics (root, options = {}) {
     // 应该用一个缓存的回复(response)还是向源服务器请求一个新的回复。
     // 在响应状态码为 304 Not Modified  的响应中，
     // 也要设置 Vary 首部，而且要与相应的 200 OK 响应设置得一模一样。
-    //ctx.set('vary', 'accept-encoding');
     ctx.set('vary', 'User-Agent');
 
     // content negotiation
     if (this.app.opts.contentNegotiation) {
       // 支持静态资源压缩版本
       const accetpEncodings = ctx.get('accept-encoding');
+      //ctx.set('vary', 'accept-encoding');
 
       // 获取可接受的编码列表
       // 使用获取的编码列表做类型判断
       // console.log(accetpEncodings.split(/,\b/));
 
-      if (/deflate/.test(accetpEncodings) && fs.existsSync(url + '.deflate')) {
-        ctx.set('content-encoding', 'deflate');
-        url += '.deflate';
+      if (/br/.test(accetpEncodings) && fs.existsSync(url + '.br')) {
+        ctx.set('content-encoding', 'br');
+        url += '.br';
       } else if (/\bgzip\b/.test(accetpEncodings) && fs.existsSync(url + '.gz')) {
         ctx.set('content-encoding', 'gzip');
         url += '.gz';
-      } else if (/br/.test(accetpEncodings) && fs.existsSync(url + '.br')) {
-        ctx.set('content-encoding', 'br');
-        url += '.br';
+      } else if (/deflate/.test(accetpEncodings) && fs.existsSync(url + '.deflate')) {
+        ctx.set('content-encoding', 'deflate');
+        url += '.deflate';
       } 
     }
 
@@ -133,7 +133,7 @@ export default function statics (root, options = {}) {
     }); 
 
     // 如果内容大于app.streamThreshold,以stream传输数据
-    if (stats.size > ctx.app.streamThreshold) {
+    if (stats.size > ctx.app.opts.streamThreshold) {
       ctx.length = stats.size;
       ctx.body = fs.createReadStream(url, { emitClose: true, autoClose: true,});
     } else {
@@ -142,98 +142,4 @@ export default function statics (root, options = {}) {
 
     return next();
   }
-}
-
-
-/**
- * Create a simple ETag.
- *
- * @param {string|Buffer|Stats} entity
- * @param {object} [options]
- * @param {boolean} [options.weak]
- * @return {String}
- * @public
- */
-
-export function etag (entity, options) {
-  if (entity == null) throw new TypeError('argument entity is required');
-
-  // support fs.Stats object
-  const isStats = isstats(entity);
-  const weak = options && typeof options.weak === 'boolean'
-    ? options.weak
-    : isStats;
-
-  // validate argument
-  if (!isStats && typeof entity !== 'string' && !Buffer.isBuffer(entity)) {
-    throw new TypeError('argument entity must be string, Buffer, or fs.Stats')
-  }
-
-  // generate entity tag
-  const tag = isStats ? statTag(entity) : entitytag(entity);
-
-  return weak ? 'W/' + tag : tag
-}
-
-/**
- * Determine if object is a Stats object.
- *
- * @param {object} obj
- * @return {boolean}
- * @api private
- */
-
-function isstats (obj) {
-  // genune fs.Stats
-  if (typeof Stats === 'function' && obj instanceof Stats) return true
-
-  // quack quack
-  return obj && typeof obj === 'object' &&
-    'ctime' in obj && toString.call(obj.ctime) === '[object Date]' &&
-    'mtime' in obj && toString.call(obj.mtime) === '[object Date]' &&
-    'ino' in obj && typeof obj.ino === 'number' &&
-    'size' in obj && typeof obj.size === 'number'
-}
-
-/**
- * Generate an entity tag.
- *
- * @param {Buffer|string} entity
- * @return {string}
- * @private
- */
-
-function entitytag (entity) {
-  // fast-path empty
-  if (entity.length === 0) return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"'
-
-  // compute hash of entity
-  const hash = crypto
-    .createHash('sha1')
-    .update(entity, 'utf8')
-    .digest('base64')
-    .substring(0, 27)
-
-  // compute length of entity
-  const len = typeof entity === 'string' 
-    ? Buffer.byteLength(entity, 'utf8') 
-    : entity.length;
-
-  return '"' + len.toString(16) + '-' + hash + '"';
-}
-
-
-/**
- * Generate a tag for a stat.
- *
- * @param {object} stat
- * @return {string}
- * @private
- */
-
-function statTag (stat) {
-  const mtime = stat.mtime.getTime().toString(16);
-  const size = stat.size.toString(16);
-
-  return '"' + size + '-' + mtime + '"';
 }

@@ -44,6 +44,7 @@ paths.CACHE_PATH = path.join(paths.HOME_PATH, 'cache');
 paths.DATA_PATH = path.join(paths.HOME_PATH, 'data');
 paths.LOG_PATH = path.join(paths.HOME_PATH, 'log');
 paths.WWW_PATH = path.join(paths.HOME_PATH, 'www');
+paths.TEST_FILE = path.join(paths.HOME_PATH, 'test.md');
 
 export default new Proxy(paths, {
   get: function (target, property, receiver) {

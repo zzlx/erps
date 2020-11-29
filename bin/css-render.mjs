@@ -12,7 +12,7 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
-import settings from '../src/settings.mjs';
+import settings from '../src/settings/index.mjs';
 
 const isDevel = process.env.NODE_ENV === 'development' ? true : false;
 const paths = settings.paths; // 获取目录配置
@@ -25,6 +25,7 @@ const cssFile = path.join(
 );
 const cssFileDeflate = cssFile + '.deflate';
 const cssFileBr = cssFile + '.br';
+const cssFileGz = cssFile + '.gz';
 
 // node-sass module
 import('node-sass').then(m => new Promise((resolve, reject) => {
@@ -41,8 +42,9 @@ import('node-sass').then(m => new Promise((resolve, reject) => {
 
     const tasks = Promise.all([
       fs.promises.writeFile(cssFile, result.css),
-      fs.promises.writeFile(cssFileDeflate, zlib.deflateSync(result.css)),
+      fs.promises.writeFile(cssFileGz, zlib.gzipSync(result.css)),
       fs.promises.writeFile(cssFileBr, zlib.brotliCompressSync(result.css)),
+      fs.promises.writeFile(cssFileDeflate, zlib.deflateSync(result.css)),
     ].filter(Boolean));
 
     resolve(tasks);

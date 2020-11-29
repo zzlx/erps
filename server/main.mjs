@@ -15,17 +15,14 @@ import fs from 'fs';
 import path from 'path';
 
 import { camelCase, console } from '../src/utils.lib.mjs';
-import settings from '../src/settings.mjs';
+import settings from '../src/settings/index.mjs';
 import Koa from '../src/koa/Application.mjs';
-import { 
-  error, 
-  logger, 
-  cors, 
-  cookies, 
-  xResponse, 
-  compress, 
-  serverRender, 
-} from '../src/koa/middlewares/index.mjs';
+import cors from '../src/koa/middlewares/cors.mjs';
+import cookies from '../src/koa/middlewares/cookies.mjs';
+import compress from '../src/koa/middlewares/compress.mjs';
+import error from '../src/koa/middlewares/error.mjs';
+import logger from '../src/koa/middlewares/logger.mjs';
+import xResponse from '../src/koa/middlewares/xResponse.mjs';
 import createServer from './http2-server.mjs';
 import { router } from './routes/index.mjs';
 
@@ -33,10 +30,10 @@ const paths = settings.paths;
 
 // 初始化服务器程序
 const app = new Koa({
-  serverCreator: createServer,     // 服务器
-  keys: settings.keys || 'erps',   // 设置key值
-  contentNegotiation: false,       // 是否开启内容协商
+  env: process.env.NODE_ENV,
 });
+
+app.serverCreator = createServer,// 服务器
 
 // 服务重启时执行的任务清单:
 // 无保证的任务
@@ -47,14 +44,14 @@ app.tasksBeforeListen = [
 ];
 
 // 配置服务器基础功能
-app.use(error(path.join(paths.LOG_PATH, 'error.log')));  // 记录中间件错误
+app.use(error(path.join(paths.LOG_PATH, 'error.log'))); // 记录中间件错误
 app.use(logger(path.join(paths.LOG_PATH, 'request.log'))); // 记录访问日志
-app.use(xResponse(settings));    // 响应时间记录
-app.use(cors());                 // 跨域访问支持
-app.use(cookies());              // 全局cookie支持
+app.use(xResponse()); // 响应时间记录
+app.use(cors()); // 跨域访问支持
+app.use(cookies()); // 全局cookie支持
 app.use(router.routes()); // 执行服务端路由配置
 app.use(router.allowedMethods()); // 路由方法
-app.use(compress({ threshold: app.compressThreshold })); // 启用内容压缩
+app.use(compress()); // 启用内容压缩
 
 // 开启监听
 app.listen({

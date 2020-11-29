@@ -11,7 +11,7 @@
  * *****************************************************************************
  */
 
-import React, { Context } from './_React.mjs';
+import React from './_React.mjs';
 import matchPath from '../utils/matchPath.mjs';
 import warning from '../utils/warning.mjs';
 
@@ -95,5 +95,3 @@ export default class Route extends React.Component {
     );
   }
 }
-
-Route.contextType = Context;

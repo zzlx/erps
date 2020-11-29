@@ -20,10 +20,10 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import './settings/env.mjs';
-import paths, { appName, appVersion } from './settings/paths.mjs';
-import system from './settings/system.mjs';
-import templates from './settings/templates.mjs';
+import './env.mjs';
+import paths, { appName, appVersion } from './paths.mjs';
+import system from './system.mjs';
+import templates from './templates.mjs';
 
 // settings from config
 const sfc = fs.readFileSync(paths.CONFIG, 'utf8');
@@ -128,7 +128,10 @@ function readConfig () {
  */
 
 export function mkdirs (pathsObj) {
-  for (let dir of Object.values(pathsObj)) {
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  for (let p of Object.values(pathsObj)) {
+    if (!fs.existsSync(p)) {
+      if (/PATH$/.test(p)) fs.promises.mkdir(p, { recursive: true });
+      if (/FILE$/.test(p)) fs.promises.writeFile(p, '');
+    }
   }
 }

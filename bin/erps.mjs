@@ -25,7 +25,7 @@ import {
   console, 
 } from '../src/utils.lib.mjs';
 
-import settings from '../src/settings.mjs';
+import settings from '../src/settings/index.mjs';
 
 const paths = settings.paths;
 

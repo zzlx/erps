@@ -7,7 +7,7 @@
  * *****************************************************************************
  */
 
-import settings from '../settings.mjs';
+import settings from '../settings/index.mjs';
 
 const APIs = {
   district: {

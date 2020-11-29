@@ -12,25 +12,33 @@ import EventEmitter from 'events';
 
 import Context from './Context.mjs';
 import compose from './compose.mjs';
-import respond from './respond.mjs';
 import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
 
 export default class Application extends EventEmitter {
-  constructor(opts) {
+  constructor(opts = {}) {
     super();
-    this.opts = opts;
+    assert(typeof opts === 'object', 'The opts you provided must be an object.');
+
+    this.opts = Object.assign({
+      // default options
+      env: 'production',
+      keys: "endsC5vcmc=",
+      protocol: 'http2',
+      contentNegotiation: true, // 默认开启
+      compressThreshold: 256*1024, // 256kb
+      streamThreshold: 1024*1024,  // 1024kb
+      silent: false,
+      subdomainOffset: 2,
+    }, opts);
 
     // setting properties
-    this.env = opts.env || process.env.NODE_ENV || 'production';
-    this.protocol = 'http2';
+    this.env = this.opts.env;
+    this.protocol = this.opts.protocol;
     this.proxy = opts.proxy ? 'true' : false;
-    this.subdomainOffset = opts.subdomainOffset || 2;
-    if (opts.keys) this.keys = opts.keys;
-    this.silent = opts.silent ? true : false;
+    this.subdomainOffset = this.opts.subdomainOffset;
+    if (opts.keys) this.keys = this.opts.keys;
+    this.silent = this.opts.silent;
     this.serverCreator = opts.serverCreator || null;
-
-    this.compressThreshold = opts.compressThreshold || 512*1024; // compress threshold
-    this.streamThreshold = opts.streamThreshold || 5*1024*1024; // 5M
 
     // app storage
     this.middlewares = []; // store middlewares
@@ -40,7 +48,7 @@ export default class Application extends EventEmitter {
   }
 
   /**
-   * 开启服务器监听
+   * begin listening
    */
 
   listen () {
@@ -118,4 +126,31 @@ export default class Application extends EventEmitter {
     const msg = err.stack || err.toString();
     console.error(msg.replace(/^/gm, '  '));
   }
+}
+
+/**
+ * respond algorithm
+ */
+
+export function respond (ctx) {
+  if (ctx.respond === false) return ctx.stream.end(); // allow bypassing respond
+
+  if (null == ctx.status) ctx.status = 404; // set 404 status if not set
+  if (null == ctx.body) ctx.body = ctx.status + ": " + ctx.message;
+
+  // response headers
+  if (ctx.headersSent === false) {
+    ctx.stream.respond(ctx.response.headers, {
+      endStream: HTTP_STATUS_EMPTY_CODES.includes(ctx.status) ? true : false, 
+      waitForTrailers: false, 
+    });
+  }
+
+  // respond contents
+  if ('HEAD' === ctx.method)  return ctx.stream.end();
+  if (ctx.writable === false) return ctx.stream.end();
+  if (Buffer.isBuffer(ctx.body)) return ctx.stream.end(ctx.body);
+  if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
+  if (typeof ctx.body.pipe === 'function') return ctx.body.pipe(ctx.stream);
+  return ctx.stream.end(); // respond with no content
 }

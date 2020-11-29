@@ -623,6 +623,10 @@
     "compressible": true,
     "extensions": ["its"]
   },
+  "application/importmap+json": {
+    "compressible": true,
+    "extensions": ["importmap"]
+  },
   "application/java-archive": {
     "source": "apache",
     "compressible": false,
@@ -642,7 +646,7 @@
     "source": "iana",
     "charset": "UTF-8",
     "compressible": true,
-    "extensions": ["js","mjs"]
+    "extensions": ["js", "mjs"]
   },
   "application/jf2feed+json": {
     "source": "iana",

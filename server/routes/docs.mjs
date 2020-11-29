@@ -9,7 +9,7 @@
 
 import path from 'path';
 import { Router, statics, dynamics } from '../../src/koa/Application.mjs';
-import settings from '../../src/settings.mjs';
+import settings from '../../src/settings/index.mjs';
 
 const paths = settings.paths;
 

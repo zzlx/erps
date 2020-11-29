@@ -10,12 +10,10 @@ import path from 'path';
 import jsdom from 'jsdom';
 
 import Router from '../../src/koa/Router.mjs';
-import { 
-  statics, 
-  serverRender,
-  dynamics 
-} from '../../src/koa/middlewares/index.mjs';
-import settings from '../../src/settings.mjs';
+import dynamics from '../../src/koa/middlewares/dynamics.mjs';
+import statics from '../../src/koa/middlewares/statics.mjs';
+import serverRender from '../../src/koa/middlewares/serverRender.mjs';
+import settings from '../../src/settings/index.mjs';
 
 const paths = settings.paths;
 
@@ -23,7 +21,7 @@ export const router = new Router(); // 路由配置
 // 静态资源服务配置
 //
 // 配置前端资源
-router.get('/webUI/*', statics(paths.REACT_CLIENT, { prefix: '/webUI' }));
+router.get('/webUI/*', statics(paths.UIOS, { prefix: '/webUI' }));
 
 router.get('/api', async (ctx, next) => {
   ctx.type = 'html';
@@ -46,6 +44,6 @@ settings.isDevel && router.get('/log/*', statics(paths.LOG_PATH, { prefix: '/log
 router.get('www', '/*', statics(paths.WWW_PATH, { directoryIndex: 'index.html'}));
 
 router.get('indexes', '/*',  serverRender({ 
-  root: paths.REACT_CLIENT,
+  root: paths.UIOS,
   template: settings.templates.HomePageHtml,
 }));
