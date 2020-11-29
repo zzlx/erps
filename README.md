@@ -9,6 +9,5 @@ ERP服务系统(ERP service system, ERPs),提供OA、CRM、会计、资产以及
 
 Copyright (C) 2019-present zzlx.org
 
-> 参照MIT许可 
 > [MIT-like](./LICENSE.md) License
 
