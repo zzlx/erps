@@ -31,7 +31,7 @@ export default async function App () {
   const routes = doc ? doc.value : [];
 
   for (const route of routes) {
-    const component = import(`./containers/${route.app}.mjs`).then(m => m.default);
+    const component = import(`./apps/${route.app}.mjs`).then(m => m.default);
 
     if (route.from) {
       routesArray.push(React.createElement(Redirect, { key: i++, ...route, component }));

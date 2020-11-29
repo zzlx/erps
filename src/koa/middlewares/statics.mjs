@@ -48,8 +48,6 @@ export default function statics (root, options = {}) {
   if (!Array.isArray(opts.directoryIndex)) opts.directoryIndex = false;
 
   return function staticsMiddleware (ctx, next) {
-    console.log(ctx.pathname);
-
     // 旁路规则:
     if (!/GET|HEAD/.test(ctx.method)) return next(); // 1. 非GET、HEAD请求方法时
     if (ctx.body != null) return next(); // 2. body已被设置时
@@ -86,6 +84,7 @@ export default function statics (root, options = {}) {
     if (path.extname(url) === '') return next(); 
     if (!fs.existsSync(url)) return next(); // 文件不存在时,不再响应
 
+    // Set content type
     ctx.type = path.extname(url);
 
     // 内容协商算法:
@@ -96,11 +95,9 @@ export default function statics (root, options = {}) {
     // 也要设置 Vary 首部，而且要与相应的 200 OK 响应设置得一模一样。
     ctx.set('vary', 'User-Agent');
 
-    // Content negotiation
+    // 内容协商: 编码格式
     if (opts.contentNegotiation) {
-      //ctx.set('vary', 'accept-encoding');
       const encodings = ctx.get('accept-encoding').split(/\b,\s?/);
-      console.log(encodings);
 
       for (const encoding of encodings) {
         if ('br' === encoding && fs.existsSync(url + '.br')) {

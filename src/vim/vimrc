@@ -131,7 +131,7 @@ set background=light
 
 if &background == "light"
   "hi Normal  ctermfg=Black ctermbg=LightYellow
-  hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey font='Monospace 16'
+  hi Comment ctermfg=DarkGrey ctermbg=None guifg=DarkGrey
   hi StatusLine ctermfg=LightGray ctermbg=DarkBlue
 endif
 
