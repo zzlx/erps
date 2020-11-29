@@ -29,6 +29,7 @@ export default function statics (root, options = {}) {
   assert('string' === typeof root, 'The root directory must be setting.');
 
   const opts = Object.assign({
+    contentNegotiation: true,
     dotfiles: 'ignore',
     etag: true,
     directoryIndex: [ 'index.html' ],
@@ -47,6 +48,7 @@ export default function statics (root, options = {}) {
   if (!Array.isArray(opts.directoryIndex)) opts.directoryIndex = false;
 
   return function staticsMiddleware (ctx, next) {
+    console.log(ctx.pathname);
 
     // 旁路规则:
     if (!/GET|HEAD/.test(ctx.method)) return next(); // 1. 非GET、HEAD请求方法时
@@ -94,26 +96,31 @@ export default function statics (root, options = {}) {
     // 也要设置 Vary 首部，而且要与相应的 200 OK 响应设置得一模一样。
     ctx.set('vary', 'User-Agent');
 
-    // content negotiation
-    if (this.app.opts.contentNegotiation) {
-      // 支持静态资源压缩版本
-      const accetpEncodings = ctx.get('accept-encoding');
+    // Content negotiation
+    if (opts.contentNegotiation) {
       //ctx.set('vary', 'accept-encoding');
+      const encodings = ctx.get('accept-encoding').split(/\b,\s?/);
+      console.log(encodings);
 
-      // 获取可接受的编码列表
-      // 使用获取的编码列表做类型判断
-      // console.log(accetpEncodings.split(/,\b/));
+      for (const encoding of encodings) {
+        if ('br' === encoding && fs.existsSync(url + '.br')) {
+          ctx.set('content-encoding', 'br');
+          url += '.br';
+          break;
+        }
 
-      if (/br/.test(accetpEncodings) && fs.existsSync(url + '.br')) {
-        ctx.set('content-encoding', 'br');
-        url += '.br';
-      } else if (/\bgzip\b/.test(accetpEncodings) && fs.existsSync(url + '.gz')) {
-        ctx.set('content-encoding', 'gzip');
-        url += '.gz';
-      } else if (/deflate/.test(accetpEncodings) && fs.existsSync(url + '.deflate')) {
-        ctx.set('content-encoding', 'deflate');
-        url += '.deflate';
-      } 
+        if ('gzip' === encoding && fs.existsSync(url + '.gz')) {
+          ctx.set('content-encoding', 'gzip');
+          url += '.gz';
+          break;
+        }
+
+        if ('deflate' === encoding && fs.existsSync(url + '.deflate')) {
+          ctx.set('content-encoding', 'deflate');
+          url += '.deflate';
+          break;
+        }
+      }
     }
 
     const stats = fs.lstatSync(url);
@@ -132,12 +139,12 @@ export default function statics (root, options = {}) {
       //'cache-control': `max-age=${ctx.app.env === 'development' ? 0 : opts.maxAge}`,
     }); 
 
-    // 如果内容大于app.streamThreshold,以stream传输数据
+    // 如果内容大于app.opts.streamThreshold,启用stream传输
     if (stats.size > ctx.app.opts.streamThreshold) {
       ctx.length = stats.size;
       ctx.body = fs.createReadStream(url, { emitClose: true, autoClose: true,});
     } else {
-      ctx.body = fs.readFileSync(url, { encoding: 'utf8', flag: 'r'});
+      ctx.body = fs.readFileSync(url);
     }
 
     return next();

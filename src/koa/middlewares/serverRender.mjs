@@ -50,7 +50,8 @@ export default function serverRender (options) {
       //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
       { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
       { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-      { src: `/webUI/index.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
+      { src: '/webUI/import-map.importmap', type: 'importmap'},
+      { src: `/webUI/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
     ].forEach(v => {
       addScript.bind(document)(v);
     });

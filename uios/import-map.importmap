@@ -1,6 +1,6 @@
 {
   "imports": {
-    'react': '/components/_React.mjs',
+    'react': './components/_React.mjs',
   },
   "scopes": {
   }

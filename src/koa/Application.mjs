@@ -26,7 +26,7 @@ export default class Application extends EventEmitter {
       protocol: 'http2',
       contentNegotiation: true, // 默认开启
       compressThreshold: 256*1024, // 256kb
-      streamThreshold: 1024*1024,  // 1024kb
+      streamThreshold: 1024*1024,  // 文件大于1M时启用stream传输
       silent: false,
       subdomainOffset: 2,
     }, opts);
@@ -48,7 +48,7 @@ export default class Application extends EventEmitter {
   }
 
   /**
-   * begin listening
+   * start listening
    */
 
   listen () {

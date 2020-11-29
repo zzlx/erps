@@ -3,6 +3,7 @@
   "description": "A platform of ERP service system.",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "install:vimrc": "ln -sf $(pwd)/src/vim/vimrc ~/.vimrc ",
     "commit": "bin/tools.sh --commit",
