@@ -17,11 +17,9 @@ import Redirect from './components/Redirect.mjs';
 import Route from './components/Route.mjs';
 import UIStorage from './utils/UIStorage.mjs';
 
-import HomePage from './apps/HomePage.mjs';
+export default async function App (iniatialState) {
 
-
-export default async function App () {
-  const store = new UIStorage();
+  const store = new UIStorage(iniatialState);
 
   const routesArray = [];
 

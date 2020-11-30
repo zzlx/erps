@@ -1,7 +1,7 @@
-ERP System
-==========
+ERPs
+====
 
-ERP服务系统(ERP service system, ERPs),提供OA、CRM、会计、资产以及档案管理等ERP系统服务.
+ERPs(ERP service system, ERP服务系统),提供OA、CRM、会计、仓管以及档案管理等ERP系统服务.
 
 # License
 

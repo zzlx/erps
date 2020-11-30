@@ -7,41 +7,9 @@
  */
 
 const initialState = [
-  { name: 'themeList', value: [
-    'primary', 'secondary', 'success', 'info', 'warning', 'light', 'dark'] },
+  { name: 'themeList', value: [ 'primary', 'secondary', 'success', 'info', 'warning', 'light', 'dark'] },
   { name: 'theme', value: 'default'},
   { name: 'location', value: { pathname: '/' } },
-  { name: 'routes', value: [
-    { "app": "HomePage",
-      "path": "/settings/:module(\\w+)?", 
-      "title": "设置",
-      "exact": false
-    },
-    { 
-      "app": "HomePage",
-      "path": [ "/", "/index.html", "/homepage", "/homepage/:module(\\w+)?" ], 
-      "title": "首页|Home",
-      "exact": true,
-    },
-    {
-      "app": "Login",
-      "path": "/login",
-      "title": "登陆",
-      "exact": false
-    },
-    {
-      "app": "HomePage",
-      "path": "/databases/:tables(\\w+)?",
-      "title": "数据库",
-      "exact": true
-    },
-    { 
-      "app": "NotFound",
-      "path": "*", 
-      "title": "Error:404|NotFound",
-      "exact": false
-    }
-  ] },
 ];
 
 export default function profiles (state = initialState, action) {

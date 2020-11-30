@@ -20,12 +20,12 @@ import React from 'react';
 import ReactDOMServer from 'react-dom/server.js';
 import jsdom from 'jsdom';
 
-globalThis.React = React;
-
 export default function serverRender (options) {
   const opts = Object.assign({
     template: null,
   }, options);
+
+  globalThis.React = React;
 
   const ReactApp = import(`${opts.root}/ReactApp.mjs`).then(m => m.default);
 
@@ -52,6 +52,8 @@ export default function serverRender (options) {
       { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
       { src: '/webUI/import-map.importmap', type: 'importmap'},
       { src: `/webUI/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
+      :qa
+      :qa
     ].forEach(v => {
       addScript.bind(document)(v);
     });

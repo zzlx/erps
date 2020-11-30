@@ -24,7 +24,7 @@ import error from '../src/koa/middlewares/error.mjs';
 import logger from '../src/koa/middlewares/logger.mjs';
 import xResponse from '../src/koa/middlewares/xResponse.mjs';
 import createServer from './http2-server.mjs';
-import { router } from './routes/index.mjs';
+import routes, { allowedMethods } from './routes/index.mjs';
 
 const paths = settings.paths;
 
@@ -49,8 +49,8 @@ app.use(logger(path.join(paths.LOG_PATH, 'request.log'))); // 记录访问日志
 app.use(xResponse()); // 响应时间记录
 app.use(cors()); // 跨域访问支持
 app.use(cookies()); // 全局cookie支持
-app.use(router.routes()); // 执行服务端路由配置
-app.use(router.allowedMethods()); // 路由方法
+app.use(routes); // 执行服务端路由配置
+app.use(allowedMethods); // 路由方法
 app.use(compress()); // 启用内容压缩
 
 // 开启监听

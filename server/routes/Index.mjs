@@ -7,17 +7,17 @@
  */
 
 import path from 'path';
-import jsdom from 'jsdom';
 
-import Router from '../../src/koa/Router.mjs';
 import dynamics from '../../src/koa/middlewares/dynamics.mjs';
 import statics from '../../src/koa/middlewares/statics.mjs';
 import serverRender from '../../src/koa/middlewares/serverRender.mjs';
+
+import Router from '../../src/koa/Router.mjs';
 import settings from '../../src/settings/index.mjs';
 
 const paths = settings.paths;
 
-export const router = new Router(); // 路由配置
+const router = new Router(); // 路由配置
 // 静态资源服务配置
 //
 // 配置前端资源
@@ -47,3 +47,6 @@ router.get('indexes', '/*',  serverRender({
   root: paths.UIOS,
   template: settings.templates.HomePageHtml,
 }));
+
+export default router.routes();
+export const allowedMethods = router.allowedMethods(); 
