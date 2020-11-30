@@ -1,20 +1,22 @@
-# 许可证
+许可证
+======
 
-**兹授权**：
+This software is licensed under the MIT License.
 
-任何人均可免费获得此软件的拷贝，不严格限制使用、修改、合并、发布、发行、再授权及销售此软件的拷贝。
+兹授权:
+
+任何人均可免费获取此软件的拷贝,不严格限制使用、修改、发布、发行、再授权及销售此软件的拷贝.
 
 Copyright (C) 2019-present zzlx.org
 
-(参照MIT许可证进行授权)
+##### MIT License
 
-##### MIT许可证原文
-Permission is hereby granted, free of charge, 
-to any person obtaining a copy of this software and associated documentation files (the "Software"), 
-to deal in the Software without restriction,
-including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
-subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy 
+of this software and associated documentation files (the "Software"), to deal 
+in the Software without restriction, including without limitation the rights 
+to use, copy, modify, merge, publish, distribute, sublicense, 
+and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies,
 or substantial portions of the Software.

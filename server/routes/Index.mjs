@@ -48,5 +48,6 @@ router.get('indexes', '/*',  serverRender({
   template: settings.templates.HomePageHtml,
 }));
 
+
 export default router.routes();
 export const allowedMethods = router.allowedMethods(); 
