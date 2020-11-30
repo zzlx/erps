@@ -1,8 +1,6 @@
 许可证
 ======
 
-This software is licensed under the MIT License.
-
 兹授权:
 
 任何人均可免费获取此软件的拷贝,不严格限制使用、修改、发布、发行、再授权及销售此软件的拷贝.
