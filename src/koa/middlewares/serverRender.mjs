@@ -52,8 +52,6 @@ export default function serverRender (options) {
       { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
       { src: '/webUI/import-map.importmap', type: 'importmap'},
       { src: `/webUI/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
-      :qa
-      :qa
     ].forEach(v => {
       addScript.bind(document)(v);
     });
