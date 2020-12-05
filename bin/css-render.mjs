@@ -5,6 +5,7 @@
  * 生成css文件
  *
  * [参考文档](../node_modules/node-sass/README.md)
+ * [发行版本](https://github.com/sass/node-sass/releases/tag/v4.14.1)
  *
  * *****************************************************************************
  */
@@ -12,13 +13,13 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
-import settings from '../src/settings/index.mjs';
+import sass from 'sass';
+import settings from '../config/index.mjs';
 
 const isDevel = process.env.NODE_ENV === 'development' ? true : false;
-const paths = settings.paths; // 获取目录配置
-const scssEntryPoint = path.join(paths.SRC, 'scss', 'styles.scss');
+const scssEntryPoint = path.join(settings.paths.SRC, 'scss', 'styles.scss');
 const cssFile = path.join(
-  paths.WWW_PATH, 
+  settings.paths.WWW_PATH, 
   'assets', 
   'css', 
   path.basename(scssEntryPoint, '.scss') + '.css',
@@ -27,26 +28,19 @@ const cssFileDeflate = cssFile + '.deflate';
 const cssFileBr = cssFile + '.br';
 const cssFileGz = cssFile + '.gz';
 
-// node-sass module
-import('node-sass').then(m => new Promise((resolve, reject) => {
-  const sass = m.default ? m.default : m;
+sass.render({
+  file: scssEntryPoint,
+  outputStyle: isDevel ? 'expanded' : 'compressed',
+}, function(err, result) { 
+  if (err) console.error(err);
+  // 保证目标文件的目录已经准备就绪
+  fs.mkdirSync(path.dirname(cssFile), {recursive: true}); 
 
-  sass.render({
-    file: scssEntryPoint,
-    outputStyle: isDevel ? 'nested' : 'compressed',
-  }, async (err, result) => {
-    if (err) reject(err);
+  const tasks = Promise.all([
+    fs.promises.writeFile(cssFile, result.css),
+    fs.promises.writeFile(cssFileGz, zlib.gzipSync(result.css)),
+    fs.promises.writeFile(cssFileBr, zlib.brotliCompressSync(result.css)),
+    fs.promises.writeFile(cssFileDeflate, zlib.deflateSync(result.css)),
+  ].filter(Boolean));
 
-    // 保证目标文件的目录已经准备就绪
-    fs.mkdirSync(path.dirname(cssFile), {recursive: true}); 
-
-    const tasks = Promise.all([
-      fs.promises.writeFile(cssFile, result.css),
-      fs.promises.writeFile(cssFileGz, zlib.gzipSync(result.css)),
-      fs.promises.writeFile(cssFileBr, zlib.brotliCompressSync(result.css)),
-      fs.promises.writeFile(cssFileDeflate, zlib.deflateSync(result.css)),
-    ].filter(Boolean));
-
-    resolve(tasks);
-  });
-}));
+});

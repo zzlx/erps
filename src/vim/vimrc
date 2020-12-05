@@ -102,6 +102,13 @@ syntax on
 syntax enable
 
 " ------------------------------------------------------------------------------
+" vim-javascript
+let g:javascript_plugin_jsdoc = 1
+let javascript_enable_domhtmlcss = 1
+let g:javascript_plugin_ngdoc = 1
+let g:javascript_plugin_flow = 1
+
+" ------------------------------------------------------------------------------
 " 配置netrw
 "
 let g:netrw_bufsettings = 'noma nomod nu nobl bh ro nocursorline'
@@ -119,15 +126,15 @@ autocmd vimenter * if !argc() | :E | endif " 未提供参数时显示目录列�
 "
 function! SetTheme()
 
+set background=light
+
 let Now=strftime("%H") " 获取当前时间
 
 if Now > 6 && Now < 23
-  set background=light
+  "set background=light
 else
-  set background=dark
+  "set background=dark
 endif
-
-set background=light
 
 if &background == "light"
   "hi Normal  ctermfg=Black ctermbg=LightYellow
@@ -157,6 +164,7 @@ python << EOM
 # coding=utf-8
 
 import re
+import sys
 import vim
 import webbrowser
 
@@ -169,17 +177,43 @@ match_path = re_path.search(line)
 if match_url:
     url = match_url.group()
     webbrowser.open(url)
-    print 'open URL : %s' % url
 elif match_path:
     path = match_path.group()
+		# @TODO:根据参数决定是否使用'tabnew'打开文件
     vim.command('open ' + path)
-    print 'open path : %s' % path
 else:
     print 'fialed! : open URL'
 
 EOM
 endfunction
 
+function! TargetsTab()
+python << EOM
+# coding=utf-8
+
+import re
+import sys
+import vim
+import webbrowser
+
+re_url = re.compile(r'https?://[a-zA-Z0-9-./"#$%&\':?=_]+')
+re_path = re.compile('\.{1,2}/[a-zA-Z0-9._\-/]+')
+line = vim.current.line
+match_url = re_url.search(line)
+match_path = re_path.search(line)
+
+if match_url:
+    url = match_url.group()
+    webbrowser.open(url)
+elif match_path:
+    path = match_path.group()
+		# @TODO:根据参数决定是否使用'tabnew'打开文件
+    vim.command('tabnew ' + path)
+else:
+    print 'fialed! : open URL'
+
+EOM
+endfunction
 " ------------------------------------------------------------------------------
 " Test
 "
@@ -228,7 +262,7 @@ autocmd FileType shell noremap <buffer> <F12> :!sh % <CR>
 "autocmd BufWinLeave *.mjs,*.cjs mkview
 "autocmd BufWinEnter *.mjs,*.cjs silent loadview
 autocmd BufRead,BufNewFile *.cjs,*.mjs,*.js set expandtab filetype=javascript
-autocmd FileType javascript noremap <buffer> <F12> :!NODE_ENV=test NODE_DEBUG=debug* node --trace-warnings --experimental-json-modules %<CR>
+autocmd FileType javascript noremap <buffer> <F12> :!node % <CR>
 
 " python脚本配置
 autocmd Filetype python set fileformat=unix
@@ -262,10 +296,11 @@ map! <C-A> <Esc>ggVGY
 "
 map <Tab> :tabnext<CR>  " gt
 map <S-Tab> :tabpre<CR> " gT
-map <F5> :call Targets()<CR> " 打开目标 
+map <F5>  :call TargetsTab()<CR> " 打开目标 
+map <C-l> :call Targets()<CR> " 打开目标 
 map <F12> :!./%<CR>          " 执行脚本 
 
-nnoremap <C-J> <C-W><C-J>
-nnoremap <C-K> <C-W><C-K>
-nnoremap <C-L> <C-W><C-L>
-nnoremap <C-H> <C-W><C-H>
+"nnoremap <C-J> <C-W><C-J>
+"nnoremap <C-K> <C-W><C-K>
+"nnoremap <C-L> <C-W><C-L>
+"nnoremap <C-H> <C-W><C-H>

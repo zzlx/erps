@@ -3,6 +3,8 @@
  * 
  * Route Layer 
  *
+ * 路由层
+ *
  * Initialize a new routing Layer with given `method`, `path`, and `middleware`.
  *
  * @param {String|RegExp} path Path string or regular expression.
@@ -21,19 +23,17 @@ export default class RouteLayer {
   constructor (path, methods, middleware, opts = {}) {
     this.opts = Object.assign({}, opts);
     this.name = this.opts.name || null;
-    this.methods = []; // 方法
-    this.paramNames = []; // 参数
+    this.methods = [];
+    this.paramNames = [];
     this.stack = Array.isArray(middleware) ? middleware : [middleware];
 
-    for (let method of methods) {
+    for (const method of methods) {
       const len = this.methods.push(method.toUpperCase());
       if (this.methods[len-1] === 'GET') this.methods.unshift('HEAD');
     }
 
     for (let fn of this.stack) {
-      if (typeof fn !== 'function') {
-        throw new Error(`${fn} must be a function.`);
-      }
+      assert(typeof fn === 'function', `${fn} must be a function.`);
     }
 
     this.path = path;
@@ -158,63 +158,63 @@ export default class RouteLayer {
   captures (path) {
     return this.opts.ignoreCaptures ? [] : path.match(this.regexp).slice(1);
   }
-}
 
-/**
- * Generate URL for route using given `params`.
- *
- * ```javascript
- * const route = new Layer('/users/:id', ['GET'], fn);
- * route.url({ id: 123 }); // => "/users/123"
- * ```
- * @param {Object} params url parameters
- * @returns {String} url string
- * @private
- *
- */
+  /**
+   * Generate URL for route using given `params`.
+   *
+   * ```javascript
+   * const route = new Layer('/users/:id', ['GET'], fn);
+   * route.url({ id: 123 }); // => "/users/123"
+   * ```
+   * @param {Object} params url parameters
+   * @returns {String} url string
+   * @private
+   *
+   */
 
-RouteLayer.prototype.url = function (params, options) {
-  let args = params;
-  let replace = {};
+  url (params, options) {
+    let args = params;
+    let replace = {};
 
-  if (typeof params !== 'object') {
-    args = Array.prototype.slice.call(arguments);
+    if (typeof params !== 'object') {
+      args = Array.prototype.slice.call(arguments);
 
-    if (typeof args[args.length - 1] === 'object') {
-      options = args[args.length -1];
-      args = args.slice(0, args.length -1);
+      if (typeof args[args.length - 1] === 'object') {
+        options = args[args.length -1];
+        args = args.slice(0, args.length -1);
+      }
     }
-  }
 
-  const url = this.path.replace(/\(\.\*\)/g, '');
-  const tokens = parse(url);
+    const url = this.path.replace(/\(\.\*\)/g, '');
+    const tokens = parse(url);
 
-  if (Array.isArray(args)) {
-    let j = 0;
-    for (let token of tokens) {
-      if (token.name) replace[token.name] = args[j++];
-    }
-  } else if (tokens.some(token => token.name)) {
-    replace = params;
-  } else {
-    options = params;
-  }
-
-  const toPath = compile(url, options);
-
-  let replaced = toPath(replace);
-
-  if (options && options.query) {
-    replaced = new URL(replaced);
-
-    if (typeof options.query === 'string') {
-      replaced.search = options.query;
+    if (Array.isArray(args)) {
+      let j = 0;
+      for (let token of tokens) {
+        if (token.name) replace[token.name] = args[j++];
+      }
+    } else if (tokens.some(token => token.name)) {
+      replace = params;
     } else {
-      replaced.search = undefined;
+      options = params;
     }
 
-    return replaced.href;
-  }
+    const toPath = compile(url, options);
 
-  return replaced;
+    let replaced = toPath(replace);
+
+    if (options && options.query) {
+      replaced = new URL(replaced);
+
+      if (typeof options.query === 'string') {
+        replaced.search = options.query;
+      } else {
+        replaced.search = undefined;
+      }
+
+      return replaced.href;
+    }
+
+    return replaced;
+  }
 }

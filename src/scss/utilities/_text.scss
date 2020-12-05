@@ -44,10 +44,6 @@
 
 .text-white { color: $white !important; }
 
-@each $color, $value in $theme-colors {
-  @include text-emphasis-variant(".text-#{$color}", $value, true);
-}
-
 .text-body { color: $body-color !important; }
 .text-muted { color: $text-muted !important; }
 
@@ -62,10 +58,14 @@
 
 .text-decoration-none { text-decoration: none !important; }
 
-.text-break {
-  word-wrap: break-word !important;
-}
-
-// Reset
+.text-break { word-wrap: break-word !important; }
 
 .text-reset { color: inherit !important; }
+.text-overline { text-decoration: overline; }
+.text-through { text-decoration: line-through; }
+.text-underline { text-decoration: underline; }
+.text-blink { text-decoration: blink; }
+
+@each $color, $value in $theme-colors {
+  @include text-emphasis-variant(".text-#{$color}", $value, true);
+}

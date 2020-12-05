@@ -8,7 +8,7 @@
 
 import fs from 'fs';
 import tls from 'tls';
-import settings from '../src/settings/index.mjs';
+import settings from '../config/index.mjs';
 
 const options = {
   // Necessary only if the server requires client certificate authentication.

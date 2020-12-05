@@ -32,7 +32,7 @@ export default function statics (root, options = {}) {
     contentNegotiation: true,
     dotfiles: 'ignore',
     etag: true,
-    directoryIndex: [ 'index.html' ],
+    //directoryIndex: [ 'index.html' ],
     extensions: [ 'html' ],
     index: false,
     immutable: false,
@@ -43,6 +43,8 @@ export default function statics (root, options = {}) {
 
   if ('string' === typeof opts.directoryIndex) {
     opts.directoryIndex = opts.directoryIndex.split(',');
+  } else if (opts.directoryIndex == null) {
+    opts.directoryIndex = [ 'index.html' ];
   }
 
   if (!Array.isArray(opts.directoryIndex)) opts.directoryIndex = false;
@@ -83,6 +85,9 @@ export default function statics (root, options = {}) {
     // 未匹配到目录索引文件时不再响应
     if (path.extname(url) === '') return next(); 
     if (!fs.existsSync(url)) return next(); // 文件不存在时,不再响应
+
+    // @TODOS:
+    if (path.basename(url) === '_React.mjs') url = path.join(path.dirname(url), '_React.browser.mjs');
 
     // Set content type
     ctx.type = path.extname(url);

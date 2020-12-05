@@ -15,25 +15,23 @@
  * *****************************************************************************
  */
 
-import path from 'path';
-import React from 'react';
 import ReactDOMServer from 'react-dom/server.js';
-import jsdom from 'jsdom';
+import HtmlTemplate from '../utils/HtmlTemplate.mjs';
+import ReactApp from '../../../public/assets/esm/App.mjs';
+import Storage from '../../../public/assets/esm/Storage.mjs';
 
-export default function serverRender (options) {
-  const opts = Object.assign({
-    template: null,
-  }, options);
-
-  globalThis.React = React;
-
-  const ReactApp = import(`${opts.root}/ReactApp.mjs`).then(m => m.default);
-
+export default function serverRender (options = {}) {
+  const opts = Object.assign({ template: null, }, options);
   return async function serverRenderMiddleware (ctx, next) {
     // 转发有扩展名的路径至下一中间件
-    if (path.extname(ctx.pathname) !== '') return next();
-    // @
+    if (/\.w+$/.test(ctx.pathname)) return next();
     if (ctx.body != null) return next();
+
+    const path = ctx.pathname;
+
+    const store = new Storage({
+      location: {pathname: ctx.pathname}
+    });
 
     const ua = ctx.get('user-agent');
     const isIE = /MSIE/.test(ua);
@@ -42,46 +40,20 @@ export default function serverRender (options) {
     //const options = JSON.parse(JSON.stringify(opts));
     //if (isIE) options.scripts.unshift({ src: '/assets/js/polyfill.min.js'});
 
-    const dom = new jsdom.JSDOM(opts.template)
-    const document = dom.window.document;
-    document.title = 'TEST';
+    const html = new HtmlTemplate({template: opts.template}) 
 
-    [
+    html.title = '首页|HomePage';
+    html.addMeta({ name: 'keywords', content: 'ERP,OA', });
+    html.addScript([
       //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
       { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
       { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-      { src: '/webUI/import-map.importmap', type: 'importmap'},
-      { src: `/webUI/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
-    ].forEach(v => {
-      addScript.bind(document)(v);
-    });
+      { src: `/assets/esm/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
+    ]);
 
-    const container = document.getElementById('root');
-    if (container) container.innerHTML = 'test'; // React服务端渲染内容
+    html.body = ReactDOMServer.renderToString(ReactApp(store));
 
-    ctx.body = dom.serialize();
-
+    ctx.body = html.render();
     return next();
   }
-}
-
-function addScript (props) {
-  const document = this;
-  const script = document.createElement("script");
-
-  for (const key of Object.keys(props)) {
-
-    /*
-    if (props[key] === 'module') {
-      // 预加载模块
-      const link = document.createElement('link');
-      link.rel= 'modulepreload';
-      link.href= props.src;
-      document.head.appendChild(link);
-    }
-    */
-
-    script[key] = props[key];
-  }
-  document.head.appendChild(script);
 }

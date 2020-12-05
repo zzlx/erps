@@ -42,7 +42,7 @@ const command = path.join(process.cwd(), process.argv[2] || '');
 const args = [];
 
 for (let key of Object.keys(params)) {
-  args.push('--' + key);
+  args.push(`--${key}${params[key] === true ? '' : '=' + params[key]}`);
 }
 
 let cmd = null;

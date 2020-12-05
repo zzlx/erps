@@ -1,17 +1,17 @@
 // placeholder 
 // 占位符
 
-.placeholder h2, 
-.placeholder p {
+placeholder h2, 
+placeholder p {
   background-color: #f2f2f2;
   font-family: sans-serif;
   overflow: hidden;
   position: relative; 
 }
 
-.placeholder h2:after, 
-.placeholder p:after {
-  animation: placeholder_animation 3s infinite;
+placeholder h2:after, 
+placeholder p:after {
+  animation: placeholder_animation 6s infinite;
   background: linear-gradient(to right, #f2f2f2, #fcfcfc, #f2f2f2);
   content: '';
   left: 0;

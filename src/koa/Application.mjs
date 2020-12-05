@@ -38,7 +38,6 @@ export default class Application extends EventEmitter {
     this.subdomainOffset = this.opts.subdomainOffset;
     if (opts.keys) this.keys = this.opts.keys;
     this.silent = this.opts.silent;
-    this.serverCreator = opts.serverCreator || null;
 
     // app storage
     this.middlewares = []; // store middlewares
@@ -52,29 +51,15 @@ export default class Application extends EventEmitter {
    */
 
   listen () {
-    assert(this.serverCreator, 'server creator is not avilable.');
+    assert(this.server, 'server creator is not avilable.');
 
-    if (this.server == null) this.server = this.serverCreator();
     // 执行完配置任务后再开启服务器监听
     Promise.all(this.tasksBeforeListen.map(task => cp.spawn(task))).then(() => {
       this.server.on('stream', this.callback());
       this.server.listen(...arguments);
+    }).catch(err => {
+      console.log(err);
     });
-  }
-
-  /**
-   * Use the given middleware 'fn'
-   *
-   * @param {Function} fn
-   * @retrun {Application} self
-   * @api public
-   */
-
-  use (fn) {
-    assert(typeof fn === 'function', 'The middleware must be a function!');
-
-    this.middlewares.push(fn);
-    return this;
   }
 
   /**
@@ -126,6 +111,22 @@ export default class Application extends EventEmitter {
     const msg = err.stack || err.toString();
     console.error(msg.replace(/^/gm, '  '));
   }
+
+  /**
+   * Use the given middleware 'fn'
+   *
+   * @param {Function} fn
+   * @retrun {Application} self
+   * @api public
+   */
+
+  use (fn) {
+    assert(typeof fn === 'function', 'The middleware must be a function!');
+
+    this.middlewares.push(fn);
+    return this;
+  }
+
 }
 
 /**

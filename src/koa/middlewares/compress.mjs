@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * content compress support
+ * Compress middleware
  *
  * @param {object} options 
  * @param {number} options.threshold
@@ -13,22 +13,19 @@ import zlib from 'zlib';
 
 export default function compress (options) {
   const opts = Object.assign({
-    // supported formats
-    compressFormats: ['', '.html', '.css', '.js', '.mjs', '.doc'],
+    compressFormats: ['', '.html', '.css', '.js', '.mjs', '.doc'], // supported formats
+    threshold: 500*1024, // 500kb
   }, options)
 
   return function compressMiddleware (ctx, next) {
     if (ctx.get('content-encoding')) return next();
-    if (ctx.length && ctx.length <= ctx.app.opts.compressThreshold) return next();
     if (!(Buffer.isBuffer(ctx.body) || typeof ctx.body === 'string')) return next();
 
-    ctx.set('vary', 'accept-encoding');
+    const threshold = ctx.app.opts.compressThreshold || opts.threshold;
+    if (ctx.length && ctx.length <= threshold) return next();
 
-    // compress algorithm
-    const encodings = ctx.get('accept-encoding').split(/\b,\s?/);
-    const body = ctx.body;
-
-    for (const encoding of encodings) {
+    // Compress algorithm
+    for (const encoding of ctx.get('accept-encoding').split(/\b,\s?/)) {
       if (encoding === 'gzip') {
         ctx.set('content-encoding', 'gzip');
         ctx.body = zlib.gzipSync(ctx.body);
@@ -46,7 +43,6 @@ export default function compress (options) {
         ctx.body = zlib.brotliCompressSync(ctx.body);
         break;
       }
-
     }
 
     return next();
