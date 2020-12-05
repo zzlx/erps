@@ -40,11 +40,6 @@ router.get('/log/*', statics(settings.paths.LOG_PATH, { prefix: '/log' }));
 // 配置前端资源
 router.get('public', '/*', statics(settings.paths.PUBLIC));
 
-// named route
-router.get('www', '/*', statics(settings.paths.WWW_PATH, { 
-  directoryIndex: 'index.html'
-}));
-
 router.get('index', '/*',  serverRender({ 
   app: path.join(settings.paths.PUBLIC, 'assets', 'esm', 'App.mjs'),
   template: settings.templates.IndexHtml,

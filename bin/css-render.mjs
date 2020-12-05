@@ -19,7 +19,7 @@ import settings from '../config/index.mjs';
 const isDevel = process.env.NODE_ENV === 'development' ? true : false;
 const scssEntryPoint = path.join(settings.paths.SRC, 'scss', 'styles.scss');
 const cssFile = path.join(
-  settings.paths.WWW_PATH, 
+  settings.paths.PUBLIC, 
   'assets', 
   'css', 
   path.basename(scssEntryPoint, '.scss') + '.css',

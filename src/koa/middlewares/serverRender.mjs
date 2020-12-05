@@ -29,6 +29,7 @@ export default function serverRender (options = {}) {
 
     const path = ctx.pathname;
 
+    // 前端初始数据
     const store = new Storage({
       location: {pathname: ctx.pathname}
     });

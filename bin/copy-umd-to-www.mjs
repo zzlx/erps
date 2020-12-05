@@ -15,13 +15,13 @@ import settings from '../config/index.mjs';
 
 // 定义样式文件路径
 const paths = settings.paths; // 获取目录配置
-const destPath = path.join(paths.WWW_PATH, 'assets', 'js');
+const destPath = path.join(paths.PUBLIC, 'assets', 'js');
 fs.mkdirSync(destPath, {recursive: true});
 
 // 执行拷贝任务
 Promise.all([ 
   // source files
-  path.join('@babel', 'polyfill', 'dist', 'polyfill.min.js'),
+  //path.join('@babel', 'polyfill', 'dist', 'polyfill.min.js'),
   path.join('react', 'umd', 'react.development.js'),
   path.join('react', 'umd', 'react.production.min.js'),
   path.join('react-dom', 'umd', 'react-dom.development.js'),
