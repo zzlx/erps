@@ -15,16 +15,19 @@ import React from './components/_React.mjs';
 import Redirect from './components/Redirect.mjs';
 import Route from './components/Route.mjs';
 import Switcher from './components/Switcher.mjs';
-
-import HomePage from './containers/HomePage.mjs';
-import NotFound from './containers/NotFound.mjs';
+import * as Pages from './containers/index.mjs';
 
 export default function App (store) {
   let i = 0;
+
   const routes = [
-    React.createElement(Route, { path: '/', component: HomePage, key: i++ }),
-    React.createElement(Route, { path: '*', component: NotFound, key: i++ }),
-  ];
+    { path: '/', app: Pages.HomePage },
+    { path: '/*', app: Pages.NotFound },
+  ].map(route => React.createElement(Route, {
+    key: i++,
+    path: route.path,
+    component: route.app,
+  }));
 
   const router = React.createElement(Switcher, { 
     location: { pathname: '/' }, 
