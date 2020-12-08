@@ -21,7 +21,7 @@ const wsMap = new Map();
 const getWS = file => {
   let ws = wsMap.get(file);
   if (ws && ws.closed !==false) return ws;
-  ws = fs.createWriteStream(file, {flags: 'a', autoClose: true});
+  ws = fs.createWriteStream(file, {autoClose: true});
   wsMap.set(file, ws);
 
   return ws;

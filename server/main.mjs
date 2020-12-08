@@ -17,7 +17,7 @@ import crypto from 'crypto';
 import util from 'util';
 
 import { camelCase, console } from '../src/utils.lib.mjs';
-import settings from '../config/index.mjs';
+import settings from '../src/settings.mjs';
 import Koa from '../src/koa/Application.mjs';
 
 import compress from '../src/koa/middlewares/compress.mjs';
@@ -47,7 +47,7 @@ app.server = createServer({
 app.tasksBeforeListen = [
 
   path.join(settings.paths.BIN, 'copy-umd-to-www.mjs'),
-  path.join(settings.paths.BIN, 'css-render.mjs'),
+  path.join(settings.paths.BIN, 'scss-render.mjs'),
 ];
 
 // 配置服务器基础功能

@@ -1,41 +1,60 @@
 中勤万信会计师事务所培训课程
 ========
 
-> ## 试题与评价表下载  
+![logo](http://www.pekingcpa.com/u/cms/cn/201501/141218565c5e.png)
+
+> ## 试题与评价表下载
 > * [**2020年项目负责人业务培训试题.docx**](http://edu.pekingcpahn.com/bcf6ab298c559b5f36fab5d4303b02079a435709.docx)
 > * [**2020年项目负责人业务培训授课老师综合评价表.xlsx**](http://edu.pekingcpahn.com/bca365a6c85182ebdb3bdb59efab9c23617cb74c.xlsx)
 
 # 一、培训课程
 
-## (一)《上市公司控股股东资金占用及其审计》解读--段立新
+## (一)证监会《会计监管风险提示第9号》解读
+
+主讲老师:段立新
 
 * [【讲义文稿】](http://edu.pekingcpahn.com/8395e74f7eae721d41ba7e4d76af80d8.ppt)
 * [【视频课件-1】](http://edu.pekingcpahn.com/474a314b443ac60102cb76b9bb1b7f76.mp4)
 * [【视频课件-2】](http://edu.pekingcpahn.com/92e87897336592b017dfd8fe9f00a0e6.mp4)
 * [【视频课件-3】](http://edu.pekingcpahn.com/4e1831dee40c3acf1a05bd612fc73d0d.mp4)
 
-## (二)《新收入准则执行中的难点、热点问题》--邹杰 
+## (二)新收入准则热点难点问题探讨
+
+主讲老师:邹杰 
 
 * [【讲义文稿】](http://edu.pekingcpahn.com/d421744d8bc2e47e83bd769d7d6a355c.pptx)
 * [【视频课件】](http://edu.pekingcpahn.com/83cc91cf41a11a8ea4b564f6138d9070.mp4)
 
-## (三)《财报舞弊及其应对》--宋连勇
+## (三)舞弊识别及应对
+
+主讲老师:宋连勇
 
 * [【讲义文稿】](http://edu.pekingcpahn.com/87fd1eca65f6dd8fee7349d528172c18.pptx)
 * [【视频课件-1】](http://edu.pekingcpahn.com/3c43928fb51397701c25ef12d72123e4.mp4)
 * [【视频课件-2】](http://edu.pekingcpahn.com/9ee4a0b80ebcbc0115ff30a08ff1812a.mp4)
 * [【视频课件-3】](http://edu.pekingcpahn.com/9b50ce8e07b9f133de64fe3d03ff2d29.mp4)
 
-## (四)《商誉的会计计量与审计》--李述喜
+## (四)商誉的会计计量与审计
+
+主讲老师:李述喜
 
 * [【讲义文稿】](http://edu.pekingcpahn.com/e37d5644cc366bda50171ac2e137ab4b.pptx)
 * [【视频课件】](http://edu.pekingcpahn.com/27bfa5663908b03acefbae49d0cf7a78.mp4)
 
-## (五)《新租赁准则的运用》-李晓敏
+## (五)新租赁准则的运用
+
+主讲老师:李晓敏
 
 * [【讲义文稿】](http://edu.pekingcpahn.com/f773a8ab2df1fb9c7814a8529fe7bffa.ppt)
 * [【视频课件-1】](http://edu.pekingcpahn.com/8c55d359e71526ddf112fa637aa39665.mp4)
 * [【视频课件-2】](http://edu.pekingcpahn.com/96729aa2dc23980755b71d63751d1212.mp4)
+
+## (六)外部检查及内部复核、监控发现的问题
+
+主讲老师:张宏敏
+
+* [【讲义文稿】](http://edu.pekingcpahn.com/1dbc600b17da8629e04c6940659cac25257894ef.pptx)
+* [【视频课件】](http://edu.pekingcpahn.com/ffd5d23a77218aaa01ce323235915d799061f4a6.mp4)
 
 # 二、北京注协培训网课程资源
 

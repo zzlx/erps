@@ -31,7 +31,7 @@ const paths = (root => {
   });
 
   return paths;
-})(path.dirname(path.dirname(import.meta.url.substr(7))));
+})(path.dirname(path.dirname(path.dirname(import.meta.url.substr(7)))));
 
 // read configurations from package.json
 export const packageJSON = JSON.parse(fs.readFileSync(paths.PACKAGE_JSON));

@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 
 import paths from './paths.mjs';
-import { camelCase } from '../src/utils.lib.mjs';
+import { camelCase } from '../utils.lib.mjs';
 
 const templates = (root => {
   const obj = Object.create(null);

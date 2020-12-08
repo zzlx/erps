@@ -20,10 +20,10 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import './env.mjs';
-import paths, { appName, appVersion } from './paths.mjs';
-import system from './system.mjs';
-import templates from './templates.mjs';
+import './config/env.mjs';
+import paths, { appName, appVersion } from './config/paths.mjs';
+import system from './config/system.mjs';
+import templates from './config/templates.mjs';
 
 // settings from config
 const sfc = fs.readFileSync(paths.SETTINGS_JSON, 'utf8');

@@ -7,7 +7,7 @@
  */
 
 import path from 'path';
-import settings from '../../config/index.mjs';
+import settings from '../../src/settings.mjs';
 
 import Router from '../../src/koa/Router.mjs';
 import dynamics from '../../src/koa/middlewares/dynamics.mjs';
