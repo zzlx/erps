@@ -236,31 +236,40 @@ export default class Router {
     // iterator middleware arguments
     for (const m of middleware) {
       if (m.router) {
-        const cloneRouter = Object.assign(Object.create(Router.prototype), m.router, { 
-          stack: m.router.stack.slice(0) 
-        });
+        const cloneRouter = new Router(m.router.opts);
+        cloneRouter.stack = m.router.stack;
+        cloneRouter.params = m.router.params;
 
         for (let j = 0; j < cloneRouter.stack.length; j++) {
           const nestedLayer = cloneRouter.stack[j];
-          const cloneLayer = Object.assign(new Route(), nestedLayer);
+          const cloneLayer = new Route(
+            nestedLayer.path, 
+            nestedLayer.methods, 
+            nestedLayer.stack,
+            nestedLayer.opts,
+          );
+
           if (path) cloneLayer.setPrefix(path);
           if (this.opts.prefix) cloneLayer.setPrefix(this.opts.prefix);
           this.stack.push(cloneLayer);
           cloneRouter.stack[j] = cloneLayer;
         }
 
-        for (const k of Object.keys(this.params)) cloneRouter.param(k, this.params[k]);
-        // end of m.router
-      } else {
-        const keys = [];
-        pathToRegexp(this.opts.prefix || '', keys);
-        const routerPrefixHasParam = this.opts.prefix && keys.length;
-        this.register(path || '([^\/]*)', [], m, {
-          end: false, 
-          ignoreCaptures: !hasPath && !routerPrefixHasParam
-        });
-      } 
+        for (const k of Object.keys(this.params)) {
+          cloneRouter.param(k, this.params[k]);
+        }
 
+        // end of m.router
+        continue;
+      }
+
+      const keys = [];
+      pathToRegexp(this.opts.prefix || '', keys);
+      const routerPrefixHasParam = this.opts.prefix && keys.length;
+      this.register(path || '([^\/]*)', [], m, {
+        end: false, 
+        ignoreCaptures: !hasPath && !routerPrefixHasParam
+      });
     }
 
     return this;
@@ -288,7 +297,6 @@ export default class Router {
 
       const matchedLayers = matched.pathAndMethod; /// matched
 
-      // 
       // most specific layer
       const mostSpecificLayer = matchedLayers[matchedLayers.length - 1];
 

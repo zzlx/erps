@@ -21,7 +21,9 @@ import { assert, compile, parse, path, pathToRegexp } from '../utils.lib.mjs';
 
 export default class RouteLayer {
   constructor (path, methods, middleware, opts = {}) {
-    this.opts = Object.assign({}, opts);
+    this.opts = Object.assign({
+    }, opts);
+
     this.name = this.opts.name || null;
     this.methods = [];
     this.paramNames = [];

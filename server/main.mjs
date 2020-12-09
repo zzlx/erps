@@ -12,6 +12,7 @@
  */
 
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import crypto from 'crypto';
 import util from 'util';
@@ -29,7 +30,7 @@ import markdown from '../src/koa/middlewares/markdown.mjs';
 import xResponse from '../src/koa/middlewares/xResponse.mjs';
 
 import createServer from './http2s.mjs';
-import routes from './routes/index.mjs';
+import router from './router.mjs';
 
 // 初始化服务器程序
 const app = new Koa({ env: process.env.NODE_ENV });
@@ -46,8 +47,8 @@ app.server = createServer({
 // 服务重启时执行的任务清单:
 app.tasksBeforeListen = [
 
-  path.join(settings.paths.BIN, 'copy-umd-to-www.mjs'),
-  path.join(settings.paths.BIN, 'scss-render.mjs'),
+  path.join(settings.paths.SERVER, 'tasks', 'copy-umd-to-www.mjs'),
+  path.join(settings.paths.SERVER, 'tasks', 'scss-render.mjs'),
 ];
 
 // 配置服务器基础功能
@@ -58,8 +59,8 @@ app.use(cors()); // 跨域访问支持
 app.use(cookies()); // 全局cookie支持
 
 // 服务器端路由配置
-app.use(routes.routes()); // 执行服务端路由配置
-app.use(routes.allowedMethods()); // 路由方法
+app.use(router.routes()); // 执行服务端路由配置
+app.use(router.allowedMethods()); // 路由方法
 
 // 根据条件对响应内容进行压缩
 app.use(markdown()); // 启用markdown解析
@@ -72,6 +73,9 @@ app.listen({
   port: settings.system.port || '8888',
   exclusive: false,
 }, () => console.monitor(
-  `${camelCase(process.env.NODE_ENV)} server is running on : %o.`, 
+`${camelCase(process.env.NODE_ENV)} server is running on : %o.
+Process PID: ${process.pid}
+Total Mem: ${os.totalmem()/1024/1024/1024}G
+Free Mem: ${os.freemem()/1024/1024}M`, 
   app.server.address()
 ));
