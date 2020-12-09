@@ -789,9 +789,6 @@ _commit_and_push() {
     * )
       ;;
   esac
-
-  echo "Success: $MESSAGE"
-
 }
 
 _os_esed() {
