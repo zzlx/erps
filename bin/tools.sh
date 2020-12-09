@@ -779,18 +779,18 @@ _commit_and_push() {
 		fi
   fi
 
-	read -r -p "是否需要上传远程仓库? /Y(es)?|No?/i " input
+	read -r -p "Push to remote git server? /Y(es)?|No?/i " input
 
   case "$input" in
     [yY][eE][sS]|[yY] )
-      echo "提交至远程仓库"; 
+      echo "commit to remote server..."; 
       git -C $_ROOT push
       ;;
     * )
       ;;
   esac
 
-  echo "Commitment is success: $MESSAGE"
+  echo "Success: $MESSAGE"
 
 }
 
