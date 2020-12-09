@@ -20,12 +20,9 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import { 
-  argvParser, 
-  console, 
-} from '../src/utils.lib.mjs';
-
+import { argvParser, console, } from '../src/utils.lib.mjs';
 import settings from '../src/settings.mjs';
+import app from '../server/main.mjs';
 
 const paths = settings.paths;
 
@@ -89,11 +86,26 @@ function main () {
   }
 }
 
-async function start () {
-  cp.spawn('node', [ path.join(paths.SERVER, 'main.mjs'), ], {
-    argv0: 'erps.httpd',
-    detached: process.env.NODE_ENV === 'development' ? false : true,
-    stdio: [0,1,2],
+function start () {
+  // Listening
+  app.listen({
+    ipv6Only: false,
+    host: settings.system.ipv6 ? '::' : '0.0.0.0',
+    port: settings.system.port || '8888',
+    exclusive: false,
+  }, function () {
+
+    console.divideLine();
+    console.write('Server Information:');
+    console.dir({
+      Env: process.env.NODE_ENV,
+      PID: process.pid,
+      TotalMem: Number(settings.system.totalmem)/1024/1024 + 'M',
+      FreeMem: Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
+      Version:  settings.system.version,
+      Address: this.address(),
+    });
+    console.divideLine();
   });
 }
 

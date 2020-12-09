@@ -34,6 +34,7 @@ import router from './router.mjs';
 // 初始化服务器程序
 const app = new Koa({ env: process.env.NODE_ENV });
 const debug = util.debuglog('debug:main.mjs');
+export default app;
 
 // 配置http2 server
 app.server = createServer({
@@ -64,25 +65,3 @@ app.use(router.allowedMethods()); // 路由方法
 // 根据条件对响应内容进行压缩
 app.use(markdown()); // 启用markdown解析
 app.use(compress()); // 启用内容压缩
-
-// Listening
-app.listen({
-  ipv6Only: false,
-  host: settings.system.ipv6 ? '::' : '0.0.0.0',
-  port: settings.system.port || '8888',
-  exclusive: false,
-}, function () {
-
-  console.divideLine();
-  console.write('Server Information:');
-  console.dir({
-    Address: this.address(),
-    Env: process.env.NODE_ENV,
-    PID: process.pid,
-    TotalMem: Number(settings.system.totalmem)/1024/1024 + 'M',
-    FreeMem: Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
-    Version:  settings.system.version,
-  });
-  console.divideLine();
-
-});

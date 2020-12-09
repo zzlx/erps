@@ -13,8 +13,8 @@ import Router from '../src/koa/Router.mjs';
 import * as routes from './routes/index.mjs';
 
 const router = new Router();
-settings.isDevel && router.use(routes.log);
-router.use('/documentation', routes.docs);
+process.env.NODE_ENV === 'development' && router.use(routes.log);
+router.use(['/documentation', '/docs'], routes.docs);
 router.use('/api', routes.api);
 router.use(routes.homePage);
 export default router;

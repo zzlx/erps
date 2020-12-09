@@ -768,11 +768,11 @@ _commit_and_push() {
     git -C $_ROOT add -A
 
 		if [[ -z $1 ]]; then
-			read -p "变更提交说明:" message
+			read -p "Document change:" message
 			if [[ -n ${message} ]]; then
 				git -C $_ROOT commit -m "${message} $(_utc_date)"
 			else
-				git -C $_ROOT commit -m "自动化存档提交 $(_utc_date)"
+				git -C $_ROOT commit -m "Routine submission $(_utc_date)"
 			fi
 		else
 			git -C $_ROOT commit -m "${1} $(_utc_date)"
@@ -790,7 +790,7 @@ _commit_and_push() {
       ;;
   esac
 
-  echo "自动化提交完成 $MESSAGE"
+  echo "Commitment is success: $MESSAGE"
 
 }
 

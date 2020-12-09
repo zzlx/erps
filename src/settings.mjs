@@ -38,7 +38,6 @@ export default new Proxy(Object.assign({}, configs, {
   templates,
 }), {
   get: function (target, property, receiver) {
-    if (property === 'isDevel') return process.env.NODE_ENV === 'development';
     if (property === 'getGitInfo') return getGitInfo;
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
