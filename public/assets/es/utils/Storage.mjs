@@ -12,8 +12,8 @@
  * *****************************************************************************
  */
 
-import assert from './utils/assert.mjs';
-import * as reducers from './reducers/index.mjs';
+import assert from './assert.mjs';
+import * as reducers from '../reducers/index.mjs';
 
 export default class Storage {
   constructor (state) {

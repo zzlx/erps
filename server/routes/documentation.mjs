@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  * 
- * api routes
+ * 
  *
  * *****************************************************************************
  */
@@ -10,13 +10,12 @@ import path from 'path';
 import settings from '../../src/settings.mjs';
 
 import Router from '../../src/koa/Router.mjs';
-const router = new Router(); // 路由配置
+import statics from '../../src/koa/middlewares/statics.mjs';
 
-router.get('api', '/api*', (ctx, next) => {
-  //console.log(ctx.router);
-  //ctx.type = 'html';
-  ctx.body = 'api';
-  return next();
-});
+const router = new Router();
+
+router.get('docs', '/documentation', statics(settings.paths.DOCS, {
+  directoryIndex: [ 'README.md' ],
+}));
 
 export default router.routes();

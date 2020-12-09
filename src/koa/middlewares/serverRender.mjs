@@ -17,8 +17,7 @@
 
 import ReactDOMServer from 'react-dom/server.js';
 import HtmlTemplate from '../utils/HtmlTemplate.mjs';
-import ReactApp from '../../../public/assets/esm/App.mjs';
-import Storage from '../../../public/assets/esm/Storage.mjs';
+import ReactApp from '../../../public/assets/es/App.mjs';
 
 export default function serverRender (options = {}) {
   const opts = Object.assign({ template: null, }, options);
@@ -28,11 +27,6 @@ export default function serverRender (options = {}) {
     if (ctx.body != null) return next();
 
     const path = ctx.pathname;
-
-    // 前端初始数据
-    const store = new Storage({
-      location: {pathname: ctx.pathname}
-    });
 
     const ua = ctx.get('user-agent');
     const isIE = /MSIE/.test(ua);
@@ -49,10 +43,12 @@ export default function serverRender (options = {}) {
       //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
       { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
       { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-      { src: `/assets/esm/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
+      { src: `/assets/es/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
     ]);
 
-    html.body = ReactDOMServer.renderToString(ReactApp(store));
+    html.body = ReactDOMServer.renderToString(ReactApp({
+      location: {pathname: ctx.pathname}
+    }));
 
     ctx.body = html.render();
     return next();

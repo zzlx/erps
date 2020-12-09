@@ -1,29 +1,24 @@
 /**
  * *****************************************************************************
  * 
- * UI application
+ * main application
  *
  * *****************************************************************************
  */
 
-import Storage from './Storage.mjs';
+const appURL = new URL(import.meta.url);
+globalThis.env = appURL.searchParams.get('env') || 'production';
 
-// 异步执行前端程序
 import('./App.mjs').then(m => m.default).then(App => {
-  const appURL = new URL(import.meta.url);
-  globalThis.env = appURL.searchParams.get('env') || 'production';
-
-  const store = new Storage({location: location });
-  const element = App(store); 
+  const element = App({ location });
 
   DOMRender(element, 'root', () => {
-    console.groupCollapsed('前端程序已就绪!');
-    console.info('使用中遇到问题请通知:Email:wangxuemin@zzlx.org');
+    console.groupCollapsed('UI程序已就绪...');
+    console.info('欢迎使用此前端程序！');
+    console.info(`参考文档: ${location.origin}/documentation`);
     console.groupEnd();
   });
 });
-
-// 执行websocket任务
 
 /**
  * web socket client

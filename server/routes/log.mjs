@@ -16,4 +16,4 @@ const router = new Router(); // 路由配置
 // @TODOS:读取log/request.log时,readStream无法关闭
 router.get('log', '/log/*', statics(settings.paths.LOG_PATH, { prefix: '/log' }));
 
-export default router;
+export default router.routes();

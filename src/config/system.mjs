@@ -25,8 +25,8 @@ export default new Proxy({
   type: os.type(),
   version: {
     app: packageJSON.version,
-    os: os.version(),
     node: process.version,
+    system: os.version(),
   },
   EOL: os.EOL,
 },{
@@ -41,7 +41,7 @@ export default new Proxy({
 });
 
 /**
- * 判断是否支持ipv6
+ * detected ipv6 support
  *
  * @return {boolean} true/false
  */
@@ -51,12 +51,8 @@ function isSupportIPv6 () {
   const interfaces = os.networkInterfaces();
 
   for (let item of Object.keys(interfaces)) {
-    for (let ip of interfaces[item]) {
-      if (ip.family === 'IPv6') {
-        hasIPv6 = true;
-        break;
-      }
-    }
+    for (let ip of interfaces[item]) if (ip.family === 'IPv6') { hasIPv6 = true; break; }
+    if (hasIPv6) break;
   }
   
   return hasIPv6;

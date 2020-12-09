@@ -16,10 +16,11 @@ import Redirect from './components/Redirect.mjs';
 import Route from './components/Route.mjs';
 import Switcher from './components/Switcher.mjs';
 import * as Pages from './containers/index.mjs';
+import Storage from './utils/Storage.mjs';
 
-export default function App (store) {
+export default function App (state) {
+  const store = new Storage(state);
   let i = 0;
-
   const routes = [
     { path: '/', app: Pages.HomePage },
     { path: '/*', app: Pages.NotFound },

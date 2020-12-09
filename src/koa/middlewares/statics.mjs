@@ -51,9 +51,11 @@ export default function statics (root, options = {}) {
 
   return function staticsMiddleware (ctx, next) {
     // 旁路规则:
-    if (!/GET|HEAD/.test(ctx.method)) return next(); // 1. 非GET、HEAD请求方法时
-    if (ctx.body != null) return next(); // 2. body已被设置时
-    // 旁路前缀不匹配时的情况
+    // 1. 非GET、HEAD请求方法时
+    // 2. body已被设置时
+    // 3. 旁路前缀不匹配时的情况
+    if (!/GET|HEAD/.test(ctx.method)) return next(); 
+    if (ctx.body != null) return next(); 
     if (ctx.pathname.substr(0, opts.prefix.length) !== opts.prefix) return next();
 
     // Response static resource:
