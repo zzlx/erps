@@ -7,6 +7,7 @@
  */
 
 import os from 'os';
+import { packageJSON } from './paths.mjs';
 
 export default new Proxy({
   totalmem: os.totalmem(),
@@ -22,7 +23,11 @@ export default new Proxy({
   pidPrefix: 'org.zzlx',
   platform: os.platform(),
   type: os.type(),
-  version: os.version(),
+  version: {
+    app: packageJSON.version,
+    os: os.version(),
+    node: process.version,
+  },
   EOL: os.EOL,
 },{
   get: function (target, property, receiver) {

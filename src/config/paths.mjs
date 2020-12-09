@@ -16,9 +16,8 @@ const paths = (root => {
 
   fs.readdirSync(root, {withFileTypes: true}).forEach(file => {
     const name = String(file.name)
-      .replace(/-/g, '_')     // 统一分隔符
-      .replace(/^(\.)/, '')   // 去掉dot前缀
-      .replace(/\./g, '_')    // _替换扩展名
+      .replace(/^(\.)/, '')
+      .replace(/[\.|-]/g, '_')
       //.replace(/(\..+)$/, '') // 去掉扩展名后缀
       .toUpperCase(); 
 

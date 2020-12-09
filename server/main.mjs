@@ -12,7 +12,6 @@
  */
 
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import crypto from 'crypto';
 import util from 'util';
@@ -72,10 +71,18 @@ app.listen({
   host: settings.system.ipv6 ? '::' : '0.0.0.0',
   port: settings.system.port || '8888',
   exclusive: false,
-}, () => console.monitor(
-`${camelCase(process.env.NODE_ENV)} server is running on : %o.
-Process PID: ${process.pid}
-Total Mem: ${os.totalmem()/1024/1024/1024}G
-Free Mem: ${os.freemem()/1024/1024}M`, 
-  app.server.address()
-));
+}, function () {
+
+  console.divideLine();
+  console.write('Server Information:');
+  console.dir({
+    Address: this.address(),
+    Env: process.env.NODE_ENV,
+    PID: process.pid,
+    TotalMem: Number(settings.system.totalmem)/1024/1024/1024 + 'G',
+    FreeMem: Number(settings.system.freemem)/1024/1024 + 'M',
+    Version:  settings.system.version,
+  });
+  console.divideLine();
+
+});
