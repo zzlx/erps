@@ -102,7 +102,6 @@ function start () {
       PID: process.pid,
       TotalMem: Number(settings.system.totalmem)/1024/1024 + 'M',
       FreeMem: Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
-      Version:  settings.system.version,
       Address: this.address(),
     });
     console.divideLine();
