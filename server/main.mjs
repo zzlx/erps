@@ -28,7 +28,7 @@ import logger from '../src/koa/middlewares/logger.mjs';
 import markdown from '../src/koa/middlewares/markdown.mjs';
 import xResponse from '../src/koa/middlewares/xResponse.mjs';
 
-import createServer from './http2s.mjs';
+import createServer from './utils/http2s.mjs';
 import router from './router.mjs';
 
 // 初始化服务器程序
@@ -46,8 +46,7 @@ app.server = createServer({
 
 // 服务重启时执行的任务清单:
 app.tasksBeforeListen = [
-
-  path.join(settings.paths.SERVER, 'tasks', 'copy-umd-to-www.mjs'),
+  path.join(settings.paths.SERVER, 'tasks', 'copy-umd-to-assets.mjs'),
   path.join(settings.paths.SERVER, 'tasks', 'scss-render.mjs'),
 ];
 

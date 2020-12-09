@@ -24,8 +24,6 @@ import { argvParser, console, } from '../src/utils.lib.mjs';
 import settings from '../src/settings.mjs';
 import app from '../server/main.mjs';
 
-const paths = settings.paths;
-
 process.nextTick(() => {
   // 检测系统平台类型
   // 系统服务依赖于类unix系统环节, 在非unix环境中无法正常提供服务
@@ -97,12 +95,11 @@ function start () {
 
     console.divideLine();
     console.write('Server Information:');
-    console.dir({
+    console.log({
+      Address: this.address(),
       Env: process.env.NODE_ENV,
-      PID: process.pid,
       TotalMem: Number(settings.system.totalmem)/1024/1024 + 'M',
       FreeMem: Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
-      Address: this.address(),
     });
     console.divideLine();
   });
