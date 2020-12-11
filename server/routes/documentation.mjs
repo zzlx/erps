@@ -18,3 +18,4 @@ router.get('docs', '/*', statics(settings.paths.DOCS, {
 }));
 
 export default router.routes();
+export const allowedMethods = router.allowedMethods();

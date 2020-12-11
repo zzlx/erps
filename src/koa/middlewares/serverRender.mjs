@@ -17,7 +17,7 @@
 
 import ReactDOMServer from 'react-dom/server.js';
 import HtmlTemplate from '../utils/HtmlTemplate.mjs';
-import ReactApp from '../../../uis/App.mjs';
+import ReactApp from '../../../frontend/App.mjs';
 
 export default function serverRender (options = {}) {
   const opts = Object.assign({ template: null, }, options);

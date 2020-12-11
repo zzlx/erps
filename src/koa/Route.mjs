@@ -3,8 +3,6 @@
  * 
  * Route Layer 
  *
- * 路由层
- *
  * Initialize a new routing Layer with given `method`, `path`, and `middleware`.
  *
  * @param {String|RegExp} path Path string or regular expression.
@@ -19,22 +17,24 @@
 
 import { assert, compile, parse, path, pathToRegexp } from '../utils.lib.mjs';
 
-export default class RouteLayer {
+export default class Route {
   constructor (path, methods, middleware, opts = {}) {
     this.opts = Object.assign({
+      name: null,
     }, opts);
 
-    this.name = this.opts.name || null;
+    this.name = this.opts.name;
     this.methods = [];
     this.paramNames = [];
-    this.stack = Array.isArray(middleware) ? middleware : [middleware];
+    this.stack = Array.isArray(middleware) ? middleware : [ middleware ];
 
     for (const method of methods) {
       const len = this.methods.push(method.toUpperCase());
       if (this.methods[len-1] === 'GET') this.methods.unshift('HEAD');
     }
 
-    for (let fn of this.stack) {
+    // 
+    for (const fn of this.stack) {
       assert(typeof fn === 'function', `${fn} must be a function.`);
     }
 

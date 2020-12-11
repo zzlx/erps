@@ -860,3 +860,11 @@ Context.prototype.push = function (pathname) {
     pushStream.end('some pushed data');
   });
 }
+
+/**
+ *
+ */
+
+Context.prototype.send = function (filename) {
+
+}

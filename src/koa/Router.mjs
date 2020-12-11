@@ -3,8 +3,6 @@
  * 
  * Router
  * 
- * 服务器端路由管理器
- *
  * ```javascript
  *
  * const app = new Koa();
@@ -24,20 +22,16 @@
  * *****************************************************************************
  */
 
-import util from 'util';
-
 import { assert, path, pathToRegexp } from '../utils.lib.mjs';
 import compose from './compose.mjs';
 import HttpError from './HttpError.mjs';
 import Route from './Route.mjs';
 
-const debug = util.debuglog('debug:router.mjs');
-
 export default class Router {
   constructor (opts = {}) {
     this.opts = Object.assign({
       prefix: null,
-      methods: ['HEAD', 'GET', 'OPTIONS', 'POST'],
+      methods: [ 'HEAD', 'GET', 'OPTIONS', 'POST' ],
     }, opts);
 
     if (Array.isArray(this.opts.methods)) this.methods = this.opts.methods;
@@ -156,7 +150,6 @@ export default class Router {
       if (route.name && route.name === routeName) return route;
     }
 
-    // @todo: 是否创建一个route?
     return null;
   }
 
@@ -235,6 +228,7 @@ export default class Router {
 
     // iterator middleware arguments
     for (const m of middleware) {
+
       if (m.router) {
         const cloneRouter = new Router(m.router.opts);
         cloneRouter.stack = m.router.stack;
@@ -255,21 +249,18 @@ export default class Router {
           cloneRouter.stack[j] = cloneLayer;
         }
 
-        for (const k of Object.keys(this.params)) {
-          cloneRouter.param(k, this.params[k]);
-        }
+        for (const k of Object.keys(this.params)) cloneRouter.param(k, this.params[k]);
 
-        // end of m.router
-        continue;
+      } else {
+        const keys = [];
+        pathToRegexp(this.opts.prefix || '', keys);
+        const routerPrefixHasParam = this.opts.prefix && keys.length;
+
+        this.register(path || '([^\/]*)', [], m, {
+          end: false, 
+          ignoreCaptures: !hasPath && !routerPrefixHasParam
+        });
       }
-
-      const keys = [];
-      pathToRegexp(this.opts.prefix || '', keys);
-      const routerPrefixHasParam = this.opts.prefix && keys.length;
-      this.register(path || '([^\/]*)', [], m, {
-        end: false, 
-        ignoreCaptures: !hasPath && !routerPrefixHasParam
-      });
     }
 
     return this;

@@ -14,3 +14,4 @@ const router = new Router();
 router.get('log', '/log/*', statics(settings.paths.LOG_PATH, { prefix: '/log' }));
 
 export default router.routes();
+export const allowedMethods = router.allowedMethods();
