@@ -9,7 +9,7 @@
 
 import React from './_React.mjs';
 import Button from './Button.mjs';
-import Message from './Message.mjs';
+import Message from './Alert.mjs';
 import Form from './Form.mjs';
 
 export default class TodoList extends React.Component {

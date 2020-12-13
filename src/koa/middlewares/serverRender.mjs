@@ -17,11 +17,13 @@
 
 import ReactDOMServer from 'react-dom/server.js';
 import HtmlTemplate from '../utils/HtmlTemplate.mjs';
-import ReactApp from '../../../frontend/App.mjs';
 
 export default function serverRender (options = {}) {
   const opts = Object.assign({ template: null, }, options);
+  let ReactApp = import(opts.app).then(m => m.default);
   return async function serverRenderMiddleware (ctx, next) {
+    const App = await ReactApp
+
     // 转发有扩展名的路径至下一中间件
     if (/\.w+$/.test(ctx.pathname)) return next();
     if (ctx.body != null) return next();
@@ -46,7 +48,7 @@ export default function serverRender (options = {}) {
       { src: `/assets/es/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
     ]);
 
-    html.body = ReactDOMServer.renderToString(ReactApp({
+    html.body = ReactDOMServer.renderToString(App({
       location: {pathname: ctx.pathname}
     }));
 

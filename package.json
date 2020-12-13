@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "commit": "bin/tools.sh --commit",
-    "devel": "bin/starter.mjs bin/erps.mjs --debug --env=development --restart --paths=bin,server,src,uis",
+    "devel": "bin/devel-daemon.mjs bin/erps.mjs --debug --env=development --restart --paths=bin,frontend,server,src",
     "install:vimrc": "ln -sf $(pwd)/src/vim/vimrc ~/.vimrc ",
     "start": "bin/erps.mjs --start",
     "version": "bin/tools.sh --version"
@@ -14,6 +14,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
     "@koa/router": "^10.0.0",
+    "bootstrap": "^5.0.0-beta1",
     "chart": "^0.1.2",
     "d3": "^5.9.7",
     "ejs": "^3.1.5",

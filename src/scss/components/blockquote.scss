@@ -1,0 +1,10 @@
+// blockquote
+blockquote, .blockquote, {
+  border: 1px solid $light;
+  border-left-color: $default;
+  border-left-width: 0.25rem;
+  border-radius: .25rem;
+  padding: 0.75rem;
+  padding-left: 1.25rem;
+  font-style: italic;
+}

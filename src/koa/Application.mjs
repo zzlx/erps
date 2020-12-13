@@ -53,6 +53,7 @@ export default class Application extends EventEmitter {
   listen () {
     assert(this.server, 'server creator is not avilable.');
 
+
     // 执行完配置任务后再开启服务器监听
     Promise.all(this.tasksBeforeListen.map(task => cp.spawn(task))).then(() => {
       this.server.on('stream', this.callback());
@@ -109,6 +110,7 @@ export default class Application extends EventEmitter {
     if (this.silent) return;
 
     const msg = err.stack || err.toString();
+
     console.error(msg.replace(/^/gm, '  '));
   }
 

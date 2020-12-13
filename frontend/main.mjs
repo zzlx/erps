@@ -1,24 +1,37 @@
 /**
  * *****************************************************************************
  * 
- * main application
+ * Main application
+ *
+ * Run in browser environment
  *
  * *****************************************************************************
  */
 
+import App from './App.mjs';
+import deviceDetect from './utils/deviceDetect.mjs'
+
 const appURL = new URL(import.meta.url);
 globalThis.env = appURL.searchParams.get('env') || 'production';
 
-import('./App.mjs').then(m => m.default).then(App => {
-  const element = App({ location });
+// Render DOM
+DOMRender(App({
+  location: location,
+}), 'root', cb);
 
-  DOMRender(element, 'root', () => {
-    console.groupCollapsed('UI程序已就绪...');
-    console.info('欢迎使用此前端程序！');
-    console.info(`参考文档: ${location.origin}/documentation`);
-    console.groupEnd();
-  });
-});
+/**
+ * 
+ * callback function
+ *
+ */
+
+function cb () {
+  console.groupCollapsed('UI程序已就绪...');
+  console.info(`当前客户端设备是:${deviceDetect(window.navigator.userAgent)}`);
+  console.info('欢迎使用前端UI程序！');
+  console.info(`使用帮助文档: ${location.origin}/documentation`);
+  console.groupEnd();
+}
 
 /**
  * web socket client

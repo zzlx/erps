@@ -1,8 +1,7 @@
 /**
  * *****************************************************************************
  * 
- * React Application
- *
+ * UI Application
  *
  * @param {object} state
  * @return {object} element
@@ -15,7 +14,7 @@ import React from './components/_React.mjs';
 import Redirect from './components/Redirect.mjs';
 import Route from './components/Route.mjs';
 import Switcher from './components/Switcher.mjs';
-import * as Pages from './containers/index.mjs';
+import * as Pages from './apps/index.mjs';
 import Storage from './utils/Storage.mjs';
 
 export default function App (state) {

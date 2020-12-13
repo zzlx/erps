@@ -3,6 +3,11 @@ ERPs
 
 一款企业ERP管理软件, 提供OA、CRM、会计、仓管以及档案管理等综合信息管理服务.
 
-Copyright (C) 2019-present [zzlx.org](www.zzlx.org)
+Copyright (C) 2019-present [erps.zzlx.org](erps.zzlx.org)
 
-> [Documentation](./docs/README.md)
+## Documentation
+
+* [Manual](./docs/manual/README.md)
+* [Deployment](./docs/deployment/README.md)
+* [License](./LICENSE.md)
+* [Favorites](./docs/favorites.md)
