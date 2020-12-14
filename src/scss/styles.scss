@@ -1,16 +1,16 @@
 /**
  * *****************************************************************************
  *
- * Style system. 
+ * Styles. 
  *
- * 
+ * 基于bootstrap样式系统
  *
- * Based on bootstrap@v5.0.0
- * [Documentation](https://getbootstrap.com/docs/5.0)
+ * [Bootstrap](https://getbootstrap.com/docs/5.0)
  * *****************************************************************************
  */
 
 //@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+//
 // Configuration
 @import "../../node_modules/bootstrap/scss/_functions.scss";
 @import "../../node_modules/bootstrap/scss/_variables.scss";
@@ -19,47 +19,16 @@
 
 @import "../../node_modules/bootstrap/scss/_mixins.scss";
 @import "../../node_modules/bootstrap/scss/_utilities.scss";
-
-// Layout & components
+@import "../../node_modules/bootstrap/scss/_helpers.scss";
+@import "../../node_modules/bootstrap/scss/utilities/_api.scss";
 @import "../../node_modules/bootstrap/scss/_root.scss";
 @import "../../node_modules/bootstrap/scss/_reboot.scss";
 @import "../../node_modules/bootstrap/scss/_type.scss";
 @import "../../node_modules/bootstrap/scss/_images.scss";
 @import "../../node_modules/bootstrap/scss/_containers.scss";
 @import "../../node_modules/bootstrap/scss/_grid.scss";
-@import "../../node_modules/bootstrap/scss/_tables.scss";
-@import "../../node_modules/bootstrap/scss/_forms.scss";
-@import "../../node_modules/bootstrap/scss/_buttons.scss";
-@import "../../node_modules/bootstrap/scss/_transitions.scss";
-@import "../../node_modules/bootstrap/scss/_dropdown.scss";
-@import "../../node_modules/bootstrap/scss/_button-group.scss";
-@import "../../node_modules/bootstrap/scss/_nav.scss";
-@import "../../node_modules/bootstrap/scss/_navbar.scss";
-@import "../../node_modules/bootstrap/scss/_card.scss";
-@import "../../node_modules/bootstrap/scss/_accordion.scss";
-@import "../../node_modules/bootstrap/scss/_breadcrumb.scss";
-@import "../../node_modules/bootstrap/scss/_pagination.scss";
-@import "../../node_modules/bootstrap/scss/_badge.scss";
-@import "../../node_modules/bootstrap/scss/_alert.scss";
-@import "../../node_modules/bootstrap/scss/_progress.scss";
-@import "../../node_modules/bootstrap/scss/_list-group.scss";
-@import "../../node_modules/bootstrap/scss/_close.scss";
-@import "../../node_modules/bootstrap/scss/_toasts.scss";
-@import "../../node_modules/bootstrap/scss/_modal.scss";
-@import "../../node_modules/bootstrap/scss/_tooltip.scss";
-@import "../../node_modules/bootstrap/scss/_popover.scss";
-@import "../../node_modules/bootstrap/scss/_carousel.scss";
-@import "../../node_modules/bootstrap/scss/_spinners.scss";
-
-// Helpers
-@import "../../node_modules/bootstrap/scss/_helpers.scss";
-
-// Utilities
-@import "../../node_modules/bootstrap/scss/utilities/_api.scss";
 // scss-docs-end import-stack
 
-@import "./components/blockquote.scss";
-@import "./components/markdown.scss";
+@import "./_components.scss";
+@import "./_animations.scss";
 
-@import "./animations/crazyeyek.scss";
-@import "./animations/rainbow.scss";

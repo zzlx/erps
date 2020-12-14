@@ -10,14 +10,24 @@
 
 import App from './App.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
+import global from './utils/global.mjs';
 
-const appURL = new URL(import.meta.url);
-globalThis.env = appURL.searchParams.get('env') || 'production';
+// Get env from searchParams
+const __url = new URL(import.meta.url);
+global.env = __url.searchParams.get('env') || 'production';
 
-// Render DOM
+// Render UI application to DOM
 DOMRender(App({
   location: location,
 }), 'root', cb);
+
+/**
+ * *****************************************************************************
+ *
+ * Utility functions
+ *
+ * *****************************************************************************
+ */ 
 
 /**
  * 
@@ -26,10 +36,10 @@ DOMRender(App({
  */
 
 function cb () {
-  console.groupCollapsed('UI程序已就绪...');
-  console.info(`当前客户端设备是:${deviceDetect(window.navigator.userAgent)}`);
+  console.groupCollapsed('UI程序已就绪🐂');
   console.info('欢迎使用前端UI程序！');
-  console.info(`使用帮助文档: ${location.origin}/documentation`);
+  console.log(`使用帮助文档: ${location.origin}/documentation`);
+  console.log(`检测到当前客户端设备为:${deviceDetect(window.navigator.userAgent)}`);
   console.groupEnd();
 }
 

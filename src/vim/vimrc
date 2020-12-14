@@ -296,8 +296,8 @@ map! <C-A> <Esc>ggVGY
 "
 map <Tab> :tabnext<CR>  " gt
 map <S-Tab> :tabpre<CR> " gT
-map <F5>  :call TargetsTab()<CR> " 打开目标 
-map <C-l> :call Targets()<CR> " 打开目标 
+map <F6>  :call TargetsTab()<CR> " 打开目标 
+map <F5> :call Targets()<CR> " 打开目标 
 map <F12> :!./%<CR>          " 执行脚本 
 
 "nnoremap <C-J> <C-W><C-J>

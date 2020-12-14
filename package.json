@@ -5,7 +5,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "commit": "bin/tools.sh --commit",
+    "commit": "bin/erps-tools.sh --commit",
     "devel": "bin/devel-daemon.mjs bin/erps.mjs --debug --env=development --restart --paths=bin,frontend,server,src",
     "install:vimrc": "ln -sf $(pwd)/src/vim/vimrc ~/.vimrc ",
     "start": "bin/erps.mjs --start",
@@ -15,6 +15,7 @@
     "@babel/polyfill": "^7.12.1",
     "@koa/router": "^10.0.0",
     "bootstrap": "^5.0.0-beta1",
+    "bootstrap-icons": "^1.0.0-alpha3",
     "chart": "^0.1.2",
     "d3": "^5.9.7",
     "ejs": "^3.1.5",
