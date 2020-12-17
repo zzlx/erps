@@ -6,9 +6,11 @@
  * *****************************************************************************
  */
 
-import Router from '../src/koa/Router.mjs';
-import settings from '../src/settings.mjs';
-import statics from '../src/koa/middlewares/statics.mjs';
+import path from 'path';
+
+import Router from '../koa/Router.mjs';
+import settings from '../settings.mjs';
+import statics from '../koa/middlewares/statics.mjs';
 import * as routes from './routes/index.mjs';
 
 const router = new Router();
@@ -19,7 +21,7 @@ export default router;
 //router.get('/', routes.homePage);
 router.get('docs', ['/documentation', '/docs'], routes.docs);
 router.get('public', '/*', statics(settings.paths.PUBLIC));
-router.get('frontend', '/assets/es/*', statics(settings.paths.FRONTEND, { 
+router.get('frontend', '/assets/es/*', statics(path.join(settings.paths.SRC, 'frontend'), { 
   prefix: '/assets/es/'
 }));
 

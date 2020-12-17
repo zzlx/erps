@@ -16,17 +16,17 @@ import path from 'path';
 import crypto from 'crypto';
 import util from 'util';
 
-import { camelCase, console } from '../src/utils.lib.mjs';
-import settings from '../src/settings.mjs';
-import Koa from '../src/koa/Application.mjs';
+import { camelCase, console } from '../utils.lib.mjs';
+import settings from '../settings.mjs';
+import Koa from '../koa/Application.mjs';
 
-import compress from '../src/koa/middlewares/compress.mjs';
-import cookies from '../src/koa/middlewares/cookies.mjs';
-import cors from '../src/koa/middlewares/cors.mjs';
-import error from '../src/koa/middlewares/error.mjs';
-import logger from '../src/koa/middlewares/logger.mjs';
-import markdown from '../src/koa/middlewares/markdown.mjs';
-import xResponse from '../src/koa/middlewares/xResponse.mjs';
+import compress from '../koa/middlewares/compress.mjs';
+import cookies from '../koa/middlewares/cookies.mjs';
+import cors from '../koa/middlewares/cors.mjs';
+import error from '../koa/middlewares/error.mjs';
+import logger from '../koa/middlewares/logger.mjs';
+import markdown from '../koa/middlewares/markdown.mjs';
+import xResponse from '../koa/middlewares/xResponse.mjs';
 
 import createServer from './utils/http2s.mjs';
 import router from './router.mjs';
@@ -46,8 +46,8 @@ app.server = createServer({
 
 // 服务重启时执行的任务清单:
 app.tasksBeforeListen = [
-  path.join(settings.paths.SERVER, 'tasks', 'copy-umd-to-assets.mjs'),
-  path.join(settings.paths.SERVER, 'tasks', 'scss-render.mjs'),
+  path.join(settings.paths.SRC, 'tasks', 'copy-umd-to-assets.mjs'),
+  path.join(settings.paths.SRC, 'tasks', 'scss-render.mjs'),
 ];
 
 // 配置服务器基础功能

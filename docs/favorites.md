@@ -1,3 +1,3 @@
 # 常用地址
 
-* [bootstrap](https://getbootstrap.com/docs)
+* [Bootstrap](https://getbootstrap.com/docs)

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --trace-warnings
 /**
  * *****************************************************************************
  * 
@@ -22,7 +22,7 @@ import util from 'util';
 
 import { argvParser, console, } from '../src/utils.lib.mjs';
 import settings from '../src/settings.mjs';
-import app from '../server/main.mjs';
+import app from '../src/server/main.mjs';
 
 process.nextTick(() => {
   // 检测系统平台类型
@@ -98,8 +98,11 @@ function start () {
     console.log({
       Address: this.address(),
       Env: process.env.NODE_ENV,
+      Platform: process.platform,
+      Arch: process.arch,
       TotalMem: Number(settings.system.totalmem)/1024/1024 + 'M',
       FreeMem: Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
+      Versions: process.versions,
     });
     console.divideLine();
   });

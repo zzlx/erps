@@ -17,6 +17,9 @@
 *.*.un~
 *.~
 
+# 缓存文件
+.cache
+
 # Node产生的文件
 node_modules
 

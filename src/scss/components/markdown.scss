@@ -3,3 +3,24 @@
 
 }
 
+.custom-class {
+  display: none;
+}
+
+@include media-breakpoint-up(sm) {
+  .custom-class {
+    display: block;
+  }
+}
+
+@include media-breakpoint-down(md) {
+  .custom-class {
+    display: block;
+  }
+}
+
+@include media-breakpoint-between(md, xl) { 
+}
+
+@include media-breakpoint-only(xs) {
+}

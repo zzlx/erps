@@ -89,9 +89,10 @@ export default class Application extends EventEmitter {
 
   handleRequest (ctx, fn) {
     fn(ctx).then(() => respond(ctx)).catch(err => {
+      console.log(err);
       if (err.code === 'ENOENT') ctx.status = 404;
       else ctx.status = 500;
-      if (ctx.app.env === 'development') ctx.body = err.stack;
+      if (this.env === 'development') ctx.body = err.stack;
       respond(ctx);
     });
   }
@@ -103,7 +104,7 @@ export default class Application extends EventEmitter {
    * @api private
    */
 
-  onerror(err, ctx) {
+  onerror(err) {
     assert(err instanceof Error, util.format('non-error thrown: %j', err));
 
     if (404 == err.status || err.expose) return;

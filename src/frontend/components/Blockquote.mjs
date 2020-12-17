@@ -9,26 +9,21 @@
  */
 
 import React from './_React.mjs';
+import addClassName from './utils/addClassName.mjs';
 
 export default function Blockquote(props = {}) {
-  const { className, children, ...rests } = props;
+  const { theme, className, children, ...rests } = props;
 
   // blockquote className
   const cn_blockquote = [
+    className,
     'blockquote',
-    className
+    `blockquote-${theme ? theme : 'primary'}`,
   ].filter(Boolean).join(' ');
 
   // blockquote-footer className
   const newChildren = React.Children.map(children, child => {
-    if (child.type === 'footer') {
-      const footer_cn = [
-        'blockquote-footer',
-        child.props.className
-      ].filter(Boolean).join(' ');
-
-      return React.cloneElement(child, { className: footer_cn, });
-    }
+    if (child.type === 'footer') return addClassName(child, 'blockquote-footer');
     return child;
   });
 
@@ -37,6 +32,3 @@ export default function Blockquote(props = {}) {
     ...rests,
   }, newChildren);
 }
-
-// test
-// Blockquote({children: 'test'});

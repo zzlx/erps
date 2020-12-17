@@ -1,0 +1,21 @@
+/**
+ *
+ * Grid layout and flex layout
+ *
+ * 弹性盒布局为一维布局,网格布局为二维布局
+ *
+ */
+
+.flex-wrapper {
+   display: flex;
+   flex-wrap: wrap;
+}
+
+.flex-wrapper > div {
+   flex: 1 1 200px;
+}
+
+.grid-wrapper {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+}

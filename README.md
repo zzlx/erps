@@ -5,19 +5,8 @@ ERPs
 
 Copyright (C) 2019-present [erps.zzlx.org](erps.zzlx.org)
 
-# Documentation
+# Docs
 
-* [Manual](./docs/manual/README.md)
-* [Deployment](./docs/deployment/README.md)
-* [License](./LICENSE.md)
+* [Documentation](./docs/README.md)
+* [Todos](./docs/Todos.md)
 * [Favorites](./docs/favorites.md)
-
-# 源代码库
-
-## 前端程序
-
-[主程序](./frontend/main.mjs);
-
-## 服务端
-
-[主程序](./server/main.mjs);

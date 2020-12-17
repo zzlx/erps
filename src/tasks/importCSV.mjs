@@ -14,7 +14,7 @@ import fs from 'fs';
 import path from 'path';
 
 import mongodb from 'mongodb';
-import { assert, argvParser, } from '../src/utils.mjs';
+import { assert, argvParser, } from '../utils.lib/mjs';
 
 const MongoClient = mongodb.MongoClient;
 const client = new MongoClient('mongodb://localhost:27017', { 

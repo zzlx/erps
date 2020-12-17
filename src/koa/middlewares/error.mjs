@@ -15,10 +15,9 @@ export default function error (options = {}) {
   return async function errorMiddleware (ctx, next) {
     try {
       attachEvents(ctx.stream);
-
       await next();
     } catch (err) {
-      logWriter(opts.logFile, err);
+      await logWriter(opts.logFile, err);
       return Promise.reject(err);
     }
   } 

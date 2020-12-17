@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "commit": "bin/erps-tools.sh --commit",
-    "devel": "bin/devel-daemon.mjs bin/erps.mjs --debug --env=development --restart --paths=bin,frontend,server,src",
+    "devel": "bin/devel-daemon.mjs bin/erps.mjs --debug --env=development --restart --paths=bin,server,src",
     "install:vimrc": "ln -sf $(pwd)/src/vim/vimrc ~/.vimrc ",
     "start": "bin/erps.mjs --start",
     "version": "bin/tools.sh --version"

@@ -1,22 +1,16 @@
-/**
- * *****************************************************************************
- *
- * Settings
- *
- * *****************************************************************************
- */
+// Settings
 
 //$body-bg: #fff;
 $default: #607080;
 
 // Create your own map
 $custom-colors: (
-  "default": $default,
+  "primary": $default,
 );
 
 
 $theme-colors: map-merge($theme-colors, $custom-colors); // Merge the maps
-$theme-colors: map-remove($theme-colors, "info", "light", "dark"); // remove
+//$theme-colors: map-remove($theme-colors, "info", "light", "dark"); // remove
 
 $h1-font-size: $font-size-base;
 $h2-font-size: $font-size-base;
@@ -24,3 +18,5 @@ $h3-font-size: $font-size-base;
 $h4-font-size: $font-size-base;
 $h5-font-size: $font-size-base;
 $h6-font-size: $font-size-base;
+
+$blockquote-font-size: $font-size-base * 0.875;

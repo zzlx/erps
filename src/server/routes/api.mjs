@@ -7,8 +7,8 @@
  */
 
 import path from 'path';
-import settings from '../../src/settings.mjs';
-import Router from '../../src/koa/Router.mjs';
+import settings from '../../settings.mjs';
+import Router from '../../koa/Router.mjs';
 const router = new Router(); // 路由配置
 
 router.get('api', '/api*', (ctx, next) => {

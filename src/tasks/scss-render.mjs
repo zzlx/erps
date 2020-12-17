@@ -14,7 +14,7 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import sass from 'sass';
-import settings from '../../src/settings.mjs';
+import settings from '../settings.mjs';
 
 const isDevel = process.env.NODE_ENV === 'development' ? true : false;
 const scssEntryPoint = path.join(settings.paths.SRC, 'scss', 'styles.scss');

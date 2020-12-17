@@ -23,16 +23,25 @@ export default function Accordion (props) {
   ].filter(Boolean).join(' ');
 
   const newChildren = React.Children.map(children, child => {
-    const cn = [
-      'accordion-item',
-      child.props.className,
-    ].filter(Boolean).join(' ');
-
-    return React.cloneElement(child, { className: cn });
+    return AccordionItem(child); 
   });
 
   return React.createElement('div', { 
     className: cn,
     ...rests 
   }, newChildren);
+}
+
+function AccordionItem (element) {
+  const { className, ...rests } = element.props;
+
+  const cn = [
+    'accordion-item',
+    className,
+  ].filter(Boolean).join(' ');
+
+  return React.createElement(element.type, {
+    className: cn,
+    ...rests,
+  });
 }
