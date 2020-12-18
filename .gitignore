@@ -34,3 +34,7 @@ node_modules
 # C编译产生的文件
 *.o
 *.out
+
+# 目录
+build
+dist

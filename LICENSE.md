@@ -1,11 +1,5 @@
-LICENSE
-=======
-
-## 授权(参照MIT License)
-
-任何人均可免费获取此软件的拷贝,不严格限制使用、修改、发布、发行、再授权及销售此软件的拷贝.
-
-## MIT License
+MIT LICENSE
+===========
 
 Permission is hereby granted, free of charge, to any person obtaining a copy 
 of this software and associated documentation files (the "Software"), to deal 
