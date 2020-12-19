@@ -30,3 +30,4 @@ export default function Switcher (props) {
 
   return React.cloneElement(element, { location, match });
 }
+

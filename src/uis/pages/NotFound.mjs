@@ -11,7 +11,7 @@
 
 import React from '../components/_React.mjs';
 import Context from '../components/_Context.mjs';
-import Redirect from '../components/Redirect.mjs';
+import Redirect from '../components/_Redirect.mjs';
 
 export default function NotFound (props) {
   const redirect = React.createElement(Redirect, { to: '/' });

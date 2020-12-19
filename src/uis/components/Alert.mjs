@@ -41,7 +41,7 @@ export default class Alert extends React.PureComponent {
     // 构造className
     const cn_alert = [
       'alert',
-      `alert-${theme ? theme : 'default'}`,
+      `alert-${theme ? theme : 'primary'}`,
       (dismissible || (timeout && timeout > 0)) ? 'alert-dismissible' : null,
       this.state.disappear ? 'd-none': null,
       className,

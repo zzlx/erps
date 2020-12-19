@@ -23,7 +23,8 @@ router.get('index', '/*', async (ctx, next) => {
 
   if (App == null) {
     App = await import('../../uis/main.mjs').then(m => m.default).catch(err => {
-      ctx.throw(err);
+      console.log(err);
+      App = null;
     })
   }
 
@@ -47,9 +48,11 @@ router.get('index', '/*', async (ctx, next) => {
     { src: `/assets/es/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
   ]);
 
-  html.body = ReactDOMServer.renderToString(App({
-    location: {pathname: ctx.pathname}
-  }));
+  if (App) {
+    html.body = ReactDOMServer.renderToString(App({
+      location: {pathname: ctx.pathname}
+    }));
+  }
 
   ctx.body = html.render();
   return next();

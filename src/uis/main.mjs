@@ -1,14 +1,23 @@
-import Provider from './components/Provider.mjs';
+/**
+ * *****************************************************************************
+ *
+ * Frontend client application.
+ *
+ * *****************************************************************************
+ */
+
+import Provider from './components/_Provider.mjs';
 import React from './components/_React.mjs';
-import Redirect from './components/Redirect.mjs';
-import Route from './components/Route.mjs';
-import Switcher from './components/Switcher.mjs';
+import Redirect from './components/_Redirect.mjs';
+import Route from './components/_Route.mjs';
+import Switcher from './components/_Switcher.mjs';
 import * as Pages from './pages/index.mjs';
 import Storage from './utils/Storage.mjs';
 import global from './utils/global.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
 
 /**
+ *
  * UI Application
  *
  * @param {object} state
@@ -43,10 +52,12 @@ export default function App (state) {
  */
 
 function cb () {
+  const device = deviceDetect(window.navigator.userAgent);
+
   console.groupCollapsed('欢迎使用前端UI程序!');
+  if (device) console.log(`检测到当前客户端设备为:${device}`);
+  else console.warn('未检测出当前设备');
   console.log(`使用帮助文档: ${location.origin}/documentation`);
-  console.log(
-    `检测到当前客户端设备为:${deviceDetect(window.navigator.userAgent)}`);
   console.groupEnd();
 }
 

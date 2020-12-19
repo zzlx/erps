@@ -9,7 +9,7 @@
  */
 
 import React from './_React.mjs';
-import addClassName from './addClassName.mjs';
+import addClassName from './_classNames.mjs';
 
 export default function Blockquote(props = {}) {
   const { theme, className, children, ...rests } = props;

@@ -11,18 +11,23 @@
 import { pathToRegexp } from './path-to-regexp.mjs';
 
 export default function matchPath(pathname, options = {}) {
-  options = typeof options === 'string' ? { path: options } : options;
-  const { path, exact = false, strict = false, sensitive = true } = options;
-  const paths = [].concat(path);
+  const opts = Object.assign({}, {
+    path: '/',
+    exact: false,
+    strict: false,
+    sensitive: true,
+  }, typeof options === 'string' ? { path: options } : options);
+
+  const paths = [].concat(opts.path);
 
   return paths.reduce((matched, path) => {
     if (!path) return null;
     if (matched) return matched;
 
     const { regexp, keys } = compilePath(path, {
-      end: exact,
-      strict,
-      sensitive
+      end: opts.exact,
+      strict: opts.strict,
+      sensitive: opts.sensitive,
     });
 
     const match = regexp.exec(pathname);
@@ -33,7 +38,7 @@ export default function matchPath(pathname, options = {}) {
     const values = match.slice(1);
     const isExact = pathname === url;
 
-    if (exact && !isExact) return null;
+    if (opts.exact && !isExact) return null;
 
     return {
       path, // the path used to match the matched portion of the URL

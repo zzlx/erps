@@ -102,7 +102,6 @@ function start () {
       Arch: process.arch,
       TotalMem: Number(settings.system.totalmem)/1024/1024 + 'M',
       FreeMem: Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
-      Versions: process.versions,
     });
     console.divideLine();
   });

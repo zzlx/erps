@@ -1,6 +1,9 @@
 /**
+ * *****************************************************************************
  *
+ * 根据提供的ua字符串,解析出设备、浏览器客户端类型
  *
+ * *****************************************************************************
  */
 
 export default function deviceDetect (ua) {
@@ -14,6 +17,8 @@ export default function deviceDetect (ua) {
     device = 'android';
   } else if (/Intel Mac OS X/.test(ua)) {
     device = 'Mac';
+  } else if (/Windows NT/.test(ua)) {
+    device = 'Windows';
   }
 
   return device;
