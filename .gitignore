@@ -3,12 +3,6 @@
 # http://help.github.com/ignore-files/
 # ##############################################################################
 
-# 环境配置文件
-.env
-
-# Mac系统文件
-.DS_Store
-
 # vim临时文件
 *.sw[mnop]
 *.un
@@ -17,10 +11,17 @@
 *.*.un~
 *.~
 
-# 缓存文件
-.cache
+# C编译产生的文件
+*.o
+*.out
 
-# Node产生的文件
+# Mac系统文件
+.DS_Store
+
+# 忽略的目录及文件
+build
+dist
+.env
 node_modules
 
 # 其他临时文件
@@ -30,11 +31,3 @@ node_modules
 *.local.json
 .config.json
 .settings.json
-
-# C编译产生的文件
-*.o
-*.out
-
-# 目录
-build
-dist

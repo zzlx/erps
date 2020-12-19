@@ -118,7 +118,7 @@ let g:netrw_winsize = 24
 let g:netrw_liststyle = 3
 let g:netrw_sort_by = 'name'
 let g:netrw_sort_direction = 'normal'
-let g:netrw_sort_sequence = '[\/]$,*'
+"let g:netrw_sort_sequence = '[\/]$,*'
 
 autocmd vimenter * if !argc() | :Vex | endif " 未提供参数时显示目录列表
 
