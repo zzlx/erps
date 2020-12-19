@@ -5,12 +5,12 @@ ERPs
 
 Copyright (C) 2019-present [erps.zzlx.org](erps.zzlx.org)
 
-# 源码目录
+# 目录简介
 
-* [bin](./bin/erps-daemon.mjs)
-* [docs](./docs/README.md)
-* [public](./public/README.md)
-* [src](./src/README.md)
+* [bin](./bin/erps-daemon.mjs) 可执行文件
+* [docs](./docs/README.md) 帮助文档
+* [public](./public/README.md) public资源
+* [src](./src/README.md) 源码资源
 
 # License
 
