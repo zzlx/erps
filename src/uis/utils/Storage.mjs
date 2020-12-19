@@ -85,7 +85,7 @@ export default class Storage {
     );
 
     if (key == null) return this.currentState
-    if (this.currentState[key]) return dataProxy(this.currentState[key]);
+    if (this.currentState[key]) return this.currentState[key];
     return null;
   }
 

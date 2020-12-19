@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import React from '../_React.mjs';
+import React from './_React.mjs';
 
 export default function addClassNameForElement (element, className) {
   if (!React.isValidElement(element)) throw new TypeError('This Element is invalid.');

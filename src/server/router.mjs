@@ -21,7 +21,7 @@ export default router;
 //router.get('/', routes.homePage);
 router.get('docs', ['/documentation', '/docs'], routes.docs);
 router.get('public', '/*', statics(settings.paths.PUBLIC));
-router.get('frontend', '/assets/es/*', statics(path.join(settings.paths.SRC, 'frontend'), { 
+router.get('uis', '/assets/es/*', statics(path.join(settings.paths.SRC, 'uis'), { 
   prefix: '/assets/es/'
 }));
 
@@ -35,4 +35,4 @@ router.get(/test\/(\w+)(?:[_-](\w+))?$/, (ctx, next) => {
   console.log(ctx.params);
 });
 
-router.get(['/', '/homePage', '/index.html'], routes.homePage);
+router.get(['/*', '/homePage', '/index.html'], routes.homePage);

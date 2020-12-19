@@ -745,7 +745,7 @@ _get_cr() {
 	return $ret
 }
 
-# 获取utc时间
+# utc time
 _utc_date() { 
   date -u "+%Y-%m-%d %H:%M:%S"
 }
@@ -768,7 +768,7 @@ _commit_and_push() {
     git -C $_ROOT add -A
 
 		if [[ -z $1 ]]; then
-			read -p "Document change:" message
+			read -p "Change log:" message
 			if [[ -n ${message} ]]; then
 				git -C $_ROOT commit -m "${message} $(_utc_date)"
 			else
@@ -779,7 +779,7 @@ _commit_and_push() {
 		fi
   fi
 
-	read -r -p "Push to remote git server? /Y(es)?|No?/i " input
+	read -r -p "Push to remote server? /Y(es)?|No?/i " input
 
   case "$input" in
     [yY][eE][sS]|[yY] )

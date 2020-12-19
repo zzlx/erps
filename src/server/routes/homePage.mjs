@@ -2,7 +2,6 @@
  * *****************************************************************************
  * 
  * homePage
- * 
  *
  * *****************************************************************************
  */
@@ -23,7 +22,7 @@ router.get('index', '/*', async (ctx, next) => {
   if (ctx.body != null) return next();
 
   if (App == null) {
-    App = await import('../../frontend/App.mjs').then(m => m.default).catch(err => {
+    App = await import('../../uis/main.mjs').then(m => m.default).catch(err => {
       ctx.throw(err);
     })
   }
