@@ -10,23 +10,18 @@ import ReactDOMServer from 'react-dom/server.js';
 import path from 'path';
 import settings from '../../settings.mjs';
 import HtmlTemplate from '../../koa/HtmlTemplate.mjs';
+import App, { CID, getContainerByID } from '../../uis/main.mjs';
+import Storage from '../../uis/utils/Storage.mjs';
 
 import Router from '../../koa/Router.mjs';
 const router = new Router();
 const template = settings.templates.HomePageHtml;
-let App = null;
+HtmlTemplate.prototype.getContainerByID = getContainerByID;
 
 router.get('index', '/*', async (ctx, next) => {
   // 转发有扩展名的路径至下一中间件
   if (/\.w+$/.test(ctx.pathname)) return next();
   if (ctx.body != null) return next();
-
-  if (App == null) {
-    App = await import('../../uis/main.mjs').then(m => m.default).catch(err => {
-      console.log(err);
-      App = null;
-    })
-  }
 
   const path = ctx.pathname;
 
@@ -48,11 +43,12 @@ router.get('index', '/*', async (ctx, next) => {
     { src: `/assets/es/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
   ]);
 
-  if (App) {
-    html.body = ReactDOMServer.renderToString(App({
-      location: {pathname: ctx.pathname}
-    }));
-  }
+  const store = new Storage({
+    location: { pathname: ctx.pathname }
+  });
+
+  const container = html.getContainerByID(CID)
+  container.innerHTML = ReactDOMServer.renderToString(App({store}));
 
   ctx.body = html.render();
   return next();

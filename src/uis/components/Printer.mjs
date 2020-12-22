@@ -1,16 +1,4 @@
 /**
- *
- *
- */
-
-import React from './_React.mjs';
-
-export default class Printer extends React.PureComponent {
-  render () {
-  }
-}
-
-/**
  * print
  * 
  * 新打开窗口中打印特定文档内容
@@ -20,9 +8,9 @@ export default class Printer extends React.PureComponent {
  *
  */
 
-function print(e) {
+export default function print(e) {
   const url = '';
-  const windowName = 'newwindow';
+  const windowName = 'newwindow'
   const windowFeatures = "location=0,locationbar=0,menubar=0,resizable=0,scrollbars=0,status=0,titlebar=0,toolbar=0";
   const newWindow = window.open(url, windowName, windowFeatures);
   newWindow.document.write('<html>');

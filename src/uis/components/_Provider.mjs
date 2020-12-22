@@ -23,22 +23,20 @@ export default class Provider extends React.Component {
 
   render () {
     return React.createElement(Context.Provider, {
-      value: this.state,
-      children: this.props.children,
-    });
+      value: this.state
+    }, this.props.children);
   }
 
   componentDidMount () {
     this._isMounted = true;
-    this.subscribe(); // 订阅store更新
+    this.subscribe();
   }
 
   shouldComponentUpdate (nextProps, nextState) {
-    return true; // always update?
+    return true; 
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
-    // update后若重置store，则重新订阅store更新
     if (this.props.store !== prevProps.store) {
       if (this.unsubscribe) this.unsubscribe();
       this.subscribe();

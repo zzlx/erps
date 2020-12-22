@@ -72,21 +72,6 @@ export default class HTMLTemplate {
     return this;
   }
 
-  set body (value) {
-    assert(typeof value === 'string', 'Body value must be string.');
-    let container = this.document.getElementById('root');
-
-    if (container == null) {
-      container = this.document.createElement('div');
-      container.id = 'root';
-      this.document.body.appendChild(container);
-    }
-
-    container.innerHTML = value; // React服务端渲染内容
-
-    return this;
-  }
-
   render () {
     return this.dom.serialize();
   }

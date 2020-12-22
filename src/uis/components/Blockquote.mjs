@@ -9,7 +9,6 @@
  */
 
 import React from './_React.mjs';
-import addClassName from './_classNames.mjs';
 
 export default function Blockquote(props = {}) {
   const { theme, className, children, ...rests } = props;
@@ -23,7 +22,15 @@ export default function Blockquote(props = {}) {
 
   // blockquote-footer className
   const newChildren = React.Children.map(children, child => {
-    if (child.type === 'footer') return addClassName(child, 'blockquote-footer');
+    if (child.type === 'footer') {
+      return React.cloneElement(child, { 
+        className: [
+          'blockquote-footer', 
+          child.props.className
+        ].filter(Boolean).join(' ')
+      });
+    }
+
     return child;
   });
 

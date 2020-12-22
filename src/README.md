@@ -1,4 +1,4 @@
-Src Directory
+Source Code Directory
 ==========
 
 

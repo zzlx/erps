@@ -16,7 +16,8 @@ export default function matchPath(pathname, options = {}) {
     exact: false,
     strict: false,
     sensitive: true,
-  }, typeof options === 'string' ? { path: options } : options);
+  }, typeof options === 'string' || options instanceof RegExp 
+    ? { path: options } : options);
 
   const paths = [].concat(opts.path);
 
@@ -53,8 +54,6 @@ export default function matchPath(pathname, options = {}) {
 }
 
 /**
- *
- *
  *
  */
 

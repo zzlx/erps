@@ -10,22 +10,27 @@
  */
 
 import React from './_React.mjs';
+import Context from './_Context.mjs';
 
-export default function AnchorLink (props) {
-  const { active, disabled, onClick, className, ...rests } = props;
+export default class AnchorLink extends React.PureComponent {
+  render() {
+    const { active, disabled, onClick, className, ...rests } = this.props;
 
-  const cn = [
-    disabled && !active && 'disabled',
-    active && !disabled && 'active',
-    className,
-  ].filter(Boolean).join(' ');
+    const cn = [
+      disabled && !active && 'disabled',
+      active && !disabled && 'active',
+      className,
+    ].filter(Boolean).join(' ');
 
-  return React.createElement('a', { 
-    className: cn : null,
-    tabIndex: disabled ? "-1" : null,
-    "aria-disabled": disabled ? "true" : null,
-    disabled: disabled ? true : null,
-    onClick: e => { e.preventDefaults(); onClick(e) },
-    ...rests 
-  });
+    return React.createElement('a', { 
+      className: cn : null,
+      tabIndex: disabled ? "-1" : null,
+      "aria-disabled": disabled ? "true" : null,
+      disabled: disabled ? true : null,
+      onClick: e => { e.preventDefaults(); onClick(e) },
+      ...rests 
+    });
+  }
 }
+
+AnchorLink.contextType = Context;

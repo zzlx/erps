@@ -6,13 +6,12 @@
   "license": "MIT",
   "scripts": {
     "commit": "bin/erps-tools.sh --commit",
-    "devel": "bin/erps-devel.mjs bin/erps-daemon.mjs --debug --env=development --restart --paths=bin,server,src",
+    "devel": "bin/erps-devel.mjs bin/erps-daemon.mjs --debug --env=development --restart --paths=src",
     "install:vimrc": "ln -sf $(pwd)/.vimrc ~/.vimrc ",
     "start": "bin/erps-daemon.mjs --start",
     "version": "bin/erps-tools.sh --version"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.12.1",
     "@koa/router": "^10.0.0",
     "bootstrap": "^5.0.0-beta1",
     "bootstrap-icons": "^1.0.0-alpha3",
@@ -29,6 +28,7 @@
     "qrcode": "^1.4.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-router-dom": "^5.2.0",
     "remarkable": "^1.7.1",
     "sass": "^1.29.0",
     "socket.io": "^2.3.0",

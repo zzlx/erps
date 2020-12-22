@@ -98,8 +98,8 @@ function start () {
     console.log({
       Address: this.address(),
       Env: process.env.NODE_ENV,
-      Platform: process.platform,
       Arch: process.arch,
+      Platform: process.platform,
       TotalMem: Number(settings.system.totalmem)/1024/1024 + 'M',
       FreeMem: Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
     });

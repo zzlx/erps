@@ -4,6 +4,8 @@
  * Route 
  *
  * @param {object} props
+ * @param {object} props.match
+ * @param {string|array|object} props.path
  * @return {object}
  * *****************************************************************************
  */
@@ -14,15 +16,21 @@ import matchPath from '../utils/matchPath.mjs';
 
 export default class Route extends React.Component {
   render() {
+    const location = this.props.location 
+      ? this.props.location 
+      : this.context.store.getState('location')
+        ? this.context.store.getState('location')
+        : { pathname: '/' }; 
+
     const match = this.props.match
       ? this.props.match
       : this.props.path 
-        ? matchPath(this.props.location.pathname, this.props) 
+        ? matchPath(location.pathname, this.props)
         : false;
 
     if (!match) return null;
 
-    const props = { location: this.props.location, match };
+    const props = { location, match };
 
     let { children, component } = this.props;
 

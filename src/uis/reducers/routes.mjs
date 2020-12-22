@@ -1,47 +1,47 @@
 /**
  * *****************************************************************************
  *
- *
+ * 路由配置
  *
  * *****************************************************************************
  */
 
 const routes = [
   { 
-    "app": "HomePage",
     "path": [ "/", "/index.html", "/homepage", "/homepage/:module(\\w+)?" ], 
+    "app": "HomePage",
     "title": "首页|Home",
     "keywords": "",
     "exact": true,
   },
-  { "app": "HomePage",
+  { 
     "path": "/settings/:module(\\w+)?", 
+    "app": "HomePage",
     "title": "设置",
     "keywords": "",
     "exact": false
   },
   {
-    "app": "Login",
     "path": "/login",
+    "app": "Login",
     "title": "登陆|Login",
     "exact": false
   },
   {
-    "app": "HomePage",
     "path": "/databases/:tables(\\w+)?",
+    "app": "HomePage",
     "title": "数据库",
     "exact": true
   },
   { 
-    "app": "NotFound",
     "path": "*", 
+    "app": "NotFound",
     "title": "Error:404|NotFound",
     "exact": false
   }
 ];
 
 export default function (state = routes, action) {
-
   switch(action.type){
     default: 
     return state;

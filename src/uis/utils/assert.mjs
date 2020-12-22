@@ -85,7 +85,7 @@ export function isUrl (v) {
 }
 
 export function isPromise (v) {
-  return Boolean(v && typeof v.then === 'function');
+  return Boolean(v && typeof v === 'object' && typeof v.then === 'function');
 }
 
 export function isZhCN (v) {
