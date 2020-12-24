@@ -19,14 +19,18 @@ export default class Switcher extends React.PureComponent {
     const location = this.props.location || this.context.store.getState('location');
     let element, match;
 
-    // iterator children
     for (const child of this.props.children) {
+
       if (match == null && React.isValidElement(child)) {
         const path = child.props.path || child.props.from;
-        match = matchPath(location.pathname, { ...child.props, path });
+        const opts = Object.assign({}, child.props, { path });
+        match = matchPath(location.pathname, opts);
       }
 
-      if (match) { element = child; break; }
+      if (match) { 
+        element = child; 
+        break; 
+      }
     }
 
     if (match == null) return null; // 未匹配到路由

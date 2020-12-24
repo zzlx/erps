@@ -8,8 +8,6 @@
 
 /**
  *
- *
- * 定义路径匹配正则表达式
  * The main path matching regexp utility.
  *
  * Match Express-style parameters and un-named parameters with a prefix
@@ -47,8 +45,6 @@ export const PATH_REGEXP = new RegExp([
 ].join(''), 'g');
 
 /**
- * *****************************************************************************
- *
  * 规范路径字符串,返回正则表达式
  * Normalize the given path string, and returning a regular expression.
  *
@@ -65,7 +61,6 @@ export const PATH_REGEXP = new RegExp([
  * @param  {Object=}               options
  * @return {!RegExp}
  *
- * *****************************************************************************
  */
 
 export function pathToRegexp (path, keys, options = {}) {

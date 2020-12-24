@@ -22,7 +22,7 @@ import util from 'util';
 
 import { argvParser, console, } from '../src/utils.lib.mjs';
 import settings from '../src/settings.mjs';
-import app from '../src/server/main.mjs';
+import server from '../src/server/main.mjs';
 
 process.nextTick(() => {
   // 检测系统平台类型
@@ -85,26 +85,31 @@ function main () {
 }
 
 function start () {
+  const app = server();
+
   // Listening
   app.listen({
     ipv6Only: false,
     host: settings.system.ipv6 ? '::' : '0.0.0.0',
     port: settings.system.port || '8888',
     exclusive: false,
-  }, function () {
+  }, sysinfo);
 
-    console.divideLine();
-    console.write('Server Information:');
-    console.log({
-      Address: this.address(),
-      Env: process.env.NODE_ENV,
-      Arch: process.arch,
-      Platform: process.platform,
-      TotalMem: Number(settings.system.totalmem)/1024/1024 + 'M',
-      FreeMem: Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
-    });
-    console.divideLine();
+}
+
+function sysinfo () {
+  console.divideLine();
+  console.log('监听地址: %o', this.address());
+  console.divideLine('-');
+  console.write('服务器信息:');
+  console.log({
+    '运行模式': process.env.NODE_ENV,
+    '系统平台': process.platform + '_' + process.arch,
+    '处理器信息': os.cpus()[0].model + ' * ' + os.cpus().length,
+    '内存总量': Number(settings.system.totalmem)/1024/1024/1024 + 'G',
+    '空闲内存': Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
   });
+  console.divideLine();
 }
 
 function stop () {

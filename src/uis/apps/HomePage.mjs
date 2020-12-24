@@ -35,8 +35,8 @@ export default class HomePage extends React.Component {
       size: "145"
     });
     const b = React.createElement(Blockquote, null, 
-      React.createElement('p', null, 'text'),
-      React.createElement('footer', null, 'text2'),
+      React.createElement('p', null, '函证中心项目'),
+      React.createElement('footer', null, '管理询证函收发记录'),
     );
 
     const footer = React.createElement(Footer, {

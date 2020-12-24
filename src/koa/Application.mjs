@@ -19,7 +19,7 @@ export default class Application extends EventEmitter {
     super();
     assert(typeof opts === 'object', 'The opts you provided must be an object.');
 
-    this.opts = Object.assign({
+    this.opts = Object.assign({}, {
       // default options
       env: 'production',
       keys: "endsC5vcmc=",

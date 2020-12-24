@@ -3,9 +3,6 @@
  *
  *
  *
- *
- *
- *
  */
 
 export default function objectSpread(target) { 

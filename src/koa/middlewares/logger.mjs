@@ -40,6 +40,7 @@ export default function logger (options = {}) {
     await next(); // 执行中间件栈
 
     ctx.state.log['status'] = ctx.status;
+
     if (ctx.state.noLog) return; // 记录request log
 
     logWriter(opts.logFile, ctx.state.log);

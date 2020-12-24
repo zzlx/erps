@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Nav
+ * Nav组件
  *
  * *****************************************************************************
  */
@@ -40,7 +40,7 @@ export default class Nav extends React.PureComponent {
         position === 'right' && 'justify-content-end',
         position === 'vertical' && 'flex-column',
         className,
-      ].filter(v => v).join(' ');
+      ].filter(Boolean).join(' ');
 
       // 设置 
       let type = 'nav';
@@ -103,15 +103,15 @@ export default class Nav extends React.PureComponent {
 }
 
 
-function applyNavLink (child, isActive) {
-  if (!React.isValidElement(child)) return null;
+function applyNavLink (child) {
+  const cn = [
+    'nav-link',
+    child.props.active && 'active',
+    child.props.disabled && 'disabled',
+    child.props.className,
+  ].filter(Boolean).join(' ');
 
-  const cn = ['nav-link'];
-  if (child.props.active || isActive) cn.push('active');
-  if (child.props.disabled) cn.push('disabled');
-  if (child.props.className) cn.push(child.props.className);
-
-  return React.cloneElement(child, {className: cn.join(' ')}); 
+  return React.cloneElement(child, { className: cn }); 
 }
 
 /**

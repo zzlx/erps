@@ -11,13 +11,21 @@
 import { pathToRegexp } from './path-to-regexp.mjs';
 
 export default function matchPath(pathname, options = {}) {
-  const opts = Object.assign({}, {
-    path: '/',
-    exact: false,
-    strict: false,
-    sensitive: true,
-  }, typeof options === 'string' || options instanceof RegExp 
-    ? { path: options } : options);
+  const opts = { 
+    path: '/', 
+    exact: false, 
+    strict: false, 
+    sensitive: true, 
+  };
+
+  if (typeof options === 'string' || options instanceof RegExp) {
+    opts.path = options;
+  } else {
+    if (options.path != null) opts.path = options.path;
+    if (options.exact != null) opts.exact = options.exact;
+    if (options.strict != null) opts.strict = options.strict;
+    if (options.sensitive != null) opts.sensitive = options.sensitive;
+  }
 
   const paths = [].concat(opts.path);
 
@@ -54,27 +62,22 @@ export default function matchPath(pathname, options = {}) {
 }
 
 /**
- *
+ * compile path
  */
 
 const cache = new Map();
-const cacheLimit = 10000;
+const cacheLimit = 1000; // 1000个地址
 
 function compilePath(path, options) {
-  const cacheKey = `${options.end}${options.strict}${options.sensitive}`;
-  const pathCache = cache.has(cacheKey) 
-    ? cache.get(cacheKey)
-    : cache.set(cache, new Map());
+  const key = `${path}_${options.end}${options.strict}${options.sensitive}`;
 
-  if (pathCache.has(path)) return pathCache.get(path);
+  if (cache.has(key)) return cache.get(key);
 
   const keys = [];
   const regexp = pathToRegexp(path, keys, options);
   const result = { regexp, keys };
 
-  if (pathCache.size < cacheLimit) {
-    pathCache.set(path, result);
-  }
+  if (cache.size < cacheLimit) cache.set(key, result);
 
   return result;
 }

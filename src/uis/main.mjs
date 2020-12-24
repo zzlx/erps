@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * 前端程序入口文件
+ * Frontend UI Application Entry Point
  *
  * *****************************************************************************
  */
@@ -11,22 +11,21 @@ import React from './components/_React.mjs';
 import Redirect from './components/_Redirect.mjs';
 import Route from './components/_Route.mjs';
 import Switcher from './components/_Switcher.mjs';
-import * as Pages from './pages/index.mjs';
+
+import * as Pages from './apps/index.mjs';
+
 import Storage from './utils/Storage.mjs';
 import global from './utils/global.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
 
 // export container id
-export const CID = 'app-root';
+export const CID = 'react-app';
 
 /**
- * *****************************************************************************
- *
- * UI Application
+ * Application
  *
  * @param {object} props
  * @return {object} element
- * *****************************************************************************
  */
 
 export default function App (props) {
@@ -38,8 +37,8 @@ export default function App (props) {
       component: route.app, 
     }));
 
-  const router = React.createElement(Switcher, null, ...routes);
-  return React.createElement(Provider, { store }, router); 
+  return React.createElement(Provider, { store }, React.createElement(Switcher, {
+  }, ...routes)); 
 }
 
 /**
@@ -48,11 +47,10 @@ export default function App (props) {
 
 function cb () {
   const device = deviceDetect(window.navigator.userAgent);
-
   console.groupCollapsed('欢迎使用前端UI程序!');
   if (device) console.log(`检测到当前客户端设备为:${device}`);
   else console.warn('未检测出当前设备类型😢');
-  console.log(`使用帮助文档: ${location.origin}/documentation`);
+  console.log(`帮助文档: ${location.origin}/documentation`);
   console.groupEnd();
 }
 
@@ -151,7 +149,7 @@ if (global.window && global.window.document) {
   // 空的容器对象上使用render方法渲染
   // 判断container是否存在服务端渲染内容
   // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
-  const container = getContainerByID.apply(window, CID)
+  const container = getContainerByID.call(window, CID)
   if (container.innerHTML) ReactDOM.hydrate(element, container, cb);
   else ReactDOM.render(element, container, cb);  
 }
