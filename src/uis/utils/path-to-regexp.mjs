@@ -45,10 +45,9 @@ export const PATH_REGEXP = new RegExp([
 ].join(''), 'g');
 
 /**
- * 规范路径字符串,返回正则表达式
+ *
  * Normalize the given path string, and returning a regular expression.
  *
- * 传入空数组
  * An empty array can be passed in for the keys, 
  * which will hold the placeholder key descriptions. 
  *
@@ -60,13 +59,12 @@ export const PATH_REGEXP = new RegExp([
  * @param  {(Array|Object)=}       keys
  * @param  {Object=}               options
  * @return {!RegExp}
- *
  */
 
 export function pathToRegexp (path, keys, options = {}) {
-  if (!Array.isArray(keys)) { 
-    options = keys || options; 
-    keys = []; 
+  if (!Array.isArray(keys)) {
+    options = keys || options;
+    keys = [];
   }
 
   // regexp path

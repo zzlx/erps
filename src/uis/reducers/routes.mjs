@@ -8,7 +8,7 @@
 
 const routes = [
   { 
-    "path": [ "/", "/index.html", "/homepage", "/homepage/:module(\\w+)?" ], 
+    "path": [ "/", "/homepage", "/homepage/:module(\\w+)?" ], 
     "app": "HomePage",
     "title": "首页|Home",
     "keywords": "",

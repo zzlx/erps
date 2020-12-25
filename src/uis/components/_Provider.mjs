@@ -18,7 +18,8 @@ export default class Provider extends React.Component {
     this.state = {
       store: props.store,
       storeState: props.store.getState(),
-    }
+    };
+
   }
 
   render () {

@@ -25,14 +25,4 @@ router.get('uis', '/assets/es/*', statics(path.join(settings.paths.SRC, 'uis'), 
   prefix: '/assets/es/'
 }));
 
-router.get('/ttt/:name', (ctx, next) => {
-  ctx.body = 'test';
-  console.log(ctx.params);
-});
-
-router.get(/test\/(\w+)(?:[_-](\w+))?$/, (ctx, next) => {
-  ctx.body = 'test';
-  console.log(ctx.params);
-});
-
 router.get(['/*', '/homePage', '/index.html'], routes.homePage);

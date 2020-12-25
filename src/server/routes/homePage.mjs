@@ -10,13 +10,10 @@ import ReactDOMServer from 'react-dom/server.js';
 import path from 'path';
 import settings from '../../settings.mjs';
 import HtmlTemplate from '../../koa/HtmlTemplate.mjs';
-import App, { CID, getContainerByID } from '../../uis/main.mjs';
-import Storage from '../../uis/utils/Storage.mjs';
 
 import Router from '../../koa/Router.mjs';
 const router = new Router();
 const template = settings.templates.HomePageHtml;
-HtmlTemplate.prototype.getContainerByID = getContainerByID;
 
 router.get('index', '/*', async (ctx, next) => {
   // 转发有扩展名的路径至下一中间件
@@ -24,6 +21,12 @@ router.get('index', '/*', async (ctx, next) => {
   if (ctx.body != null) return next();
 
   const path = ctx.pathname;
+  //import App, { CID, getContainerByID } from '../../uis/main.mjs';
+  const M = await import('../../uis/main.mjs').catch(err => ctx.throw(err));
+  const { CID, getContainerByID } = M;
+  const App = M.default;
+  const Storage = await import('../../uis/utils/Storage.mjs').then(m => m.default)
+    .catch(err => ctx.throw(err));
 
   const ua = ctx.get('user-agent');
   const isIE = /MSIE/.test(ua);
@@ -34,6 +37,7 @@ router.get('index', '/*', async (ctx, next) => {
 
   const html = new HtmlTemplate({template: template}) 
 
+  // @TODO:根据路由信息动态更新title
   html.title = '首页|HomePage';
   html.addMeta({ name: 'keywords', content: 'ERP,OA', });
   html.addScript([
@@ -47,7 +51,7 @@ router.get('index', '/*', async (ctx, next) => {
     location: { pathname: ctx.pathname }
   });
 
-  const container = html.getContainerByID(CID)
+  const container = getContainerByID.call(html, CID)
   container.innerHTML = ReactDOMServer.renderToString(App({store}));
 
   ctx.body = html.render();
