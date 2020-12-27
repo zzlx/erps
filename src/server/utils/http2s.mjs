@@ -13,7 +13,7 @@ import path from 'path';
 import WebSocket from '../../koa/WebSocket.mjs'
 import { inspect, } from '../../utils.lib.mjs';
 import logWriter from '../../koa/logWriter.mjs';
-import settings from '../../settings.mjs';
+import settings from '../../settings/index.mjs';
 import util from 'util';
 
 // 调试信息打印工具

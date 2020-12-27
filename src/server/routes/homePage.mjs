@@ -8,7 +8,7 @@
 
 import ReactDOMServer from 'react-dom/server.js';
 import path from 'path';
-import settings from '../../settings.mjs';
+import settings from '../../settings/index.mjs';
 import HtmlTemplate from '../../koa/HtmlTemplate.mjs';
 
 import Router from '../../koa/Router.mjs';
@@ -52,7 +52,7 @@ router.get('index', '/*', async (ctx, next) => {
   });
 
   const container = getContainerByID.call(html, CID)
-  container.innerHTML = ReactDOMServer.renderToString(App({store}));
+  container.innerHTML = ReactDOMServer.renderToString(App(store));
 
   ctx.body = html.render();
   return next();

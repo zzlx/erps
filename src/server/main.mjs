@@ -15,7 +15,7 @@ import path from 'path';
 import crypto from 'crypto';
 
 import { camelCase, console } from '../utils.lib.mjs';
-import settings from '../settings.mjs';
+import settings from '../settings/index.mjs';
 import Koa from '../koa/Application.mjs';
 
 import compress from '../koa/middlewares/compress.mjs';

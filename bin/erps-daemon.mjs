@@ -21,7 +21,7 @@ import path from 'path';
 import util from 'util';
 
 import { argvParser, console, } from '../src/utils.lib.mjs';
-import settings from '../src/settings.mjs';
+import settings from '../src/settings/index.mjs';
 import server from '../src/server/main.mjs';
 
 process.nextTick(() => {

@@ -7,9 +7,7 @@
   "scripts": {
     "commit": "bin/erps-tools.sh --commit",
     "devel": "bin/erps-devel.mjs bin/erps-daemon.mjs --debug --env=development --restart --paths=src",
-    "install:vimrc": "ln -sf $(pwd)/.vimrc ~/.vimrc ",
-    "start": "bin/erps-daemon.mjs --start",
-    "version": "bin/erps-tools.sh --version"
+    "start": "bin/erps-daemon.mjs --start"
   },
   "dependencies": {
     "@koa/router": "^10.0.0",

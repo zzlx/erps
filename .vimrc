@@ -3,6 +3,7 @@
 " VIM配置文件
 "
 " usage: 'vim -u .vimrc'
+" ln -sf $(pwd)/.vimrc ~/.vimrc
 " author: wangxuemin@zzlx.org
 " ==============================================================================
 
@@ -27,17 +28,14 @@ let g:javascript_plugin_flow = 1
 " ------------------------------------------------------------------------------
 " 配置netrw
 "
-let g:netrw_bufsettings = 'noma nomod nu nobl bh ro nocursorline'
+let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro nornu'
 let g:netrw_menu = 1
 let g:netrw_banner = 0
 let g:netrw_browse_split = 4 " 1水平 2垂直 3 新标签页 4 前一个窗口
 let g:netrw_winsize = 24
 let g:netrw_liststyle = 3
-"let g:netrw_sort_by = 'name'
-"let g:netrw_sort_direction = 'normal'
-"let g:netrw_sort_sequence = '[\/]$,*'
 
-autocmd vimenter * if !argc() | :Vex | endif " 未提供参数时显示目录列表
+autocmd VimEnter * if !argc() | :Vex | endif " 未提供参数时显示目录列表
 
 " ------------------------------------------------------------------------------
 " 字符编码设置 "
@@ -249,8 +247,6 @@ endfunc
 "
 " c脚本配置
 autocmd BufRead *.c set cindent             "C/C++缩进方式
-
-"autocmd vimenter * if !argc() | NERDTree | endif
 
 " markdown脚本配置
 autocmd BufRead,BufNewFile *.md setfiletype markdown

@@ -7,7 +7,7 @@
  */
 
 import path from 'path';
-import settings from '../../settings.mjs';
+import settings from '../../settings/index.mjs';
 import Router from '../../koa/Router.mjs';
 const router = new Router(); // 路由配置
 
