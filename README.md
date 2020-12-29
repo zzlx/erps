@@ -18,6 +18,6 @@ ERPs
 
 # License
 
-[MIT](./LICENSE.md)
+[MIT](./LICENSE)
 
 Copyright (C) 2019-present [erps.zzlx.org](https://erps.zzlx.org)
