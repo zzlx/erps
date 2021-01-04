@@ -28,9 +28,7 @@ export default class HomePage extends React.Component {
   render () {
     const store = this.context.store;
     const messages = store.getState({profiles: { messages: 1 } });
-
     const header = React.createElement(Header, { }, '函证中心');
-
     const circular = React.createElement(Circular, {
       size: "145"
     });
@@ -48,7 +46,7 @@ export default class HomePage extends React.Component {
 
     const container = React.createElement('div', {
       className: 'container'
-    }, todoList, b );
+    }, b, todoList);
 
     return React.createElement(React.Fragment, {}, 
       header, 

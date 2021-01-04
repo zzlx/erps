@@ -1,7 +1,9 @@
 /**
  * *****************************************************************************
  *
- * Http2 server
+ * Http2 service
+ *
+ * 支持websocket协议
  *
  * *****************************************************************************
  */
@@ -10,10 +12,9 @@ import assert from 'assert';
 import crypto from 'crypto';
 import http2 from 'http2';
 import path from 'path';
-import WebSocket from '../../koa/WebSocket.mjs'
-import { inspect, } from '../../utils.lib.mjs';
-import logWriter from '../../koa/logWriter.mjs';
-import settings from '../../settings/index.mjs';
+import logWriter from '../koa/logWriter.mjs';
+import settings from '../settings/index.mjs';
+import WebSocket from './utils/WebSocketServer.mjs'
 import util from 'util';
 
 // 调试信息打印工具

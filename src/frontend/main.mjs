@@ -17,8 +17,10 @@ import * as Pages from './pages/index.mjs';
 import Storage from './utils/Storage.mjs';
 import global from './utils/global.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
+import WebSocketClient from './utils/WebSocketClient.mjs';
 
-export const CID = 'react-app'; // container id
+// 配置前端应用标识符
+export const CID = 'react-app'; 
 
 /**
  * *****************************************************************************
@@ -36,6 +38,8 @@ if (global.window && global.window.document) {
 
   const ua = window.navigator.userAgent;
   //if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
+  
+  const wsc = new WebSocketClient(__url.host);
 
   const store = new Storage({
     location,
@@ -90,32 +94,6 @@ function cb () {
   else console.warn('未检测出当前设备类型😢');
   console.log(`帮助文档: ${location.origin}/documentation`);
   console.groupEnd();
-}
-
-/**
- * web socket client
- */
-
-function getWebSocket () {
-  const ws = new WebSocket(`wss://${appURL.host}/api/socket`);
-
-  ws.onopen = (event) => {
-    console.log('webSocket is connected.');
-    this.send("Client: Hello!");
-  };
-
-  ws.onmessage = (e) => {
-    if(typeof e.data === 'string') console.log("from server: ", e.data);
-
-    if(e.data instanceof ArrayBuffer){
-      const buffer = e.data;
-      console.log("Received arraybuffer");
-    }
-  }
-
-  ws.onclose = () => console.warn("Connection is closed.");
-
-  return ws;
 }
 
 /**

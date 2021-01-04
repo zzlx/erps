@@ -3,6 +3,8 @@
  *
  * Kernel of services
  *
+ * KOAS(Kernel of application service), A framwork for backend service.
+ *
  * *****************************************************************************
  */
 

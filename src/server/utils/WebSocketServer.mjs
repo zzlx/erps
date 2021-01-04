@@ -1,9 +1,9 @@
 /**
  * *****************************************************************************
  *
- * WebSocket
+ * WebSocket Server
  *
- * 客户端和服务器之间的低延迟\实时的连接
+ * 客户端和服务器之间的低延迟\实时连接
  *
  * ## 数据帧格式
  *
@@ -28,58 +28,43 @@
  *
  * 详细定义请参考:[WebSocket Protocol](https://tools.ietf.org/html/rfc6455#page-27)
  *
- * 连接保持
- *
- *
- * 客户端
- *
- *
- * Web Socket Client
- *
- * API Reference:
- *
- * * webSocket.readyState 
- *   返回实例对象当前状态,共有4种['CONNECTING', 'OPEN','CLOSING','CLOSED']
- * * webSocket.onopen
- *   用于指定连接成功后的回调函数
- * * webSocket.onclose
- *   用于指定连接关闭后的回调函数
- * * webSocket.onmessage
- *   用于指定收到服务器数据后的回调函数
- * * webSocket.send()
- *   用于向服务器发送数据
- * *  webSocket.bufferedAmount
- *   表示还有多少字节的二进制数据没有发送出去
- * *  webSocket.onerror
- *   用于指定报错时的回调函数
- *
- * * webSocket.close: 关闭连接
- *
  * *****************************************************************************
  */
 
+import assert from 'assert';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
+import http from 'http';
 import http2 from 'http2';
-import { uuid } from '../utils.lib.mjs';
-import { HTTP_STATUS_CODES, } from './constants.mjs';
+import { uuid } from '../../utils.lib.mjs';
+import { HTTP_STATUS_CODES, } from '../../koa/constants.mjs';
 
 const readyStates = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
 const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
-//const GUID = uuid(Buffer.from(key)); 
+const hashKey = key => 
+  crypto.createHash('sha1').update(key + GUID, 'ascii').digest('base64');
+const OPCODES = {
+  CONTINUE: 0,
+  TEXT: 1,
+  BINARY: 2,
+  CLOSE: 8,
+  PING: 9,
+  PONG: 10,
+};
 
-export default class WebSocketServer extends EventEmitter {
-  constructor (server) {
+export default class WebSocket extends EventEmitter {
+  constructor (options) {
     super();
+    assert(options.server, 'Server is not provided.');
+    this.server = options.server;
 
-    if (server == null)  throw new Error('server is null');
-
-    server.on('upgrade', this.upgradeHandler);
+    server.on('upgrade', this.upgrade);
   }
 
   /**
    *
    */
+
   close (cb) {
     if (cb) this.once('close', cb);
 
@@ -96,7 +81,18 @@ export default class WebSocketServer extends EventEmitter {
    *
    */
 
-  upgradeHandler (req, socket, head) {
+  onData (data) {
+    this.buffer = data;
+    //this.processBuffer(); // 处理buffer
+
+  }
+
+  /**
+   *
+   *
+   */
+
+  upgrade (req, socket, head) {
     socket.on('error', socketOnError);
 
     const version = req.headers['sec-websocket-version'];
@@ -116,12 +112,15 @@ export default class WebSocketServer extends EventEmitter {
 
     if (!socket.readable || !socket.writable) return socket.destroy();
 
-    const digest = crypto.createHash('sha1').update(key + GUID).digest('base64');
+    // 对浏览器生产的key进行加密
+    const hashKey = hashKey(key);
+
+    // 构造相应头
     const headers = [
       'HTTP/1.1 101 Switching Protocols',
       'Upgrade: websocket',
       'Connection: Upgrade',
-      `Sec-WebSocket-Accept: ${digest}`
+      `Sec-WebSocket-Accept: ${hashKey}`
     ];
 
     let protocol = req.headers['sec-websocket-protocol'];
@@ -247,6 +246,7 @@ function decodeWsFrame(data) {
 
   return frame;
 }
+
 // 编码ws帧
 function encodeWsFrame(data) {
   const isFinal = data.isFinal !== undefined ? data.isFinal : true, // 没有 isFinal 字段默认为终止帧
@@ -312,4 +312,92 @@ function rawFrameParseHandle(socket) {
       totalLen += frame.payloadLen;
     }
   });
+}
+
+/**
+ *
+ */
+
+function unmask (maskBytes, data) {
+  const payload = Buffer.alloc(data.length);
+  // 
+  for (let i = 0; i < data.length; i++) payload[i] = maskBytes[i % 4] ^ data[i];
+  return payload;
+}
+
+/**
+ *
+ *
+ * Referense: https://segmentfault.com/a/1190000022075295
+ */
+
+function readData (buffer) {
+  let idx = 2;
+
+  const byte_1 = buffer.readUInt8(0);
+  const str_1 = byte_1.toString(2);
+  const FIN = str_1[0];
+  let opcode = byte_1 & 0x0f;
+
+  const byte_2 = buffer.readUInt8(1)
+  const str_2 = byte_2.toString(2);
+  const MASK = str_2[0];
+  let length = parseInt(str_2.substr(2), 2);
+
+  if (length === 0x7e) {
+    length = buffer.readUInt16BE(2);
+    idx+=2;
+  } else if (length === 0x7f) {
+    const highBits = buffer.readUInt32BE(2);
+    // 数据异常
+    if (highBits != 0) {
+    }
+    length = buffer.readUInt32BE(6);
+    idx+=8;
+  }
+
+  let data = null;
+
+  if (MASK) {
+    const maskDataBuffer = buffer.slice(idx, idx + 4);
+    idx+=4;
+    const dataBuffer = buffer.slice(idx, idx + length);
+    data = unmask(maskDataBuffer, dataBuffer);
+
+  }
+
+  let dataBuffer = Buffer.from(data);
+
+  if (FIN) {
+  }
+
+}
+
+WebSocket.prototype.handleData = function (opcode, readData) {
+  switch (opcode) {
+    case OPCODES.TEXT: 
+      this.emit('data', readData.toString('utf8'));
+      break;
+    case OPCODES.BINARY:
+      this.emit('data', readData);
+      break;
+    default:
+      this.close(1002, 'unhandle opcode: ' + opcode);
+  }
+}
+
+
+WebSocket.prototype.send = function (data) {
+  let opcode, buffer;
+  if (Buffer.isBuffer(data)) { 
+    opcode == OPCODES.BINARY; 
+    buffer = data; 
+  } else if (typeof data === 'string') { 
+    opcode == OPCODES.TEXT; 
+    buffer = Buffer.from(data, 'utf8'); 
+  }
+  this.doSend(opcode, buffer);
+}
+
+WebSocket.prototype.send = function (data) {
 }

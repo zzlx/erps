@@ -32,7 +32,7 @@ let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro nornu'
 let g:netrw_menu = 1
 let g:netrw_altv = 1
 let g:netrw_banner = 0
-let g:netrw_browse_split = 4 " 1水平 2垂直 3 新标签页 4 前一个窗口
+let g:netrw_browse_split = 4 " 1 水平 2 垂直 3 新标签页 4 前一个窗口
 let g:netrw_winsize = 24
 let g:netrw_liststyle = 3
 

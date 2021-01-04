@@ -22,10 +22,10 @@ router.get('index', '/*', async (ctx, next) => {
 
   const path = ctx.pathname;
   //import App, { CID, getContainerByID } from '../../uis/main.mjs';
-  const M = await import('../../uis/main.mjs').catch(err => ctx.throw(err));
+  const M = await import('../../frontend/main.mjs').catch(err => ctx.throw(err));
   const { CID, getContainerByID } = M;
   const App = M.default;
-  const Storage = await import('../../uis/utils/Storage.mjs').then(m => m.default)
+  const Storage = await import('../../frontend/utils/Storage.mjs').then(m => m.default)
     .catch(err => ctx.throw(err));
 
   const ua = ctx.get('user-agent');
