@@ -13,6 +13,7 @@
 
 import path from 'path';
 import crypto from 'crypto';
+import util from 'util';
 
 import { camelCase, console } from '../utils.lib.mjs';
 import settings from '../settings/index.mjs';
@@ -28,6 +29,8 @@ import xResponse from '../koa/middlewares/xResponse.mjs';
 
 import createServer from './http2s.mjs';
 import router from './router.mjs';
+
+const debug = util.debuglog('debug:server/main.mjs');
 
 export default function main () {
   // 初始化服务器程序
@@ -61,6 +64,11 @@ export default function main () {
   // 根据条件对响应内容进行压缩
   app.use(markdown()); // 启用markdown解析
   app.use(compress()); // 启用内容压缩
+
+  // test
+  app.use((ctx, next) => {
+    next();
+  });
 
   return app;
 }

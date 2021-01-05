@@ -21,6 +21,7 @@ import path from 'path';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
+import settings from '../src/settings/index.mjs';
 
 import { 
   assert, 

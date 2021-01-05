@@ -772,7 +772,7 @@ _commit_and_push() {
 			if [[ -n ${message} ]]; then
 				git -C $_ROOT commit -m "${message} $(_utc_date)"
 			else
-				git -C $_ROOT commit -m "Routine submission $(_utc_date)"
+				git -C $_ROOT commit -m "Submit $(_utc_date)"
 			fi
 		else
 			git -C $_ROOT commit -m "${1} $(_utc_date)"

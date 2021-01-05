@@ -1,56 +1,107 @@
 /**
  * *****************************************************************************
  *
- * WebSocket Client
+ * wsc(WebSocket Client)
+ *
+ * WebSocket(url[, protocols])
+ *
+ * [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
  *
  * API Reference:
  *
- * * webSocket.readyState 
- *   返回实例对象当前状态,共有4种['CONNECTING', 'OPEN','CLOSING','CLOSED']
- * * webSocket.onopen
- *   用于指定连接成功后的回调函数
- * * webSocket.onclose
- *   用于指定连接关闭后的回调函数
- * * webSocket.onmessage
- *   用于指定收到服务器数据后的回调函数
- * * webSocket.send()
- *   用于向服务器发送数据
- * *  webSocket.bufferedAmount
- *   表示还有多少字节的二进制数据没有发送出去
- * *  webSocket.onerror
- *   用于指定报错时的回调函数
+ * Properties:
  *
- * * webSocket.close: 关闭连接
+ * * WebSocket.binaryType The binary data type used by the connection.
+ * * WebSocket.bufferedAmount The number of bytes of queued data.
+ * * WebSocket.extensions The extensions selected by the server.
+ * * WebSocket.onclose An event listener to be called when the connection is closed.
+ * * WebSocket.onmessage An event listener to be called when a message is received from the server. 
+ * * WebSocket.onopen An event listener to be called when the connection is opened.
+ * * WebSocket.protocol The sub-protocol selected by the server. 
+ * * WebSocket.readyState The current state of the connection.['CONNECTING', 'OPEN','CLOSING','CLOSED']
+ * * WebSocket.url The absolute URL of the WebSocket. 
+ *
+ * Methods:
+ *
+ * * WebSocket.close([code[, reason]]);
+ * * WebSocket.send(data)
+ *
+ * Events:
+ *
+ * * close
+ * * error
+ * * message
+ * * open
+ *
+ *
+ * [WebSocketServer](../../server/utils/WebSocketServer.mjs)
  *
  * *****************************************************************************
  */
 
+const wsc = Symbol('web-socket-client');
+
 export default class WebSocketClient {
-  constructor (host) {
-    this.ws = new WebSocket(`wss://${host}/GraphQL`);
-    this.ws.addEventListener('open', this.onOpen);
-    this.ws.addEventListener('message', this.onMessage);
-    this.ws.addEventListener('close', this.onClose);
+  constructor (url) {
+    this.url = url;
   }
 
-  onClose (event) {
-    console.warn("Connection is closed.");
-  }
-
-  onOpen (event) {
-    console.log('webSocket is connected.');
-    this.ws.send('Hello Server!');
-  }
-
-  onMessage (event) {
-    console.log('Message from server ', event.data);
-    if(typeof e.data === 'string') {
-      console.log("from server: ", e.data);
-    }
-
-    if(e.data instanceof ArrayBuffer){
-      const buffer = e.data;
-      console.log("Received arraybuffer");
+  send (data) {
+    if (this.ws.readyState != 1) {
+      console.info("Cannot send data to server, WebSocket.readyState: ", this.ws.readyState);
+    } else {
+      console.info('Send data to server success.');
+      this.ws.send(data);
     }
   }
+
+  get ws () {
+    if (this[wsc] == null) {
+      const ws = new WebSocket(getURL(this.url)); 
+
+      ws.addEventListener('error', (error) => {
+        console.log('WebSocket Error ' + error);
+      });
+
+      ws.addEventListener('close', (event) => {
+        console.warn("websocket connection is closed.");
+      });
+
+      ws.addEventListener('open', (event) => {
+        ws.send('{hello}');
+      });
+
+      ws.addEventListener('message', (event) => {
+        if(typeof event.data === 'string') {
+          console.log("from server: ", event.data);
+        }
+
+        if(event.data instanceof ArrayBuffer){
+          const buffer = event.data;
+          console.log("Received arraybuffer");
+        }
+      });
+
+      this[wsc] = ws;
+    }
+
+    return this[wsc]
+  }
+}
+
+
+/**
+ *
+ *
+ */
+
+function getURL (pathname = '/socket') {
+  const url = new URL(import.meta.url);
+  const protocol = url.protocol === 'http' ? 'ws' : 'wss';
+  const hostname = url.hostname;
+  const port = url.port === ""
+    ? url.protocol === 'http' ? '80' : '443'
+    : url.port 
+
+  return `${protocol}://${hostname}:${port}${pathname}`; 
 }

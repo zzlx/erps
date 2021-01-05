@@ -17,7 +17,7 @@ import * as Pages from './pages/index.mjs';
 import Storage from './utils/Storage.mjs';
 import global from './utils/global.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
-import WebSocketClient from './utils/WebSocketClient.mjs';
+import WSC from './utils/WebSocketClient.mjs';
 
 // 配置前端应用标识符
 export const CID = 'react-app'; 
@@ -39,11 +39,19 @@ if (global.window && global.window.document) {
   const ua = window.navigator.userAgent;
   //if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
   
-  const wsc = new WebSocketClient(__url.host);
+  const ws = new WSC();
+  setTimeout(() => {
+    ws.send('TEST');
+
+    setTimeout(() => {
+      ws.send('TEST2');
+    }, 500);
+  }, 10000);
 
   const store = new Storage({
     location,
   });
+
 
   // 订阅更新
   // 变动发生额存入客户端

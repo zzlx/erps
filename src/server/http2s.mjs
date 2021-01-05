@@ -18,7 +18,7 @@ import WebSocket from './utils/WebSocketServer.mjs'
 import util from 'util';
 
 // 调试信息打印工具
-const debug = util.debuglog('http2s.mjs');
+const debug = util.debuglog('debug:http2s.mjs');
 const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
 
@@ -45,6 +45,9 @@ export default (options = {}) => {
   }, options)
 
   const server = http2.createSecureServer(opts);
+
+  // handle websocket connection
+  new WebSocket({server: server});
 
   // handle tls server events:
 
