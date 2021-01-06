@@ -14,7 +14,7 @@ import http2 from 'http2';
 import path from 'path';
 import logWriter from '../koa/logWriter.mjs';
 import settings from '../settings/index.mjs';
-import WebSocket from './utils/WebSocketServer.mjs'
+import WebSocket from './WebSocketServer.mjs'
 import util from 'util';
 
 // 调试信息打印工具
@@ -46,7 +46,7 @@ export default (options = {}) => {
 
   const server = http2.createSecureServer(opts);
 
-  // handle websocket connection
+  // websocket protocol support
   new WebSocket({server: server});
 
   // handle tls server events:

@@ -1,1 +1,5 @@
-*
+polyfill.min.js
+react-dom.development.js
+react-dom.production.mjs.js
+react.development.js
+react.production.mjs.js

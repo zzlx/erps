@@ -12,8 +12,8 @@
  * *****************************************************************************
  */
 
-import assert from './assert.mjs';
-import * as reducers from '../reducers/index.mjs';
+import assert from './utils/assert.mjs';
+import * as reducers from './reducers/index.mjs';
 
 export default class Storage {
   constructor (state) {
@@ -35,8 +35,7 @@ export default class Storage {
     this.dispatch = this.dispatch.bind(this);
     this._dispatch = this._dispatch.bind(this);
 
-    // Action处理器
-    this._dispatch({ type: 'INIT' }); // 初始化state
+    this._dispatch({ type: 'INIT' });
   }
 
   dispatch (action) {
@@ -48,7 +47,6 @@ export default class Storage {
    */
 
   _dispatch (action) {
-
     assert(assert.isPlainObject(action), 
       'Actions must be plain objects. Use custom middleware for async actions.');
 
@@ -160,12 +158,9 @@ const crashReporter = store => next => action => {
  * `dispatch` will return the return value of the dispatched function.
  */
 
-const thunk = store => next => action => {
-  if (action == null) throw new TypeError('Action must not be null.');
-  if (typeof action === 'function') return action(store);
-  if (typeof action === 'object') return next(action);
-  throw new TypeError('Action must not be null.');
-}
+const thunk = store => next => action => typeof action === 'function'
+  ? action(store)
+  : next(action);
 
 /**
  * promise middleware
@@ -248,10 +243,10 @@ const normalization = store => next => action => {
 
 const logger = store => next => action => {
   console.group('Action');
-  console.log('State_Prev:', store.getState());
-  console.info('Dispatching action:', action);
+  console.log('prev_state:', store.getState());
+  console.info('dispatch_action:', action);
   const result = next(action);
-  console.log('State_New:', store.getState());
+  console.log('new_state:', store.getState());
   console.groupEnd();
   return result;
 }

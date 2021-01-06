@@ -7,6 +7,8 @@
  *
  * [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
  *
+ * constants:
+ *
  * API Reference:
  *
  * Properties:
@@ -39,54 +41,37 @@
  * *****************************************************************************
  */
 
-const wsc = Symbol('web-socket-client');
+export default function getWS () {
+  const ws = new WebSocket(getURL(), ['GraphQL', 'Authority']); 
 
-export default class WebSocketClient {
-  constructor (url) {
-    this.url = url;
-  }
+  ws.addEventListener('error', (error) => {
+    console.log('WebSocket Error ' + error);
+  });
 
-  send (data) {
-    if (this.ws.readyState != 1) {
-      console.info("Cannot send data to server, WebSocket.readyState: ", this.ws.readyState);
-    } else {
-      console.info('Send data to server success.');
-      this.ws.send(data);
-    }
-  }
-
-  get ws () {
-    if (this[wsc] == null) {
-      const ws = new WebSocket(getURL(this.url)); 
-
-      ws.addEventListener('error', (error) => {
-        console.log('WebSocket Error ' + error);
-      });
-
-      ws.addEventListener('close', (event) => {
-        console.warn("websocket connection is closed.");
-      });
-
-      ws.addEventListener('open', (event) => {
-        ws.send('{hello}');
-      });
-
-      ws.addEventListener('message', (event) => {
-        if(typeof event.data === 'string') {
-          console.log("from server: ", event.data);
-        }
-
-        if(event.data instanceof ArrayBuffer){
-          const buffer = event.data;
-          console.log("Received arraybuffer");
-        }
-      });
-
-      this[wsc] = ws;
+  ws.addEventListener('close', function (event) {
+    if(this.readyState == this.CLOSED){
+      console.warn("websocket connection is closed.");
     }
 
-    return this[wsc]
-  }
+    console.warn("websocket connection is closed.");
+  });
+
+  ws.addEventListener('open', (event) => {
+    ws.send('{hello}');
+  });
+
+  ws.addEventListener('message', (event) => {
+    if(typeof event.data === 'string') {
+      console.log("from server: ", event.data);
+    }
+
+    if(event.data instanceof ArrayBuffer){
+      const buffer = event.data;
+      console.log("Received arraybuffer");
+    }
+  });
+
+  return ws;
 }
 
 
@@ -95,7 +80,7 @@ export default class WebSocketClient {
  *
  */
 
-function getURL (pathname = '/socket') {
+function getURL (pathname = '') {
   const url = new URL(import.meta.url);
   const protocol = url.protocol === 'http' ? 'ws' : 'wss';
   const hostname = url.hostname;

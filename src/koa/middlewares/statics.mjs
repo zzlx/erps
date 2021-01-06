@@ -32,7 +32,7 @@ export default function statics (root, options = {}) {
     contentNegotiation: true,
     dotfiles: 'ignore',
     etag: true,
-    //directoryIndex: [ 'index.html' ],
+    directoryIndex: [],
     extensions: [ 'html' ],
     index: false,
     immutable: false,
@@ -43,9 +43,7 @@ export default function statics (root, options = {}) {
 
   if ('string' === typeof opts.directoryIndex) {
     opts.directoryIndex = opts.directoryIndex.split(',');
-  } else if (opts.directoryIndex == null) {
-    opts.directoryIndex = [ 'index.html' ];
-  }
+  } 
 
   if (!Array.isArray(opts.directoryIndex)) opts.directoryIndex = false;
 
@@ -66,6 +64,7 @@ export default function statics (root, options = {}) {
     let url = absolutePath;
 
     if (path.extname(url) === '' && fs.existsSync(url)) {
+
       // 匹配目录索引文件
       for (const index of opts.directoryIndex) {
         const indexPath = path.join(url, index);

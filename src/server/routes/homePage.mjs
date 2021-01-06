@@ -25,7 +25,7 @@ router.get('index', '/*', async (ctx, next) => {
   const M = await import('../../frontend/main.mjs').catch(err => ctx.throw(err));
   const { CID, getContainerByID } = M;
   const App = M.default;
-  const Storage = await import('../../frontend/utils/Storage.mjs').then(m => m.default)
+  const Storage = await import('../../frontend/Storage.mjs').then(m => m.default)
     .catch(err => ctx.throw(err));
 
   const ua = ctx.get('user-agent');

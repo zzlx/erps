@@ -14,10 +14,9 @@ import Switcher from './components/_Switcher.mjs';
 
 import * as Pages from './pages/index.mjs';
 
-import Storage from './utils/Storage.mjs';
+import Storage from './Storage.mjs';
 import global from './utils/global.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
-import WSC from './utils/WebSocketClient.mjs';
 
 // 配置前端应用标识符
 export const CID = 'react-app'; 
@@ -39,26 +38,20 @@ if (global.window && global.window.document) {
   const ua = window.navigator.userAgent;
   //if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
   
-  const ws = new WSC();
-  setTimeout(() => {
-    ws.send('TEST');
-
-    setTimeout(() => {
-      ws.send('TEST2');
-    }, 500);
-  }, 10000);
-
   const store = new Storage({
     location,
   });
 
-
   // 订阅更新
   // 变动发生额存入客户端
   // 客户端存储逻辑判断
-  //
   store.subscribe(() => {
-    console.log('test');
+  });
+
+  store.dispatch(() => {
+    return {
+      type: 'TEST'
+    };
   });
 
   const element = ReactApp(store);

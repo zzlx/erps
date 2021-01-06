@@ -21,8 +21,7 @@ export default router;
 //router.get('/', routes.homePage);
 router.get('docs', ['/documentation', '/docs'], routes.docs);
 router.get('public', '/*', statics(settings.paths.PUBLIC));
-router.get('uis', '/assets/es/*', statics(path.join(settings.paths.SRC, 'frontend'), { 
+router.get('/assets/es/*', statics(path.join(settings.paths.SRC, 'frontend'), {
   prefix: '/assets/es/'
 }));
-
-router.get(['/*', '/homePage', '/index.html'], routes.homePage);
+router.get('/*', routes.homePage);

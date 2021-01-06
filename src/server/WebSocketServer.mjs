@@ -52,8 +52,8 @@ import http from 'http';
 import http2 from 'http2';
 import util from 'util';
 
-import { uuid } from '../../utils.lib.mjs';
-import { HTTP_STATUS_CODES, } from '../../koa/constants.mjs';
+import { uuid } from '../utils.lib.mjs';
+import { HTTP_STATUS_CODES, } from '../koa/constants.mjs';
 
 const debug = util.debuglog('debug:websocket-server');
 const readyStates = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
