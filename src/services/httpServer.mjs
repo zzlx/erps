@@ -12,15 +12,18 @@ import assert from 'assert';
 import crypto from 'crypto';
 import http2 from 'http2';
 import path from 'path';
+import util from 'util';
+
 import logWriter from '../koa/logWriter.mjs';
 import settings from '../settings/index.mjs';
 import WebSocket from './WebSocketServer.mjs'
-import util from 'util';
+import app from './app.mjs';
 
 // 调试信息打印工具
 const debug = util.debuglog('debug:http2s.mjs');
 const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
+const streamHandler = app.callback();
 
 export default (options = {}) => {
   const opts = Object.assign({
@@ -45,9 +48,12 @@ export default (options = {}) => {
   }, options)
 
   const server = http2.createSecureServer(opts);
+  const websocket = new WebSocket(); 
 
   // websocket protocol support
-  new WebSocket({server: server});
+  server.on('upgrade', (req, socket, head) => {
+    websocket.upgradeHandshake(req, socket, head);
+  });
 
   // handle tls server events:
 
@@ -65,11 +71,9 @@ export default (options = {}) => {
   // as it allows captured TLS traffic to be decrypted. 
   // It may be emitted multiple times for each socket.
   server.on('keylog', (line, tlsSocket) => {
-    debug('keylog:', line.toString());
     logWriter(path.join(paths.LOG_PATH, 'ssl-keys.log'), line.toString());
   });
 
-  /*
   // The 'newSession' event is emitted upon creation of a new TLS session. 
   // This may be used to store sessions in external storage. 
   // The data should be provided to the 'resumeSession' callback.
@@ -78,7 +82,6 @@ export default (options = {}) => {
     sessionStore.set(sessionId.toString('hex'), sessionData);
     cb();
   });
-  */
 
   // event is emitted when the client sends a certificate status request. 
   server.on('OCSPRequest', (certificate, issuer, cb) => {
@@ -87,7 +90,6 @@ export default (options = {}) => {
     cb(null, null);
   });
 
-  /*
   // The 'resumeSession' event is emitted 
   // when the client requests to resume a previous TLS session. 
   server.on('resumeSession', (id, cb) => {
@@ -101,7 +103,6 @@ export default (options = {}) => {
       cb(null, null);
     }
   });
-  */
 
   // he 'secureConnection' event is emitted after the handshaking process 
   // for a new connection has successfully completed. 
@@ -113,8 +114,6 @@ export default (options = {}) => {
   server.on('tlsClientError', (exception, tlsSocket) => {
     debug('tlsClientError: ', exception);
   });
-
-  // endof tls server events
 
   server.on('unknownProtocol', (error) => {
     debug('unknownProtocol');
@@ -131,6 +130,8 @@ export default (options = {}) => {
   server.on('close', () => {
     console.log('server is closed');
   });
+
+  server.on('stream', streamHandler);
 
   return server;
 }  

@@ -43,26 +43,6 @@ export default class Application extends EventEmitter {
 
     // app storage
     this.middlewares = []; // store middlewares
-    this.tasksBeforeListen = []; // store tasks
-    this.queueList = [];
-
-  }
-
-  /**
-   * start listening
-   */
-
-  listen () {
-    assert(this.server, 'server creator is not avilable.');
-
-
-    // 执行完配置任务后再开启服务器监听
-    Promise.all(this.tasksBeforeListen.map(task => cp.spawn(task))).then(() => {
-      this.server.on('stream', this.callback());
-      this.server.listen(...arguments);
-    }).catch(err => {
-      console.log(err);
-    });
   }
 
   /**

@@ -15,6 +15,7 @@
 import assert from 'assert';
 import cluster from 'cluster';
 import cp from 'child_process';
+import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -22,7 +23,13 @@ import util from 'util';
 
 import { argvParser, console, } from '../src/utils.lib.mjs';
 import settings from '../src/settings/index.mjs';
-import server from '../src/server/main.mjs';
+import httpServer from '../src/services/httpServer.mjs';
+
+// 服务重启时执行的任务清单:
+const tasksBeforeListen = [
+  path.join(settings.paths.BIN, 'copy-umd-to-assets.mjs'),
+  path.join(settings.paths.BIN, 'scss-render.mjs'),
+];
 
 process.nextTick(() => {
   // 检测系统平台类型
@@ -85,16 +92,22 @@ function main () {
 }
 
 function start () {
-  const app = server();
+  const server = httpServer({
+    key: settings.privateKey,
+    cert: settings.cert,
+    passphrase: settings.passphrase, // 证书passphrase
+    ticketKeys: crypto.randomBytes(48), 
+  });
 
-  // Listening
-  app.listen({
-    ipv6Only: false,
-    host: settings.system.ipv6 ? '::' : '0.0.0.0',
-    port: settings.system.port || '8888',
-    exclusive: false,
-  }, sysinfo);
-
+  // 执行完配置任务后再开启服务器监听
+  Promise.all(tasksBeforeListen.map(task => cp.spawn(task))).then(() => {
+    server.listen({
+      ipv6Only: false,
+      host: settings.system.ipv6 ? '::' : '0.0.0.0',
+      port: settings.system.port || '8888',
+      exclusive: false,
+    }, sysinfo);
+  }).catch(err => { console.log(err); });
 }
 
 function sysinfo () {

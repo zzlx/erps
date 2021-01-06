@@ -3,7 +3,34 @@
  *
  * WebSocket Server
  *
- * 客户端和服务器之间的低延迟\实时连接
+ * [WebSocketClient](../../frontend/utils/WebSocketClient.mjs)
+ *
+ * *****************************************************************************
+ */ 
+ 
+import assert from 'assert';
+import crypto from 'crypto';
+import EventEmitter from 'events'; 
+import util from 'util';
+
+import { uuid } from '../utils.lib.mjs';
+import { HTTP_STATUS_CODES, } from '../koa/constants.mjs';
+
+const debug = util.debuglog('debug:websocket-server');
+const readyStates = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
+const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
+const OPCODES = {
+  CONTINUE: 0,
+  TEXT: 1,
+  BINARY: 2,
+  CLOSE: 8,
+  PING: 9,
+  PONG: 10,
+};
+
+/**
+ *
+ * [The WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
  *
  * ## 数据帧格式
  *
@@ -28,9 +55,6 @@
  *
  * FIN为1表示这是消息的最后一部分分片,如果为0表示后续还有数据
  *
- *
- * 详细定义请参考:[WebSocket Protocol](https://tools.ietf.org/html/rfc6455#page-27)
- *
  * Socket 协议头
  *
  * * Connection: Upgrade
@@ -39,117 +63,108 @@
  * * Sec-Websocket-key: 
  * 服务端取到该值后与GUID拼接后计算sha1作为Sec-Websocket-Accept的值返回客户端
  * 
- *
- * [WebSocketClient](../../frontend/utils/WebSocketClient.mjs)
- *
- * *****************************************************************************
  */
-
-import assert from 'assert';
-import crypto from 'crypto';
-import EventEmitter from 'events'; 
-import http from 'http';
-import http2 from 'http2';
-import util from 'util';
-
-import { uuid } from '../utils.lib.mjs';
-import { HTTP_STATUS_CODES, } from '../koa/constants.mjs';
-
-const debug = util.debuglog('debug:websocket-server');
-const readyStates = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
-const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
-const hashKey = key => 
-  crypto.createHash('sha1').update(key + GUID, 'ascii').digest('base64');
-const OPCODES = {
-  CONTINUE: 0,
-  TEXT: 1,
-  BINARY: 2,
-  CLOSE: 8,
-  PING: 9,
-  PONG: 10,
-};
 
 export default class WebSocket extends EventEmitter {
   constructor (options = {}) {
     super();
-    if (options.server == null ) {
-      this.server = http.createServer();
-      this.server.listen(options.port || 3000);
-    } else {
-      this.server = options.server;
-    }
-
     this.closed = false;
     this.socket = null;
     this.buffer = Buffer.alloc(0);
 
-    this.server.on('upgrade', (req, socket, head) => {
-      this.socket = socket;
+  }
 
-      socket.on('error', socketOnError);
+  upgradeHandshake (req, socket, head) {
+    this.socket = socket;
 
-      const version = req.headers['sec-websocket-version'];
-      const key = req.headers['sec-websocket-key'] || null;
-      const extensions = {};
+    socket.on('error', socketOnError);
 
-      if (
-        'GET' !== req['method'] || 
-        'websocket' !== req.headers.upgrade.toLowerCase() ||
-        !key ||
-        (version !== '8' && version !== '13')
-      ) {
-        return abortHandshake(socket, 400);
+    const version = req.headers['sec-websocket-version'];
+    const key = req.headers['sec-websocket-key'] || null;
+    const extensions = {};
+
+    if (
+      'GET' !== req['method'] || 
+      'websocket' !== req.headers.upgrade.toLowerCase() ||
+      !key ||
+      (version !== '8' && version !== '13')
+    ) {
+      return abortHandshake(socket, 400);
+    }
+
+    if (!socket.readable || !socket.writable) {
+      return socket.destroy();
+    }
+
+    // 构造相应头
+    const resHeaders = [
+      'HTTP/1.1 101 Switching Protocols',
+      'Upgrade: websocket',
+      'Connection: Upgrade',
+      `Sec-WebSocket-Accept: ${hashKey(key)}`
+    ];
+
+    let protocol = req.headers['sec-websocket-protocol'];
+
+    if (protocol) { 
+      protocol = protocol.trim().split(/ *, */);
+      protocol = protocol[0];
+
+      if (protocol) {
+        resHeaders.push(`Sec-WebSocket-Protocol: ${protocol}`);
+      }
+    }
+
+    socket.write(resHeaders.concat('\r\n').join('\r\n'));
+
+    socket.on('close', error => {
+      if (!this.closed) {
+        this.emit('close', 1006, 'timeout');
+        this.closed = true;
       }
 
-      if (!socket.readable || !socket.writable) {
-        return socket.destroy();
-      }
-
-      // 构造相应头
-      const resHeaders = [
-        'HTTP/1.1 101 Switching Protocols',
-        'Upgrade: websocket',
-        'Connection: Upgrade',
-        `Sec-WebSocket-Accept: ${hashKey(key)}`
-      ];
-
-      let protocol = req.headers['sec-websocket-protocol'];
-
-      if (protocol) { 
-        protocol = protocol.trim().split(/ *, */);
-        protocol = prococol[0];
-
-        if (protocol) {
-          resHeaders.push(`Sec-WebSocket-Protocol: ${protocol}`);
-        }
-      }
-
-      /*
-      if (extensions[PerMessageDeflate.extensionName]) {
-        const params = extensions[PerMessageDeflate.extensionName].params;
-        const value = format({
-          [PerMessageDeflate.extensionName]: [params]
-        });
-        resHeaders.push(`Sec-WebSocket-Extensions: ${value}`);
-      }
-      */
-
-      socket.write(resHeaders.concat('\r\n').join('\r\n'));
-      socket.on('close', error => {
-        if (!this.closed) {
-          this.emit('close', 1006, 'timeout');
-          this.closed = true;
-        }
-
-      });
-
-      socket.on('data', data => {
-        this.buffer = data;
-        this.processBuffer();
-      });
-
-      socket.removeListener('error', socketOnError);
     });
+
+    socket.on('data', data => {
+      this.buffer = data;
+      this.processBuffer();
+    });
+
+    socket.removeListener('error', socketOnError);
+  }
+
+  /**
+   * Close the connection when preconditions are not fulfilled.
+   *
+   * @param {net.Socket} socket The socket of the upgrade request
+   * @param {Number} code The HTTP response status code
+   * @param {String} [message] The HTTP response body
+   * @param {Object} [headers] Additional HTTP response headers
+   * @private
+   */
+
+  abortHandshake(socket, code, message, headers) {
+    if (socket.writable) {
+      message = message || HTTP_STATUS_CODES[code];
+      headers = {
+        Connection: 'close',
+        'Content-Type': 'text/html',
+        'Content-Length': Buffer.byteLength(message),
+        ...headers
+      };
+
+      socket.write(
+        `HTTP/1.1 ${code} ${HTTP_STATUS_CODES[code]}\r\n` +
+          Object.keys(headers)
+            .map((h) => `${h}: ${headers[h]}`)
+            .join('\r\n') +
+          '\r\n\r\n' +
+          message
+      );
+    }
+
+    socket.removeListener('error', socketOnError);
+    socket.destroy();
   }
 
   /**
@@ -166,6 +181,40 @@ export default class WebSocket extends EventEmitter {
     const server = this._server;
     process.nextTick(emitClose, this);
   }
+
+  handleData (opcode, readData) {
+    switch (opcode) {
+      case OPCODES.TEXT: 
+        this.emit('data', readData.toString('utf8'));
+        break;
+      case OPCODES.BINARY:
+        this.emit('data', readData);
+        break;
+      default:
+        this.close(1002, 'unhandle opcode: ' + opcode);
+    }
+  }
+
+  send (data) {
+    let opcode, buffer;
+
+    if (Buffer.isBuffer(data)) { 
+      opcode == OPCODES.BINARY; 
+      buffer = data; 
+    } else if (typeof data === 'string') { 
+      opcode == OPCODES.TEXT; 
+      buffer = Buffer.from(data, 'utf8'); 
+    } else {
+      throw new Error('cannot send object. must be send buffer or string.');
+    }
+    this.doSend(opcode, buffer);
+  }
+
+  doSend (opcode, buffer) {
+    this.socket.write(encodeMessage(opcode, buffer));
+  }
+
+
 }
 
 WebSocket.prototype.processBuffer = function () {
@@ -223,48 +272,6 @@ WebSocket.prototype.handleRealData = function (opcode, realDataBuffer) {
   }
 }
 
-/**
- * Close the connection when preconditions are not fulfilled.
- *
- * @param {net.Socket} socket The socket of the upgrade request
- * @param {Number} code The HTTP response status code
- * @param {String} [message] The HTTP response body
- * @param {Object} [headers] Additional HTTP response headers
- * @private
- */
-
-function abortHandshake(socket, code, message, headers) {
-  if (socket.writable) {
-    message = message || HTTP_STATUS_CODES[code];
-    headers = {
-      Connection: 'close',
-      'Content-Type': 'text/html',
-      'Content-Length': Buffer.byteLength(message),
-      ...headers
-    };
-
-    socket.write(
-      `HTTP/1.1 ${code} ${HTTP_STATUS_CODES[code]}\r\n` +
-        Object.keys(headers)
-          .map((h) => `${h}: ${headers[h]}`)
-          .join('\r\n') +
-        '\r\n\r\n' +
-        message
-    );
-  }
-
-  socket.removeListener('error', socketOnError);
-  socket.destroy();
-}
-
-/**
- *
- *
- */
-
-function socketOnError () {
-  this.destroy();
-}
 
 // 编码ws帧
 function encodeWsFrame (data) {
@@ -333,22 +340,6 @@ function rawFrameParseHandle(socket) {
   });
 }
 
-/**
- *
- */
-
-function unmask (maskBytes, data) {
-  const payload = Buffer.alloc(data.length);
-  for (let i = 0; i < data.length; i++) payload[i] = maskBytes[i % 4] ^ data[i];
-  return payload;
-}
-
-/**
- *
- *
- * Referense: https://segmentfault.com/a/1190000022075295
- */
-
 function readData (buffer) {
   let idx = 2;
 
@@ -390,39 +381,17 @@ function readData (buffer) {
   if (FIN) {
     this.handleRealData(opcode, realDataBuffer);
   }
-
 }
 
-WebSocket.prototype.handleData = function (opcode, readData) {
-  switch (opcode) {
-    case OPCODES.TEXT: 
-      this.emit('data', readData.toString('utf8'));
-      break;
-    case OPCODES.BINARY:
-      this.emit('data', readData);
-      break;
-    default:
-      this.close(1002, 'unhandle opcode: ' + opcode);
-  }
-}
+/**
+ * Utilities
+ *
+ */
 
-
-WebSocket.prototype.send = function (data) {
-  let opcode, buffer;
-  if (Buffer.isBuffer(data)) { 
-    opcode == OPCODES.BINARY; 
-    buffer = data; 
-  } else if (typeof data === 'string') { 
-    opcode == OPCODES.TEXT; 
-    buffer = Buffer.from(data, 'utf8'); 
-  } else {
-    throw new Error('cannot send object. must be send buffer or string.');
-  }
-  this.doSend(opcode, buffer);
-}
-
-WebSocket.prototype.doSend = function (opcode, buffer) {
-  this.socket.write(encodeMessage(opcode, buffer));
+function unmask (maskBytes, data) {
+  const payload = Buffer.alloc(data.length);
+  for (let i = 0; i < data.length; i++) payload[i] = maskBytes[i % 4] ^ data[i];
+  return payload;
 }
 
 function encodeMessage (opcode, payload) {
@@ -440,3 +409,12 @@ function encodeMessage (opcode, payload) {
 
   return buf;
 }
+
+function hashKey (key) {
+  return crypto.createHash('sha1').update(key + GUID, 'ascii').digest('base64');
+}
+
+function socketOnError () {
+  this.destroy();
+}
+

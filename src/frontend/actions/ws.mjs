@@ -35,6 +35,7 @@
  * * message
  * * open
  *
+ * # Reference
  *
  * [WebSocketServer](../../server/utils/WebSocketServer.mjs)
  *
@@ -48,15 +49,16 @@ export default function getWS () {
     console.log('WebSocket Error ' + error);
   });
 
-  ws.addEventListener('close', function (event) {
-    if(this.readyState == this.CLOSED){
-      console.warn("websocket connection is closed.");
-    }
-
-    console.warn("websocket connection is closed.");
-  });
+  ws.onclose = function (event) {
+    console.warn("websocket connection is closed. %o", {
+      code: event.code,
+      reason: event.reason,
+      wasClean: event.wasClean,
+    });
+  };
 
   ws.addEventListener('open', (event) => {
+    console.log('websocket connection is opening.');
     ws.send('{hello}');
   });
 

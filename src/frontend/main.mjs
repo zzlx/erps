@@ -17,6 +17,8 @@ import * as Pages from './pages/index.mjs';
 import Storage from './Storage.mjs';
 import global from './utils/global.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
+import getWS from './actions/ws.mjs';
+
 
 // 配置前端应用标识符
 export const CID = 'react-app'; 
@@ -38,6 +40,8 @@ if (global.window && global.window.document) {
   const ua = window.navigator.userAgent;
   //if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
   
+  const ws = getWS();
+
   const store = new Storage({
     location,
   });
