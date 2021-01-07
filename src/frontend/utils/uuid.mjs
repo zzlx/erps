@@ -1,6 +1,8 @@
 /**
  * *****************************************************************************
  *
+ * [A Universally Unique IDentifier](https://tools.ietf.org/html/rfc4122)
+ *
  * Convert array of 16 byte values to UUID string format of the form:
  * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
  * 8-4-4-4-12
@@ -17,7 +19,7 @@ export default function bytesToUUID(buf, offset) {
 
   let i = offset || 0;
 
-  return ([
+  return [
     byteToHex[buf[i++]], 
     byteToHex[buf[i++]], 
     byteToHex[buf[i++]], 
@@ -38,8 +40,5 @@ export default function bytesToUUID(buf, offset) {
     byteToHex[buf[i++]],
     byteToHex[buf[i++]], 
     byteToHex[buf[i++]]
-  ]).join('');
+  ].join('');
 }
-
-// test
-//console.log(bytesToUUID(Buffer.from('abcdefghigklmnnnnnn')));

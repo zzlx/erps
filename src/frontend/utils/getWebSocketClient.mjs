@@ -86,9 +86,6 @@ function getURL (pathname = '') {
   const url = new URL(import.meta.url);
   const protocol = url.protocol === 'http' ? 'ws' : 'wss';
   const hostname = url.hostname;
-  const port = url.port === ""
-    ? url.protocol === 'http' ? '80' : '443'
-    : url.port 
-
-  return `${protocol}://${hostname}:${port}${pathname}`; 
+  const port = url.port === "" ? "" : ":" + url.port;
+  return `${protocol}://${hostname}${port}${pathname}`; 
 }

@@ -12,12 +12,12 @@ import Redirect from './components/_Redirect.mjs';
 import Route from './components/_Route.mjs';
 import Switcher from './components/_Switcher.mjs';
 
-import * as Pages from './pages/index.mjs';
+import * as Pages from './webPages/index.mjs';
 
 import Storage from './Storage.mjs';
 import global from './utils/global.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
-import getWS from './actions/ws.mjs';
+import getWS from './utils/getWebSocketClient.mjs';
 
 
 // 配置前端应用标识符

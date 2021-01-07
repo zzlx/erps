@@ -1,9 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Camel case functionality
- *
- * 驼峰命名法（Camel-Case）
+ * 驼峰化（Camel-Case）
  *
  * @param {string} value
  * @param {boolean} capitalized
@@ -12,10 +10,13 @@
  * *****************************************************************************
  */
 
-export default function camelCase (value, capitalized = true) {
+export default function camelCase (value, capitalized = false) {
   return value.toLowerCase()
     .replace(/\./g, '-')
     .replace(/(\b|-|_)\w/g, m => m.toUpperCase())
-    .replace(/_|-|\s+\W/g, '')
+    .replace(/_|-|\W/g, '')
     .replace(/^\w/, m => capitalized ? m : m.toLowerCase())
 }
+
+//test
+//console.log(camelCase('camel.case_function', true));

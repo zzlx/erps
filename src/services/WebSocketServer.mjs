@@ -1,9 +1,10 @@
 /**
  * *****************************************************************************
  *
- * WebSocket Server
+ * [The WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
+ * ======
  *
- * [WebSocketClient](../../frontend/utils/WebSocketClient.mjs)
+ * [WebSocketClient](../frontend/utils/getWebSocketClient.mjs)
  *
  * *****************************************************************************
  */ 
@@ -12,12 +13,9 @@ import assert from 'assert';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import util from 'util';
-
-import { uuid } from '../utils.lib.mjs';
 import { HTTP_STATUS_CODES, } from '../koa/constants.mjs';
 
 const debug = util.debuglog('debug:websocket-server');
-const readyStates = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
 const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
 const OPCODES = {
   CONTINUE: 0,
@@ -27,15 +25,21 @@ const OPCODES = {
   PING: 9,
   PONG: 10,
 };
+const STATUS_CODES = {
+  1000: 'Normal Closure',
+  1001: 'Going Away',
+  1002: 'Protocol Error',
+  1003: 'Unsupported Data',
+}
 
 /**
  *
- * [The WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
+ * WebSocket Server
  *
  * ## 数据帧格式
  *
- * 0                   1                   2                   3
- * 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *  0                   1                   2                   3
+ *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  * +-+-+-+-+-------+-+-------------+-------------------------------+
  * |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
  * |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
@@ -53,7 +57,22 @@ const OPCODES = {
  * |                     Payload Data continued ...                |
  * +---------------------------------------------------------------+
  *
- * FIN为1表示这是消息的最后一部分分片,如果为0表示后续还有数据
+ * FIN: 1bit
+ *
+ * Indicates that this is the final fragment in a message,
+ * The first fragment may also be the final fragment.
+ * FIN为1表示这是消息的最后一部分,如果为0表示后续还有数据
+ *
+ * RSV1,RSV2,RSV3: 1bit each
+ *
+ * Opcode: 4bits
+ *
+ * Defines the interpretation of the payload data. 
+ * If an unknown opcode is received, the receiving endpoint Must fail.
+ *
+ * Mask: 1bit
+ *
+ * Defines whether the payload data is masked.
  *
  * Socket 协议头
  *
@@ -68,6 +87,7 @@ const OPCODES = {
 export default class WebSocket extends EventEmitter {
   constructor (options = {}) {
     super();
+
     this.closed = false;
     this.socket = null;
     this.buffer = Buffer.alloc(0);
@@ -77,10 +97,11 @@ export default class WebSocket extends EventEmitter {
   upgradeHandshake (req, socket, head) {
     this.socket = socket;
 
+    console.log(head.toString());
     socket.on('error', socketOnError);
 
     const version = req.headers['sec-websocket-version'];
-    const key = req.headers['sec-websocket-key'] || null;
+    const key = req.headers['sec-websocket-key'] || '';
     const extensions = {};
 
     if (
@@ -98,7 +119,7 @@ export default class WebSocket extends EventEmitter {
 
     // 构造相应头
     const resHeaders = [
-      'HTTP/1.1 101 Switching Protocols',
+      'HTTP/1.1 101 Switching Protocols', // status line
       'Upgrade: websocket',
       'Connection: Upgrade',
       `Sec-WebSocket-Accept: ${hashKey(key)}`
@@ -122,7 +143,6 @@ export default class WebSocket extends EventEmitter {
         this.emit('close', 1006, 'timeout');
         this.closed = true;
       }
-
     });
 
     socket.on('data', data => {
@@ -214,64 +234,67 @@ export default class WebSocket extends EventEmitter {
     this.socket.write(encodeMessage(opcode, buffer));
   }
 
+  processBuffer () {
+    let buf = this.buffer;
+    let idx = 2;
+    const byte1 = buf.readUInt8(0);
+    const str1 = byte1.toString(2);
+    const FIN = str1[0];
+    let opcode = byte1 & 0x0f;
+    const byte2 = buf.readUInt8(1);
+    const str2 = byte2.toString(2);
+    const MASK = str2[0];
+    let length = parseInt(str2.substring(1), 2);
 
-}
+    if (length === 126) {
+      length = buf.readUInt16BE(2);
+      idx += 2;
+    } else if (length === 127) {
+      const highBits = buf.readUInt32BE(2);
+      if (highBits != 0) {
+        this.close(1009, '');
+      }
 
-WebSocket.prototype.processBuffer = function () {
-  let buf = this.buffer;
-  let idx = 2;
-  const byte1 = buf.readUInt8(0);
-  const str1 = byte1.toString(2);
-  const FIN = str1[0];
-  let opcode = byte1 & 0x0f;
-  const byte2 = buf.readUInt8(1);
-  const str2 = byte2.toString(2);
-  const MASK = str2[0];
-  let length = parseInt(str2.substring(1), 2);
-
-  if (length === 126) {
-    length = buf.readUInt16BE(2);
-    idx += 2;
-  } else if (length === 127) {
-    const highBits = buf.readUInt32BE(2);
-    if (highBits != 0) {
-      this.close(1009, '');
+      length = buf.readUInt32BE(6);
+      idx +=8;
     }
 
-    length = buf.readUInt32BE(6);
-    idx +=8;
+    let realData = null;
+
+    if (MASK) {
+      const maskDataBuffer = buf.slice(idx, idx + 4);
+      idx+=4;
+      const realDataBuffer = buf.slice(idx, idx + length);
+      realData = unmask(maskDataBuffer, realDataBuffer);
+    }
+
+    let realDataBuffer = Buffer.from(realData);
+    this.buffer = buf.slice(idx + length);
+
+    if (FIN) {
+      this.handleRealData(opcode, realDataBuffer); // 处理操作码
+    }
   }
 
-  let realData = null;
-
-  if (MASK) {
-    const maskDataBuffer = buf.slice(idx, idx + 4);
-    idx+=4;
-    const realDataBuffer = buf.slice(idx, idx + length);
-    realData = unmask(maskDataBuffer, realDataBuffer);
+  handleRealData (opcode, realDataBuffer) {
+    switch (opcode) {
+      case OPCODES.TEXT:
+        this.emit('data', realDataBuffer.toString('utf8'));
+        break;
+      case OPCODES.BINARY:
+        this.emit('data', realDataBuffer);
+        break;
+      default:
+        this.close(1002, 'unhandled opcode: ' + opcode);
+    }
   }
 
-  let realDataBuffer = Buffer.from(realData);
-  this.buffer = buf.slice(idx + length);
+} // end of WebSoceket class
 
-  if (FIN) {
-    this.handleRealData(opcode, realDataBuffer); // 处理操作码
-  }
-}
-
-WebSocket.prototype.handleRealData = function (opcode, realDataBuffer) {
-  switch (opcode) {
-    case OPCODES.TEXT:
-      this.emit('data', realDataBuffer.toString('utf8'));
-      break;
-    case OPCODES.BINARY:
-      this.emit('data', realDataBuffer);
-      break;
-    default:
-      this.close(1002, 'unhandled opcode: ' + opcode);
-  }
-}
-
+/**
+ * Utilities
+ *
+ */
 
 // 编码ws帧
 function encodeWsFrame (data) {
@@ -384,8 +407,7 @@ function readData (buffer) {
 }
 
 /**
- * Utilities
- *
+ * 解析数据
  */
 
 function unmask (maskBytes, data) {
@@ -394,8 +416,13 @@ function unmask (maskBytes, data) {
   return payload;
 }
 
+/**
+ * 信息编码
+ */
+
 function encodeMessage (opcode, payload) {
   let buf;
+
   let b1 = 0x80 | opcode;
   let b2;
   let length = payload.length;
@@ -410,9 +437,17 @@ function encodeMessage (opcode, payload) {
   return buf;
 }
 
+/**
+ * 计算hash值
+ */
+
 function hashKey (key) {
-  return crypto.createHash('sha1').update(key + GUID, 'ascii').digest('base64');
+  return crypto.createHash('sha1').update(key + GUID).digest('base64');
 }
+
+/**
+ * socket on error
+ */
 
 function socketOnError () {
   this.destroy();
