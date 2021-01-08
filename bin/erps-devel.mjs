@@ -58,7 +58,7 @@ process.nextTick(() => new Watcher(...paths, () => {
   lastPid = cmd.pid;
 })); 
 
-class Watcher extends EventEmitter {
+export class Watcher extends EventEmitter {
   constructor() {
     super();
     let callback = () => {};

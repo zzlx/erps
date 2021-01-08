@@ -2,6 +2,12 @@
 "
 " VIM配置文件
 "
+"
+" 快捷键：
+"
+" * U 撤销
+" * ctrl + r 反撤销
+"
 " usage: 'vim -u .vimrc'
 " ln -sf $(pwd)/.vimrc ~/.vimrc
 " author: wangxuemin@zzlx.org

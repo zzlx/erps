@@ -12,13 +12,11 @@ import Redirect from './components/_Redirect.mjs';
 import Route from './components/_Route.mjs';
 import Switcher from './components/_Switcher.mjs';
 
-import * as Pages from './webPages/index.mjs';
+import * as Pages from './containers/index.mjs';
 
-import Storage from './Storage.mjs';
+import Storage from './utils/ReduxStore.mjs';
 import global from './utils/global.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
-import getWS from './utils/getWebSocketClient.mjs';
-
 
 // 配置前端应用标识符
 export const CID = 'react-app'; 
@@ -40,8 +38,6 @@ if (global.window && global.window.document) {
   const ua = window.navigator.userAgent;
   //if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
   
-  const ws = getWS();
-
   const store = new Storage({
     location,
   });
@@ -50,12 +46,6 @@ if (global.window && global.window.document) {
   // 变动发生额存入客户端
   // 客户端存储逻辑判断
   store.subscribe(() => {
-  });
-
-  store.dispatch(() => {
-    return {
-      type: 'TEST'
-    };
   });
 
   const element = ReactApp(store);

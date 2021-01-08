@@ -17,15 +17,15 @@ import util from 'util';
 
 import { camelCase, console } from '../utils.lib.mjs';
 import settings from '../settings/index.mjs';
-import Koa from '../koa/Application.mjs';
+import Koa from './koa/Application.mjs';
 
-import compress from '../koa/middlewares/compress.mjs';
-import cookies from '../koa/middlewares/cookies.mjs';
-import cors from '../koa/middlewares/cors.mjs';
-import error from '../koa/middlewares/error.mjs';
-import logger from '../koa/middlewares/logger.mjs';
-import markdown from '../koa/middlewares/markdown.mjs';
-import xResponse from '../koa/middlewares/xResponse.mjs';
+import compress from './koa/middlewares/compress.mjs';
+import cookies from './koa/middlewares/cookies.mjs';
+import cors from './koa/middlewares/cors.mjs';
+import error from './koa/middlewares/error.mjs';
+import logger from './koa/middlewares/logger.mjs';
+import markdown from './koa/middlewares/markdown.mjs';
+import xResponse from './koa/middlewares/xResponse.mjs';
 
 import router from './router.mjs';
 

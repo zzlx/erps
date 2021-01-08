@@ -14,16 +14,17 @@ import http2 from 'http2';
 import path from 'path';
 import util from 'util';
 
-import logWriter from '../koa/logWriter.mjs';
+import logWriter from './koa/logWriter.mjs';
 import settings from '../settings/index.mjs';
 import WebSocket from './WebSocketServer.mjs'
-import app from './app.mjs';
 
 // 调试信息打印工具
 const debug = util.debuglog('debug:http2s.mjs');
 const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
-const streamHandler = app.callback();
+
+//
+const streamHandler = await import('./app.mjs').then(m => m.default.callback());
 
 export default (options = {}) => {
   const opts = Object.assign({
@@ -74,15 +75,6 @@ export default (options = {}) => {
     logWriter(path.join(paths.LOG_PATH, 'ssl-keys.log'), line.toString());
   });
 
-  // The 'newSession' event is emitted upon creation of a new TLS session. 
-  // This may be used to store sessions in external storage. 
-  // The data should be provided to the 'resumeSession' callback.
-  server.on('newSession', (sessionId, sessionData, cb) => {
-    debug('newSession event is emitted.');
-    sessionStore.set(sessionId.toString('hex'), sessionData);
-    cb();
-  });
-
   // event is emitted when the client sends a certificate status request. 
   server.on('OCSPRequest', (certificate, issuer, cb) => {
     debug('OCSPRequest event');
@@ -91,12 +83,21 @@ export default (options = {}) => {
   });
 
   // The 'resumeSession' event is emitted 
+
+  // The 'newSession' event is emitted upon creation of a new TLS session. 
+  // This may be used to store sessions in external storage. 
+  // The data should be provided to the 'resumeSession' callback.
+  server.on('newSession', (sessionId, sessionData, cb) => {
+    sessionStore.set(sessionId.toString('hex'), sessionData);
+    debug(sessionStore);
+    cb();
+  });
+
   // when the client requests to resume a previous TLS session. 
   server.on('resumeSession', (id, cb) => {
     const sessionData = sessionStore.get(id.toString('hex')); 
 
-    if (sessionData) {
-      debug('resumeSession success');
+    if (sessionData) { 
       cb(null, sessionData);
     } else {
       debug('resumeSession faile');

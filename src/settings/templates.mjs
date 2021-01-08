@@ -16,7 +16,7 @@ const templates = (root => {
   const obj = Object.create(null);
 
   fs.readdirSync(root, {withFileTypes: true}).forEach(file => {
-    obj[camelCase(file.name)] = path.join(root, file.name);
+    obj[camelCase(file.name, true)] = path.join(root, file.name);
   });
 
   return obj;

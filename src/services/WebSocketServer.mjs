@@ -4,8 +4,6 @@
  * [The WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
  * ======
  *
- * [WebSocketClient](../frontend/utils/getWebSocketClient.mjs)
- *
  * *****************************************************************************
  */ 
  
@@ -13,7 +11,7 @@ import assert from 'assert';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import util from 'util';
-import { HTTP_STATUS_CODES, } from '../koa/constants.mjs';
+import { HTTP_STATUS_CODES, } from './koa/constants.mjs';
 
 const debug = util.debuglog('debug:websocket-server');
 const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
@@ -137,6 +135,8 @@ export default class WebSocket extends EventEmitter {
     }
 
     socket.write(resHeaders.concat('\r\n').join('\r\n'));
+    debug('websocket connection establised');
+    debug(socket);
 
     socket.on('close', error => {
       if (!this.closed) {
@@ -453,3 +453,46 @@ function socketOnError () {
   this.destroy();
 }
 
+/**
+ * *****************************************************************************
+ *
+ * WebSocket Client
+ *
+ * WebSocket(url[, protocols])
+ *
+ * [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
+ *
+ * constants:
+ *
+ * API Reference:
+ *
+ * Properties:
+ *
+ * * WebSocket.binaryType The binary data type used by the connection.
+ * * WebSocket.bufferedAmount The number of bytes of queued data.
+ * * WebSocket.extensions The extensions selected by the server.
+ * * WebSocket.onclose An event listener to be called when the connection is closed.
+ * * WebSocket.onmessage An event listener to be called when a message is received from the server. 
+ * * WebSocket.onopen An event listener to be called when the connection is opened.
+ * * WebSocket.protocol The sub-protocol selected by the server. 
+ * * WebSocket.readyState The current state of the connection.['CONNECTING', 'OPEN','CLOSING','CLOSED']
+ * * WebSocket.url The absolute URL of the WebSocket. 
+ *
+ * Methods:
+ *
+ * * WebSocket.close([code[, reason]]);
+ * * WebSocket.send(data)
+ *
+ * Events:
+ *
+ * * close
+ * * error
+ * * message
+ * * open
+ *
+ * # Reference
+ *
+ * [WebSocketServer](../../server/utils/WebSocketServer.mjs)
+ *
+ * *****************************************************************************
+ */

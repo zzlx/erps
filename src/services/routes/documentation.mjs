@@ -8,8 +8,8 @@
 
 import settings from '../../settings/index.mjs';
 
-import Router from '../../koa/Router.mjs';
-import statics from '../../koa/middlewares/statics.mjs';
+import Router from '../koa/Router.mjs';
+import statics from '../koa/middlewares/statics.mjs';
 
 const router = new Router();
 

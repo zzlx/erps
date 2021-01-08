@@ -8,10 +8,12 @@
 
 import ReactDOMServer from 'react-dom/server.js';
 import path from 'path';
+import util from 'util';
 import settings from '../../settings/index.mjs';
-import HtmlTemplate from '../../koa/HtmlTemplate.mjs';
+import HtmlTemplate from '../utils/HtmlTemplate.mjs';
+import Router from '../koa/Router.mjs';
 
-import Router from '../../koa/Router.mjs';
+const debug = util.debuglog('debug:routes/homePage.mjs');
 const router = new Router();
 const template = settings.templates.HomePageHtml;
 
@@ -22,10 +24,10 @@ router.get('index', '/*', async (ctx, next) => {
 
   const path = ctx.pathname;
   //import App, { CID, getContainerByID } from '../../uis/main.mjs';
-  const M = await import('../../frontend/main.mjs').catch(err => ctx.throw(err));
+  const M = await import('../../webUI/main.mjs').catch(err => ctx.throw(err));
   const { CID, getContainerByID } = M;
   const App = M.default;
-  const Storage = await import('../../frontend/Storage.mjs').then(m => m.default)
+  const Storage = await import('../../webUI/utils/ReduxStore.mjs').then(m => m.default)
     .catch(err => ctx.throw(err));
 
   const ua = ctx.get('user-agent');
@@ -39,7 +41,7 @@ router.get('index', '/*', async (ctx, next) => {
 
   // @TODO:根据路由信息动态更新title
   html.title = '首页|HomePage';
-  html.addMeta({ name: 'keywords', content: 'ERP,OA', });
+  //html.addMeta({ name: 'keywords', content: 'ERP,OA', });
   html.addScript([
     //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
     { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },

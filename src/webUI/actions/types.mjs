@@ -37,6 +37,20 @@ const types = [
   { name: 'SET_API_ADDRESS', desc: '设置API地址' },
   { name: 'SET_PAGE_FOOTER', desc: '设置页脚数据' },
   { name: 'SET_VISIBILITY_FILTER', desc: 'SET_VISIBILITY_FILTER' },
+
+  // user dispatch action types
+  { name: 'WEBSOCKET_SEND', desc: '用于发送websocket数据' }
+
+  // event dispatched action types
+  { name: 'WEBSOCKET_CLOSED', desc: '' }
+  { name: 'WEBSOCKET_CONNECT', desc: '建立websocket连接' }
+  { name: 'WEBSOCKET_CONNECTING', desc: '' }
+  { name: 'WEBSOCKET_DISCONNECT', desc: '' }
+  { name: 'WEBSOCKET_ERROR', desc: '' }
+  { name: 'WEBSOCKET_MESSAGE', desc: '接收到websocket服务端消息' }
+  { name: 'WEBSOCKET_OPEN', desc: '' }
+  { name: 'WEBSOCKET_RECONNECT', desc: '' }
+
   { name: 'ZZZ', desc: '休眠' }
 ];
 

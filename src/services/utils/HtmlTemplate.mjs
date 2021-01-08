@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * HTML模板
+ * HTML Template
  *
  * *****************************************************************************
  */
@@ -25,11 +25,6 @@ export default class HTMLTemplate {
     this.document.title = value;
     return this;
   }
-
-  /**
-   *
-   *
-   */
 
   addMeta (value) {
     const metas = this.document.getElementsByTagName('meta');

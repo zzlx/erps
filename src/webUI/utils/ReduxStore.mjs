@@ -1,21 +1,22 @@
 /**
  * *****************************************************************************
  * 
- * UI storage
- *
- * 用于管理UI状态
- *
- *
- * @param {object} preload state
- * @param {object} store
+ * Redux Store
  *
  * *****************************************************************************
  */
 
-import assert from './utils/assert.mjs';
-import * as reducers from './reducers/index.mjs';
+import assert from '../utils/assert.mjs';
+import * as reducers from '../reducers/index.mjs';
 
-export default class Storage {
+/**
+ * Redux Store
+ *
+ * @param {object} preload state
+ * @return {object} store
+ */
+
+export default class ReduxStore {
   constructor (state) {
     this.currentState = state;
     this.currentReducer = combineReducers(reducers);
@@ -137,6 +138,15 @@ export default class Storage {
     }
   }
 }
+
+/**
+ * *****************************************************************************
+ *
+ * Utilities
+ *
+ * *****************************************************************************
+ */
+
 /**
  * crashReporter middleware
  */
@@ -167,12 +177,11 @@ const thunk = store => next => action => typeof action === 'function'
  */
 
 const promise = store => next => action => {
-  const isPromise = v => v && typeof v.next === 'function';
   // promise action
-  if (isPromise(action)) return action.then(result => next(result)); 
+  if (assert.isPromise(action)) return action.then(result => next(result)); 
 
   // promise payload
-  if (action && isPromise(action.payload)) {
+  if (action && assert.isPromise(action.payload)) {
     return action.payload.then(
       result => {
         next(Object.assign({}, action, { payload: result }));

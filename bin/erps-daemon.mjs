@@ -25,6 +25,8 @@ import { argvParser, console, } from '../src/utils.lib.mjs';
 import settings from '../src/settings/index.mjs';
 import httpServer from '../src/services/httpServer.mjs';
 
+let server = null;
+
 // 服务重启时执行的任务清单:
 const tasksBeforeListen = [
   path.join(settings.paths.BIN, 'copy-umd-to-assets.mjs'),
@@ -92,22 +94,22 @@ function main () {
 }
 
 function start () {
-  const server = httpServer({
-    key: settings.privateKey,
-    cert: settings.cert,
-    passphrase: settings.passphrase, // 证书passphrase
-    ticketKeys: crypto.randomBytes(48), 
-  });
+  if (server == null) {
+    server = httpServer({
+      key: settings.privateKey,
+      cert: settings.cert,
+      passphrase: settings.passphrase, // 证书passphrase
+      ticketKeys: crypto.randomBytes(48), 
+    });
+  }
 
   // 执行完配置任务后再开启服务器监听
-  Promise.all(tasksBeforeListen.map(task => cp.spawn(task))).then(() => {
-    server.listen({
-      ipv6Only: false,
-      host: settings.system.ipv6 ? '::' : '0.0.0.0',
-      port: settings.system.port || '8888',
-      exclusive: false,
-    }, sysinfo);
-  }).catch(err => { console.log(err); });
+  server.listen({
+    ipv6Only: false,
+    host: settings.system.ipv6 ? '::' : '0.0.0.0',
+    port: settings.system.port || '8888',
+    exclusive: false,
+  }, sysinfo);
 }
 
 function sysinfo () {

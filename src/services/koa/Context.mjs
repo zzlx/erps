@@ -12,7 +12,7 @@ import accepts from 'accepts';
 //import contentType from 'content-type';
 
 import HttpError from './HttpError.mjs';
-import { memCache } from '../utils.lib.mjs';
+import { memCache } from '../../utils.lib.mjs';
 import MimeTypes from './MimeTypes.mjs';
 
 import { 
