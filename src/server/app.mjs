@@ -11,6 +11,7 @@
  * *****************************************************************************
  */
 
+import os from 'os';
 import path from 'path';
 import crypto from 'crypto';
 import util from 'util';
@@ -26,13 +27,14 @@ import error from './koa/middlewares/error.mjs';
 import logger from './koa/middlewares/logger.mjs';
 import markdown from './koa/middlewares/markdown.mjs';
 import xResponse from './koa/middlewares/xResponse.mjs';
-
 import router from './router.mjs';
 
 const debug = util.debuglog('debug:server/main.mjs');
 
 // 初始化服务器程序
-const app = new Koa({ env: process.env.NODE_ENV });
+const app = new Koa({ 
+  env: process.env.NODE_ENV,
+});
 
 // 配置服务器基础功能
 app.use(error(path.join(settings.paths.LOG_PATH, 'error.log'))); // 记录中间件错误

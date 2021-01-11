@@ -1,61 +1,87 @@
 /**
  * *****************************************************************************
  *
- * Http2 service
+ * Http2 daemon
  *
- * 支持websocket协议
+ * 支持的功能
+ *
+ * * websocket protocol
  *
  * *****************************************************************************
  */
 
 import assert from 'assert';
 import crypto from 'crypto';
+import EventEmitter from 'events'; 
 import http2 from 'http2';
 import path from 'path';
 import util from 'util';
 
-import logWriter from './koa/logWriter.mjs';
+import logWriter from './utils/logWriter.mjs';
 import settings from '../settings/index.mjs';
 import WebSocket from './WebSocketServer.mjs'
+import app from './app.mjs';
 
 // 调试信息打印工具
 const debug = util.debuglog('debug:http2s.mjs');
 const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
+const streamHandler = app.callback();
 
-//
-const streamHandler = await import('./app.mjs').then(m => m.default.callback());
+export default class HttpServer extends EventEmitter {
+  constructor(options = {}) {
+    super();
+    this.opts = Object.assign({}, {
+      websocket: true, // 默认提供websocket protocol服务
+    }, options);
 
-export default (options = {}) => {
-  const opts = Object.assign({
-    allowHTTP1: true,
-    //ca: [fs.readFileSync('client-cert.pem')],
-    key: null,
-    cert: null,
-    passphrase: null, // 证书passphrase
-    requestCert: false, // 客户端证书支持
-    
-    //sigalgs: 
-    //ciphers: 
-    //clientCertEngine: 
-    //dhparam
-    //ecdhCurve
-    //origins: [],
-    //privateKeyEngine
-    //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-    handshakeTimeout: 120 * 1000, // milliseconds
-    ticketKeys: null,
-    sessionTimeout: 300, // seconds
-  }, options)
+    this.initServer();
+    app.server = this.server;
 
-  const server = http2.createSecureServer(opts);
-  const websocket = new WebSocket(); 
+    // websocket protocol
+    this.ws = this.opts.websocket 
+      ? new WebSocket({server: this.server}) 
+      : null;
+  }
 
-  // websocket protocol support
-  server.on('upgrade', (req, socket, head) => {
-    websocket.upgradeHandshake(req, socket, head);
-  });
+  get connections () {
+    return sessionStore.size;
+  }
 
+  initServer () {
+    this.server = http2.createSecureServer({
+      allowHTTP1: true,
+      //ca: [fs.readFileSync('client-cert.pem')],
+      key: this.opts.key,
+      cert: this.opts.cert,
+      passphrase: this.opts.passphrase, // 证书passphrase
+      requestCert: false, // 客户端证书支持
+      
+      //sigalgs: 
+      //ciphers: 
+      //clientCertEngine: 
+      //dhparam
+      //ecdhCurve
+      //origins: [],
+      //privateKeyEngine
+      //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+      handshakeTimeout: 120 * 1000, // milliseconds
+      ticketKeys: null,
+      sessionTimeout: 300, // seconds
+    });
+  }
+
+  listen () {
+    this.server.on('stream', streamHandler);
+    this.server.listen.apply(this.server, arguments);
+  }
+}
+
+/**
+ * Utilities
+ */
+
+/*
   // handle tls server events:
 
   // This event is emitted when a new TCP stream is established, 
@@ -131,8 +157,5 @@ export default (options = {}) => {
   server.on('close', () => {
     console.log('server is closed');
   });
+*/
 
-  server.on('stream', streamHandler);
-
-  return server;
-}  

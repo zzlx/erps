@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import logWriter from '../logWriter.mjs';
+import logWriter from '../../utils/logWriter.mjs';
 
 export default function error (options = {}) {
   const opts = Object.assign({
@@ -25,6 +25,6 @@ export default function error (options = {}) {
 
 function attachEvents (stream) {
   stream.on('frameError', (type, code, id) => {
-    console.log('%s frame with id %s error: %s', type, id, code);
+    logWriter(`${type} frame with id ${id} error: {code}`);
   });
 }

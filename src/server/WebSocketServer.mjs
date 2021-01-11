@@ -10,6 +10,7 @@
 import assert from 'assert';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
+import http from 'http';
 import util from 'util';
 import { HTTP_STATUS_CODES, } from './koa/constants.mjs';
 
@@ -29,6 +30,7 @@ const STATUS_CODES = {
   1002: 'Protocol Error',
   1003: 'Unsupported Data',
 }
+const clients = Symbol('websocketConnections');
 
 /**
  *
@@ -85,17 +87,31 @@ const STATUS_CODES = {
 export default class WebSocket extends EventEmitter {
   constructor (options = {}) {
     super();
+    assert(typeof options === 'object', 'WebSocket options must be an Object.');
+    this.opts = Object.assign({}, {
+      env: process.env.NODE_ENV || 'production',
+    }, options);
+
+    this.server = this.opts.server || http.createServer(); 
 
     this.closed = false;
-    this.socket = null;
     this.buffer = Buffer.alloc(0);
+
+    this[clients] = new Set();
+
+    // register upgrade handler
+    this.server.on('upgrade', (req, socket, head) => {
+      this.upgradeHandler(req, socket, head);
+    });
 
   }
 
-  upgradeHandshake (req, socket, head) {
-    this.socket = socket;
+  onData(data) {
+    this.buffer = data;
+    this.processBuffer();
+  }
 
-    console.log(head.toString());
+  upgradeHandler (req, socket, head) {
     socket.on('error', socketOnError);
 
     const version = req.headers['sec-websocket-version'];
@@ -135,23 +151,30 @@ export default class WebSocket extends EventEmitter {
     }
 
     socket.write(resHeaders.concat('\r\n').join('\r\n'));
-    debug('websocket connection establised');
-    debug(socket);
 
     socket.on('close', error => {
-      if (!this.closed) {
-        this.emit('close', 1006, 'timeout');
-        this.closed = true;
-      }
-    });
-
-    socket.on('data', data => {
-      this.buffer = data;
-      this.processBuffer();
+      debug('connection from ', socket.remoteAddress, ' is closed.');
+      this[clients].delete(socket);
     });
 
     socket.removeListener('error', socketOnError);
+
+    debug('websocket connection establised');
+    this[clients].add(socket); // 添加到服务端存储
   }
+
+  /**
+   * 广播消息
+   */
+
+  broadcastMessage(data) {
+    for (let client of this[clients]) client.send(data);
+  }
+
+  /**
+   *
+   */
+
 
   /**
    * Close the connection when preconditions are not fulfilled.

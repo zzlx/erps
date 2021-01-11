@@ -25,13 +25,24 @@ const CLEAR_PAGE = isWin ?  '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H';
 export default new Proxy(console, {
 	get: function (target, property, receiver) {
 		if (property === 'progressBar') receiver.progressBar = progressBar;
-		if (property === 'clearLine') return () => process.stdout.write(CLEAR_LINE);
+		if (property === 'clearLine') return clearLine;
 		if (property === 'divideLine') return divideLine;
 		if (property === 'write') return write;
 
 		return Reflect.get(target, property, receiver);
 	}
 });
+
+/**
+ *
+ */
+
+function clearLine (n = 1) {
+  for (let i = 0; i < n; i++) {
+    process.stdout.write(CLEAR_LINE);
+    process.stdout.write(MOVE_UP);
+  }
+}
 
 /**
  *

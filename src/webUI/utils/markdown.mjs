@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Markdown 
+ * Markdown processor
  *
  * 解析markdown字串, 生成JSON\html格式文档
  *
@@ -21,23 +21,7 @@
  * *****************************************************************************
  */
 
-/**
- *
- * @param {string} source
- * @param {string|object} options
- */
-
-export default function parseMarkdown (source, options, callback) {
-  const md = new Markdown(source, options);
-
-  return source;
-}
-
-/**
- * Markdown processor
- */
-
-class Markdown {
+export default class Markdown {
   constructor(source, options) {
     this.opts = Object.assign({}, {
       format: ['json', 'html', 'xml', 'pdf'][1],

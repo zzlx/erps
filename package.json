@@ -31,7 +31,7 @@
   "private": true,
   "scripts": {
     "commit": "bin/erpsctl --commit",
-    "devel": "bin/erps-devel.mjs bin/erps-daemon.mjs --debug --env=development --restart --paths=src",
+    "devel": "bin/erps-devel.mjs bin/erps-daemon.mjs --debug --env=development --restart --paths=bin,src",
     "start": "bin/erps-daemon.mjs --start"
   }
 }

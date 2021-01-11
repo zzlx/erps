@@ -12,6 +12,7 @@ const types = [
   { name: 'API_QUERY', desc: '执行API查询' },
   { name: 'DRAG', desc: '拖动操作' },
   { name: 'DROP', desc: '放入操作' },
+  { name: 'ERROR', desc: '错误' },
   { name: 'ERROR_MESSAGE', desc: '错误消息' },
   { name: 'HISTORY_PUSH_STATE', desc: '无状态刷新' },
   { name: 'HISTORY_REDIRECT', desc: '页面重定向' },
@@ -39,19 +40,19 @@ const types = [
   { name: 'SET_VISIBILITY_FILTER', desc: 'SET_VISIBILITY_FILTER' },
 
   // user dispatch action types
-  { name: 'WEBSOCKET_SEND', desc: '用于发送websocket数据' }
+  { name: 'WEBSOCKET_SEND', desc: '用于发送websocket数据' },
 
   // event dispatched action types
-  { name: 'WEBSOCKET_CLOSED', desc: '' }
-  { name: 'WEBSOCKET_CONNECT', desc: '建立websocket连接' }
-  { name: 'WEBSOCKET_CONNECTING', desc: '' }
-  { name: 'WEBSOCKET_DISCONNECT', desc: '' }
-  { name: 'WEBSOCKET_ERROR', desc: '' }
-  { name: 'WEBSOCKET_MESSAGE', desc: '接收到websocket服务端消息' }
-  { name: 'WEBSOCKET_OPEN', desc: '' }
-  { name: 'WEBSOCKET_RECONNECT', desc: '' }
+  { name: 'WEBSOCKET_CLOSED', desc: '' },
+  { name: 'WEBSOCKET_CONNECT', desc: '建立websocket连接' },
+  { name: 'WEBSOCKET_CONNECTING', desc: '' },
+  { name: 'WEBSOCKET_DISCONNECT', desc: '' },
+  { name: 'WEBSOCKET_ERROR', desc: '' },
+  { name: 'WEBSOCKET_MESSAGE', desc: '接收到websocket服务端消息' },
+  { name: 'WEBSOCKET_OPEN', desc: '' },
+  { name: 'WEBSOCKET_RECONNECT', desc: '' },
 
-  { name: 'ZZZ', desc: '休眠' }
+  { name: 'ZZZ', desc: '休眠' },
 ];
 
 export default new Proxy(types, {

@@ -16,6 +16,7 @@ import PictureCollection from '../components/PictureCollection.mjs';
 import TodoList from '../components/TodoList.mjs';
 import Accordion from '../components/Accordion.mjs';
 import Blockquote from '../components/Blockquote.mjs';
+import { send } from '../actions/index.mjs';
 
 export default class HomePage extends React.Component {
   constructor(props, context) {
@@ -53,6 +54,10 @@ export default class HomePage extends React.Component {
       container,
       footer
     ); 
+  }
+
+  componentDidMount() {
+    this.context.store.dispatch(send('TTTTTTT'));
   }
 }
 

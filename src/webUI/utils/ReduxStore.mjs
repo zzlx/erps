@@ -8,6 +8,9 @@
 
 import assert from '../utils/assert.mjs';
 import * as reducers from '../reducers/index.mjs';
+import { types } from '../actions/index.mjs';
+
+const ws = Symbol('websocket');
 
 /**
  * Redux Store
@@ -67,6 +70,10 @@ export default class ReduxStore {
     for (let listener of listeners) listener();
 
     return action;
+  }
+
+  get websocket () {
+    if (this[ws] == null)
   }
 
   /**
@@ -172,6 +179,19 @@ const thunk = store => next => action => typeof action === 'function'
   ? action(store)
   : next(action);
 
+
+/**
+ *
+ */
+
+const websocket => store => next => action => {
+
+  if (action && action.type === types.WEBSOCKET_SEND) {
+  }
+
+  return next(action);
+}
+
 /**
  * promise middleware
  */
@@ -232,7 +252,7 @@ const timestamp = store => next => action => {
 }
 
 /**
- * 标准化action
+ *
  */
 
 const normalization = store => next => action => {
@@ -252,10 +272,10 @@ const normalization = store => next => action => {
 
 const logger = store => next => action => {
   console.group('Action');
-  console.log('prev_state:', store.getState());
+  console.log('prevState:', store.getState());
   console.info('dispatch_action:', action);
   const result = next(action);
-  console.log('new_state:', store.getState());
+  console.log('newState:', store.getState());
   console.groupEnd();
   return result;
 }
@@ -340,4 +360,36 @@ function findOneFromArray (query = {}) {
   }
 
   return retval;
+}
+
+function getWebSocket (url, protocol = ['soap', 'wamp']) {
+  return new Promise((resolve, reject) => {
+    try {
+      const websocket = new WebSocket(getURI(url), protocol); 
+
+      /*
+      websocket.addEventListener('error', error => { 
+        console.error(error); 
+      });
+      websocket.addEventListener('close', event => { 
+        console.info(event); 
+      });
+      */
+
+      websocket.addEventListener('open', event => { 
+        resolve(websocket); 
+      });
+    } catch (e) { reject(e); }
+  });
+}
+
+function getURI (url = import.meta.url) {
+  const urlObj = new URL(url);
+
+  const protocol = urlObj.protocol === 'http' ? 'ws' : 'wss';
+  const hostname = urlObj.hostname;
+  const port = urlObj.port === "" ? "" : ":" + urlObj.port;
+  const pathname = urlObj.pathname;
+
+  return `${protocol}://${hostname}${port}`; 
 }

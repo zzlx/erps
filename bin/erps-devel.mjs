@@ -53,7 +53,7 @@ process.nextTick(() => new Watcher(...paths, () => {
     detached: false 
   });
 
-  console.clear(); // clear console
+  //console.clear(); // clear console
   console.log(`${lastPid ? `(PID:${lastPid})进程退出 ` : ''}(PID:${cmd.pid})启动...`);
   lastPid = cmd.pid;
 })); 

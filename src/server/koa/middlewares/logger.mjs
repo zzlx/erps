@@ -14,7 +14,7 @@
 
 import assert from 'assert';
 import { date } from '../../../utils.lib.mjs';
-import logWriter from '../logWriter.mjs';
+import logWriter from '../../utils/logWriter.mjs';
 
 export default function logger (options = {}) {
   const opts = Object.assign({

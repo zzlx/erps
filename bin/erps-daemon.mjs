@@ -4,11 +4,6 @@
  * 
  * ERP Service Manager
  *
- * ERP服务管理器
- *
- * ERP服务后台管理程序(ERP Services Daemon, ERPSD),
- * 用于管理ERP各项服务的启动、关闭、重启等任务.
- *
  * *****************************************************************************
  */
 
@@ -23,9 +18,9 @@ import util from 'util';
 
 import { argvParser, console, } from '../src/utils.lib.mjs';
 import settings from '../src/settings/index.mjs';
-import httpServer from '../src/services/httpServer.mjs';
+import Http2Server from '../src/server/Http2Server.mjs';
 
-let server = null;
+let httpd = null; // http daemon 
 
 // 服务重启时执行的任务清单:
 const tasksBeforeListen = [
@@ -94,8 +89,8 @@ function main () {
 }
 
 function start () {
-  if (server == null) {
-    server = httpServer({
+  if (httpd == null) {
+    httpd = new Http2Server({
       key: settings.privateKey,
       cert: settings.cert,
       passphrase: settings.passphrase, // 证书passphrase
@@ -103,28 +98,41 @@ function start () {
     });
   }
 
-  // 执行完配置任务后再开启服务器监听
-  server.listen({
+  httpd.listen({
     ipv6Only: false,
     host: settings.system.ipv6 ? '::' : '0.0.0.0',
     port: settings.system.port || '8888',
     exclusive: false,
-  }, sysinfo);
+  }, () => {
+    consolePrint(() => {
+      //console.clearLine(12);
+      console.clear();
+      console.divideLine();
+      console.log('服务器监控信息: ')
+      console.divideLine('-');
+      console.log({
+        '监听地址': httpd.server.address(),
+        '运行模式': process.env.NODE_ENV,
+        '系统平台': process.platform + '_' + process.arch,
+        '处理器信息': os.cpus()[0].model + ' * ' + os.cpus().length,
+        '内存总量': Number(settings.system.totalmem)/1024/1024/1024 + 'G',
+        '空闲内存': Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
+        '连接计数': httpd.connections,
+        '错误计数': httpd.errors,
+      });
+      console.divideLine();
+    });
+  });
+
 }
 
-function sysinfo () {
-  console.divideLine();
-  console.log('监听地址: %o', this.address());
-  console.divideLine('-');
-  console.write('服务器信息:');
-  console.log({
-    '运行模式': process.env.NODE_ENV,
-    '系统平台': process.platform + '_' + process.arch,
-    '处理器信息': os.cpus()[0].model + ' * ' + os.cpus().length,
-    '内存总量': Number(settings.system.totalmem)/1024/1024/1024 + 'G',
-    '空闲内存': Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
-  });
-  console.divideLine();
+/**
+ * 控制台打印
+ */
+
+function consolePrint (cb, realTime = false) {
+  if (realTime) setInterval(cb, 1000);
+  else cb();
 }
 
 function stop () {
