@@ -73,7 +73,7 @@ export default class ReduxStore {
   }
 
   get websocket () {
-    if (this[ws] == null)
+    if (this[ws] == null) null;
   }
 
   /**
@@ -184,7 +184,23 @@ const thunk = store => next => action => typeof action === 'function'
  *
  */
 
-const websocket => store => next => action => {
+let ws = null;
+
+const websocket = store => next => action => {
+  const getWS = url => {
+    if (ws == null) {
+      try {
+        ws = new WebSocket(getURI(url)); 
+        ws.onclose = event => console.info(event);
+        ws.onopen = event => console.info(event);
+      } catch (e) {
+        console.error(e);
+      }
+
+    }
+
+    return ws;
+  }
 
   if (action && action.type === types.WEBSOCKET_SEND) {
   }

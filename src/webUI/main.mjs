@@ -74,8 +74,10 @@ export default function ReactApp (store) {
       component: route.app, 
     }));
 
-  return React.createElement(Provider, { store }, React.createElement(Switcher, {
-  }, ...routes)); 
+  return React.createElement(Provider, { 
+    store: store,
+    children: React.createElement(Switcher, null, ...routes),
+  }); 
 }
 
 /**
