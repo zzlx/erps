@@ -2,7 +2,6 @@
 /**
  * *****************************************************************************
  * 
- * ERP Service Manager
  *
  * *****************************************************************************
  */
@@ -111,19 +110,18 @@ function start () {
       console.log('服务器监控信息: ')
       console.divideLine('-');
       console.log({
-        '监听地址': httpd.server.address(),
         '运行模式': process.env.NODE_ENV,
         '系统平台': process.platform + '_' + process.arch,
         '处理器信息': os.cpus()[0].model + ' * ' + os.cpus().length,
         '内存总量': Number(settings.system.totalmem)/1024/1024/1024 + 'G',
         '空闲内存': Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
+        '监听地址': httpd.server.address(),
         '连接计数': httpd.connections,
         '错误计数': httpd.errors,
       });
       console.divideLine();
     });
   });
-
 }
 
 /**

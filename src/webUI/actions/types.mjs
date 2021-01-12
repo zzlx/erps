@@ -42,15 +42,10 @@ const types = [
   // user dispatch action types
   { name: 'WEBSOCKET_SEND', desc: '用于发送websocket数据' },
 
-  // event dispatched action types
+  // event drived action types
   { name: 'WEBSOCKET_CLOSED', desc: '' },
-  { name: 'WEBSOCKET_CONNECT', desc: '建立websocket连接' },
-  { name: 'WEBSOCKET_CONNECTING', desc: '' },
-  { name: 'WEBSOCKET_DISCONNECT', desc: '' },
   { name: 'WEBSOCKET_ERROR', desc: '' },
   { name: 'WEBSOCKET_MESSAGE', desc: '接收到websocket服务端消息' },
-  { name: 'WEBSOCKET_OPEN', desc: '' },
-  { name: 'WEBSOCKET_RECONNECT', desc: '' },
 
   { name: 'ZZZ', desc: '休眠' },
 ];

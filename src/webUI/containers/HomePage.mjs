@@ -57,7 +57,7 @@ export default class HomePage extends React.Component {
   }
 
   componentDidMount() {
-    this.context.store.dispatch(send('TTTTTTT'));
+    //this.context.store.dispatch(send('TTTTTTT'));
   }
 }
 

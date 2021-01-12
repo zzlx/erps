@@ -29,7 +29,8 @@ export default new Proxy({
     system: os.version(),
   },
   EOL: os.EOL,
-},{
+  errors: [],
+}, {
   get: function (target, property, receiver) {
 
     if (property === 'freemem') return os.freemem();

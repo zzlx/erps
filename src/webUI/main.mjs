@@ -14,7 +14,7 @@ import Switcher from './components/_Switcher.mjs';
 
 import * as Pages from './containers/index.mjs';
 
-import Storage from './utils/ReduxStore.mjs';
+import Store from './redux/Store.mjs';
 import global from './utils/global.mjs';
 import deviceDetect from './utils/deviceDetect.mjs'
 
@@ -38,7 +38,7 @@ if (global.window && global.window.document) {
   const ua = window.navigator.userAgent;
   //if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
   
-  const store = new Storage({
+  const store = new Store({
     location,
   });
 
@@ -89,7 +89,7 @@ function cb () {
   console.groupCollapsed('欢迎使用前端UI程序!');
   if (device) console.log(`检测到当前客户端设备为:${device}`);
   else console.warn('未检测出当前设备类型😢');
-  console.log(`帮助文档: ${location.origin}/documentation`);
+  //console.log(`帮助文档: ${location.origin}/documentation`);
   console.groupEnd();
 }
 

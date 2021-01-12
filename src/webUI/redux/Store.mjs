@@ -9,8 +9,7 @@
 import assert from '../utils/assert.mjs';
 import * as reducers from '../reducers/index.mjs';
 import { types } from '../actions/index.mjs';
-
-const ws = Symbol('websocket');
+import * as M from './middlewares/index.mjs'
 
 /**
  * Redux Store
@@ -28,12 +27,13 @@ export default class ReduxStore {
     this.isDispatching = false;
 
     this.middlewares = [
-      crashReporter, 
-      thunk,
-      promise,
-      timeoutScheduler,
-      normalization,
-      'development' === globalThis.env && logger,
+      M.crashReporter, 
+      M.thunk,
+      M.promise,
+      M.timeoutScheduler,
+      M.normalization,
+      M.websocket,
+      'development' === globalThis.env && M.logger,
     ].filter(Boolean).map(fn => fn(this));
 
     this.dispatch = this.dispatch.bind(this);
@@ -70,10 +70,6 @@ export default class ReduxStore {
     for (let listener of listeners) listener();
 
     return action;
-  }
-
-  get websocket () {
-    if (this[ws] == null) null;
   }
 
   /**
@@ -155,148 +151,6 @@ export default class ReduxStore {
  */
 
 /**
- * crashReporter middleware
- */
-
-const crashReporter = store => next => action => {
-  try {
-    return next(action);
-  } catch (err) {
-    console.error('Action crashed: ', err);
-  }
-}
-
-/**
- * Lets you dispatch a function instead of an action.
- * This function will receive `dispatch` and `getState` as arguments.
- * Useful for early exits (conditions over `getState()`), as well
- * as for async control flow (it can `dispatch()` something else).
- *
- * `dispatch` will return the return value of the dispatched function.
- */
-
-const thunk = store => next => action => typeof action === 'function'
-  ? action(store)
-  : next(action);
-
-
-/**
- *
- */
-
-let ws = null;
-
-const websocket = store => next => action => {
-  const getWS = url => {
-    if (ws == null) {
-      try {
-        ws = new WebSocket(getURI(url)); 
-        ws.onclose = event => console.info(event);
-        ws.onopen = event => console.info(event);
-      } catch (e) {
-        console.error(e);
-      }
-
-    }
-
-    return ws;
-  }
-
-  if (action && action.type === types.WEBSOCKET_SEND) {
-  }
-
-  return next(action);
-}
-
-/**
- * promise middleware
- */
-
-const promise = store => next => action => {
-  // promise action
-  if (assert.isPromise(action)) return action.then(result => next(result)); 
-
-  // promise payload
-  if (action && assert.isPromise(action.payload)) {
-    return action.payload.then(
-      result => {
-        next(Object.assign({}, action, { payload: result }));
-      },
-      error  => {
-        next(Object.assign({}, action, { payload: error, error: true,}));
-      }
-    );
-  }
-
-  return next(action); 
-}
-
-/**
- * Scheduler actions with { meta: { delay: N } } to be delayed by N milliseconds.
- * Makes `dispatch` return a function to cancel the timeout. 
- */
-
-const timeoutScheduler = store => next => action => {
-  if (action && action.meta && action.meta.delay) {
-
-    const timeout = setTimeout(
-      () => next(action),
-      action.meta.delay
-    );
-
-    return () => clearTimeout(timeout);
-  }
-
-  return next(action);
-}
-
-/**
- * add timestamp to action.meta.timestamp
- */
-
-const timestamp = store => next => action => {
-  if (action) {
-
-    const newAction = Object.assign({}, action, {
-      meta: Object.assign({}, action.meta, { timestamp: Date.now() })
-    });
-
-    return next(newAction);
-  }
-
-  return next(action);
-}
-
-/**
- *
- */
-
-const normalization = store => next => action => {
-  const { type, meta, payload, error, ...rests } = action;
-  const newAction = Object.create(null);
-  newAction.type = type || 'Unknown_Action';
-  newAction.payload = Object.assign({}, payload, rests);
-  if (meta) newAction.meta = meta;
-  if (error) newAction.error = error;
-
-  return next(newAction);
-}
-
-/**
- * logger middleware
- */
-
-const logger = store => next => action => {
-  console.group('Action');
-  console.log('prevState:', store.getState());
-  console.info('dispatch_action:', action);
-  const result = next(action);
-  console.log('newState:', store.getState());
-  console.groupEnd();
-  return result;
-}
-
-/**
  * Composes single-argument functions from right to left. 
  *
  * The rightmost function can take multiple arguments 
@@ -376,36 +230,4 @@ function findOneFromArray (query = {}) {
   }
 
   return retval;
-}
-
-function getWebSocket (url, protocol = ['soap', 'wamp']) {
-  return new Promise((resolve, reject) => {
-    try {
-      const websocket = new WebSocket(getURI(url), protocol); 
-
-      /*
-      websocket.addEventListener('error', error => { 
-        console.error(error); 
-      });
-      websocket.addEventListener('close', event => { 
-        console.info(event); 
-      });
-      */
-
-      websocket.addEventListener('open', event => { 
-        resolve(websocket); 
-      });
-    } catch (e) { reject(e); }
-  });
-}
-
-function getURI (url = import.meta.url) {
-  const urlObj = new URL(url);
-
-  const protocol = urlObj.protocol === 'http' ? 'ws' : 'wss';
-  const hostname = urlObj.hostname;
-  const port = urlObj.port === "" ? "" : ":" + urlObj.port;
-  const pathname = urlObj.pathname;
-
-  return `${protocol}://${hostname}${port}`; 
 }

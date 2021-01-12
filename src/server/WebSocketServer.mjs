@@ -4,36 +4,6 @@
  * [The WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
  * ======
  *
- * *****************************************************************************
- */ 
- 
-import assert from 'assert';
-import crypto from 'crypto';
-import EventEmitter from 'events'; 
-import http from 'http';
-import util from 'util';
-import { HTTP_STATUS_CODES, } from './koa/constants.mjs';
-
-const debug = util.debuglog('debug:websocket-server');
-const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
-const OPCODES = {
-  CONTINUE: 0,
-  TEXT: 1,
-  BINARY: 2,
-  CLOSE: 8,
-  PING: 9,
-  PONG: 10,
-};
-const STATUS_CODES = {
-  1000: 'Normal Closure',
-  1001: 'Going Away',
-  1002: 'Protocol Error',
-  1003: 'Unsupported Data',
-}
-const clients = Symbol('websocketConnections');
-
-/**
- *
  * WebSocket Server
  *
  * ## 数据帧格式
@@ -81,8 +51,37 @@ const clients = Symbol('websocketConnections');
  * * Sec-Websocket-version: 13
  * * Sec-Websocket-key: 
  * 服务端取到该值后与GUID拼接后计算sha1作为Sec-Websocket-Accept的值返回客户端
- * 
- */
+ *
+ * *****************************************************************************
+ */ 
+ 
+import assert from 'assert';
+import crypto from 'crypto';
+import EventEmitter from 'events'; 
+import http from 'http';
+import util from 'util';
+import { HTTP_STATUS_CODES, } from './koa/constants.mjs';
+
+const debug = util.debuglog('debug:websocket-server');
+const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
+
+const OPCODES = {
+  CONTINUE: 0,
+  TEXT: 1,
+  BINARY: 2,
+  CLOSE: 8,
+  PING: 9,
+  PONG: 10,
+};
+
+const STATUS_CODES = {
+  1000: 'Normal Closure',
+  1001: 'Going Away',
+  1002: 'Protocol Error',
+  1003: 'Unsupported Data',
+}
+
+const clients = Symbol('websocketConnections');
 
 export default class WebSocket extends EventEmitter {
   constructor (options = {}) {
@@ -104,11 +103,6 @@ export default class WebSocket extends EventEmitter {
       this.upgradeHandler(req, socket, head);
     });
 
-  }
-
-  onData(data) {
-    this.buffer = data;
-    this.processBuffer();
   }
 
   upgradeHandler (req, socket, head) {
@@ -152,15 +146,23 @@ export default class WebSocket extends EventEmitter {
 
     socket.write(resHeaders.concat('\r\n').join('\r\n'));
 
-    socket.on('close', error => {
-      debug('connection from ', socket.remoteAddress, ' is closed.');
+    const address = socket.remoteAddress + ':' + socket.remotePort;
+
+    socket.on('close', () => { 
+      debug('connection from ', address, ' is closed.');
       this[clients].delete(socket);
     });
 
     socket.removeListener('error', socketOnError);
 
-    debug('websocket connection establised');
+    socket.on('data', (data) => {
+      this.buffer = data;
+      this.processBuffer();
+    });
+
     this[clients].add(socket); // 添加到服务端存储
+
+    debug('websocket connection establised');
   }
 
   /**
@@ -168,7 +170,11 @@ export default class WebSocket extends EventEmitter {
    */
 
   broadcastMessage(data) {
-    for (let client of this[clients]) client.send(data);
+    for (let client of this[clients]) {
+      client.write(data, 'utf8', () => { 
+        debug('broadcast message: ', data);
+      });
+    }
   }
 
   /**
@@ -215,17 +221,17 @@ export default class WebSocket extends EventEmitter {
    */
 
   close (cb) {
-    if (cb) this.once('close', cb);
-
     if (this.clients) {
       for (const client of this.clients) client.terminate();
     }
 
-    const server = this._server;
-    process.nextTick(emitClose, this);
+    //const server = this._server;
+    //process.nextTick(emitClose, this);
   }
 
   handleData (opcode, readData) {
+    debug('opcode: ', opcode);
+
     switch (opcode) {
       case OPCODES.TEXT: 
         this.emit('data', readData.toString('utf8'));
@@ -303,6 +309,7 @@ export default class WebSocket extends EventEmitter {
     switch (opcode) {
       case OPCODES.TEXT:
         this.emit('data', realDataBuffer.toString('utf8'));
+        this.broadcastMessage(realDataBuffer.toString());
         break;
       case OPCODES.BINARY:
         this.emit('data', realDataBuffer);
@@ -475,47 +482,3 @@ function hashKey (key) {
 function socketOnError () {
   this.destroy();
 }
-
-/**
- * *****************************************************************************
- *
- * WebSocket Client
- *
- * WebSocket(url[, protocols])
- *
- * [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
- *
- * constants:
- *
- * API Reference:
- *
- * Properties:
- *
- * * WebSocket.binaryType The binary data type used by the connection.
- * * WebSocket.bufferedAmount The number of bytes of queued data.
- * * WebSocket.extensions The extensions selected by the server.
- * * WebSocket.onclose An event listener to be called when the connection is closed.
- * * WebSocket.onmessage An event listener to be called when a message is received from the server. 
- * * WebSocket.onopen An event listener to be called when the connection is opened.
- * * WebSocket.protocol The sub-protocol selected by the server. 
- * * WebSocket.readyState The current state of the connection.['CONNECTING', 'OPEN','CLOSING','CLOSED']
- * * WebSocket.url The absolute URL of the WebSocket. 
- *
- * Methods:
- *
- * * WebSocket.close([code[, reason]]);
- * * WebSocket.send(data)
- *
- * Events:
- *
- * * close
- * * error
- * * message
- * * open
- *
- * # Reference
- *
- * [WebSocketServer](../../server/utils/WebSocketServer.mjs)
- *
- * *****************************************************************************
- */

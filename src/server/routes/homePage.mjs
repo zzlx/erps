@@ -24,11 +24,14 @@ router.get('index', '/*', async (ctx, next) => {
 
   const path = ctx.pathname;
   //import App, { CID, getContainerByID } from '../../uis/main.mjs';
-  const M = await import('../../webUI/main.mjs').catch(err => ctx.throw(err));
+  const M = await import('../../webUI/main.mjs').catch(err => {
+    ctx.throw(err)
+  });
+  const Store = await import('../../webUI/redux/Store.mjs')
+    .then(m => m.default)
+    .catch(err => ctx.throw(err));
   const { CID, getContainerByID } = M;
   const App = M.default;
-  const Storage = await import('../../webUI/utils/ReduxStore.mjs').then(m => m.default)
-    .catch(err => ctx.throw(err));
 
   const ua = ctx.get('user-agent');
   const isIE = /MSIE/.test(ua);
@@ -49,7 +52,7 @@ router.get('index', '/*', async (ctx, next) => {
     { src: `/assets/es/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
   ]);
 
-  const store = new Storage({
+  const store = new Store({
     location: { pathname: ctx.pathname }
   });
 

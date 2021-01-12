@@ -27,6 +27,7 @@ const debug = util.debuglog('debug:http2s.mjs');
 const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
 const streamHandler = app.callback();
+const server = Symbol('http2-server');
 
 export default class HttpServer extends EventEmitter {
   constructor(options = {}) {
@@ -35,7 +36,6 @@ export default class HttpServer extends EventEmitter {
       websocket: true, // 默认提供websocket protocol服务
     }, options);
 
-    this.initServer();
     app.server = this.server;
 
     // websocket protocol
@@ -48,27 +48,31 @@ export default class HttpServer extends EventEmitter {
     return sessionStore.size;
   }
 
-  initServer () {
-    this.server = http2.createSecureServer({
-      allowHTTP1: true,
-      //ca: [fs.readFileSync('client-cert.pem')],
-      key: this.opts.key,
-      cert: this.opts.cert,
-      passphrase: this.opts.passphrase, // 证书passphrase
-      requestCert: false, // 客户端证书支持
-      
-      //sigalgs: 
-      //ciphers: 
-      //clientCertEngine: 
-      //dhparam
-      //ecdhCurve
-      //origins: [],
-      //privateKeyEngine
-      //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-      handshakeTimeout: 120 * 1000, // milliseconds
-      ticketKeys: null,
-      sessionTimeout: 300, // seconds
-    });
+  get server () {
+    if (this[server] == null) {
+      this[server] = http2.createSecureServer({
+        allowHTTP1: true,
+        //ca: [fs.readFileSync('client-cert.pem')],
+        key: this.opts.key,
+        cert: this.opts.cert,
+        passphrase: this.opts.passphrase, // 证书passphrase
+        requestCert: false, // 客户端证书支持
+        
+        //sigalgs: 
+        //ciphers: 
+        //clientCertEngine: 
+        //dhparam
+        //ecdhCurve
+        //origins: [],
+        //privateKeyEngine
+        //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+        handshakeTimeout: 120 * 1000, // milliseconds
+        ticketKeys: null,
+        sessionTimeout: 300, // seconds
+      });
+    }
+
+    return this[server];
   }
 
   listen () {

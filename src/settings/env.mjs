@@ -20,6 +20,7 @@
 import assert from 'assert';
 import fs from 'fs';
 import paths, { appName } from './paths.mjs';
+import system from './system.mjs';
 
 if (fs.existsSync(paths.ENV)) {
   const dotenvObj = envParser(fs.readFileSync(paths.ENV));
@@ -43,13 +44,12 @@ process.on('exit', code => {
 // 被捕获的exception\rejection,需要进行妥善处理
 // 不应出现未经管理的exception
 process.on('uncaughtException', (error, origin) => {
-  console.error('Uncaught Exception: %o', error);
-  console.error('Origin Exception: %s', origin);
+  system.errors.push(error);
 });
 
 // 系统不应出现未经管理的rejection
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Uncaught Rejection: %o', reason);
+  system.errors.push(reason);
 });
 
 /**
