@@ -1,7 +1,7 @@
 #!/bin/sh
 # ------------------------------------------------------------------------------
 # 
-# 开发环境工具
+# 开发工具
 #
 # 仅在类Unix环境中可执行
 # ------------------------------------------------------------------------------
@@ -23,8 +23,8 @@ declare -r _ORIG_UMASK=$(umask)           # 记录原始umask值
 
 declare -r _FILE=${0##*/}                                 # 获取文件名称
 declare -r _S_FILE=$(ls -l $0 |awk '{print $NF}')         # 获取文件物理地址
-declare -r _BIN=$(cd $(dirname $_S_FILE) || exit; pwd -P) # 获取目录路径
-declare -r _ROOT=$(dirname $_BIN)                         # 获取脚本根目录路径
+declare -r _ROOT=$(cd $(dirname $_S_FILE) || exit; pwd -P) # 获取目录路径
+declare -r _BIN="${_ROOT}/bin"                            # 获取脚本根目录路径
 
 declare +r _DEBUG=false        # 默认关闭调试
 declare -r _RENEW_ALLOW=30
@@ -765,7 +765,8 @@ _commit_and_push() {
 	# 比对工作区与仓库差异
   if [[ -n $(git -C $_ROOT diff HEAD) ]]; then
     git -C $_ROOT add -A
-    git -C $_ROOT status
+    git -C $_ROOT status -s
+
 
 		if [[ -z $1 ]]; then
 			read -p "Change log:" message
