@@ -8,6 +8,7 @@
  * 💐 动态路由服务
  * 👏 API路由服务
  *
+ *
  * *****************************************************************************
  */
 
@@ -30,7 +31,6 @@ import xResponse from './koa/middlewares/xResponse.mjs';
 import router from './router.mjs';
 
 const debug = util.debuglog('debug:server/main.mjs');
-test();
 
 // 初始化服务器程序
 const app = new Koa({ 

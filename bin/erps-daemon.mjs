@@ -3,6 +3,7 @@
  * *****************************************************************************
  * 
  *
+ *
  * *****************************************************************************
  */
 
@@ -17,7 +18,8 @@ import util from 'util';
 
 import { argvParser, console, } from '../src/utils.lib.mjs';
 import settings from '../src/settings/index.mjs';
-import Http2Server from '../src/server/Http2Server.mjs';
+import Http2Server from '../src/services/Http2Server.mjs';
+import PathWatcher from '../src/services/utils/PathWatcher.mjs';
 
 let httpd = null; // http daemon 
 
@@ -87,6 +89,7 @@ function main () {
   }
 }
 
+
 function start () {
   if (httpd == null) {
     httpd = new Http2Server({
@@ -122,6 +125,27 @@ function start () {
       console.divideLine();
     });
   });
+
+  if (process.env.NODE_ENV === 'development') {
+    const watcher = new PathWatcher({ paths: ['bin', 'src'] });
+    let clearTimeout = null;
+
+    // 注册变动事件
+    watcher.on('change', (file) => {
+      if (typeof clearTimeout === 'function') { 
+        clearTimeout();
+        clearTimeout = null;
+      }
+
+      clearTimeout = setTimeout(() => {
+        httpd.close(() => {
+          console.log('服务器已关闭');
+        });
+      }, 500);
+    });
+
+    watcher.begin(); // 开始监控
+  }
 }
 
 /**

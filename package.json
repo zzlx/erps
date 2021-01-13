@@ -30,8 +30,6 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "commit": "bin/erpsctl.sh --commit",
-    "devel": "bin/auto-restart.mjs bin/erps-daemon.mjs --debug --env=development --restart --paths=bin,src",
     "start": "bin/erps-daemon.mjs --start"
   }
 }

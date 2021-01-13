@@ -44,12 +44,12 @@ process.on('exit', code => {
 // 被捕获的exception\rejection,需要进行妥善处理
 // 不应出现未经管理的exception
 process.on('uncaughtException', (error, origin) => {
-  system.errors.push(error);
+  console.log(error);
 });
 
 // 系统不应出现未经管理的rejection
 process.on('unhandledRejection', (reason, promise) => {
-  system.errors.push(reason);
+  console.log(reason);
 });
 
 /**
