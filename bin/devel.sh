@@ -765,6 +765,7 @@ _commit_and_push() {
 	# 比对工作区与仓库差异
   if [[ -n $(git -C $_ROOT diff HEAD) ]]; then
     git -C $_ROOT add -A
+    git -C $_ROOT status
 
 		if [[ -z $1 ]]; then
 			read -p "Change log:" message
