@@ -32,15 +32,9 @@ const tasksBeforeListen = [
 ];
 
 /**
- * *****************************************************************************
+ * 主程序
  *
- * Utilities
- *
- * *****************************************************************************
- */
-
-/**
- * 根据参数执行命令
+ * 根据参数执行相应命令
  */
 
 export default function main (argvs) {
@@ -230,15 +224,12 @@ function cssRender () {
   const cssFileBr = cssFile + '.br';
   const cssFileGz = cssFile + '.gz';
 
-
-  /*
-        // 保证目标文件的目录已经准备就绪
-        fs.mkdirSync(path.dirname(cssFile), {recursive: true}); 
+  // 保证目标文件的目录已经准备就绪
+  fs.mkdirSync(path.dirname(cssFile), {recursive: true}); 
   const tasks = Promise.all([
     fs.promises.writeFile(cssFile, result.css),
     fs.promises.writeFile(cssFileGz, zlib.gzipSync(result.css)),
     fs.promises.writeFile(cssFileBr, zlib.brotliCompressSync(result.css)),
     fs.promises.writeFile(cssFileDeflate, zlib.deflateSync(result.css)),
   ].filter(Boolean));
-*/
 }

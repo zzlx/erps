@@ -1,13 +1,10 @@
 #!/usr/bin/env node --trace-warnings
-/**
- * *****************************************************************************
- * 
- * ERP services daemon
- *
- * *****************************************************************************
- */
 
+// 加载主程序
 import main from '../src/backend/main.mjs';
 
-// 执行后端主程序
-main(Array.prototype.slice.call(process.argv, 2));
+// 获取执行参数列表
+const ARGV = Array.prototype.slice.call(process.argv, 2);
+
+// 传入执行参数ARGV, 执行主程序
+main(ARGV);

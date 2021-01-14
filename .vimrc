@@ -301,8 +301,8 @@ map! <C-A> <Esc>ggVGY
 "
 map <Tab> :tabnext<CR>  " gt
 map <S-Tab> :tabpre<CR> " gT
-map <F6>  :call TargetsTab()<CR> " 打开目标 
-map <F5> :call Targets()<CR> " 打开目标 
+map <F2> :call Targets()<CR> " 当前窗口打开目标 
+map <F3>  :call TargetsTab()<CR> " 新标签窗口打开目标 
 map <F12> :!./%<CR>          " 执行脚本 
 
 "nnoremap <C-J> <C-W><C-J>
