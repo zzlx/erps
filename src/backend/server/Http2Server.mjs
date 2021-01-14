@@ -16,16 +16,15 @@ import EventEmitter from 'events';
 import http2 from 'http2';
 import path from 'path';
 
-import debuglog from './utils/debuglog.mjs';
-import logWriter from './utils/logWriter.mjs';
-import settings from './settings.mjs';
 import WebSocket from './WebSocket.mjs'
+import debuglog from '../utils/debuglog.mjs';
+import logWriter from '../utils/logWriter.mjs';
+import settings from '../settings.mjs';
 
 // 调试信息打印工具
 const debug = debuglog('debug:http2s.mjs');
 const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
-const streamHandler = app.callback();
 const server = Symbol('http2-server');
 
 export default class HttpServer extends EventEmitter {

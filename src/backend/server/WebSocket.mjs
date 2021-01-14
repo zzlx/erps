@@ -13,8 +13,8 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import http from 'http';
 import util from 'util';
-import debuglog from './utils/debuglog.mjs';
-import { HTTP_STATUS_CODES, } from './koa/constants.mjs';
+import debuglog from '../utils/debuglog.mjs';
+import { HTTP_STATUS_CODES, } from '../koa/constants.mjs';
 
 const debug = debuglog('debug:websocket-server');
 
