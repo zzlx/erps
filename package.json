@@ -30,6 +30,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "devel": "bin/erps-daemon.mjs --start --env=development",
     "start": "bin/erps-daemon.mjs --start"
   }
 }

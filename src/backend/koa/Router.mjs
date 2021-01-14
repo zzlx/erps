@@ -22,7 +22,7 @@
  * *****************************************************************************
  */
 
-import { assert, path, pathToRegexp } from '../../utils.lib.mjs';
+import { assert, path, pathToRegexp } from '../utils.lib.mjs';
 import compose from './compose.mjs';
 import HttpError from './HttpError.mjs';
 import Route from './Route.mjs';

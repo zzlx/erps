@@ -11,7 +11,10 @@ import os from 'os';
 import path from 'path';
 
 // read paths from source code, can not be writable、configurable、enumerable
-const _ROOT = path.dirname(path.dirname(path.dirname(import.meta.url.substr(7))));
+const _ROOT = path.dirname(path.dirname(path.dirname(path.dirname(
+  import.meta.url.substr(7)
+))));
+
 const paths = (root => {
   const paths = Object.create(null);
 

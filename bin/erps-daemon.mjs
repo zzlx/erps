@@ -2,7 +2,7 @@
 /**
  * *****************************************************************************
  * 
- *
+ * ERP services daemon
  *
  * *****************************************************************************
  */
@@ -17,10 +17,12 @@ import path from 'path';
 import util from 'util';
 
 import { argvParser, console, } from '../src/utils.lib.mjs';
+import debuglog from '../src/services/utils/debuglog.mjs';
 import settings from '../src/settings/index.mjs';
 import Http2Server from '../src/services/Http2Server.mjs';
 import PathWatcher from '../src/services/utils/PathWatcher.mjs';
 
+const debug = debuglog('debug:erps-daemon');
 let httpd = null; // http daemon 
 
 // 服务重启时执行的任务清单:
@@ -37,6 +39,14 @@ process.nextTick(() => {
 }); 
 
 /**
+ * *****************************************************************************
+ *
+ * Utilities
+ *
+ * *****************************************************************************
+ */
+
+/**
  * 根据参数执行命令
  */
 
@@ -50,10 +60,6 @@ function main () {
       case 'env': 
         process.env.NODE_ENV = paramMap['env'];
         delete paramMap['env'];
-        continue;
-      case 'debug':
-        process.env.NODE_DEBUG = 'debug:*';
-        delete paramMap['debug'];
         continue;
       //default:
     }
@@ -89,7 +95,6 @@ function main () {
   }
 }
 
-
 function start () {
   if (httpd == null) {
     httpd = new Http2Server({
@@ -100,19 +105,15 @@ function start () {
     });
   }
 
-  httpd.listen({
-    ipv6Only: false,
-    host: settings.system.ipv6 ? '::' : '0.0.0.0',
-    port: settings.system.port || '8888',
-    exclusive: false,
-  }, () => {
+  httpd.listen(() => {
     consolePrint(() => {
       //console.clearLine(12);
-      console.clear();
+      //console.clear();
       console.divideLine();
       console.log('服务器监控信息: ')
       console.divideLine('-');
       console.log({
+        '进行编号': process.pid,
         '运行模式': process.env.NODE_ENV,
         '系统平台': process.platform + '_' + process.arch,
         '处理器信息': os.cpus()[0].model + ' * ' + os.cpus().length,

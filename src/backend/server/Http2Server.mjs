@@ -15,15 +15,14 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import http2 from 'http2';
 import path from 'path';
-import util from 'util';
 
+import debuglog from './utils/debuglog.mjs';
 import logWriter from './utils/logWriter.mjs';
-import settings from '../settings/index.mjs';
-import WebSocket from './WebSocketServer.mjs'
-import app from './app.mjs';
+import settings from './settings.mjs';
+import WebSocket from './WebSocket.mjs'
 
 // 调试信息打印工具
-const debug = util.debuglog('debug:http2s.mjs');
+const debug = debuglog('debug:http2s.mjs');
 const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
 const streamHandler = app.callback();
@@ -75,9 +74,14 @@ export default class HttpServer extends EventEmitter {
     return this[server];
   }
 
-  listen () {
+  listen (cb) {
     this.server.on('stream', streamHandler);
-    this.server.listen.apply(this.server, arguments);
+    this.server.listen({
+      ipv6Only: false,
+      host: settings.system.ipv6 ? '::' : '0.0.0.0',
+      port: process.env.PORT || '8888',
+      exclusive: false,
+    }, cb);
   }
 }
 

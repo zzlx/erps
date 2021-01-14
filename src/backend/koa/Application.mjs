@@ -23,7 +23,7 @@ export default class Application extends EventEmitter {
 
     this.opts = Object.assign({}, {
       // default options
-      env: 'production',
+      env: process.env.NODE_ENV || 'production',
       keys: "endsC5vcmc=",
       protocol: 'http2',
       contentNegotiation: true, // 默认开启

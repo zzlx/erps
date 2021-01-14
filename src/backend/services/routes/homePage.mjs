@@ -9,8 +9,8 @@
 import ReactDOMServer from 'react-dom/server.js';
 import path from 'path';
 import util from 'util';
-import settings from '../../settings/index.mjs';
-import HtmlTemplate from '../utils/HtmlTemplate.mjs';
+import settings from '../../settings.mjs';
+import HtmlTemplate from '../../utils/HtmlTemplate.mjs';
 import Router from '../koa/Router.mjs';
 
 const debug = util.debuglog('debug:routes/homePage.mjs');
