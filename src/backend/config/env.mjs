@@ -31,7 +31,7 @@ if (fs.existsSync(paths.ENV)) {
   }
 }
 
-process.env.NODE_ENV = process.env.NODE_ENV || 'production'; // 环境参数
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 process.on('exit', code => {
   const uptime = Math.ceil(process.uptime()*1000);

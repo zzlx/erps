@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A platform of ERP service system.",
   "scripts": {
-    "devel": "./bin/erpsd.mjs --start --env=development",
     "start": "./bin/erpsd.mjs --start"
   },
   "dependencies": {
