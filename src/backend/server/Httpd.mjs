@@ -14,8 +14,10 @@ import assert from 'assert';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import http2 from 'http2';
+import os from 'os';
 import path from 'path';
 
+import { console } from '../utils.lib.mjs';
 import WebSocket from './WebSocket.mjs'
 import debuglog from '../utils/debuglog.mjs';
 import logWriter from '../utils/logWriter.mjs';
@@ -27,19 +29,21 @@ const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
 const server = Symbol('http2-server');
 
-export default class HttpServer extends EventEmitter {
+export default class Httpd extends EventEmitter {
   constructor(options = {}) {
     super();
     this.opts = Object.assign({}, {
       websocket: true, // 默认提供websocket protocol服务
     }, options);
 
-    app.server = this.server;
-
     // websocket protocol
     this.ws = this.opts.websocket 
       ? new WebSocket({server: this.server}) 
       : null;
+  }
+
+  close () {
+    this.server.close();
   }
 
   get connections () {
@@ -71,16 +75,6 @@ export default class HttpServer extends EventEmitter {
     }
 
     return this[server];
-  }
-
-  listen (cb) {
-    this.server.on('stream', streamHandler);
-    this.server.listen({
-      ipv6Only: false,
-      host: settings.system.ipv6 ? '::' : '0.0.0.0',
-      port: process.env.PORT || '8888',
-      exclusive: false,
-    }, cb);
   }
 }
 

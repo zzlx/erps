@@ -4,6 +4,8 @@
  * System Preferences
  * ==============
  *
+ * 用于管理系统配置
+ *
  * 系统配置: 
  *
  * * 系统环境配置
@@ -20,13 +22,12 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import './config/env.mjs';
 import paths, { appName, appVersion } from './config/paths.mjs';
 import system from './config/system.mjs';
 import templates from './config/templates.mjs';
 
 // settings from config
-const sfc = fs.readFileSync(paths.SETTINGS_JSON, 'utf8');
+const sfc = fs.readFileSync(paths.DOT_SETTINGS, 'utf8');
 const configs = JSON.parse(sfc);
 mkdirs(paths);
 

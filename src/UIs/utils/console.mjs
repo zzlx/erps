@@ -56,7 +56,7 @@ function write (str) {
  * 打印分隔线
  */
 
-function divideLine ( symbol = '=') {
+function divideLine (symbol = '=') {
   const dl = new Array(process.stdout.columns).join(symbol);
   console.log(dl);
 }

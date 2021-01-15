@@ -20,9 +20,9 @@ const paths = (root => {
 
   fs.readdirSync(root, {withFileTypes: true}).forEach(file => {
     const name = String(file.name)
-      .replace(/^(\.)/, '')
+      .replace(/^(\.)/, 'DOT_')
+      .replace(/(\..+)$/, '') // 去掉扩展名后缀
       .replace(/[\.|-]/g, '_')
-      //.replace(/(\..+)$/, '') // 去掉扩展名后缀
       .toUpperCase(); 
 
     Object.defineProperty(paths, name, {
@@ -37,7 +37,7 @@ const paths = (root => {
 })(_ROOT);
 
 // read configurations from package.json
-export const packageJSON = JSON.parse(fs.readFileSync(paths.PACKAGE_JSON));
+export const packageJSON = JSON.parse(fs.readFileSync(paths.PACKAGE));
 export const appName = packageJSON.name;
 export const appVersion = packageJSON.version;
 

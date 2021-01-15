@@ -1,10 +1,18 @@
 #!/usr/bin/env node --trace-warnings
+/**
+ * *****************************************************************************
+ * 
+ * ERP services
+ *
+ * 实例化主控制程序
+ *
+ * *****************************************************************************
+ */
 
-// 加载主程序
-import main from '../src/backend/main.mjs';
+import Main from '../src/backend/Main.mjs'; // 加载主程序
 
-// 获取执行参数列表
-const ARGV = Array.prototype.slice.call(process.argv, 2);
+const main = new Main({
+  argvs: Array.prototype.slice.call(process.argv, 2), // 获取并传递执行参数列表
+});
 
-// 传入执行参数ARGV, 执行主程序
-main(ARGV);
+main.run(); // 执行主程序

@@ -23,6 +23,7 @@ export default class PathWatcher extends EventEmitter {
     super();
     this.opts = Object.assign({}, {
       paths: [],
+      callback: () => {},
       interval: 800,
     }, typeof options === 'string' ? { paths: options } : options);
 
@@ -33,10 +34,23 @@ export default class PathWatcher extends EventEmitter {
         this.detect();
       }, this.opts.inverval);
     });
+
+    this.on('change', file => {
+      if (this.onChangeTimer)
+        this.onChangeTimer();
+        this.onChangeTimer = null;
+      }
+
+      this.onChangeTimer = setTimeout(this.opts.callback, 500);
+    });
   }
 
-  begin () {
-    this.detect(); // 开始监控目录
+  /**
+   * 
+   */
+
+  watch () {
+    this.detect();
   }
 
   detect () {

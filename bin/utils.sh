@@ -1134,6 +1134,10 @@ _parse_argv() {
 	done
 }
 
+_getPID() {
+  echo $(lsof -i:${port} | grep 'LISTEN' \ | awk \'NR==1{print $2}\');
+}
+
 _readDotEnv() {
 	# 读入.env环境变量
 	dotEnvFile=${_ROOT}/.env
@@ -1151,6 +1155,13 @@ _get_pid_by_port () {
 
 _curl_request () {
 	curl --http2 -X POST -k --data '{test}' https://macair2013:3000/homePage
+}
+
+_test () {
+  for ((COUNT = 1; COUNT <= 10; COUNT++)); do
+    echo $COUNT
+    sleep 1
+  done
 }
 
 _main() { 
