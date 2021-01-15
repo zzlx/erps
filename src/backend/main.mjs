@@ -12,6 +12,7 @@ import assert from 'assert';
 import cluster from 'cluster';
 import crypto from 'crypto';
 import EventEmitter from 'events';
+import os from 'os';
 import fs from 'fs';
 
 import { argvParser, console } from './utils.lib.mjs';
@@ -19,6 +20,7 @@ import debuglog from './utils/debuglog.mjs';
 import envParser from './utils/envParser.mjs';
 import settings from './settings.mjs';
 import Httpd from './server/Httpd.mjs';
+import app from './services/app.mjs';
 
 const debug = debuglog('debug:main');
 const symbol = Symbol('MainApplication');
@@ -103,12 +105,14 @@ Main.prototype.showVersion = function () {
 
 Main.prototype.startServer = function () {
 
-  this.httpd = new Http2Server({
+  this.httpd = new Httpd({
     key: settings.privateKey,
     cert: settings.cert,
     passphrase: settings.passphrase, // 证书passphrase
     ticketKeys: crypto.randomBytes(48), 
   });
+
+  this.httpd.server.on('stream', app.callback());
 
   this.httpd.server.listen({
     ipv6Only: false,

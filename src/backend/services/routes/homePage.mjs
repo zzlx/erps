@@ -11,7 +11,7 @@ import path from 'path';
 import util from 'util';
 import settings from '../../settings.mjs';
 import HtmlTemplate from '../../utils/HtmlTemplate.mjs';
-import Router from '../koa/Router.mjs';
+import Router from '../../koa/Router.mjs';
 
 const debug = util.debuglog('debug:routes/homePage.mjs');
 const router = new Router();
@@ -23,11 +23,11 @@ router.get('index', '/*', async (ctx, next) => {
   if (ctx.body != null) return next();
 
   const path = ctx.pathname;
-  //import App, { CID, getContainerByID } from '../../uis/main.mjs';
-  const M = await import('../../UIs/main.mjs').catch(err => {
+  //import App, { CID, getContainerByID } from '../../frontend/main.mjs';
+  const M = await import('../../../frontend/main.mjs').catch(err => {
     ctx.throw(err)
   });
-  const Store = await import('../../UIs/redux/Store.mjs')
+  const Store = await import('../../../frontend/redux/Store.mjs')
     .then(m => m.default)
     .catch(err => ctx.throw(err));
   const { CID, getContainerByID } = M;

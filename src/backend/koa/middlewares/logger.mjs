@@ -13,7 +13,7 @@
  */
 
 import assert from 'assert';
-import { date } from '../../../utils.lib.mjs';
+import { date } from '../../utils.lib.mjs';
 import logWriter from '../../utils/logWriter.mjs';
 
 export default function logger (options = {}) {

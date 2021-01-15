@@ -19,7 +19,7 @@ const router = new Router();
 //process.env.NODE_ENV === 'development' && router.use(routes.log);
 router.get('docs', ['/documentation', '/docs'], routes.docs);
 router.get('public', '/*', statics(settings.paths.PUBLIC));
-router.get('/assets/es/*', statics(path.join(settings.paths.SRC, 'UIs'), {
+router.get('/assets/es/*', statics(path.join(settings.paths.SRC, 'frontend'), {
   prefix: '/assets/es/'
 }));
 router.get('/*', routes.homePage);

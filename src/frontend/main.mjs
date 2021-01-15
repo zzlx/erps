@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Web UI System.
+ * Frontend UI System.
  *
  * *****************************************************************************
  */
@@ -20,6 +20,56 @@ import deviceDetect from './utils/deviceDetect.mjs'
 
 // 配置前端应用标识符
 export const CID = 'react-app'; 
+
+/**
+ * Application
+ *
+ * @param {object} store
+ * @return {object} element
+ */
+
+export default function ReactApp (store) {
+  const routes = store.getState('routes')
+    .map(item => Object.assign({}, item, { app: Pages[item.app] }))
+    .map(route => React.createElement(Route, { 
+      path: route.path, 
+      component: route.app, 
+    }));
+
+  return React.createElement(Provider, { 
+    store: store,
+    children: React.createElement(Switcher, null, ...routes),
+  }); 
+}
+
+/**
+ * callback function
+ */
+
+function cb () {
+  const device = deviceDetect(window.navigator.userAgent);
+  console.groupCollapsed('欢迎使用前端UI程序!');
+  if (device) console.log(`检测到当前客户端设备为:${device}`);
+  else console.warn('未检测出当前设备类型😢');
+  //console.log(`帮助文档: ${location.origin}/documentation`);
+  console.groupEnd();
+}
+
+/**
+ * 获取container
+ */
+
+export function getContainerByID (id) {
+  let container = this.document.getElementById(id);
+
+  if (null == container) {
+    container = this.document.createElement('div');
+    container.id = id;
+    this.document.body.appendChild(container);
+  }
+
+  return container;
+}
 
 /**
  * *****************************************************************************
@@ -57,72 +107,4 @@ if (global.window && global.window.document) {
   const container = getContainerByID.call(window, CID)
   if (container.innerHTML) ReactDOM.hydrate(element, container, cb);
   else ReactDOM.render(element, container, cb);  
-}
-
-/**
- * Application
- *
- * @param {object} store
- * @return {object} element
- */
-
-export default function ReactApp (store) {
-  const routes = store.getState('routes')
-    .map(item => Object.assign({}, item, { app: Pages[item.app] }))
-    .map(route => React.createElement(Route, { 
-      path: route.path, 
-      component: route.app, 
-    }));
-
-  return React.createElement(Provider, { 
-    store: store,
-    children: React.createElement(Switcher, null, ...routes),
-  }); 
-}
-
-/**
- * callback function
- */
-
-function cb () {
-  const device = deviceDetect(window.navigator.userAgent);
-  console.groupCollapsed('欢迎使用前端UI程序!');
-  if (device) console.log(`检测到当前客户端设备为:${device}`);
-  else console.warn('未检测出当前设备类型😢');
-  //console.log(`帮助文档: ${location.origin}/documentation`);
-  console.groupEnd();
-}
-
-/**
- * Web Worker
- */
-
-function getWebWorker () {
-  self.addEventListener('message', function (e) {
-    const data = e.data;
-
-    switch (data.cmd) {
-      case 'start':
-        self.postMessage('WORKER STARTED: ' + data.msg);
-        break;
-      case 'stop':
-        self.postMessage('WORKER STOPPED: ' + data.msg);
-        self.close(); // Terminates the worker.
-        break;
-      default:
-        self.postMessage('Unknown command: ' + data.msg);
-    };
-  }, false);
-}
-
-export function getContainerByID (id) {
-  let container = this.document.getElementById(id);
-
-  if (null == container) {
-    container = this.document.createElement('div');
-    container.id = id;
-    this.document.body.appendChild(container);
-  }
-
-  return container;
 }

@@ -24,7 +24,7 @@ import logWriter from '../utils/logWriter.mjs';
 import settings from '../settings.mjs';
 
 // 调试信息打印工具
-const debug = debuglog('debug:http2s.mjs');
+const debug = debuglog('debug:Httpd.mjs');
 const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
 const server = Symbol('http2-server');
@@ -40,6 +40,8 @@ export default class Httpd extends EventEmitter {
     this.ws = this.opts.websocket 
       ? new WebSocket({server: this.server}) 
       : null;
+
+    this.registerEventHandlers();
   }
 
   close () {
@@ -76,87 +78,81 @@ export default class Httpd extends EventEmitter {
 
     return this[server];
   }
-}
 
-/**
- * Utilities
- */
+  registerEventHandlers () {
+    // This event is emitted when a new TCP stream is established, 
+    // before the TLS handshake begins.
+    // socket is typically an object of type net.Socket
+    this.server.on('connection', socket => {
+      debug(
+        `connection is come from ${socket.remoteAddress}:${socket.remotePort}`);
+    });
 
-/*
-  // handle tls server events:
+    this.server.on('error', (err) => {
+      debug(err);
 
-  // This event is emitted when a new TCP stream is established, 
-  // before the TLS handshake begins.
-  // socket is typically an object of type net.Socket
-  server.on('connection', socket => {
-    debug('connection is come from ', socket.remoteAddress);
-  });
+      if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${err.port} is used, try again later.`);
+      }
+    });
 
-  // The keylog event is emitted when key material is generated 
-  // or received by a connection to this server
-  // (typically before handshake has completed, but not necessarily).
-  // This keying material can be stored for debugging, 
-  // as it allows captured TLS traffic to be decrypted. 
-  // It may be emitted multiple times for each socket.
-  server.on('keylog', (line, tlsSocket) => {
-    logWriter(path.join(paths.LOG_PATH, 'ssl-keys.log'), line.toString());
-  });
+    this.server.on('close', () => {
+      debug('server is closed');
+    });
 
-  // event is emitted when the client sends a certificate status request. 
-  server.on('OCSPRequest', (certificate, issuer, cb) => {
-    debug('OCSPRequest event');
-    debug(crypto.Certificate.exportPublicKey(certificate));
-    cb(null, null);
-  });
+    // The keylog event is emitted when key material is generated 
+    // or received by a connection to this server
+    // (typically before handshake has completed, but not necessarily).
+    // This keying material can be stored for debugging, 
+    // as it allows captured TLS traffic to be decrypted. 
+    // It may be emitted multiple times for each socket.
+    this.server.on('keylog', (line, tlsSocket) => {
+      logWriter(path.join(paths.LOG_PATH, 'ssl-keys.log'), line.toString());
+    });
 
-  // The 'resumeSession' event is emitted 
-
-  // The 'newSession' event is emitted upon creation of a new TLS session. 
-  // This may be used to store sessions in external storage. 
-  // The data should be provided to the 'resumeSession' callback.
-  server.on('newSession', (sessionId, sessionData, cb) => {
-    sessionStore.set(sessionId.toString('hex'), sessionData);
-    debug(sessionStore);
-    cb();
-  });
-
-  // when the client requests to resume a previous TLS session. 
-  server.on('resumeSession', (id, cb) => {
-    const sessionData = sessionStore.get(id.toString('hex')); 
-
-    if (sessionData) { 
-      cb(null, sessionData);
-    } else {
-      debug('resumeSession faile');
+    // event is emitted when the client sends a certificate status request. 
+    this.server.on('OCSPRequest', (certificate, issuer, cb) => {
+      debug('OCSPRequest event');
+      debug(crypto.Certificate.exportPublicKey(certificate));
       cb(null, null);
-    }
-  });
+    });
 
-  // he 'secureConnection' event is emitted after the handshaking process 
-  // for a new connection has successfully completed. 
-  server.on('secureConnection', tlsSocket => {
-    debug('secureConnection');
-  });
+    // The 'resumeSession' event is emitted 
 
-  // event is emitted when an error occurs before a secure connection is established.
-  server.on('tlsClientError', (exception, tlsSocket) => {
-    debug('tlsClientError: ', exception);
-  });
+    // The 'newSession' event is emitted upon creation of a new TLS session. 
+    // This may be used to store sessions in external storage. 
+    // The data should be provided to the 'resumeSession' callback.
+    this.server.on('newSession', (sessionId, sessionData, cb) => {
+      sessionStore.set(sessionId.toString('hex'), sessionData);
+      cb();
+    });
 
-  server.on('unknownProtocol', (error) => {
-    debug('unknownProtocol');
-  });
+    // when the client requests to resume a previous TLS session. 
+    this.server.on('resumeSession', (id, cb) => {
+      const sessionData = sessionStore.get(id.toString('hex')); 
 
-  server.on('error', (err) => {
-    debug(err);
+      if (sessionData) { 
+        cb(null, sessionData);
+      } else {
+        debug('resumeSession faile');
+        cb(null, null);
+      }
+    });
 
-    if (err.code === 'EADDRINUSE') {
-      console.error(`Port ${err.port} is used, try again later.`);
-    }
-  });
+    // he 'secureConnection' event is emitted after the handshaking process 
+    // for a new connection has successfully completed. 
+    this.server.on('secureConnection', tlsSocket => {
+      debug('secureConnection');
+    });
 
-  server.on('close', () => {
-    console.log('server is closed');
-  });
-*/
+    // event is emitted when an error occurs before a secure connection is established.
+    this.server.on('tlsClientError', (exception, tlsSocket) => {
+      debug('tlsClientError: ', exception);
+    });
+
+    this.server.on('unknownProtocol', (error) => {
+      debug('unknownProtocol');
+    });
+  }
+}
 
