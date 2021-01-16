@@ -24,14 +24,11 @@ router.get('index', '/*', async (ctx, next) => {
 
   const path = ctx.pathname;
   //import App, { CID, getContainerByID } from '../../webUI/main.mjs';
-  const M = await import('../../../webUI/main.mjs').catch(err => {
-    ctx.throw(err)
+  const UI = await import('../../../webUI/main.mjs').then(m => m.default)
+    .catch(err => { ctx.throw(err); });
+  const app = new UI({
+    location: { pathname: ctx.pathname }
   });
-  const Store = await import('../../../webUI/redux/Store.mjs')
-    .then(m => m.default)
-    .catch(err => ctx.throw(err));
-  const { CID, getContainerByID } = M;
-  const App = M.default;
 
   const ua = ctx.get('user-agent');
   const isIE = /MSIE/.test(ua);
@@ -52,12 +49,8 @@ router.get('index', '/*', async (ctx, next) => {
     { src: `/assets/es/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
   ]);
 
-  const store = new Store({
-    location: { pathname: ctx.pathname }
-  });
-
-  const container = getContainerByID.call(html, CID)
-  container.innerHTML = ReactDOMServer.renderToString(App(store));
+  const container = getContainerByID.call(html, app.CID)
+  container.innerHTML = ReactDOMServer.renderToString(app.element);
 
   ctx.body = html.render();
   return next();
