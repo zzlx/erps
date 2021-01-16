@@ -23,11 +23,11 @@ router.get('index', '/*', async (ctx, next) => {
   if (ctx.body != null) return next();
 
   const path = ctx.pathname;
-  //import App, { CID, getContainerByID } from '../../frontend/main.mjs';
-  const M = await import('../../../frontend/main.mjs').catch(err => {
+  //import App, { CID, getContainerByID } from '../../webUI/main.mjs';
+  const M = await import('../../../webUI/main.mjs').catch(err => {
     ctx.throw(err)
   });
-  const Store = await import('../../../frontend/redux/Store.mjs')
+  const Store = await import('../../../webUI/redux/Store.mjs')
     .then(m => m.default)
     .catch(err => ctx.throw(err));
   const { CID, getContainerByID } = M;

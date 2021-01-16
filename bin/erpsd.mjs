@@ -9,7 +9,7 @@
  * *****************************************************************************
  */
 
-import Main from '../src/backend/Main.mjs'; // 加载主程序
+import Main from '../src/erps/Main.mjs'; // 加载主程序
 
 const main = new Main({
   argvs: Array.prototype.slice.call(process.argv, 2), // 获取并传递执行参数列表

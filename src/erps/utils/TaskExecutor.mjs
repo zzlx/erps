@@ -1,13 +1,8 @@
 /**
  * *****************************************************************************
  *
- * 监视目录文件变动,触发change事件
+ * 任务执行器
  * 
- * Events:
- *
- * * change
- *
- *
  * *****************************************************************************
  */
 
@@ -16,45 +11,47 @@ import path from 'path';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
+
+import debuglog from './debuglog.mjs';
 import readDir from './readDir.mjs';
 
-export default class PathWatcher extends EventEmitter {
+const debug = debuglog('debug:task-executor');
+
+export default class TaskExecutor extends EventEmitter {
   constructor(options = {}) {
     super();
     this.opts = Object.assign({}, {
-      paths: [],
+      watchPath: [],
       callback: () => {},
-      interval: 800,
+      interval: 500,
     }, typeof options === 'string' ? { paths: options } : options);
 
     this.cache = new Map();
 
-    this.on('complete', () => {
+    this.on('detectComplete', () => {
       this.timeout = setTimeout(() => {
         this.detect();
       }, this.opts.inverval);
     });
 
     this.on('change', file => {
-      if (this.onChangeTimer)
-        this.onChangeTimer();
+      debug(`监测到文件${file} 发生改动.`);
+
+      if (this.onChangeTimer != null) {
+        clearTimeout(this.onChangeTimer)
+        debug(this.onChangeTimer);
         this.onChangeTimer = null;
       }
 
-      this.onChangeTimer = setTimeout(this.opts.callback, 500);
+      this.onChangeTimer = setTimeout(this.opts.callback, this.opts.interval + 100);
     });
-  }
 
-  /**
-   * 
-   */
-
-  watch () {
     this.detect();
   }
 
+
   detect () {
-    const files = readDir(this.opts.paths); // 读取目录文件列表
+    const files = readDir(this.opts.watchPath); // 读取目录文件列表
 
     for (const file of files) {
       try {
@@ -75,6 +72,7 @@ export default class PathWatcher extends EventEmitter {
       }
     }
 
-    this.emit('complete'); // 检测完成
+    // 检测完成事件
+    this.emit('detectComplete'); 
   }
 }

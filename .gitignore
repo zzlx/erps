@@ -22,7 +22,6 @@
 build
 dist
 test
-.env
 node_modules
 
 # 其他临时文件
@@ -30,6 +29,6 @@ node_modules
 *.local
 *.local.conf
 *.local.json
-.config.json
+.env
 .settings.json
 

@@ -72,6 +72,33 @@ export function getContainerByID (id) {
 }
 
 /**
+ *
+ * 通知
+ *
+ * 注意使用场合
+ *
+ */
+
+function notification () {
+  if (window && window.Notification == null) return;
+  Notification.requestPermission(); // 获取授权
+
+  const notification = new Notification('新消息', {
+    body: `数据已经准备就绪请查看`,
+    silent: false, // 通知出现是否提示音
+    //sound: '', // 定义通知出现时的声音资源
+    icon: 'https://avatars2.githubusercontent.com/u/15223841?s=96&v=4'
+  });
+
+  notification.onclick = (event) => {
+    window.open('/notice', 'test');
+    window.focus();
+    notification.close();
+  };
+
+}
+
+/**
  * *****************************************************************************
  *
  * 执行浏览器客户端渲染程序

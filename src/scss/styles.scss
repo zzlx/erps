@@ -5,6 +5,8 @@
  *
  * Based on [Bootstrap](https://getbootstrap.com/docs).
  * add animation classes.
+ *
+ *
  * *****************************************************************************
  */
 
@@ -58,6 +60,8 @@
 
 // Customized styles
 @import "./_animations.scss";
+@import "./_table.scss";
 @import "./_color.scss";
 @import "./_components.scss";
 @import "./_grid.scss";
+@import "./_typesetting.scss";
