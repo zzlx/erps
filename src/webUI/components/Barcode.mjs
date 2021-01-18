@@ -10,15 +10,12 @@
  */
 
 import React from './_React.mjs';
+import Barcode from '../utils/Barcode.mjs';
 
-export default class Barcode extends React.PureComponent { 
+export default class BarcodeComponent extends React.PureComponent { 
   constructor(props) {
     super(props);
     this._ref = React.createRef();
-
-    this.bytes = props.data 
-        ? props.data.split('').map(char => char.charCodeAt(0))
-        : [];
   }
 
   componentDidMount() {
@@ -33,6 +30,7 @@ export default class Barcode extends React.PureComponent {
 
   render() {
     const { width, height, ...rests } = this.props;
+
     return React.createElement('canvas', {
       width: width ? width : '150',
       height: height ? height : '100',

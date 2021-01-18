@@ -20,11 +20,10 @@ import deviceDetect from './utils/deviceDetect.mjs'
 
 const re = Symbol('react-element');
 
-export default class UIApp {
+export default class Main {
   constrctor (initialState = {}) {
     this.CID = 'root';
     this.store = new Store(initialState); 
-
   }
 
   get element () {
@@ -36,7 +35,7 @@ export default class UIApp {
    * Rendering the app Element into the DOM
    */
 
-  renderDOM () {
+  render () {
     //Detect environment and render UI Application
     const __url = new URL(import.meta.url);
     global.env = __url.searchParams.get('env') || 'production';
@@ -48,15 +47,20 @@ export default class UIApp {
     // 空的容器对象上使用render方法渲染
     // 判断container是否存在服务端渲染内容
     // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
-    const container = getContainerByID.call(window, this.CID)
+    let container = document.getElementById(this.CID);
+
+    if (null == container) {
+      container = document.createElement('div');
+      container.id = id;
+      document.body.appendChild(container);
+    }
+
     if (container.innerHTML) ReactDOM.hydrate(this.element, container, cb);
     else ReactDOM.render(this.element, container, cb);  
   }
 }
 
-if (global.window && global.window.document) {
-  new UIApp({ location }).renderDOM();
-}
+if (global.window && global.window.document) new Main({ location }).render();
 
 /**
  * *****************************************************************************
@@ -75,7 +79,9 @@ if (global.window && global.window.document) {
  */
 
 function ReactApp (props) {
-  const routes = props.store.getState('routes')
+  const { store } = props;
+
+  const routes = store.getState('routes')
     .map(item => Object.assign({}, item, { app: Pages[item.app] }))
     .map(route => React.createElement(Route, { 
       path: route.path, 
@@ -99,22 +105,6 @@ function cb () {
   else console.warn('未检测出当前设备类型😢');
   //console.log(`帮助文档: ${location.origin}/documentation`);
   console.groupEnd();
-}
-
-/**
- * 获取container
- */
-
-export function getContainerByID (id) {
-  let container = this.document.getElementById(id);
-
-  if (null == container) {
-    container = this.document.createElement('div');
-    container.id = id;
-    this.document.body.appendChild(container);
-  }
-
-  return container;
 }
 
 /**

@@ -16,6 +16,7 @@ import PictureCollection from '../components/PictureCollection.mjs';
 import TodoList from '../components/TodoList.mjs';
 import Accordion from '../components/Accordion.mjs';
 import Blockquote from '../components/Blockquote.mjs';
+import Barcode from '../components/Barcode.mjs';
 import { send } from '../actions/index.mjs';
 
 export default class HomePage extends React.Component {
@@ -38,6 +39,10 @@ export default class HomePage extends React.Component {
       React.createElement('footer', null, '管理询证函收发记录'),
     );
 
+    const barcode = React.createElement(Barcode, {
+      data: 'Wxm18039105900',
+    });
+
     const footer = React.createElement(Footer, {
     }, 'Copyrigth(2020) All rights reserved.'); 
 
@@ -47,7 +52,7 @@ export default class HomePage extends React.Component {
 
     const container = React.createElement('div', {
       className: 'container'
-    }, b, todoList);
+    }, barcode, b, todoList);
 
     return React.createElement(React.Fragment, {}, 
       header, 

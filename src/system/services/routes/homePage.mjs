@@ -49,7 +49,7 @@ router.get('index', '/*', async (ctx, next) => {
     { src: `/assets/es/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
   ]);
 
-  const container = getContainerByID.call(html, app.CID)
+  const container = html.getElementById(app.CID)
   container.innerHTML = ReactDOMServer.renderToString(app.element);
 
   ctx.body = html.render();

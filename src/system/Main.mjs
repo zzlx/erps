@@ -218,6 +218,8 @@ Main.prototype.processSetup = function () {
  *
  * Utilities
  *
+ * 工具如果
+ *
  * *****************************************************************************
  */
 
@@ -231,37 +233,15 @@ Main.prototype.processSetup = function () {
  * @param {function} cb 
  */
 
-function scssRender () {
-  return import('sass').then(m => m.default).then(sass => {
-    return new Promise((resolve, reject) => {
-      sass.render(options, (err, result) => { 
-        if (err) reject(err);
-        resolve(result);
-      });
+function renderCssFile (scssFile, cssFile) {
+  return import('sass').then(m => new Promise((resolve, reject) => {
+    const sass = m.default;
+    sass.render({
+      file: scssFile,
+      outputStyle: 'compressed', // 使用压缩模式
+    }, (err, result) => { 
+      if (err) reject(err);
+      resolve(result);
     });
-  });
+  })).then(res => fs.promise.writeFile(cssFile, res.css));
 }
-
-/*
- *
-function cssRender () {
-  const cssFile = path.join(
-    settings.paths.PUBLIC, 
-    'assets', 
-    'css', 
-    path.basename(scssEntryPoint, '.scss') + '.css',
-  );
-  const cssFileDeflate = cssFile + '.deflate';
-  const cssFileBr = cssFile + '.br';
-  const cssFileGz = cssFile + '.gz';
-
-  // 保证目标文件的目录已经准备就绪
-  fs.mkdirSync(path.dirname(cssFile), {recursive: true}); 
-  const tasks = Promise.all([
-    fs.promises.writeFile(cssFile, result.css),
-    fs.promises.writeFile(cssFileGz, zlib.gzipSync(result.css)),
-    fs.promises.writeFile(cssFileBr, zlib.brotliCompressSync(result.css)),
-    fs.promises.writeFile(cssFileDeflate, zlib.deflateSync(result.css)),
-  ].filter(Boolean));
-}
-*/

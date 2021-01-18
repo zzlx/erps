@@ -26,6 +26,18 @@ export default class HTMLTemplate {
     return this;
   }
 
+  getElementById (id) {
+    let element = this.document.getElementById(id);
+
+    if (null == element) {
+      element = this.document.createElement('div');
+      element.id = id;
+      this.document.body.appendChild(element);
+    }
+
+    return element;
+  }
+
   addMeta (value) {
     const metas = this.document.getElementsByTagName('meta');
     let meta = null;
