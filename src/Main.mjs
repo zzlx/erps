@@ -16,7 +16,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
-import Httpd from './server/Httpd.mjs';
+import Https from './server/Https.mjs';
 import app from './services/app.mjs';
 
 import { argvParser, console } from './utils.lib.mjs';
@@ -28,14 +28,15 @@ import settings from './settings.mjs';
 
 const debug = debuglog('debug:main');
 
-export default class Main extends EventEmitter {
+class Main extends EventEmitter {
   constructor(options = {}) {
     super();
-
-    this.argvs = options.argvs;
     this.version = '1.0.0';
+    this.name = 'erps';
 
-    this.state = { errors: [] }
+    this.state = { 
+      errors: [] 
+    }
 
     this.readEnvFile(settings.paths.DOT_ENV); // 读取dotEnv
     this.processSetup();
@@ -74,10 +75,8 @@ export default class Main extends EventEmitter {
 
 }
 
-
-
-Main.prototype.run = function () {
-  const paramMap = argvParser(this.argvs);
+Main.prototype.run = function (argvs) {
+  const paramMap = argvParser(argvs);
 
   // 处理环境变量配置 
   for (let param of Object.keys(paramMap)) { 
@@ -122,7 +121,6 @@ Main.prototype.run = function () {
 
 }
 
-
 /**
  *
  */
@@ -137,16 +135,17 @@ Main.prototype.watchPath = function (dir) {
 
 Main.prototype.startServer = function () {
 
-  this.httpd = new Httpd({
+  this.https = new Https({
     key: settings.privateKey,
     cert: settings.cert,
     passphrase: settings.passphrase, // 证书passphrase
     ticketKeys: crypto.randomBytes(48), 
   });
 
-  this.httpd.server.on('stream', app.callback());
+  this.https.server.on('stream', app.callback());
+  this.https.streamHandler = app.callback();
 
-  this.httpd.server.listen({
+  this.https.server.listen({
     ipv6Only: false,
     host: settings.system.ipv6 ? '::' : '0.0.0.0',
     port: process.env.PORT || '8888',
@@ -162,8 +161,8 @@ Main.prototype.startServer = function () {
       '处理器信息': os.cpus()[0].model + ' * ' + os.cpus().length,
       '内存总量': Number(settings.system.totalmem)/1024/1024/1024 + 'G',
       '空闲内存': Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
-      '监听地址': this.httpd.server.address(),
-      '连接计数': this.httpd.connections,
+      '监听地址': this.https.server.address(),
+      '连接计数': this.https.connections,
       '错误计数': this.state.errors,
     });
     console.divideLine();
@@ -245,3 +244,6 @@ function renderCssFile (scssFile, cssFile) {
     });
   })).then(res => fs.promise.writeFile(cssFile, res.css));
 }
+
+// 输出主程序实例
+export default new Main();

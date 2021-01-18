@@ -29,7 +29,7 @@ const paths = settings.paths;
 const sessionStore = new Map();  // 存储器
 const server = Symbol('http2-server');
 
-export default class Httpd extends EventEmitter {
+export default class Http extends EventEmitter {
   constructor(options = {}) {
     super();
     this.opts = Object.assign({}, {
@@ -50,6 +50,10 @@ export default class Httpd extends EventEmitter {
 
   get connections () {
     return sessionStore.size;
+  }
+
+  set streamHandler (handler) {
+    this.server.on('stream', handler);
   }
 
   get server () {

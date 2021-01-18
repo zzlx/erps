@@ -19,9 +19,6 @@
 .DS_Store
 
 # 忽略的目录及文件
-build
-dist
-test
 node_modules
 
 # 其他临时文件

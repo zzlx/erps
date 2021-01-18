@@ -9,10 +9,11 @@
  * *****************************************************************************
  */
 
-import Main from '../src/system/Main.mjs'; // 加载主程序
+import Main from './src/Main.mjs'; // 加载主程序
 
-const main = new Main({
-  argvs: Array.prototype.slice.call(process.argv, 2), // 获取并传递执行参数列表
-});
+// 实例化主控程序
+const main = new Main();
 
-main.run(); // 执行主程序
+// 获取并传递执行参数列表
+// 执行主程序
+man.run(argvs: Array.prototype.slice.call(process.argv, 2));

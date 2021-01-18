@@ -24,7 +24,7 @@ import util from 'util';
 
 import paths, { appName, appVersion } from './config/paths.mjs';
 import system from './config/system.mjs';
-import templates from './config/templates.mjs';
+//import templates from './config/templates.mjs';
 
 // settings from config
 const sfc = fs.readFileSync(paths.DOT_SETTINGS, 'utf8');
@@ -36,7 +36,6 @@ export default new Proxy(Object.assign({}, configs, {
   system,
   appName,
   appVersion,
-  templates,
 }), {
   get: function (target, property, receiver) {
     if (property === 'getGitInfo') return getGitInfo;

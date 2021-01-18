@@ -1,6 +1,8 @@
 #!/bin/sh
 # ------------------------------------------------------------------------------
 # 
+# ERPs shell脚本程序
+# 
 # ------------------------------------------------------------------------------
 
 # 执行环境设定
@@ -20,7 +22,7 @@ declare -r _ORIG_UMASK=$(umask)           # 记录原始umask值
 
 declare -r _FILE=${0##*/}                                 # 获取文件名称
 declare -r _S_FILE=$(ls -l $0 |awk '{print $NF}')         # 获取文件物理地址
-declare -r _ROOT=$(dirname $(cd $(dirname $_S_FILE) || exit; pwd -P)) # 获取目录路径
+declare -r _ROOT=$(cd $(dirname $_S_FILE) || exit; pwd -P) # 获取目录路径
 declare -r _BIN="${_ROOT}/bin"                            # 获取脚本根目录路径
 
 declare +r _DEBUG=false        # 默认关闭调试
