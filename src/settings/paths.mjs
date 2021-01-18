@@ -1,7 +1,10 @@
 /**
  * *****************************************************************************
  *
- * Paths configurations
+ * 目录配置管理器
+ * Paths Configuration Manager
+ * ===
+ *
  *
  * *****************************************************************************
  */
@@ -10,14 +13,18 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-// read paths from source code, can not be writable、configurable、enumerable
-const _ROOT = path.dirname(path.dirname(path.dirname(
-  import.meta.url.substr(7)
-)));
+const paths = Object.create(null);
 
-const paths = (root => {
-  const paths = Object.create(null);
+(root => {
+  // Set ROOT Path
+  Object.defineProperty(paths, 'ROOT', {
+    value: root,
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  });
 
+  // Read paths from source code, can not be writable、configurable、enumerable
   fs.readdirSync(root, {withFileTypes: true}).forEach(file => {
     const name = String(file.name)
       .replace(/^(\.)/, 'DOT_')
@@ -25,6 +32,7 @@ const paths = (root => {
       .replace(/[\.|-]/g, '_')
       .toUpperCase(); 
 
+    // 
     Object.defineProperty(paths, name, {
       value: path.join(root, file.name),
       writable: false,
@@ -34,31 +42,23 @@ const paths = (root => {
   });
 
   return paths;
-})(_ROOT);
-
-// read configurations from package.json
-export const packageJSON = JSON.parse(fs.readFileSync(paths.PACKAGE));
-export const appName = packageJSON.name;
-export const appVersion = packageJSON.version;
-
-if (paths.HOME_PATH == null) paths.HOME_PATH = path.join(os.homedir(), '.' + appName);
+})(path.dirname(path.dirname(path.dirname(import.meta.url.substr(7)))));
 
 // 配置的目录路径
 // 可配置、枚举,以便在配置文件保存配置
+// 卸载程序执行时删除所有可枚举的目录
 export default new Proxy(paths, {
   get: function (target, property, receiver) {
-    if (property === 'CACHE_PATH') return path.join(target.HOME_PATH, 'cache');
-    if (property === 'DATA_PATH') return path.join(target.HOME_PATH, 'data');
-    if (property === 'LOG_PATH') return path.join(target.HOME_PATH, 'log');
-
     return Reflect.get(target, property, receiver);
   },
 	set: function (target, property, value) {
+    fs.promises.mkdir(value, {recursive: true}); // 创建配置目录
+
     return Object.defineProperty(target, property, {
       value: value,
       writable: true,
-      enumerable: true,
+      enumerable: false,
       configurable: false,
     });
-	},
+	}
 });

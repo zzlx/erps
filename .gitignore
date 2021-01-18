@@ -28,4 +28,5 @@ node_modules
 *.local.json
 .env
 .settings.json
+.config.json
 

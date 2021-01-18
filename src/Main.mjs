@@ -16,7 +16,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
-import Https from './server/Https.mjs';
+import Https from './Https.mjs';
 import app from './services/app.mjs';
 
 import { argvParser, console } from './utils.lib.mjs';
@@ -40,6 +40,9 @@ class Main extends EventEmitter {
 
     this.readEnvFile(settings.paths.DOT_ENV); // 读取dotEnv
     this.processSetup();
+  }
+
+  setup () {
   }
 
   /**

@@ -22,27 +22,21 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import paths, { appName, appVersion } from './config/paths.mjs';
-import system from './config/system.mjs';
-//import templates from './config/templates.mjs';
+import paths from './settings/paths.mjs';
+import config from './settings/config.mjs';
+import git from './settings/git.mjs';
+import packageJSON from './settings/package.mjs';
 
-// settings from config
-const sfc = fs.readFileSync(paths.DOT_SETTINGS, 'utf8');
-const configs = JSON.parse(sfc);
-mkdirs(paths);
-
-export default new Proxy(Object.assign({}, configs, { 
+export default new Proxy({ 
+  config,
+  git,
   paths,
-  system,
-  appName,
-  appVersion,
-}), {
+  packageJSON,
+}, {
   get: function (target, property, receiver) {
     if (property === 'getGitInfo') return getGitInfo;
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
-    if (property === 'saveConfig') return () => {};
-    if (property === 'readConfig') return () => {};
     if (property === 'cert') {
       const certFile = target.certFile || `/etc/ssl/${os.hostname()}-cert.pem`;
       return fs.readFileSync(certFile);
@@ -117,20 +111,4 @@ function readConfig () {
       if (err) throw err;
     });
   });
-}
-
-/**
- * 创建目录
- *
- * @param {object} pathsObj
- * @param {object} options
- */
-
-export function mkdirs (pathsObj) {
-  for (let p of Object.values(pathsObj)) {
-    if (!fs.existsSync(p)) {
-      if (/PATH$/.test(p)) fs.promises.mkdir(p, { recursive: true });
-      if (/FILE$/.test(p)) fs.promises.writeFile(p, '');
-    }
-  }
 }

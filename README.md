@@ -20,7 +20,7 @@ ERPs
 * 启动EPRs
 
 ```
-./bin/erps-daemon.mjs --start
+./erpsd.mjs --start
 ```
 
 # License
