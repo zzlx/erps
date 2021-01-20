@@ -16,4 +16,4 @@ const main = new Main();
 
 // 获取并传递执行参数列表
 // 执行主程序
-man.run(argvs: Array.prototype.slice.call(process.argv, 2));
+main.run(Array.prototype.slice.call(process.argv, 2));

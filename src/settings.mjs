@@ -24,17 +24,18 @@ import util from 'util';
 
 import paths from './settings/paths.mjs';
 import config from './settings/config.mjs';
+import env from './settings/env.mjs';
 import git from './settings/git.mjs';
 import packageJSON from './settings/package.mjs';
 
 export default new Proxy({ 
   config,
+  env,
   git,
   paths,
   packageJSON,
 }, {
   get: function (target, property, receiver) {
-    if (property === 'getGitInfo') return getGitInfo;
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
     if (property === 'cert') {
@@ -52,22 +53,6 @@ export default new Proxy({
     return Reflect.get(target, property, receiver);
   },
 });
-
-/**
- *
- *
- */
-
-function getGitInfo () {
-  const HEAD = String(fs.readFileSync(path.join(paths.GIT, 'head'))).split(':')[1].trim();
-  const branch = path.basename(HEAD);
-  const hash = String(fs.readFileSync(path.join(paths.GIT, HEAD))).trim();
-
-  return {
-    branch: branch, 
-    commit: hash,
-  };
-}
 
 /**
  *

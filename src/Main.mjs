@@ -16,19 +16,15 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
-import Https from './Https.mjs';
-import app from './services/app.mjs';
+import settings from './settings.mjs';
 
 import { argvParser, console } from './utils.lib.mjs';
 import TaskExecutor from './utils/TaskExecutor.mjs';
 import debuglog from './utils/debuglog.mjs';
-import envParser from './utils/envParser.mjs';
-
-import settings from './settings.mjs';
 
 const debug = debuglog('debug:main');
 
-class Main extends EventEmitter {
+export default class Main extends EventEmitter {
   constructor(options = {}) {
     super();
     this.version = '1.0.0';
@@ -38,7 +34,6 @@ class Main extends EventEmitter {
       errors: [] 
     }
 
-    this.readEnvFile(settings.paths.DOT_ENV); // 读取dotEnv
     this.processSetup();
   }
 
@@ -72,8 +67,9 @@ class Main extends EventEmitter {
   /**
    * 显示版本信息
    */
+
   showVersion () {
-    console.log(this.version);
+    console.log(settings.packageJSON.version);
   }
 
 }
@@ -125,28 +121,20 @@ Main.prototype.run = function (argvs) {
 }
 
 /**
- *
- */
-
-Main.prototype.watchPath = function (dir) {
-
-}
-
-/**
  * 启动服务
  */
 
-Main.prototype.startServer = function () {
-
-  this.https = new Https({
-    key: settings.privateKey,
-    cert: settings.cert,
-    passphrase: settings.passphrase, // 证书passphrase
+Main.prototype.startServer = async function () {
+  const Https = await import('./servers/Https.mjs').then(m => m.default);
+  const options = {
+    key: fs.readFileSync(settings.config.privateKey, 'utf8'),
+    cert: fs.readFileSync(settings.config.cert, 'utf8'),
+    passphrase: settings.config.passphrase, // 证书passphrase
     ticketKeys: crypto.randomBytes(48), 
-  });
+  };
 
-  this.https.server.on('stream', app.callback());
-  this.https.streamHandler = app.callback();
+  console.log(options);
+  this.https = new Https(options);
 
   this.https.server.listen({
     ipv6Only: false,
@@ -172,17 +160,6 @@ Main.prototype.startServer = function () {
   });
 
   this.tasks();
-}
-
-Main.prototype.readEnvFile = function (envFile) {
-  if (fs.existsSync(envFile)) {
-    const dotenvObj = envParser(fs.readFileSync(envFile));
-    assert(typeof dotenvObj === 'object', '解析.env文件出错');
-
-    for (let env of Object.keys(dotenvObj)) {
-      if (process.env[env] == null) process.env[env] = dotenvObj[env];
-    }
-  }
 }
 
 Main.prototype.processSetup = function () {
@@ -247,6 +224,3 @@ function renderCssFile (scssFile, cssFile) {
     });
   })).then(res => fs.promise.writeFile(cssFile, res.css));
 }
-
-// 输出主程序实例
-export default new Main();
