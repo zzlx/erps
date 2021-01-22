@@ -10,8 +10,8 @@
 
 import assert from 'assert';
 import cluster from 'cluster';
-import crypto from 'crypto';
 import EventEmitter from 'events';
+import http2 from 'http2';
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
@@ -24,11 +24,11 @@ import debuglog from './utils/debuglog.mjs';
 
 const debug = debuglog('debug:main');
 
-export default class Main extends EventEmitter {
+class Main extends EventEmitter {
   constructor(options = {}) {
     super();
-    this.version = '1.0.0';
-    this.name = 'erps';
+    this.version = options.version || "1.0.0";
+    this.name = options.name || 'zzlx';
 
     this.state = { 
       errors: [] 
@@ -125,20 +125,17 @@ Main.prototype.run = function (argvs) {
  */
 
 Main.prototype.startServer = async function () {
-  const Https = await import('./servers/Https.mjs').then(m => m.default);
   const options = {
-    key: fs.readFileSync(settings.config.privateKey, 'utf8'),
-    cert: fs.readFileSync(settings.config.cert, 'utf8'),
+    cert: settings.config.cert,
+    key: settings.config.privateKey,
     passphrase: settings.config.passphrase, // 证书passphrase
-    ticketKeys: crypto.randomBytes(48), 
   };
 
-  console.log(options);
-  this.https = new Https(options);
+  this.https = createHttpServer(options);
 
   this.https.server.listen({
     ipv6Only: false,
-    host: settings.system.ipv6 ? '::' : '0.0.0.0',
+    host: process.env.IPV6 === 'true' ? '::' : '0.0.0.0',
     port: process.env.PORT || '8888',
     exclusive: false,
   }, () => {
@@ -146,12 +143,11 @@ Main.prototype.startServer = async function () {
     console.log('服务器监控信息: ')
     console.divideLine('-');
     console.log({
-      'PID': process.pid,
+      'AppVersion': this.version,
+      'NodeVersion': process.version,
       '运行模式': process.env.NODE_ENV,
-      '系统平台': process.platform + '_' + process.arch,
-      '处理器信息': os.cpus()[0].model + ' * ' + os.cpus().length,
-      '内存总量': Number(settings.system.totalmem)/1024/1024/1024 + 'G',
-      '空闲内存': Number(settings.system.freemem/1024/1024).toFixed(2) + 'M',
+      '内存总量': Number(os.totalmem())/1024/1024/1024 + 'G',
+      '空闲内存': Number(os.freemem()/1024/1024).toFixed(2) + 'M',
       '监听地址': this.https.server.address(),
       '连接计数': this.https.connections,
       '错误计数': this.state.errors,
@@ -203,6 +199,39 @@ Main.prototype.processSetup = function () {
  */
 
 /**
+ *
+ * create http server
+ *
+ */
+
+function createHttpServer (options = {}) {
+  const opts = Object.assign({
+    allowHTTP1: true,
+    //ca: [fs.readFileSync('client-cert.pem')],
+    key: null,
+    cert: null,
+    passphrase: null,
+    requestCert: false, // 客户端证书支持
+    
+    //sigalgs: 
+    //ciphers: 
+    //clientCertEngine: 
+    //dhparam
+    //ecdhCurve
+    //origins: [],
+    //privateKeyEngine
+    //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+    handshakeTimeout: 120 * 1000, // milliseconds
+    //ticketKeys: crypto.randomBytes(48), 
+    sessionTimeout: 300, // seconds
+  }, options);
+
+  return opts.cert && opts.key
+    ? http2.createSecureServer(opts)
+    : http2.createServer(opts);
+}
+
+/**
  * Scss编译生成CSS
  *
  * [参考文档](../../node_modules/node-sass/README.md)
@@ -224,3 +253,94 @@ function renderCssFile (scssFile, cssFile) {
     });
   })).then(res => fs.promise.writeFile(cssFile, res.css));
 }
+
+/**
+ * *****************************************************************************
+ *
+ * 执行主程序
+ *
+ * *****************************************************************************
+ */
+
+const main = new Main({
+  name: settings.packageJSON.name,
+  version: settings.packageJSON.version,
+});
+
+main.run(Array.prototype.slice.call(process.argv, 2));
+
+/*
+  registerEventHandlers () {
+    // This event is emitted when a new TCP stream is established, 
+    // before the TLS handshake begins.
+    // socket is typically an object of type net.Socket
+    this.server.on('connection', socket => {
+      debug(
+        `connection is come from ${socket.remoteAddress}:${socket.remotePort}`);
+    });
+
+    this.server.on('error', (err) => {
+      debug(err);
+
+      if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${err.port} is used, try again later.`);
+      }
+    });
+
+    // The keylog event is emitted when key material is generated 
+    // or received by a connection to this server
+    // (typically before handshake has completed, but not necessarily).
+    // This keying material can be stored for debugging, 
+    // as it allows captured TLS traffic to be decrypted. 
+    // It may be emitted multiple times for each socket.
+    this.server.on('keylog', (line, tlsSocket) => {
+      logWriter(path.join(paths.PATH_LOG, 'ssl-keys.log'), line.toString());
+    });
+
+    // event is emitted when the client sends a certificate status request. 
+    this.server.on('OCSPRequest', (certificate, issuer, cb) => {
+      debug('OCSPRequest event');
+      debug(crypto.Certificate.exportPublicKey(certificate));
+      cb(null, null);
+    });
+
+    // The 'resumeSession' event is emitted 
+
+    // The 'newSession' event is emitted upon creation of a new TLS session. 
+    // This may be used to store sessions in external storage. 
+    // The data should be provided to the 'resumeSession' callback.
+    this.server.on('newSession', (sessionId, sessionData, cb) => {
+      sessionStore.set(sessionId.toString('hex'), sessionData);
+      cb();
+    });
+
+    // when the client requests to resume a previous TLS session. 
+    this.server.on('resumeSession', (id, cb) => {
+      const sessionData = sessionStore.get(id.toString('hex')); 
+
+      if (sessionData) { 
+        cb(null, sessionData);
+      } else {
+        debug('resumeSession faile');
+        cb(null, null);
+      }
+    });
+
+    // he 'secureConnection' event is emitted after the handshaking process 
+    // for a new connection has successfully completed. 
+    this.server.on('secureConnection', tlsSocket => {
+      debug('secureConnection');
+    });
+
+    // event is emitted when an error occurs before a secure connection is established.
+    this.server.on('tlsClientError', (exception, tlsSocket) => {
+      debug('tlsClientError: ', exception);
+    });
+
+    this.server.on('unknownProtocol', (error) => {
+      debug('unknownProtocol');
+    });
+  }
+}
+
+*/

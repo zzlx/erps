@@ -39,11 +39,11 @@ export default new Proxy({
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
     if (property === 'cert') {
-      const certFile = target.certFile || `/etc/ssl/${os.hostname()}-cert.pem`;
+      const certFile = target.config.certFile || `/etc/ssl/${os.hostname()}-cert.pem`;
       return fs.readFileSync(certFile);
     }
     if (property === 'privateKey') {
-      const keyFile = target.privateKey || `/etc/ssl/privkey.pem`;
+      const keyFile = target.config.privateKey || `/etc/ssl/privkey.pem`;
       return fs.readFileSync(keyFile);
     }
     if (property === 'toString' || property === 'toJSON') {
