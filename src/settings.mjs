@@ -26,6 +26,7 @@ import paths from './settings/paths.mjs';
 import config from './settings/config.mjs';
 import env from './settings/env.mjs';
 import git from './settings/git.mjs';
+import system from './settings/system.mjs';
 import packageJSON from './settings/package.mjs';
 
 export default new Proxy({ 
@@ -34,6 +35,7 @@ export default new Proxy({
   git,
   paths,
   packageJSON,
+  system,
 }, {
   get: function (target, property, receiver) {
     if (property === 'writePidFile') return writePidFile;

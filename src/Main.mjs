@@ -1,9 +1,9 @@
 /**
  * *****************************************************************************
  * 
- * ERP system
+ * ERP Service Daemon
  *
- * 主控制程序
+ * 后台服务驻留程序
  *
  * *****************************************************************************
  */
@@ -11,10 +11,11 @@
 import assert from 'assert';
 import cluster from 'cluster';
 import EventEmitter from 'events';
+import fs from 'fs';
 import http2 from 'http2';
+import net from 'net';
 import os from 'os';
 import path from 'path';
-import fs from 'fs';
 
 import settings from './settings.mjs';
 
@@ -22,59 +23,15 @@ import { argvParser, console } from './utils.lib.mjs';
 import TaskExecutor from './utils/TaskExecutor.mjs';
 import debuglog from './utils/debuglog.mjs';
 
-const debug = debuglog('debug:main');
+const debug = debuglog('debug:main'); // 调试信息打印工具
 
-class Main extends EventEmitter {
-  constructor(options = {}) {
-    super();
-    this.version = options.version || "1.0.0";
-    this.name = options.name || 'zzlx';
+/**
+ * main application
+ *
+ * @param {object} argvs
+ */
 
-    this.state = { 
-      errors: [] 
-    }
-
-    this.processSetup();
-  }
-
-  setup () {
-  }
-
-  /**
-   * 执行任务
-   */
-
-  tasks () {
-    const scssPath = path.join(settings.paths.SRC, 'scss');
-    new TaskExecutor({
-      watchPath: [ scssPath ],
-      callback: () => {
-
-        scssRender(path.join(scssPath, 'styles.scss')).then(res => {
-          debug(res.css);
-        });
-      },
-    });
-  }
-
-  /**
-   * 显示帮助信息
-   */
-  showHelp () {
-    console.log('Help');
-  }
-
-  /**
-   * 显示版本信息
-   */
-
-  showVersion () {
-    console.log(settings.packageJSON.version);
-  }
-
-}
-
-Main.prototype.run = function (argvs) {
+(function main (argvs) {
   const paramMap = argvParser(argvs);
 
   // 处理环境变量配置 
@@ -90,26 +47,27 @@ Main.prototype.run = function (argvs) {
 
   for (let param of Object.keys(paramMap)) {
     switch(param) {
+      case 'h':
       case 'help':
-        //showHelp();
-        this.showHelp();
-        delete paramMap['help'];
+        delete paramMap[param];
+        showHelp();
         break;
+      case 'v':
       case 'version':
-        this.showVersion();
-        delete paramMap['version'];
+        delete paramMap[param];
+        showVersion();
         break;
       case 'start':
-        this.startServer();
-        delete paramMap['start'];
+        delete paramMap[param];
+        start();
         break;
       case 'stop':
-        //stop();
-        delete paramMap['stop'];
+        delete paramMap[param];
+        stop();
         break;
       case 'restart':
-        //restart();
-        delete paramMap['restart'];
+        delete paramMap[param];
+        stop('RESTART');
         break;
     }
 
@@ -117,86 +75,120 @@ Main.prototype.run = function (argvs) {
       console.log('The param: %s is not supported.', Object.keys(paramMap).join(' '));
     }
   }
+})(Array.prototype.slice.call(process.argv, 2)); // 立即执行主程序
 
+/**
+ * close
+ */
+
+function stop (command = 'STOP') {
+  const con = net.connect({ port: settings.system.port + 1 }, () => {
+    const message = JSON.stringify({
+      token: 'test',
+      command: command
+    });
+
+    con.write(message);
+
+    con.on('data', chunk => {
+      debug(chunk.toString());
+      con.end();
+    });
+  });
+
+  con.on('error', e => {
+    if (e.code === 'ECONNREFUSED') {
+      console.log('服务未启动，请先启动服务');
+    }
+  });
 }
 
 /**
  * 启动服务
  */
 
-Main.prototype.startServer = async function () {
-  const options = {
-    cert: settings.config.cert,
-    key: settings.config.privateKey,
-    passphrase: settings.config.passphrase, // 证书passphrase
-  };
+function start () {
 
-  this.https = createHttpServer(options);
+  // 配置进程
+  processSetup();
 
-  this.https.server.listen({
+  // 后台驻留程序,用于管理进程
+  const daemon = net.createServer(socket => {
+    if (socket.remoteAddress !== socket.localAddress) {
+      return socket.end(); // 不接受非本机地址访问
+    }
+
+    socket.on('data', chunk => {
+      const data = JSON.parse(chunk.toString());
+      if (data.token === 'test') {
+      }
+
+      switch (data.command) {
+        case 'STOP':
+          socket.write('后端服务已在安排退出.');
+          daemon.close();
+          break;
+        case 'RESTART':
+          socket.write('后端服务重启命令正在安排.');
+          daemon.close(() => {
+            start(); // 重启服务
+          });
+          break;
+      }
+    });
+
+  });
+
+  daemon.on('error', e => { 
+    if (e.code === 'EADDRINUSE') { 
+       console.log("The service is running, try '--restart'."); 
+    }
+
+  });
+
+  daemon.listen({
     ipv6Only: false,
-    host: process.env.IPV6 === 'true' ? '::' : '0.0.0.0',
-    port: process.env.PORT || '8888',
-    exclusive: false,
+    exclusive: true,
+    host: settings.system.host,
+    port: settings.system.port + 1, // 驻留程序使用默认服务端口+1
   }, () => {
-    console.divideLine();
+
+    console.log(console.divideLine());
     console.log('服务器监控信息: ')
-    console.divideLine('-');
+    console.log(console.divideLine('-'));
     console.log({
-      'AppVersion': this.version,
-      'NodeVersion': process.version,
       '运行模式': process.env.NODE_ENV,
       '内存总量': Number(os.totalmem())/1024/1024/1024 + 'G',
       '空闲内存': Number(os.freemem()/1024/1024).toFixed(2) + 'M',
-      '监听地址': this.https.server.address(),
-      '连接计数': this.https.connections,
-      '错误计数': this.state.errors,
+      '监听地址': daemon.address(),
+      '连接计数': daemon.connections,
     });
-    console.divideLine();
-  });
+    console.log(console.divideLine());
 
-  this.tasks();
+  });
 }
 
-Main.prototype.processSetup = function () {
-
-  process.title = 'ERPSD';
+function processSetup () {
+  process.title = settings.packageJSON.name;
   process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
   process.on('exit', code => {
     const uptime = Math.ceil(process.uptime()*1000);
-    console.info(
+    debug(
       `${process.title}(PID:${process.pid}) is running ${uptime}ms before exit.`);
-    if (this.state.errors.length > 0) {
-      console.log(this.state.errors);
-    }
   });
 
   // 被捕获的exception\rejection,需要进行妥善处理
   // 不应出现未经管理的exception
   process.on('uncaughtException', (error, origin) => {
-    this.emit('error', error);
+    console.log(error);
   });
 
   // 系统不应出现未经管理的rejection
   process.on('unhandledRejection', (reason, promise) => {
-    this.emit('error', reason);
-  });
-
-  this.on('error', error => {
-    console.log(error);
+    console.log(reason);
   });
 }
-
-/**
- * *****************************************************************************
- *
- * Utilities
- *
- * 工具如果
- *
- * *****************************************************************************
- */
 
 /**
  *
@@ -253,21 +245,6 @@ function renderCssFile (scssFile, cssFile) {
     });
   })).then(res => fs.promise.writeFile(cssFile, res.css));
 }
-
-/**
- * *****************************************************************************
- *
- * 执行主程序
- *
- * *****************************************************************************
- */
-
-const main = new Main({
-  name: settings.packageJSON.name,
-  version: settings.packageJSON.version,
-});
-
-main.run(Array.prototype.slice.call(process.argv, 2));
 
 /*
   registerEventHandlers () {
@@ -344,3 +321,44 @@ main.run(Array.prototype.slice.call(process.argv, 2));
 }
 
 */
+
+
+/**
+ * 执行任务
+ */
+
+function tasks () {
+  const scssPath = path.join(settings.paths.SRC, 'scss');
+  new TaskExecutor({
+    watchPath: [ scssPath ],
+    callback: () => {
+
+      scssRender(path.join(scssPath, 'styles.scss')).then(res => {
+        debug(res.css);
+      });
+    },
+  });
+}
+
+/**
+ * 显示帮助信息
+ */
+
+function showHelp () {
+  console.log('Help');
+}
+
+/**
+ * 显示版本信息
+ */
+
+function showVersion () {
+  console.log(settings.packageJSON.version);
+}
+
+  const options = {
+    cert: settings.config.cert,
+    key: settings.config.privateKey,
+    passphrase: settings.config.passphrase, // 证书passphrase
+  };
+
