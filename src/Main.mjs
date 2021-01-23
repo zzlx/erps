@@ -1,9 +1,7 @@
 /**
  * *****************************************************************************
  * 
- * ERP Service Daemon
- *
- * 后台服务驻留程序
+ * 服务管理程序
  *
  * *****************************************************************************
  */
@@ -16,6 +14,7 @@ import http2 from 'http2';
 import net from 'net';
 import os from 'os';
 import path from 'path';
+import tls from 'tls';
 
 import settings from './settings.mjs';
 
@@ -24,6 +23,8 @@ import TaskExecutor from './utils/TaskExecutor.mjs';
 import debuglog from './utils/debuglog.mjs';
 
 const debug = debuglog('debug:main'); // 调试信息打印工具
+let https = null; // http server
+let daemon = null;
 
 /**
  * main application
@@ -45,58 +46,68 @@ const debug = debuglog('debug:main'); // 调试信息打印工具
     }
   }
 
+  let isExec = false; // 是否执行
+
   for (let param of Object.keys(paramMap)) {
     switch(param) {
       case 'h':
       case 'help':
+        isExec = true;
         delete paramMap[param];
         showHelp();
         break;
       case 'v':
       case 'version':
+        isExec = true;
         delete paramMap[param];
         showVersion();
         break;
       case 'start':
+        isExec = true;
         delete paramMap[param];
-        start();
+        startDaemon();
         break;
       case 'stop':
+        isExec = true;
         delete paramMap[param];
-        stop();
+        emit('STOP');
         break;
       case 'restart':
+        isExec = true;
         delete paramMap[param];
-        stop('RESTART');
+        emit('RESTART');
         break;
     }
 
     if (Object.keys(paramMap).length > 0) {
+      isExec = true;
       console.log('The param: %s is not supported.', Object.keys(paramMap).join(' '));
     }
   }
+
+  if (isExec === false) startDaemon(); // 未提供参数时执行start
 })(Array.prototype.slice.call(process.argv, 2)); // 立即执行主程序
 
 /**
- * close
+ * Emit signal
  */
 
-function stop (command = 'STOP') {
-  const con = net.connect({ port: settings.system.port + 1 }, () => {
+function emit (command = 'STOP') {
+  const conn = net.connect({ port: Number(settings.system.port) + 1 }, () => {
     const message = JSON.stringify({
       token: 'test',
       command: command
     });
 
-    con.write(message);
+    conn.write(message);
 
-    con.on('data', chunk => {
+    conn.on('data', chunk => {
       debug(chunk.toString());
-      con.end();
+      conn.end();
     });
   });
 
-  con.on('error', e => {
+  conn.on('error', e => {
     if (e.code === 'ECONNREFUSED') {
       console.log('服务未启动，请先启动服务');
     }
@@ -104,16 +115,55 @@ function stop (command = 'STOP') {
 }
 
 /**
- * 启动服务
+ * 启动后端服务守护进程
  */
 
-function start () {
+function startHttps () {
+  https.listen({
+    ipv6Only: false,
+    exclusive: true,
+    host: settings.system.host,
+    port: settings.system.port,
+  }, () => {
+    console.log(console.divideLine());
+    console.log('服务器监控信息: ')
+    console.log(console.divideLine('-'));
+    console.log({
+      '运行模式': process.env.NODE_ENV,
+      '内存总量': Number(os.totalmem())/1024/1024/1024 + 'G',
+      '空闲内存': Number(os.freemem()/1024/1024).toFixed(2) + 'M',
+      '监听地址': https.address(),
+    });
+    console.log(console.divideLine());
+  });
+}
 
-  // 配置进程
+function restartHttps () {
+  https.close(() => {
+    // 重启https
+    debug('Http server is closed.');
+    debug('Http server is retarting...');
+    start();
+  });
+}
+
+function stopHttps (cb) {
+  debug('执行服务关闭程序...');
+  https.close(() => {
+    debug('Http服务已退出.');
+    if (cb) cb();
+  });
+}
+
+/**
+ *
+ *
+ */
+
+function startDaemon () {
   processSetup();
 
-  // 后台驻留程序,用于管理进程
-  const daemon = net.createServer(socket => {
+  daemon = net.createServer(socket => {
     if (socket.remoteAddress !== socket.localAddress) {
       return socket.end(); // 不接受非本机地址访问
     }
@@ -126,13 +176,15 @@ function start () {
       switch (data.command) {
         case 'STOP':
           socket.write('后端服务已在安排退出.');
-          daemon.close();
+          stopHttps(() => {
+            daemon.close(() => {
+              debug('后端服务已推出');
+            });
+          });
           break;
         case 'RESTART':
           socket.write('后端服务重启命令正在安排.');
-          daemon.close(() => {
-            start(); // 重启服务
-          });
+          restartHttps();
           break;
       }
     });
@@ -143,7 +195,6 @@ function start () {
     if (e.code === 'EADDRINUSE') { 
        console.log("The service is running, try '--restart'."); 
     }
-
   });
 
   daemon.listen({
@@ -152,19 +203,8 @@ function start () {
     host: settings.system.host,
     port: settings.system.port + 1, // 驻留程序使用默认服务端口+1
   }, () => {
-
-    console.log(console.divideLine());
-    console.log('服务器监控信息: ')
-    console.log(console.divideLine('-'));
-    console.log({
-      '运行模式': process.env.NODE_ENV,
-      '内存总量': Number(os.totalmem())/1024/1024/1024 + 'G',
-      '空闲内存': Number(os.freemem()/1024/1024).toFixed(2) + 'M',
-      '监听地址': daemon.address(),
-      '连接计数': daemon.connections,
-    });
-    console.log(console.divideLine());
-
+    https = createHttpServer();
+    startHttps();
   });
 }
 
@@ -218,9 +258,21 @@ function createHttpServer (options = {}) {
     sessionTimeout: 300, // seconds
   }, options);
 
-  return opts.cert && opts.key
+  const server = opts.cert && opts.key
     ? http2.createSecureServer(opts)
     : http2.createServer(opts);
+
+  server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+      console.log('服务端口正在被使用中...');
+    }
+  });
+
+  server.on('stream', () => {
+    debug('收到stream');
+  });
+
+  return server;
 }
 
 /**
@@ -356,9 +408,10 @@ function showVersion () {
   console.log(settings.packageJSON.version);
 }
 
+
   const options = {
-    cert: settings.config.cert,
-    key: settings.config.privateKey,
-    passphrase: settings.config.passphrase, // 证书passphrase
+    cert: settings.system.cert,
+    key: settings.system.privateKey,
+    passphrase: settings.system.passphrase, // 证书passphrase
   };
 

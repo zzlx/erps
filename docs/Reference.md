@@ -11,7 +11,7 @@
 
   https://github.com/electron/electron
 
-# 参考资源
+# 参考项目
 
 * [electron](https://github.com/electron/electron)
 * [awesome-nodejs](https://github.com/sindresorhus/awesome-nodejs)
@@ -29,6 +29,5 @@
 * [tesseract](https://github.com/naptha/tesseract.js)
 * [socket.io](https://github.com/socketio/socket.io)
 * [Bootstrap](https://getbootstrap.com/docs)
-
 
 ---

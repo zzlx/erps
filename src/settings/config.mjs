@@ -21,4 +21,7 @@ export default new Proxy(configurations, {
   get: function (target, property, receiver) {
     return Reflect.get(target, property, receiver);
   },
+  set: function (target, property, value) {
+    return true;
+  }
 });

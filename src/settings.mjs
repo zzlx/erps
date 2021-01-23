@@ -23,21 +23,22 @@ import path from 'path';
 import util from 'util';
 
 import paths from './settings/paths.mjs';
-import config from './settings/config.mjs';
 import env from './settings/env.mjs';
 import git from './settings/git.mjs';
-import system from './settings/system.mjs';
 import packageJSON from './settings/package.mjs';
+import system from './settings/system.mjs';
 
 export default new Proxy({ 
-  config,
-  env,
   git,
   paths,
   packageJSON,
   system,
 }, {
   get: function (target, property, receiver) {
+    if (property === 'name') return target.packageJSON.name;
+    if (property === 'version') return target.packageJSON.version;
+    if (property === 'license') return target.packageJSON.license;
+
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
     if (property === 'cert') {

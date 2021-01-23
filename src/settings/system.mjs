@@ -7,7 +7,7 @@
  */
 
 import os from 'os';
-import conf from './configurations.mjs'; // 配置项目
+import conf from './config.mjs'; // 配置项目
 
 export default new Proxy({
   arch: os.arch(),
@@ -27,6 +27,8 @@ export default new Proxy({
     if (property === 'freemem') return os.freemem();
     if (property === 'cpus') return os.cpus();
     if (property === 'IPv6') return isSupportIPv6();
+
+    if (conf[property]) return conf[property];
 
     return Reflect.get(target, property, receiver);
   },
