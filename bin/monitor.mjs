@@ -1,7 +1,8 @@
+#!/usr/bin/env node
 /**
  * *****************************************************************************
  *
- * 任务执行器
+ * monitor
  * 
  * *****************************************************************************
  */
@@ -12,8 +13,8 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
 
-import debuglog from './debuglog.mjs';
-import readDir from './readDir.mjs';
+import debuglog from '../src/utils/debuglog.mjs';
+import readDir from '../src/utils/readDir.mjs';
 
 const debug = debuglog('debug:task-executor');
 

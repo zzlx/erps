@@ -2,13 +2,11 @@
 /**
  * *****************************************************************************
  * 
- * ERP services
- *
- * 实例化主控制程序
- *
  * *****************************************************************************
  */
 
+import main from './src/main.mjs';
+
 // 获取并传递执行参数列表
 // 执行主程序
-console.log(Array.prototype.slice.call(process.argv, 2));
+main(Array.prototype.slice.call(process.argv, 2));

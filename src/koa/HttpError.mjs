@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import { HTTP_STATUS_CODES } from './constants.mjs';
+import { HTTP_STATUS_CODES } from '../constants.mjs';
 
 export default class HttpError extends Error {
   constructor() {

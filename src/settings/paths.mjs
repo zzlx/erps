@@ -49,8 +49,11 @@ const paths = Object.create(null);
 // 卸载程序执行时删除所有可枚举的目录
 export default new Proxy(paths, {
   get: function (target, property, receiver) {
-    if (property === 'PATH_HOME') return target.PATH_HOME || path.join(os.homedir(), '.erps');
+    if (property === 'PATH_HOME') {
+      return target.PATH_HOME || path.join(os.homedir(), '.erps');
+    }
     if (property === 'PATH_LOG') return path.join(receiver.PATH_HOME, 'log');
+
     return Reflect.get(target, property, receiver);
   },
 	set: function (target, property, value) {

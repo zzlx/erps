@@ -8,8 +8,6 @@
  * *****************************************************************************
  */
 
-import settings from '../settings/index.mjs';
-
 const APIs = {
   district: {
     description: '高德开放平台API: 行政区域查询',

@@ -1,7 +1,9 @@
 /**
  * *****************************************************************************
  *
- * Http constants
+ * Constants
+ *
+ *
  *
  * *****************************************************************************
  */
@@ -44,11 +46,18 @@ for (const key of Object.keys(http2.constants)) {
   }
 }
 
-export default {
-  METHOD: HTTP2_METHOD,
-  HEADER: HTTP2_HEADER,
-  STATUS: HTTP_STATUS,
-  STATUS_CODES: HTTP_STATUS_CODES,
-  EMPTY_CODES: HTTP_STATUS_EMPTY_CODES,
-  REDIRECT_CODES: HTTP_STATUS_REDIRECT_CODES,
+export const WEBSOCKET_OPCODES = {
+  CONTINUE: 0,
+  TEXT: 1,
+  BINARY: 2,
+  CLOSE: 8,
+  PING: 9,
+  PONG: 10,
+};
+
+export const WEBSOCKET_STATUS_CODES = {
+  1000: 'Normal Closure',
+  1001: 'Going Away',
+  1002: 'Protocol Error',
+  1003: 'Unsupported Data',
 }

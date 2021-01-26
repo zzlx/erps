@@ -14,9 +14,12 @@ import EventEmitter from 'events';
 import http from 'http';
 import util from 'util';
 
-import debuglog from '../utils/debuglog.mjs';
-import { HTTP_STATUS_CODES, } from '../koa/constants.mjs';
-import { OPCODES, STATUS_CODES } from './constants.mjs';
+import debuglog from './utils/debuglog.mjs';
+import { HTTP_STATUS_CODES, } from './koa/constants.mjs';
+import { 
+  WEBSOCKET_OPCODES as OPCODES, 
+  WEBSOCKET_STATUS_CODES as STATUS_CODES 
+} from './constants.mjs';
 
 const debug = debuglog('debug:websocket');
 const clients = new Set();
@@ -39,6 +42,22 @@ export default class WebSocket extends EventEmitter {
       this.upgradeHandler(req, socket, head);
     });
   }
+
+  /**
+   * send ping message to client
+   */
+
+  ping () {
+
+  }
+
+  /**
+   * send pong message to client
+   */
+
+  pong () {
+  }
+
 
   upgradeHandler (req, socket, head) {
     socket.on('error', socketOnError);
@@ -257,8 +276,9 @@ export default class WebSocket extends EventEmitter {
 } // end of WebSoceket class
 
 /**
+ * *****************************************************************************
  * Utilities
- *
+ * *****************************************************************************
  */
 
 // 编码ws帧

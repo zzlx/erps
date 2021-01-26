@@ -30,7 +30,7 @@ import {
   REQ_IP,
   RES_BODY,
   RES_HEADERS,
-} from './constants.mjs'
+} from '../constants.mjs'
 
 // define constants
 const mimeTypes = new MimeTypes();

@@ -22,11 +22,18 @@ import os from 'os';
 import path from 'path';
 import util from 'util';
 
-import paths from './settings/paths.mjs';
-import env from './settings/env.mjs';
-import git from './settings/git.mjs';
-import packageJSON from './settings/package.mjs';
-import system from './settings/system.mjs';
+import paths from './paths.mjs';
+import env from './env.mjs';
+import git from './git.mjs';
+import packageJSON from './package.mjs';
+import system from './system.mjs';
+
+/**
+ * 读取配置
+ */
+
+const configJSON = JSON.parse(fs.readFileSync(paths.DOT_SETTINGS, 'utf8'));
+
 
 export default new Proxy({ 
   git,
@@ -48,9 +55,6 @@ export default new Proxy({
     if (property === 'privateKey') {
       const keyFile = target.config.privateKey || `/etc/ssl/privkey.pem`;
       return fs.readFileSync(keyFile);
-    }
-    if (property === 'toString' || property === 'toJSON') {
-      return () => JSON.stringify(target);
     }
 
     return Reflect.get(target, property, receiver);

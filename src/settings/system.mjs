@@ -7,28 +7,14 @@
  */
 
 import os from 'os';
-import conf from './config.mjs'; // 配置项目
 
 export default new Proxy({
-  arch: os.arch(),
-  totalmem: os.totalmem(),
-  platform: os.platform(),
-  release: os.release(),
-  userInfo: os.userInfo(),
   port: conf.port || process.env.PORT || '3000',
   host: isSupportIPv6() ? '::' : '0.0.0.0',
 }, {
   get: function (target, property, receiver) {
-
     // 动态获取的配置
-    if (property === 'hostname') return os.hostname();
-    if (property === 'homedir') return os.homedir();
-    if (property === 'networkInterfaces') return os.networkInterfaces();
-    if (property === 'freemem') return os.freemem();
-    if (property === 'cpus') return os.cpus();
     if (property === 'IPv6') return isSupportIPv6();
-
-    if (conf[property]) return conf[property];
 
     return Reflect.get(target, property, receiver);
   },

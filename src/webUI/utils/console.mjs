@@ -27,8 +27,10 @@ export default new Proxy(console, {
     if (property === 'BLOCK_EMPTY') return '░';
     if (property === 'BLOCK_CELL') return '▓';
 
-		if (property === 'progressBar') return progressBar;
-		if (property === 'divideLine') return divideLine;
+    if (isNode) {
+      if (property === 'progressBar') return progressBar;
+      if (property === 'divideLine') return divideLine;
+    }
 
 		return Reflect.get(target, property, receiver);
 	}
