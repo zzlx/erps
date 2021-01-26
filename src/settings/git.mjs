@@ -26,6 +26,6 @@ export default paths.DOT_GIT ? new Proxy({}, {
 
     return Reflect.get(target, property, receiver);
   },
-  set: function (target, property, receiver) {
+  set: function (target, property, value) {
   }
 }) : null;

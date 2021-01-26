@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * WebSocket
+ * WebSocket Server
  *
  * [WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
  *
@@ -11,29 +11,20 @@
 import assert from 'assert';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
-import http from 'http';
-import util from 'util';
 
-import debuglog from './utils/debuglog.mjs';
-import { HTTP_STATUS_CODES, } from './koa/constants.mjs';
 import { 
+  HTTP_STATUS_CODES,
   WEBSOCKET_OPCODES as OPCODES, 
   WEBSOCKET_STATUS_CODES as STATUS_CODES 
 } from './constants.mjs';
-
-const debug = debuglog('debug:websocket');
-const clients = new Set();
 
 export default class WebSocket extends EventEmitter {
   constructor (options = {}) {
     super();
     assert(typeof options === 'object', 'WebSocket options must be an Object.');
-    this.opts = Object.assign({}, {
-      env: process.env.NODE_ENV || 'production',
-    }, options);
+    assert(options.server, 'WebSocket Server need a server in options.');
 
-    this.server = this.opts.server || http.createServer(); 
-
+    this.server = options.server;
     this.closed = false;
     this.buffer = Buffer.alloc(0);
 
@@ -277,7 +268,9 @@ export default class WebSocket extends EventEmitter {
 
 /**
  * *****************************************************************************
+ *
  * Utilities
+ *
  * *****************************************************************************
  */
 

@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-		"start": "./erps.mjs"
+		"start": "./bin/erps.mjs"
   },
   "dependencies": {
     "@koa/router": "^10.0.0",

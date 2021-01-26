@@ -34,7 +34,6 @@ import system from './system.mjs';
 
 const configJSON = JSON.parse(fs.readFileSync(paths.DOT_SETTINGS, 'utf8'));
 
-
 export default new Proxy({ 
   git,
   paths,

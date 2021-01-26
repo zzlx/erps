@@ -14,7 +14,7 @@ import EventEmitter from 'events';
 
 import Context from './Context.mjs';
 import compose from './compose.mjs';
-import { HTTP_STATUS_EMPTY_CODES } from '../constants.mjs';
+import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
 
 export default class Application extends EventEmitter {
   constructor(opts = {}) {

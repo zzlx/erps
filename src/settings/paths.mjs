@@ -2,9 +2,6 @@
  * *****************************************************************************
  *
  * 目录配置管理器
- * Paths Configuration Manager
- * ===
- *
  *
  * *****************************************************************************
  */
@@ -43,6 +40,14 @@ const paths = Object.create(null);
 
   return paths;
 })(path.dirname(path.dirname(path.dirname(import.meta.url.substr(7)))));
+
+// 当系统配置文件不存在时创建一个
+if (paths.DOT_SETTINGS == null) {
+  paths.DOT_SETTINGS = path.join(paths.ROOT, '.settings.json')
+  fs.promises.writeFile(paths.DOT_SETTINGS, JSON.stringify({
+    description: '系统配置文件'
+  }, null, 4), 'utf8');
+}
 
 // 配置的目录路径
 // 可配置、枚举,以便在配置文件保存配置

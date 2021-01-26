@@ -3,8 +3,6 @@
  *
  * Http service Daemon
  *
- * @author: wangxuemin@zzlx.org
- * @file: Httpd.mjs
  * *****************************************************************************
  */
 

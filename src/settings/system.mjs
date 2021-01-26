@@ -8,16 +8,21 @@
 
 import os from 'os';
 
-export default new Proxy({
-  port: conf.port || process.env.PORT || '3000',
+const system = {
+  port: process.env.PORT || '3000',
   host: isSupportIPv6() ? '::' : '0.0.0.0',
-}, {
+};
+
+export default new Proxy(system, {
   get: function (target, property, receiver) {
     // 动态获取的配置
     if (property === 'IPv6') return isSupportIPv6();
 
     return Reflect.get(target, property, receiver);
   },
+  set: function (target, property, value) {
+
+  }
 });
 
 /**
