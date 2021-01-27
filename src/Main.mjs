@@ -3,12 +3,6 @@
  * 
  * 系统服务主控程序
  *
- * 支持的服务协议
- *
- * * http2
- * * websocket
- * * ftp
- *
  * *****************************************************************************
  */
 
@@ -30,7 +24,7 @@ const debug = debuglog('debug:main');
  * @param {object} argvs
  */
 
-export default function main (argvs) {
+export default function main (argvs = process.argv.slice(2)) {
   const paramMap = argvParser(argvs);
 
   // 处理环境变量配置 
@@ -80,16 +74,26 @@ export default function main (argvs) {
 }
 
 /**
+ * *****************************************************************************
+ *
+ * Utilites
+ *
+ * *****************************************************************************
+ */
+
+/**
  *
  *
  */
 
 function startDaemon () {
+  /*
   process.nextTick(() => {
     setInterval(() => {
       console.log('TEST');
     }, 1000);
   });
+  */
 }
 
 /**
@@ -107,7 +111,7 @@ function showHelp () {
  */
 
 function showVersion () {
-  console.log(settings.packageJSON.version);
+  console.log(settings.version);
 }
 
 /**

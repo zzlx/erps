@@ -27,34 +27,21 @@ import env from './env.mjs';
 import git from './git.mjs';
 import packageJSON from './package.mjs';
 import system from './system.mjs';
-
-/**
- * 读取配置
- */
-
-const configJSON = JSON.parse(fs.readFileSync(paths.DOT_SETTINGS, 'utf8'));
+import configs from './configs.mjs';
 
 export default new Proxy({ 
-  git,
+  name: packageJSON.name,
+  version: packageJSON.version, 
+  license: packageJSON.license || 'MIT',
   paths,
-  packageJSON,
   system,
 }, {
   get: function (target, property, receiver) {
-    if (property === 'name') return target.packageJSON.name;
-    if (property === 'version') return target.packageJSON.version;
-    if (property === 'license') return target.packageJSON.license;
-
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
-    if (property === 'cert') {
-      const certFile = target.config.certFile || `/etc/ssl/${os.hostname()}-cert.pem`;
-      return fs.readFileSync(certFile);
-    }
-    if (property === 'privateKey') {
-      const keyFile = target.config.privateKey || `/etc/ssl/privkey.pem`;
-      return fs.readFileSync(keyFile);
-    }
+    if (property === 'cert') return fs.readFileSync(configs.cert);
+    if (property === 'privateKey') return fs.readFileSync(configs.privateKey);
+    if (property === 'passphrase') return configs.passphrase;
 
     return Reflect.get(target, property, receiver);
   },

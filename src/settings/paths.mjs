@@ -41,14 +41,6 @@ const paths = Object.create(null);
   return paths;
 })(path.dirname(path.dirname(path.dirname(import.meta.url.substr(7)))));
 
-// 当系统配置文件不存在时创建一个
-if (paths.DOT_SETTINGS == null) {
-  paths.DOT_SETTINGS = path.join(paths.ROOT, '.settings.json')
-  fs.promises.writeFile(paths.DOT_SETTINGS, JSON.stringify({
-    description: '系统配置文件'
-  }, null, 4), 'utf8');
-}
-
 // 配置的目录路径
 // 可配置、枚举,以便在配置文件保存配置
 // 卸载程序执行时删除所有可枚举的目录
@@ -62,7 +54,9 @@ export default new Proxy(paths, {
     return Reflect.get(target, property, receiver);
   },
 	set: function (target, property, value) {
-    fs.promises.mkdir(value, {recursive: true}); // 创建配置目录
+    if (/^PATH_/.test(property)) {
+      fs.promises.mkdir(value, {recursive: true}); // 创建配置目录
+    }
 
     return Object.defineProperty(target, property, {
       value: value,

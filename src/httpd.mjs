@@ -2,13 +2,19 @@
  * *****************************************************************************
  *
  * Http service Daemon
+ * ===
+ *
+ * ## 参考文档
+ *
+ * * [Node HTTP/2](https://nodejs.org/dist/latest-v15.x/docs/api/http2.html)
  *
  * *****************************************************************************
  */
 
-import { spawn } from 'child_process';
 import cluster from 'cluster';
+import fs from 'fs';
 import http2 from 'http2';
+import { spawn } from 'child_process';
 
 import debuglog from './utils/debuglog.mjs';
 import settings from './settings/index.mjs';
@@ -18,11 +24,10 @@ const debug = debuglog('debug:https.mjs'); // 调试信息打印工具
 const opts = {
   allowHTTP1: true,
   //ca: [fs.readFileSync('client-cert.pem')],
-  key: null,
-  cert: null,
-  passphrase: null,
+  key: settings.privateKey,
+  cert: settings.cert,
+  passphrase: settings.passphrase,
   requestCert: false, // 客户端证书支持
-  
   //sigalgs: 
   //ciphers: 
   //clientCertEngine: 
@@ -31,8 +36,8 @@ const opts = {
   //origins: [],
   //privateKeyEngine
   //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-  handshakeTimeout: 120 * 1000, // milliseconds
   //ticketKeys: crypto.randomBytes(48), 
+  handshakeTimeout: 120 * 1000, // milliseconds
   sessionTimeout: 300, // seconds
 };
 
@@ -53,6 +58,12 @@ process.on('message', (message) => {
   if (message === 'start') {
   }
 });
+
+/**
+ * *****************************************************************************
+ * Utilities
+ * *****************************************************************************
+ */
 
 function start (cb = () => {}) {
   server.listen({
@@ -77,12 +88,6 @@ function streamHandler (fn) {
 
   server.on('stream', fn);
 }
-
-/**
- * *****************************************************************************
- * Utilities
- * *****************************************************************************
- */
 
 function connectionHandler (socket) {
 
