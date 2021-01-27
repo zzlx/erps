@@ -7,7 +7,15 @@
  */
 
 import fs from 'fs';
-import { spawn } from 'child_process';
+import path from 'path';
+import { fork, spawn } from 'child_process';
+import net from 'net';
+import tls from 'tls';
+import http2 from 'http2';
+import { 
+  X509Certificate 
+} from 'crypto';
+
 import { 
   argvParser, 
   camelCase,
@@ -17,17 +25,16 @@ import debuglog from './utils/debuglog.mjs';
 import settings from './settings/index.mjs';
 
 const debug = debuglog('debug:main');
+let httpd = null;
 
 /**
- * main 
- *
- * @param {object} argvs
+ * main控制程序: 接受并执行参数
  */
 
 export default function main (argvs = process.argv.slice(2)) {
   const paramMap = argvParser(argvs);
 
-  // 处理环境变量配置 
+  // deal with environment variables
   for (let param of Object.keys(paramMap)) { 
     switch(param) { 
       case 'env': 
@@ -53,15 +60,15 @@ export default function main (argvs = process.argv.slice(2)) {
         break;
       case 'start':
         isExec = true;
-        //startDaemon();
+        startDaemon();
         break;
       case 'stop':
         isExec = true;
-        //emit('STOP');
+        sendCommand('STOP');
         break;
       case 'restart':
         isExec = true;
-        //emit('RESTART');
+        sendCommand('RESTART');
         break;
       default:
         isExec = true;
@@ -87,56 +94,55 @@ export default function main (argvs = process.argv.slice(2)) {
  */
 
 function startDaemon () {
+  const command = path.join(settings.paths.SRC, 'httpd.mjs');
+  const args = [ command, ];
+  const options = {
+    detached: true,
+    stdio: 'inherit',
+    //stdio: ['ignore', 'ignore', 'ignore', 'ipc']
+  };
+
+  httpd = spawn(process.argv[0], args, options);
+
   /*
-  process.nextTick(() => {
-    setInterval(() => {
-      console.log('TEST');
-    }, 1000);
+  httpd.send('test');
+  httpd.on('message', (m) => {
+    debug(m);
   });
   */
 }
 
 /**
- * 显示帮助信息
- */
-
-function showHelp () {
-  fs.promises.readFile(settings.paths.HELP).then(content => {
-    process.stdout.write(content);
-  });
-}
-
-/**
- * 显示版本信息
- */
-
-function showVersion () {
-  console.log(settings.version);
-}
-
-/**
  *
  *
  */
 
-function exec () {
-  const conn = net.connect({ port: Number(settings.system.port) + 1 }, () => {
-    const message = JSON.stringify({
-      token: 'test',
-      command: command
-    });
+function sendCommand (command) {
+  const options = {
+    host: settings.host,
+    port: settings.port, 
+    ca: settings.cert,
+    checkServerIdentity: (hostname, cert) => { 
+      return null;
+    },
+  };
 
-    conn.write(message);
+  //const x509 = new X509Certificate(settings.cert);
 
-    conn.on('data', chunk => {
-      debug(chunk.toString());
-      conn.end();
-    });
+  const socket = tls.connect(options, () => {
+    if (socket.authorized) {
+      const message = JSON.stringify({
+        passphrase: settings.passphrase,
+        command: command
+      });
+
+      socket.end(message);
+    }
   });
 
-  conn.on('error', e => {
+  socket.on('error', e => {
     if (e.code === 'ECONNREFUSED') {
-      console.log('服务未启动，请先启动服务');
+      console.log('服务访问被拒绝，请确认服务已经启动.');
     }
   });
 } 
@@ -161,4 +167,32 @@ function setupProcess () {
   process.on('unhandledRejection', (reason, promise) => {
     console.log(reason);
   });
+}
+/**
+ * 显示帮助信息
+ */
+
+function showHelp () {
+  process.stdout.write(
+    `${console.divideLine()}
+ERP服务器使用帮助
+${console.divideLine('-')}
+Usage: erps.mjs [options]
+
+Options:
+  -h, --help                  显示帮助信息
+  -v, --version               显示版本信息
+  --start                     启动服务
+  --stop                      关闭服务
+  --restart                   重启服务
+${console.divideLine()}
+`);
+}
+
+/**
+ * 显示版本信息
+ */
+
+function showVersion () {
+  console.log(settings.version);
 }

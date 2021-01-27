@@ -9,8 +9,6 @@
 import os from 'os';
 
 const system = {
-  port: process.env.PORT || '3000',
-  host: isSupportIPv6() ? '::' : '0.0.0.0',
 };
 
 export default new Proxy(system, {

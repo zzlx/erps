@@ -4,6 +4,7 @@
  * Http service Daemon
  * ===
  *
+ *
  * ## 参考文档
  *
  * * [Node HTTP/2](https://nodejs.org/dist/latest-v15.x/docs/api/http2.html)
@@ -13,13 +14,33 @@
 
 import cluster from 'cluster';
 import fs from 'fs';
+import crypto from 'crypto';
+import path from 'path';
 import http2 from 'http2';
 import { spawn } from 'child_process';
 
+import logWriter from './utils/logWriter.mjs';
 import debuglog from './utils/debuglog.mjs';
 import settings from './settings/index.mjs';
 
-const debug = debuglog('debug:https.mjs'); // 调试信息打印工具
+const debug = debuglog('debug:httpd'); // 调试信息打印工具
+const sessionStore = new Map();
+
+process.title = 'org.zzlx.httpd';
+
+process.on('SIGINT', () => {
+  console.log('Press Control-D to exit.');
+});
+
+process.on('message', (m) => {
+  debug(m);
+});
+
+process.on('uncaughtException', (error, origin) => {
+  debug(error);
+});
+
+process.nextTick(() => start());
 
 const opts = {
   allowHTTP1: true,
@@ -41,132 +62,134 @@ const opts = {
   sessionTimeout: 300, // seconds
 };
 
-const server = opts.cert && opts.key
-    ? http2.createSecureServer(opts)
-    : http2.createServer(opts);
+const server = opts.cert && opts.key 
+  ? http2.createSecureServer(opts)
+  : http2.createServer(opts);
 
 server.on('error', e => {
-  if (e.code === 'EADDRINUSE') {
-    console.warn && console.warn('服务端口正在被使用中...');
+  if (e.code === 'EADDRINUSE') { 
+    if (process.send) {
+      process.send(e);
+    } else {
+      console.log(`Address ${e.address}:${e.port} is in use, try again latter.`);
+    }
+  }
+
+});
+
+server.on('keylog', (line, tlsSocket) => {
+  logWriter(path.join(settings.paths.PATH_LOG, 'ssl-keys.log'), line.toString());
+});
+
+server.on('connection', (socket) => {
+});
+
+// he 'secureConnection' event is emitted after the handshaking process 
+// for a new connection has successfully completed. 
+server.on('secureConnection', socket => {
+  socket.on('data', buffer => {
+    const message = JSON.parse(buffer.toString());
+    if (message.passphrase !== settings.passphrase) return;
+    exec(message.command);
+  });
+});
+
+// This event is emitted when a new TCP stream is established, 
+// before the TLS handshake begins.
+// socket is typically an object of type net.Socket
+
+// The keylog event is emitted when key material is generated 
+// or received by a connection to this server
+// (typically before handshake has completed, but not necessarily).
+// This keying material can be stored for debugging, 
+// as it allows captured TLS traffic to be decrypted. 
+// It may be emitted multiple times for each socket.
+// event is emitted when the client sends a certificate status request. 
+server.on('OCSPRequest', (certificate, issuer, cb) => {
+  debug('OCSPRequest event');
+  debug(crypto.Certificate.exportPublicKey(certificate));
+  cb(null, null);
+});
+
+// The 'resumeSession' event is emitted 
+
+// The 'newSession' event is emitted upon creation of a new TLS session. 
+// This may be used to store sessions in external storage. 
+// The data should be provided to the 'resumeSession' callback.
+server.on('newSession', (sessionId, sessionData, cb) => {
+  sessionStore.set(sessionId.toString('hex'), sessionData);
+  cb();
+});
+
+// when the client requests to resume a previous TLS session. 
+server.on('resumeSession', (id, cb) => {
+  const sessionData = sessionStore.get(id.toString('hex')); 
+
+  if (sessionData) { 
+    cb(null, sessionData);
+  } else {
+    debug('resumeSession faile');
+    cb(null, null);
   }
 });
 
-server.on('connection', socket => {
+// event is emitted when an error occurs before a secure connection is established.
+server.on('tlsClientError', (exception, tlsSocket) => {
+  debug('tlsClientError: ', exception);
 });
 
-process.on('message', (message) => {
-  if (message === 'start') {
-  }
+server.on('unknownProtocol', (error) => {
+  debug('unknownProtocol');
+});
+
+let handler = await streamHandler();
+server.on('stream', (stream, headers, flags) => {
+  handler(stream, headers, flags);
+
 });
 
 /**
  * *****************************************************************************
- * Utilities
+ *
+ * Utility functions
+ *
  * *****************************************************************************
  */
 
-function start (cb = () => {}) {
+function start () {
   server.listen({
     ipv6Only: false,
     exclusive: true,
-    host: settings.system.host,
-    port: settings.system.port,
-  }, cb);
-}
-
-function stop (cb) {
-  server.close(() => {
-    debug('Http服务已退出.');
-    if (cb) cb();
+    host: settings.host,
+    port: settings.port,
+  }, function () {
+    if (process.channel && process.send) {
+      process.send({ 
+        message: '服务器已启动',
+        pid: process.pid,
+        address: this.address(),
+      });
+    } else {
+      debug('服务器已开始监听:', this.address());
+    }
   });
 }
 
-function streamHandler (fn) {
-  if (server.eventNames('stream').indexOf('stream') > -1) {
-    throw new Error('The stream handler is already exitsed.');
-  }
-
-  server.on('stream', fn);
-}
-
-function connectionHandler (socket) {
-
-}
-
-function errorHandler (e) {
-  if (e.code === 'EADDRINUSE') { 
-     console.log("The address is in use, please try again later."); 
+function exec (cmd) {
+  switch(cmd) {
+    case 'STOP': 
+      server.close(() => { });
+      break;
+    case 'RESTART': 
+      server.close(() => {
+        start();
+      });
+      break;
   }
 }
 
-function registerEventHandlers () {
-    // This event is emitted when a new TCP stream is established, 
-    // before the TLS handshake begins.
-    // socket is typically an object of type net.Socket
-    this.server.on('connection', socket => {
-      debug(
-        `connection is come from ${socket.remoteAddress}:${socket.remotePort}`);
-    });
-
-    this.server.on('error', (err) => {
-      debug(err);
-
-      if (err.code === 'EADDRINUSE') {
-        console.error(`Port ${err.port} is used, try again later.`);
-      }
-    });
-
-    // The keylog event is emitted when key material is generated 
-    // or received by a connection to this server
-    // (typically before handshake has completed, but not necessarily).
-    // This keying material can be stored for debugging, 
-    // as it allows captured TLS traffic to be decrypted. 
-    // It may be emitted multiple times for each socket.
-    this.server.on('keylog', (line, tlsSocket) => {
-      logWriter(path.join(paths.PATH_LOG, 'ssl-keys.log'), line.toString());
-    });
-
-    // event is emitted when the client sends a certificate status request. 
-    this.server.on('OCSPRequest', (certificate, issuer, cb) => {
-      debug('OCSPRequest event');
-      debug(crypto.Certificate.exportPublicKey(certificate));
-      cb(null, null);
-    });
-
-    // The 'resumeSession' event is emitted 
-
-    // The 'newSession' event is emitted upon creation of a new TLS session. 
-    // This may be used to store sessions in external storage. 
-    // The data should be provided to the 'resumeSession' callback.
-    this.server.on('newSession', (sessionId, sessionData, cb) => {
-      sessionStore.set(sessionId.toString('hex'), sessionData);
-      cb();
-    });
-
-    // when the client requests to resume a previous TLS session. 
-    this.server.on('resumeSession', (id, cb) => {
-      const sessionData = sessionStore.get(id.toString('hex')); 
-
-      if (sessionData) { 
-        cb(null, sessionData);
-      } else {
-        debug('resumeSession faile');
-        cb(null, null);
-      }
-    });
-
-    // he 'secureConnection' event is emitted after the handshaking process 
-    // for a new connection has successfully completed. 
-    this.server.on('secureConnection', tlsSocket => {
-      debug('secureConnection');
-    });
-
-    // event is emitted when an error occurs before a secure connection is established.
-    this.server.on('tlsClientError', (exception, tlsSocket) => {
-      debug('tlsClientError: ', exception);
-    });
-
-    this.server.on('unknownProtocol', (error) => {
-      debug('unknownProtocol');
-    });
+function streamHandler () {
+  return import('./services/app.mjs').then(m => m.default).then(app => {
+    return app.callback();
+  }) ;
 }

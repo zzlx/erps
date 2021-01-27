@@ -35,6 +35,8 @@ export default new Proxy({
   license: packageJSON.license || 'MIT',
   paths,
   system,
+  port: process.env.PORT || '8888',
+  host: isSupportIPv6() ? '::' : '0.0.0.0',
 }, {
   get: function (target, property, receiver) {
     if (property === 'writePidFile') return writePidFile;
@@ -89,4 +91,22 @@ function readConfig () {
       if (err) throw err;
     });
   });
+}
+
+/**
+ * 判断系统是否支持IPv6
+ */
+
+function isSupportIPv6 () {
+  let hasIPv6 = false;
+
+  for (const networkInterface of Object.values(os.networkInterfaces())) {
+    for (const network of networkInterface) {
+      if (network.family === 'IPv6') { hasIPv6 = true; break; }
+    }
+
+    if (hasIPv6) break;
+  }
+
+  return hasIPv6;
 }

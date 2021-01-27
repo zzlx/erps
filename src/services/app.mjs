@@ -23,7 +23,7 @@ import markdown from '../koa/middlewares/markdown.mjs';
 import xResponse from '../koa/middlewares/xResponse.mjs';
 
 import { camelCase, console } from '../utils.lib.mjs';
-import settings from '../settings.mjs';
+import settings from '../settings/index.mjs';
 import debuglog from '../utils/debuglog.mjs';
 import router from './router.mjs';
 
@@ -32,8 +32,8 @@ const debug = debuglog('debug:server/main.mjs');
 // 初始化服务器程序
 // 配置服务器基础功能
 const app = new Koa();
-app.use(error(path.join(settings.paths.LOG_PATH, 'error.log'))); // 记录中间件错误
-app.use(logger(path.join(settings.paths.LOG_PATH, 'request.log'))); // 记录访问日志
+app.use(error(path.join(settings.paths.PATH_LOG, 'error.log'))); // 记录中间件错误
+app.use(logger(path.join(settings.paths.PATH_LOG, 'request.log'))); // 记录访问日志
 app.use(xResponse()); // 响应时间记录
 app.use(cors()); // 跨域访问支持
 app.use(cookies()); // 全局cookie支持

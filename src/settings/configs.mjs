@@ -21,11 +21,11 @@ const configs = {
 }
 
 // 配置文件不存在时
-if (paths.DOT_SETTINGS == null) {
-  paths.DOT_SETTINGS = path.join(paths.ROOT, '.settings.json');
+if (paths.SETTINGS == null) {
+  paths.SETTINGS = path.join(paths.ROOT, 'settings.json');
   await writeJsonFile(configs);
 } else {
-  const json = JSON.parse(fs.readFileSync(paths.DOT_SETTINGS, 'utf8'));
+  const json = JSON.parse(fs.readFileSync(paths.SETTINGS, 'utf8'));
   Object.assign(configs, json);
 }
 
@@ -48,7 +48,7 @@ function writeJsonFile (obj) {
   assert(obj, 'The param obj must be set.');
 
   return fs.promises.writeFile(
-    paths.DOT_SETTINGS, 
+    paths.SETTINGS, 
     JSON.stringify(obj, null, 2), 
     'utf8'
   );

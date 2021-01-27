@@ -10,7 +10,7 @@ import path from 'path';
 
 import Router from '../koa/Router.mjs';
 import statics from '../koa/middlewares/statics.mjs';
-import settings from '../settings.mjs';
+import settings from '../settings/index.mjs';
 
 import * as routes from './routes/index.mjs';
 

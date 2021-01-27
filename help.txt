@@ -1,8 +1,0 @@
-Usage: erps.mjs [options]
-
-Options:
-  -h, --help    显示帮助信息
-  -v, --version 显示版本信息
-  --start       启动服务
-  --stop        关闭服务
-  --restart     重启服务

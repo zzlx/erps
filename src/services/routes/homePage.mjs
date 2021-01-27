@@ -9,13 +9,14 @@
 import ReactDOMServer from 'react-dom/server.js';
 import path from 'path';
 import util from 'util';
-import settings from '../../settings.mjs';
+import settings from '../../settings/index.mjs';
 import HtmlTemplate from '../../utils/HtmlTemplate.mjs';
 import Router from '../../koa/Router.mjs';
+import UI from '../../webUI/main.mjs';
 
 const debug = util.debuglog('debug:routes/homePage.mjs');
 const router = new Router();
-const template = settings.templates.HomePageHtml;
+const template = path.join(settings.paths.PUBLIC, 'index.html');;
 
 router.get('index', '/*', async (ctx, next) => {
   // 转发有扩展名的路径至下一中间件
@@ -23,9 +24,6 @@ router.get('index', '/*', async (ctx, next) => {
   if (ctx.body != null) return next();
 
   const path = ctx.pathname;
-  //import App, { CID, getContainerByID } from '../../webUI/main.mjs';
-  const UI = await import('../../../webUI/main.mjs').then(m => m.default)
-    .catch(err => { ctx.throw(err); });
   const app = new UI({
     location: { pathname: ctx.pathname }
   });
