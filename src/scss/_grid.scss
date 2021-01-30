@@ -5,10 +5,12 @@
 //grid-template-columns: auto 1fr auto;
 //grid-template-areas: none;
 
+
 .flex-wrapper {
    display: flex;
    flex-wrap: wrap;
 }
+
 
 .flex-wrapper > div {
    flex: 1 1 200px;

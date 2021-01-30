@@ -2,8 +2,254 @@
 /**
  * *****************************************************************************
  * 
+ * ERP服务管理程序
+ *
  * *****************************************************************************
  */
 
-import main from '../src/main.mjs';
-main(); // 执行主程序
+import fs from 'fs';
+import path from 'path';
+import { fork, spawn, exec, execFile } from 'child_process';
+import net from 'net';
+import tls from 'tls';
+import http2 from 'http2';
+import { 
+  X509Certificate 
+} from 'crypto';
+
+import { 
+  argvParser, 
+  camelCase,
+  console, 
+} from '../server/utils.lib.mjs';
+import debuglog from '../server/debuglog.mjs';
+import settings from '../server/settings/index.mjs';
+import Watchdog from '../server/Watchdog.mjs';
+
+const debug = debuglog('debug:main');
+let httpd = null;
+
+/**
+ * 系统服务主控程序
+ * main控制程序接受并执行参数
+ */
+
+(function main (argvs = process.argv.slice(2)) {
+  const paramMap = argvParser(argvs);
+
+  // deal with environment variables
+  for (let param of Object.keys(paramMap)) { 
+    switch(param) { 
+      case 'env': 
+        process.env.NODE_ENV = paramMap['env'];
+        delete paramMap['env'];
+        continue;
+      case 'debug': 
+        process.env.NODE_DEBUG = 'debug*';
+        delete paramMap['debug'];
+        continue;
+    }
+  }
+
+  let isExec = false; // 是否执行
+
+  for (let param of Object.keys(paramMap)) {
+    switch(param) {
+      case 'h':
+      case 'help':
+        isExec = true;
+        showHelp();
+        break;
+      case 'v':
+      case 'version':
+        isExec = true;
+        showVersion();
+        break;
+      case 'start':
+        isExec = true;
+        startDaemon();
+        break;
+      case 'stop':
+        isExec = true;
+        sendCommand('STOP');
+        break;
+      case 'restart':
+        isExec = true;
+        sendCommand('RESTART');
+        break;
+      default:
+        isExec = true;
+        console.log('The param "%s" is not supported.', param);
+        break;
+    }
+  }
+
+  if (isExec === false) startDaemon(); // 未提供参数时执行start
+})(); // 执行主程序
+
+/**
+ * *****************************************************************************
+ *
+ * Utilites
+ *
+ * *****************************************************************************
+ */
+
+/**
+ *
+ *
+ */
+
+function startDaemon () {
+  startHttpd();
+  if (process.env.NODE_ENV === 'development') {
+    scssMonitor();
+    srcMonitor();
+  }
+}
+
+/**
+ * 启动HTTPD服务
+ */
+
+function startHttpd () {
+  const args = [ 
+    path.join(settings.paths.SERVER, 'httpd.mjs'),
+  ];
+  const options = {
+    detached: process.env.NODE_ENV === 'development' ? false : true,
+    //stdio: ['ignore', 'ignore', 'ignore', 'ipc']
+    stdio: [0, 1, 2, null],
+  };
+
+  httpd = spawn(process.argv[0], args, options);
+}
+
+function srcMonitor () {
+  const watchdog = new Watchdog(
+    settings.paths.BIN,
+    settings.paths.SERVER,
+  );
+
+  let timeout = null;
+  let test = null;
+
+  watchdog.on('change', () => {
+    if (timeout) clearTimeout(timeout);
+
+    // 延迟执行
+    timeout = setTimeout(() => {
+      if (httpd) httpd.kill();
+      startHttpd();
+    }, 1000)
+  });
+}
+
+
+function scssMonitor () {
+  const watchdog = new Watchdog(path.join(settings.paths.SRC, 'scss'));
+  let timeout = null;
+
+  watchdog.on('change', (file) => {
+    if (timeout) {
+      debug('file:%s发生改动, 取消上次改动计划的重新渲染', file);
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(() => {
+      exec(path.join(settings.paths.BIN, 'render-css.mjs'), (error, stdout, stderr) => {
+        debug('计划的渲染程序已执行完成. reason: %s', file);
+        if (error) console.error(error);
+        if (stdout) console.log(stdout);
+        if (stderr) console.log(stderr);
+      });
+    }, 1200); // 1200ms延迟
+  });
+}
+
+/**
+ *
+ *
+ */
+
+function sendCommand (command) {
+  const options = {
+    host: settings.host,
+    port: settings.port, 
+    ca: settings.cert,
+    checkServerIdentity: (hostname, cert) => { 
+      return null;
+    },
+  };
+
+  const conn = tls.connect(options, () => {
+    if (conn.authorized) {
+      const message = JSON.stringify({
+        token: settings.passphrase,
+        command: command
+      });
+
+      conn.end(message);
+    }
+  });
+
+  conn.on('error', e => {
+    if (e.code === 'ECONNREFUSED') {
+      debug('The server may not be started, tye again later.');
+    }
+  });
+
+  conn.on('close', () => { 
+    debug('Connection is closed.'); 
+  });
+} 
+
+/**
+ *
+ */
+
+function setupProcess () {
+  //process.title = settings.packageJSON.name;
+  process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
+  process.on('exit', code => {
+    const uptime = Math.ceil(process.uptime()*1000);
+    debug(`${process.title} is running ${uptime}ms before exit.`);
+  });
+
+  process.on('uncaughtException', (error, origin) => {
+    console.log(error);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    console.log(reason);
+  });
+}
+/**
+ * 显示帮助信息
+ */
+
+function showHelp () {
+  process.stdout.write(
+    `${console.divideLine()}
+ERP服务器使用帮助
+${console.divideLine('-')}
+Usage: erps.mjs [options]
+
+Options:
+  -h, --help                  显示帮助信息
+  -v, --version               显示版本信息
+  --start                     启动服务
+  --stop                      关闭服务
+  --restart                   重启服务
+${console.divideLine()}
+`);
+}
+
+/**
+ * 显示版本信息
+ */
+
+function showVersion () {
+  console.log(settings.version);
+}
