@@ -6,14 +6,10 @@
  * *****************************************************************************
  */
 
-import global from './utils/global.mjs';
-import deviceDetect from './utils/deviceDetect.mjs'
-
 //Detect environment and render UI Application
+const global = getGlobal();
 const __url = new URL(import.meta.url);
 global.env = __url.searchParams.get('env') || 'production';
-const ua = window.navigator.userAgent;
-//if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
 
 import('./ReactApp.mjs').then(m => m.default).then(ReactApp => {
   const element = ReactApp({ location});
@@ -37,7 +33,7 @@ function render (element) {
 
   if (null == container) {
     container = document.createElement('div');
-    container.id = id;
+    container.id = 'root';
     document.body.appendChild(container);
   }
 
@@ -59,11 +55,9 @@ function cb () {
 }
 
 /**
- *
  * 通知
  *
  * 注意使用场合
- *
  */
 
 function notification () {
@@ -82,4 +76,39 @@ function notification () {
     window.focus();
     notification.close();
   };
+}
+
+/**
+ * 根据提供的ua字符串,解析出设备、浏览器客户端类型
+ */
+
+export default function deviceDetect (ua) {
+  let device = null;
+  //if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
+
+  if (/iPhone;/.test(ua)) {
+    device = 'iPhone';
+  } else if (/iPad;/.test(ua)) {
+    device = 'iPad';
+  } else if (/Android/.test(ua)) {
+    device = 'android';
+  } else if (/Intel Mac OS X/.test(ua)) {
+    device = 'Mac';
+  } else if (/Windows NT/.test(ua)) {
+    device = 'Windows';
+  }
+
+  return device;
+}
+
+/**
+ * 获取环境global对象
+ */
+
+export function getGlobal () {
+  if (typeof globalThis !== 'undefined') return globalThis;
+  if (typeof window !== 'undefined') return window;
+  if (typeof self !== 'undefined') return self;
+  if (typeof global !== 'undefined') return global;
+  return Object.create(null);
 }

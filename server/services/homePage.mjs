@@ -12,7 +12,6 @@ import path from 'path';
 import settings from '../settings/index.mjs';
 import HtmlTemplate from '../HtmlTemplate.mjs';
 import Router from '../koa/Router.mjs';
-import ReactApp from '../../uis/ReactApp.mjs';
 import debuglog from '../debuglog.mjs';
 
 const debug = debuglog('debug:routes/homePage.mjs');
@@ -24,11 +23,6 @@ router.get('index', '/*', async (ctx, next) => {
   if (/\.\w+$/.test(ctx.pathname)) return next();
 
   if (ctx.body != null) return next();
-
-  const path = ctx.pathname;
-  const element = ReactApp({
-    location: { pathname: ctx.pathname }
-  });
 
   const ua = ctx.get('user-agent');
   const isIE = /MSIE/.test(ua);
@@ -49,8 +43,16 @@ router.get('index', '/*', async (ctx, next) => {
     { src: `/assets/es/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
   ]);
 
-  const container = html.getElementById('root')
-  container.innerHTML = ReactDOMServer.renderToString(element);
+  if (process.env.NODE_ENV === 'development') {
+    const appURL = path.join(settings.paths.REACT_CLIENT, 'ReactApp.mjs'); 
+    const ReactApp = await import(appURL).then(m => m.default);
+    const element = ReactApp({
+      location: { pathname: ctx.pathname }
+    });
+    const container = html.getElementById('root')
+    container.innerHTML = ReactDOMServer.renderToString(element);
+  }
+
   ctx.body = html.render();
   next();
 });

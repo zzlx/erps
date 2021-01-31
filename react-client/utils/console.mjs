@@ -11,8 +11,7 @@
  * *****************************************************************************
  */
 
-import global from './global.mjs';
-
+const global = globalThis; 
 const isNode = global.process && typeof global.process.cwd === 'function';
 const isBrowser = global.window && typeof global.window === 'object';
 const isWin = !isBrowser && global.process && global.process.platform === 'win32';
