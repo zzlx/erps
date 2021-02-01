@@ -48,11 +48,12 @@ export default class WebSocket extends EventEmitter {
   /**
    * send pong message to client
    */
-
   pong () {
   }
 
-
+  /**
+   *
+   */
   upgradeHandler (req, socket, head) {
     socket.on('error', socketOnError);
 

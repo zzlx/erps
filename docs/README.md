@@ -1,8 +1,10 @@
 Documentations
 ======
 
----
+## 待办事项
 
-* [用户手册](./manual/TOC.md)
-* [部署与运维](./manual/TOC.md)
-* [开发与维护](./manual/TOC.md)
+1. 软件著作权登记
+
+> [计算机软件著作权登记指南](http://www.ccopyright.com.cn/index.php?optionid=1033)
+
+  https://github.com/electron/electron

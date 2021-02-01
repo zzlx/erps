@@ -35,18 +35,11 @@ router.get('index', '/*', async (ctx, next) => {
 
   // @TODO:根据路由信息动态更新title
   html.title = '首页|HomePage';
-  //html.addMeta({ name: 'keywords', content: 'ERP,OA', });
-  html.addScript([
-    //{ src: "https://hm.baidu.com/hm.js?6d232be7bbac84648183642dea1aac4b" },
-    { src: `/assets/js/react.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/assets/js/react-dom.${process.env.NODE_ENV === 'development' ? 'development' : 'production.min'}.js` },
-    { src: `/assets/es/main.mjs${process.env.NODE_ENV === 'development' ? '?env=development' : '' }`, type: 'module', crossOrigin: true },
-  ]);
 
   if (process.env.NODE_ENV === 'development') {
-    const appURL = path.join(settings.paths.REACT_CLIENT, 'ReactApp.mjs'); 
-    const ReactApp = await import(appURL).then(m => m.default);
-    const element = ReactApp({
+    const appURL = path.join(settings.paths.PUBLIC, 'assets', 'es', 'App.mjs'); 
+    const app = await import(appURL).then(m => m.default);
+    const element = app({
       location: { pathname: ctx.pathname }
     });
     const container = html.getElementById('root')

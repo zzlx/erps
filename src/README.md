@@ -6,5 +6,6 @@
 ## 目录介绍
 
 * addons c++插件
+* data
 * schema graphql描述文件
 * scss 样式表系统文件

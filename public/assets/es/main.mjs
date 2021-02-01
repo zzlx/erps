@@ -11,8 +11,8 @@ const global = getGlobal();
 const __url = new URL(import.meta.url);
 global.env = __url.searchParams.get('env') || 'production';
 
-import('./ReactApp.mjs').then(m => m.default).then(ReactApp => {
-  const element = ReactApp({ location});
+import('./app.mjs').then(m => m.default).then(app => {
+  const element = app({ location});
   render(element);
 });
 
