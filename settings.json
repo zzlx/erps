@@ -1,6 +1,0 @@
-{
-  "description": "系统配置",
-  "keys": ["18039105900"],
-  "cert":  "/etc/ssl/macair-cert.pem",
-  "passphrase": "18039105900"
-}
