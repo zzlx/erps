@@ -15,11 +15,15 @@ import assert from 'assert';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
 
+import debuglog from './debuglog.mjs';
 import { 
   HTTP_STATUS_CODES,
   WEBSOCKET_OPCODES as OPCODES, 
   WEBSOCKET_STATUS_CODES as STATUS_CODES 
 } from './constants.mjs';
+
+const debug = debuglog('debug:websocket');
+const clients = new Set();
 
 export default class WebSocket extends EventEmitter {
   constructor (options = {}) {

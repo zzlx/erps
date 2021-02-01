@@ -18,7 +18,7 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 
-import debuglog from '../server/utils/debuglog.mjs';
+import debuglog from '../server/debuglog.mjs';
 import settings from '../server/settings/index.mjs';
 
 const debug = debuglog('debug:render-css');

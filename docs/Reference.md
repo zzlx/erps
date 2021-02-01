@@ -4,6 +4,8 @@
 ## 网络资源
 
 * [阿里云镜像站点](https://developer.aliyun.com/mirror/)
+* [Web开发技术](https://developer.mozilla.org/zh-CN/docs/Web)
+* [JavaScript 参考](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference)
 
 ## 参考项目
 

@@ -20,7 +20,7 @@ export default class BarcodeComponent extends React.PureComponent {
 
   componentDidMount() {
     const canvas = this._ref.current;
-    const draw = new Draw(canvas);
+    const draw = new Drawer(canvas);
     draw.fillStyle('snow')
         .fillRect(0,0,100, 100)
         .fillStyle('red')
@@ -53,11 +53,7 @@ export class Drawer {
   }
 
   // 属性
-  get fillStyle () {
-    return this.ctx.fillStyle;
-  }
-
-  set fillStyle (color = 'black') {
+  fillStyle (color = 'black') {
     this.ctx.fillStyle = color;
     return this;
   }

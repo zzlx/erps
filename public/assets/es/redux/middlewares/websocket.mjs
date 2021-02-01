@@ -44,8 +44,6 @@
  * *****************************************************************************
  */
 
-import { types } from '../../actions/index.mjs';
-
 let ws = null;
 
 export default function websocket (store) {
@@ -58,26 +56,26 @@ export default function websocket (store) {
       ws = new WebSocket(getURI()); 
 
       ws.onerror = function (error) {
-        store.dispatch({ type: types.WEBSOCKET_ERROR, payload: event });
+        store.dispatch({ type: 'WEBSOCKET_ERROR', payload: event });
       }
 
       ws.onclose = function (event) {
-        store.dispatch({ type: types.WEBSOCKET_CLOSED, payload: event });
+        store.dispatch({ type: 'WEBSOCKET_CLOSED', payload: event });
       }
 
       ws.onopen = function (event) { resolve(ws); };
 
       ws.onmessage = function (event) {
-        store.dispatch({ type: types.WEBSOCKET_MESSAGE, payload: event });
+        store.dispatch({ type: 'WEBSOCKET_MESSAGE', payload: event });
       };
 
     } catch (e) {
-      store.dispatch({ type: types.WEBSOCKET_ERROR, payload: e });
+      store.dispatch({ type: 'WEBSOCKET_ERROR', payload: e });
     }
   });
 
   return next => action => { 
-    if (action && action.type === types.WEBSOCKET_SEND) {
+    if (action && action.type === 'WEBSOCKET_SEND') {
       const payload = action.payload;
       const data  = typeof payload === 'string' ? payload : JSON.stringify(payload);
       getWS().then(socket => { 

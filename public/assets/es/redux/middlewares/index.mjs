@@ -7,7 +7,6 @@
  */
 
 import assert from '../../utils/assert.mjs';
-import { types } from '../../actions/index.mjs';
 export { default as websocket } from './websocket.mjs'
 
 /**

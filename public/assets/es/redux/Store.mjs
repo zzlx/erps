@@ -7,8 +7,8 @@
  */
 
 import assert from '../utils/assert.mjs';
-import * as reducers from '../reducers/index.mjs';
-import { types } from '../actions/index.mjs';
+import * as reducers from './reducers/index.mjs';
+import types from './actionTypes.mjs';
 import * as M from './middlewares/index.mjs'
 
 /**

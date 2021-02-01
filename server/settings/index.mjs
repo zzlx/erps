@@ -47,6 +47,8 @@ export default new Proxy({
 
     return Reflect.get(target, property, receiver);
   },
+  set: function (target, property, value) {
+  }
 });
 
 /**
@@ -109,4 +111,12 @@ function isSupportIPv6 () {
   }
 
   return hasIPv6;
+}
+
+function detectPort (port) {
+  const message =
+    process.platform !== 'win32' && defaultPort < 1024 && !isRoot()
+      ? `Admin permissions are required to run a server on a port below 1024.`
+      : `Something is already running on port ${defaultPort}.`;
+
 }

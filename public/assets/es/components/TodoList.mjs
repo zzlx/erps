@@ -12,7 +12,6 @@ import Context from './_Context.mjs';
 import Button from './Button.mjs';
 import Message from './Alert.mjs';
 import Form from './Form.mjs';
-import { send } from '../actions/index.mjs';
 
 export default class TodoList extends React.Component {
   constructor(props) {
@@ -73,7 +72,10 @@ export default class TodoList extends React.Component {
 
     if (this.state.text.length === 0) return;
 
-    this.context.store.dispatch(send(this.state.text));
+    this.context.store.dispatch({
+      type: 'WEBSOCKET_SEND',
+      payload: this.state.text
+    });
     const newItem = { text: this.state.text, id: Date.now() };
     
     this.setState(state => ({

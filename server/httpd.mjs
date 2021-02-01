@@ -2,8 +2,7 @@
  * *****************************************************************************
  *
  * Http service Daemon
- * ===
- *
+ * ===================
  *
  * ## 参考文档
  *
@@ -23,18 +22,13 @@ import logWriter from './logWriter.mjs';
 import debuglog from './debuglog.mjs';
 import settings from './settings/index.mjs';
 import app from './services/index.mjs';
+import WebSocket from './WebSocketServer.mjs';
 
 process.title = 'org.zzlx.httpd';
 
 const debug = debuglog('debug:httpd'); // 调试信息打印工具
 const sessionStore = new Map();
 const streamHandler = app.callback();
-
-/*
-process.on('SIGINT', () => {
-  console.log('Press Control-D to exit.');
-});
-*/
 
 process.on('message', (m) => {
   debug(m);
@@ -73,6 +67,9 @@ const server = opts.cert && opts.key
   ? http2.createSecureServer(opts)
   : http2.createServer(opts);
 
+// websocket
+const ws = new WebSocket({ server: server, });
+
 // 注册close处理程序
 server.on('close', () => {
   debug('The server is closed gracefull.');
@@ -101,9 +98,13 @@ server.on('connection', (socket) => {
 // for a new connection has successfully completed. 
 server.on('secureConnection', socket => {
   socket.on('data', buffer => {
-    const message = JSON.parse(buffer.toString());
-    if (message.token !== settings.passphrase) return;
-    exec(message.command);
+    try {
+      const message = JSON.parse(buffer.toString());
+      if (message.token !== settings.passphrase) return;
+      exec(message.command);
+    } catch (e) {
+      //不做处理
+    }
   });
 });
 
@@ -119,7 +120,7 @@ server.on('secureConnection', socket => {
 // It may be emitted multiple times for each socket.
 // event is emitted when the client sends a certificate status request. 
 server.on('OCSPRequest', (certificate, issuer, cb) => {
-  debug('OCSPRequest event');
+  debug('OCSPRequest event handler: @todo: 客户端证书验证流程');
   debug(crypto.Certificate.exportPublicKey(certificate));
   cb(null, null);
 });
