@@ -1,7 +1,22 @@
 Git
 =====
 
-# 常用操作
+## hash算法  
+
+```
+header = "<type> " + content.length + "\0"
+hash = sha1(header + content)
+```
+
+在计算对象hash时首先会在对象头部添加一个header这个header由3部分组成,
+第一部分表示对象的类型可以取值blob tree commit以分别表示数据对象树对象提交对象
+第二部分是数据的字节长度
+第三部分是一个空字节用来将header和content分隔开
+将header添加到content头部之后使用sha1算法计算出一个40位的hash值
+
+
+
+## 常用操作
 
 * 查看冲突文件列表
 
