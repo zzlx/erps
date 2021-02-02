@@ -53,6 +53,7 @@ export default function websocket (store) {
     }
 
     try {
+      const startTime = Date.now();
       ws = new WebSocket(getURI()); 
 
       ws.onerror = function (error) {
@@ -63,7 +64,9 @@ export default function websocket (store) {
         store.dispatch({ type: 'WEBSOCKET_CLOSED', payload: event });
       }
 
-      ws.onopen = function (event) { resolve(ws); };
+      ws.onopen = function (event) { 
+        resolve(ws); 
+      };
 
       ws.onmessage = function (event) {
         store.dispatch({ type: 'WEBSOCKET_MESSAGE', payload: event });
@@ -93,7 +96,7 @@ export function getURI (url = import.meta.url) {
   const protocol = urlObj.protocol === 'http' ? 'ws' : 'wss';
   const hostname = urlObj.hostname;
   const port = urlObj.port === "" ? "" : ":" + urlObj.port;
-  const pathname = '/websocket';
+  const pathname = '/socket';
 
   return `${protocol}://${hostname}${port}${pathname}`; 
 }

@@ -6,7 +6,6 @@
  * *****************************************************************************
  */
 
-import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 import paths from './paths.mjs';
@@ -45,8 +44,6 @@ export default new Proxy(configs, {
  */
 
 function writeJsonFile (obj) {
-  assert(obj, 'The param obj must be set.');
-
   return fs.promises.writeFile(
     paths.SETTINGS, 
     JSON.stringify(obj, null, 2), 

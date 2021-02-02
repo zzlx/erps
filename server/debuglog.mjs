@@ -10,7 +10,7 @@ import util from 'util';
 
 // `debugs` is deliberately initialized to undefined so any call to
 // debuglog() before initializeDebugEnv() is called will throw.
-let debugs = {};
+const debugs = {};
 
 let debugEnvRegex = null;
 
@@ -36,8 +36,6 @@ function emitWarningIfNeeded(set) {
   }
 }
 
-function noop() {}
-
 function debuglogImpl(set) {
   if (debugEnvRegex == null) initializeDebugEnv(process.env.NODE_DEBUG);
   set = set.toUpperCase();
@@ -52,7 +50,7 @@ function debuglogImpl(set) {
         process.stderr.write(util.format('%s %s: %s\n', set, coloredPID, msg));
       };
     } else {
-      debugs[set] = noop;
+      debugs[set] = () => {};
     }
   }
 
@@ -61,8 +59,7 @@ function debuglogImpl(set) {
 
 // debuglogImpl depends on process.pid and process.env.NODE_DEBUG,
 // so it needs to be called lazily in top scopes of internal modules
-// that may be loaded before these run time states are allowed to
-// be accessed.
+// that may be loaded before these run time states are allowed to be accessed.
 export default function debuglog(set, cb) {
   let debug = (...args) => {
     // Only invokes debuglogImpl() when the debug function is
@@ -73,7 +70,5 @@ export default function debuglog(set, cb) {
     debug(...args);
   };
 
-  return (...args) => {
-    debug(...args);
-  };
+  return (...args) => debug(...args);
 }

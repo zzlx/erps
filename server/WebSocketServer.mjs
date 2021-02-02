@@ -3,7 +3,7 @@
  *
  * WebSocket Server
  *
- * ## Referense:
+ * Referense:
  *
  * * [The WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
  * * [Websocket protocol PDF format](https://tools.ietf.org/pdf/rfc6455.pdf)
@@ -11,9 +11,9 @@
  * *****************************************************************************
  */ 
  
-import assert from 'assert';
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
+import https from 'https';
 
 import debuglog from './debuglog.mjs';
 import { 
@@ -23,14 +23,11 @@ import {
 } from './constants.mjs';
 
 const debug = debuglog('debug:websocket');
-const clients = new Set();
+const connections = new Set(); // 链接存储器
 
 export default class WebSocket extends EventEmitter {
   constructor (options = {}) {
     super();
-    assert(typeof options === 'object', 'WebSocket options must be an Object.');
-    assert(options.server, 'WebSocket Server need a server in options.');
-
     this.server = options.server;
     this.closed = false;
     this.buffer = Buffer.alloc(0);
@@ -42,7 +39,7 @@ export default class WebSocket extends EventEmitter {
   }
 
   /**
-   * send ping message to client
+   * send ping message
    */
 
   ping () {
@@ -50,16 +47,20 @@ export default class WebSocket extends EventEmitter {
   }
 
   /**
-   * send pong message to client
+   * send pong message
    */
+
   pong () {
   }
 
   /**
    *
    */
+
   upgradeHandler (req, socket, head) {
     socket.on('error', socketOnError);
+
+    debug('websocket handshake');
 
     const version = req.headers['sec-websocket-version'] || '';
     const key = req.headers['sec-websocket-key'] || '';
@@ -97,25 +98,24 @@ export default class WebSocket extends EventEmitter {
       }
     }
 
+    //
     socket.write(resHeaders.concat('\r\n').join('\r\n'));
 
     const address = socket.remoteAddress + ':' + socket.remotePort;
 
     socket.on('close', () => { 
       debug('connection from ', address, ' is closed.');
-      clients.delete(socket);
+      connections.delete(socket);
     });
 
     socket.removeListener('error', socketOnError);
 
     socket.on('data', (data) => {
-      this.buffer = data;
-      this.processBuffer();
+      debug('test');
+      this.processBuffer(data);
     });
 
-    clients.add(socket); // 添加到服务端存储
-
-    debug('websocket connection establised');
+    connections.add(socket); // 添加到服务端存储
   }
 
   /**
@@ -123,17 +123,12 @@ export default class WebSocket extends EventEmitter {
    */
 
   broadcastMessage(data) {
-    for (let client of clients) {
+    for (let client of connections) {
       client.write(data, 'utf8', () => { 
         debug('broadcast message: ', data);
       });
     }
   }
-
-  /**
-   *
-   */
-
 
   /**
    * Close the connection when preconditions are not fulfilled.
@@ -174,30 +169,35 @@ export default class WebSocket extends EventEmitter {
    */
 
   close (cb) {
-    if (clients) {
-      for (const client of clients) client.terminate();
+    if (connections) {
+      for (const client of connections) client.terminate();
     }
 
     //const server = this._server;
     //process.nextTick(emitClose, this);
   }
 
-  handleData (opcode, readData) {
+  /**
+   *
+   *
+   */
+
+  handleData (opcode, data) {
     debug('opcode: ', opcode);
 
     switch (opcode) {
       case OPCODES.TEXT: 
-        this.emit('data', readData.toString('utf8'));
+        this.emit('message', data.toString('utf8'));
         break;
       case OPCODES.BINARY:
-        this.emit('data', readData);
+        this.emit('message', data);
         break;
       default:
         this.close(1002, 'unhandle opcode: ' + opcode);
     }
   }
 
-  send (data) {
+  send (socket, data) {
     let opcode, buffer;
 
     if (Buffer.isBuffer(data)) { 
@@ -209,22 +209,23 @@ export default class WebSocket extends EventEmitter {
     } else {
       throw new Error('cannot send object. must be send buffer or string.');
     }
-    this.doSend(opcode, buffer);
-  }
 
-  doSend (opcode, buffer) {
-    this.socket.write(encodeMessage(opcode, buffer));
+    socket.write(encodeMessage(opcode, buffer));
   }
 
   /**
    *
-   * [Data Framing](https://tools.ietf.org/html/rfc6455#section-5)
+   *
+   * [Data Framing Protocol](https://tools.ietf.org/html/rfc6455#section-5.2)
+   *
+   *
    */
 
-  processBuffer () {
-    let buf = this.buffer;
+  processBuffer (data) {
+    let buf = data;
     let idx = 2;
     const byte1 = buf.readUInt8(0);
+    debug(byte1);
     const str1 = byte1.toString(2);
     const FIN = str1[0];
     let opcode = byte1 & 0x0f;
@@ -266,11 +267,11 @@ export default class WebSocket extends EventEmitter {
   handleRealData (opcode, realDataBuffer) {
     switch (opcode) {
       case OPCODES.TEXT:
-        this.emit('data', realDataBuffer.toString('utf8'));
-        this.broadcastMessage(realDataBuffer.toString());
+        this.emit('message', realDataBuffer.toString('utf8'));
+        //this.broadcastMessage(realDataBuffer.toString());
         break;
       case OPCODES.BINARY:
-        this.emit('data', realDataBuffer);
+        this.emit('message', realDataBuffer);
         break;
       default:
         this.close(1002, 'unhandled opcode: ' + opcode);
@@ -398,7 +399,10 @@ function readData (buffer) {
 }
 
 /**
- * 解析数据
+ * unmask data
+ *
+ * @param {} maskBytes
+ * @param {buffer} data
  */
 
 function unmask (maskBytes, data) {
@@ -429,7 +433,7 @@ function encodeMessage (opcode, payload) {
 }
 
 /**
- * 计算hash值
+ * calculate hash key
  */
 
 function hashKey (key) {

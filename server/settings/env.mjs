@@ -14,6 +14,7 @@ import paths from './paths.mjs';
 const dotenvObj = paths.DOT_ENV
   ?  envParser(fs.readFileSync(paths.DOT_ENV))
   : {};
+
 assert(typeof dotenvObj === 'object', '解析.env文件出错');
 
 for (let env of Object.keys(dotenvObj)) {

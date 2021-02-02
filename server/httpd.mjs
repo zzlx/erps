@@ -24,24 +24,20 @@ import settings from './settings/index.mjs';
 import app from './services/index.mjs';
 import WebSocket from './WebSocketServer.mjs';
 
-process.title = 'org.zzlx.httpd';
-
 const debug = debuglog('debug:httpd'); // 调试信息打印工具
 const sessionStore = new Map();
 const streamHandler = app.callback();
+const socketClients = new Map();
 
-process.on('message', (m) => {
-  debug(m);
-});
+process.title = 'org.zzlx.httpd';
 
 process.on('uncaughtException', (error, origin) => {
-  debug(error);
-});
-process.on('unhandledRejection', (reason, promise) => {
-  debug(reason);
+  console.log(error);
 });
 
-process.nextTick(() => start()); //  启动服务
+process.on('unhandledRejection', (reason, promise) => {
+  console.log(reason);
+});
 
 const opts = {
   allowHTTP1: true,
@@ -67,7 +63,9 @@ const server = opts.cert && opts.key
   ? http2.createSecureServer(opts)
   : http2.createServer(opts);
 
-// websocket
+process.nextTick(() => start()); //  启动服务
+
+// websocket server
 const ws = new WebSocket({ server: server, });
 
 // 注册close处理程序
@@ -92,11 +90,13 @@ server.on('keylog', (line, tlsSocket) => {
 });
 
 server.on('connection', (socket) => {
+  debug('connection envent');
 });
 
 // he 'secureConnection' event is emitted after the handshaking process 
 // for a new connection has successfully completed. 
 server.on('secureConnection', socket => {
+  debug('secureConnection event');
   socket.on('data', buffer => {
     try {
       const message = JSON.parse(buffer.toString());
@@ -120,7 +120,7 @@ server.on('secureConnection', socket => {
 // It may be emitted multiple times for each socket.
 // event is emitted when the client sends a certificate status request. 
 server.on('OCSPRequest', (certificate, issuer, cb) => {
-  debug('OCSPRequest event handler: @todo: 客户端证书验证流程');
+  debug('OCSPRequest event handler: @todo: 支持客户端证书验证');
   debug(crypto.Certificate.exportPublicKey(certificate));
   cb(null, null);
 });
@@ -163,6 +163,18 @@ server.on('stream', (stream, headers, flags) => {
   streamHandler(stream, headers, flags);
 });
 
+server.on('listening', function () {
+  if (process.channel && process.send) {
+    process.send({ 
+      message: '服务器已启动',
+      pid: process.pid,
+      address: this.address(),
+    });
+  } else {
+    debug('Http server is listening on:', this.address());
+  }
+});
+
 /**
  * *****************************************************************************
  *
@@ -172,22 +184,11 @@ server.on('stream', (stream, headers, flags) => {
  */
 
 function start () {
-  server.listen({
-    ipv6Only: false,
+  server.listen({ 
+    ipv6Only: false, 
     exclusive: true,
     host: settings.host,
     port: settings.port,
-  }, function () {
-    if (process.channel && process.send) {
-      process.send({ 
-        message: '服务器已启动',
-        pid: process.pid,
-        address: this.address(),
-      });
-    } else {
-      console.log('%s(pid:%s) server addr:', 
-        process.title, process.pid, this.address());
-    }
   });
 }
 
