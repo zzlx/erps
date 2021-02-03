@@ -23,19 +23,12 @@ import {
 } from './constants.mjs';
 
 const debug = debuglog('debug:websocket');
-const connections = new Set(); // 链接存储器
 
-export default class WebSocket extends EventEmitter {
+export default class WebSocketServer extends EventEmitter {
   constructor (options = {}) {
     super();
-    this.server = options.server;
-    this.closed = false;
-    this.buffer = Buffer.alloc(0);
 
-    // register upgrade handler
-    this.server.on('upgrade', (req, socket, head) => {
-      this.upgradeHandler(req, socket, head);
-    });
+    this.connections = new Map(); //
   }
 
   /**
@@ -102,20 +95,22 @@ export default class WebSocket extends EventEmitter {
     socket.write(resHeaders.concat('\r\n').join('\r\n'));
 
     const address = socket.remoteAddress + ':' + socket.remotePort;
+    const socketID = crypto.createHash('sha1').update(address + '_' + Date.now()).digest('hex');
 
+    // 添加到服务端存储
+    this.connections.set(socketID, socket); 
+
+    // 关闭时删除链接
     socket.on('close', () => { 
       debug('connection from ', address, ' is closed.');
-      connections.delete(socket);
+      this.connections.delete(socketID);
     });
 
-    socket.removeListener('error', socketOnError);
-
     socket.on('data', (data) => {
-      debug('test');
+      debug('websocket链接计数:', this.connections.size);
       this.processBuffer(data);
     });
 
-    connections.add(socket); // 添加到服务端存储
   }
 
   /**
@@ -123,7 +118,7 @@ export default class WebSocket extends EventEmitter {
    */
 
   broadcastMessage(data) {
-    for (let client of connections) {
+    for (let client of this.connections) {
       client.write(data, 'utf8', () => { 
         debug('broadcast message: ', data);
       });
@@ -225,7 +220,7 @@ export default class WebSocket extends EventEmitter {
     let buf = data;
     let idx = 2;
     const byte1 = buf.readUInt8(0);
-    debug(byte1);
+    debug('buf[0]:', buf[0]);
     const str1 = byte1.toString(2);
     const FIN = str1[0];
     let opcode = byte1 & 0x0f;

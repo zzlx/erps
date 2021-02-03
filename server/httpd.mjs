@@ -22,7 +22,7 @@ import logWriter from './logWriter.mjs';
 import debuglog from './debuglog.mjs';
 import settings from './settings/index.mjs';
 import app from './services/index.mjs';
-import WebSocket from './WebSocketServer.mjs';
+import WebSocketServer from './WebSocketServer.mjs';
 
 const debug = debuglog('debug:httpd'); // 调试信息打印工具
 const sessionStore = new Map();
@@ -65,9 +65,6 @@ const server = opts.cert && opts.key
 
 process.nextTick(() => start()); //  启动服务
 
-// websocket server
-const ws = new WebSocket({ server: server, });
-
 // 注册close处理程序
 server.on('close', () => {
   debug('The server is closed gracefull.');
@@ -87,6 +84,17 @@ server.on('error', e => {
 
 server.on('keylog', (line, tlsSocket) => {
   logWriter(path.join(settings.paths.PATH_LOG, 'ssl-keys.log'), line.toString());
+});
+
+/**
+ * upgrade handler
+ */
+
+// websocket server
+const wss = new WebSocketServer({});
+
+server.on('upgrade', (req, socket, head) => {
+  wss.upgradeHandler(req, socket, head);
 });
 
 server.on('connection', (socket) => {
