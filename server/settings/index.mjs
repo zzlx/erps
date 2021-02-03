@@ -35,10 +35,14 @@ export default new Proxy({
   license: packageJSON.license || 'MIT',
   paths,
   system,
-  port: process.env.PORT || '8888',
   host: isSupportIPv6() ? '::' : '0.0.0.0',
 }, {
   get: function (target, property, receiver) {
+    if (property === 'port') {
+      return process.env.PORT 
+        ? process.env.PORT 
+        : process.env.NODE_ENV === 'development' ? '8888' : '3000',
+    }
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
     if (property === 'cert') return fs.readFileSync(configs.cert);
