@@ -8,10 +8,6 @@
  *
  * [参考文档](../node_modules/sass/README.md)
  * [node-sass](https://github.com/sass/node-sass)
- *
- * @param {} scssFile
- * @param {function} cb 
- * @return 
  * *****************************************************************************
  */
 

@@ -11,38 +11,37 @@ import os from 'os';
 import path from 'path';
 
 const __file = import.meta.url.substr(7);
-export const __ROOT = path.dirname(path.dirname(path.dirname(__file)));
+const __root = path.dirname(path.dirname(path.dirname(__file)));
 
-const paths = (root => {
-  const paths = Object.create(null);
+// paths object
+const paths = Object.create(null);
 
-  // Set ROOT Path
-  Object.defineProperty(paths, 'ROOT', {
-    value: root,
+// 源码目录及文件预定义, 此配置不可重写配置
+const PATHS = {
+  GIT: '.git',
+  BIN: 'bin',
+  DOCS: 'docs',
+  PUBLIC: 'public',
+  SERVER: 'server',
+  SRC: 'src',
+  GITIGNORE: '.gitignore',
+  NPMRC: '.npmrc',
+  VIMRC: '.vimrc',
+  LICENSE: 'LICENSE',
+  README: 'README.md',
+  CONFIGURE: 'configure',
+  MAKEFILE: 'makefile',
+  PACKAGE: 'package.json',
+};
+
+for (const p of Object.keys(PATHS)) {
+  Object.defineProperty(paths, p, {
+    value: path.join(__root, PATHS[p]),
     writable: false,
-    enumerable: true,
+    enumerable: false,
     configurable: false,
   });
-
-  // Read paths from source code, can not be writable、configurable、enumerable
-  fs.readdirSync(root, {withFileTypes: true}).forEach(file => {
-    const name = String(file.name)
-      .replace(/^(\.)/, 'DOT_')
-      .replace(/(\..+)$/, '') // 去掉扩展名后缀
-      .replace(/[\.|-]/g, '_')
-      .toUpperCase(); 
-
-    // 
-    Object.defineProperty(paths, name, {
-      value: path.join(root, file.name),
-      writable: false,
-      enumerable: false, 
-      configurable: false,
-    });
-  });
-
-  return paths;
-})(__ROOT);
+}
 
 // 配置的目录路径
 // 可配置、枚举,以便在配置文件保存配置

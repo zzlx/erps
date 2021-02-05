@@ -7,26 +7,22 @@
  * *****************************************************************************
  */
 
+const { exec, execFile, fork, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { fork, spawn, exec, execFile } = require('child_process');
 const net = require('net');
 const tls = require('tls');
 const https = require('http2');
 const { X509Certificate } = require('crypto');
 const zlib = require('zlib');
-const __root = path.dirname(__dirname);
 
+const __root = path.dirname(__dirname);
 let httpd = null;
 let debug = () => {};
 let settings = null;
 let console = {};
 
-/**
- * 系统服务主控程序
- * main控制程序接受并执行参数
- */
-
+// 主控制程序: 解析参数并执行命令
 (async function main (argvs = process.argv.slice(2)) {
   const debuglog = await import('../server/debuglog.mjs').then(m => m.default);
   const argvParser = await import('../server/utils.lib.mjs').then(m => m.argvParser);

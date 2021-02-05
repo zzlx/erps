@@ -6,6 +6,7 @@
 * [阿里云镜像站点](https://developer.aliyun.com/mirror/)
 * [Web开发技术](https://developer.mozilla.org/zh-CN/docs/Web)
 * [JavaScript 参考](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference)
+* [system admin](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/)
 
 ## 参考项目
 

@@ -4,17 +4,30 @@
  * 
  * ACME client
  *
+ * 自动获取签名证书部署证书
+ *
  * [ACME Protocol](https://tools.ietf.org/html/rfc8555)
  * @author: wangxuemin@zzlx.org
  * *****************************************************************************
  */
 
+const http = require('http');
+const http2 = require('http2');
 
+// API Server address
+const ACME_API = "https://acme-v02.api.letsencrypt.org";
+const ACME_API_STAGING = "https://acme-staging-v02.api.letsencrypt.org";
+
+// main program
 (async function main () {
   const debuglog = await import('../server/debuglog.mjs').then(m => m.default);
   const settings = await import('../server/settings/index.mjs').then(m => m.default);
   const debug = debuglog('debug:acme');
-
   debug('ACME client');
-  debug(settings);
+
+
 })();
+
+/**
+ *
+ */

@@ -5,12 +5,12 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "devel:start": "bin/erps.mjs --start --env=development --debug",
-    "devel:stop": "bin/erps.mjs --stop --env=development --debug",
-    "devel:restart": "bin/erps.mjs --restart --env=development --debug",
-    "restart": "bin/erps.mjs --restart",
-    "stop": "bin/erps.mjs --stop",
-    "start": "bin/erps.mjs --start"
+    "devel:start": "bin/erps --start --env=development --debug",
+    "devel:stop": "bin/erps --stop --env=development --debug",
+    "devel:restart": "bin/erps --restart --env=development --debug",
+    "restart": "bin/erps --restart",
+    "stop": "bin/erps --stop",
+    "start": "bin/erps --start"
   },
   "dependencies": {
     "@koa/router": "^10.0.0",
