@@ -41,7 +41,7 @@ export default new Proxy({
     if (property === 'port') {
       return process.env.PORT 
         ? process.env.PORT 
-        : process.env.NODE_ENV === 'development' ? '8888' : '3000',
+        : process.env.NODE_ENV === 'development' ? '8888' : '3000';
     }
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
