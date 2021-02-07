@@ -13,9 +13,6 @@ import path from 'path';
 const __file = import.meta.url.substr(7);
 const __root = path.dirname(path.dirname(path.dirname(__file)));
 
-// paths object
-const paths = Object.create(null);
-
 // 源码目录及文件预定义, 此配置不可重写配置
 const PATHS = {
   GIT: '.git',
@@ -34,14 +31,33 @@ const PATHS = {
   PACKAGE: 'package.json',
 };
 
-for (const p of Object.keys(PATHS)) {
-  Object.defineProperty(paths, p, {
-    value: path.join(__root, PATHS[p]),
+const paths = (root => {
+  const paths = Object.create(null);
+
+  Object.defineProperty(paths, 'ROOT', {
+    value: root,
     writable: false,
-    enumerable: false,
+    enumerable: true,
     configurable: false,
   });
-}
+
+  fs.readdirSync(root, { withFileTypes: true }).forEach(p => {
+    const name = String(p.name)
+      .replace(/^(\.)/, 'DOT_')
+      .replace(/(\..+)$/, '')
+      .replace(/[\.|-]/g, '_')
+      .toUpperCase(); 
+
+    Object.defineProperty(paths, name, { 
+      value: path.join(root, p.name),
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    });
+  });
+
+  return paths;
+})(__root);
 
 // 配置的目录路径
 // 可配置、枚举,以便在配置文件保存配置
