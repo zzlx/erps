@@ -28,7 +28,7 @@ export default class WebSocketServer extends EventEmitter {
   constructor (options = {}) {
     super();
 
-    this.connections = new Map(); //
+    this.connections = new Map(); // 客户端链接存储器
   }
 
   /**
@@ -91,18 +91,17 @@ export default class WebSocketServer extends EventEmitter {
       }
     }
 
-    //
+    // 服务返回后才能正式建立websocket连接
     socket.write(resHeaders.concat('\r\n').join('\r\n'));
 
+    // 添加到服务端存储
     const address = socket.remoteAddress + ':' + socket.remotePort;
     const socketID = crypto.createHash('sha1').update(address + '_' + Date.now()).digest('hex');
-
-    // 添加到服务端存储
     this.connections.set(socketID, socket); 
 
-    // 关闭时删除链接
     socket.on('close', () => { 
       debug('connection from ', address, ' is closed.');
+      // 关闭时删除链接
       this.connections.delete(socketID);
     });
 
@@ -319,6 +318,7 @@ function rawFrameParseHandle(socket) {
   let frame,
     frameArr = [], // 用来保存分片帧的数组
     totalLen = 0;  // 记录所有分片帧负载叠加的总长度
+
   socket.on('data', rawFrame => {
     frame = decodeWsFrame(rawFrame);
 

@@ -4,6 +4,8 @@
  * Http service Daemon
  * ===================
  *
+ * 守护进程
+ *
  * ## 参考文档
  *
  * * [Node HTTP/2](https://nodejs.org/dist/latest-v15.x/docs/api/http2.html)
@@ -26,7 +28,6 @@ import WebSocketServer from './WebSocketServer.mjs';
 
 const debug = debuglog('debug:httpd'); // 调试信息打印工具
 const sessionStore = new Map();
-const streamHandler = app.callback();
 const socketClients = new Map();
 
 process.title = 'org.zzlx.httpd';
@@ -92,6 +93,7 @@ server.on('keylog', (line, tlsSocket) => {
 
 // websocket server
 const wss = new WebSocketServer({});
+app.websocketServer = wss;
 
 server.on('upgrade', (req, socket, head) => {
   wss.upgradeHandler(req, socket, head);
@@ -99,6 +101,7 @@ server.on('upgrade', (req, socket, head) => {
 
 server.on('connection', (socket) => {
   debug('connection envent');
+  //debug(socket);
 });
 
 
@@ -106,15 +109,18 @@ server.on('connection', (socket) => {
 // for a new connection has successfully completed. 
 server.on('secureConnection', socket => {
   debug('secureConnection event');
+
   socket.on('data', buffer => {
     try {
       const message = JSON.parse(buffer.toString());
-      if (message.token !== settings.passphrase) return;
+      debug('Receive message: ', message);
+      if (message.token !== settings.passphrase) return; // 过滤socket
       exec(message.command);
     } catch (e) {
       //不做处理
     }
   });
+
 });
 
 // This event is emitted when a new TCP stream is established, 
@@ -167,6 +173,9 @@ server.on('tlsClientError', (exception, tlsSocket) => {
 server.on('unknownProtocol', (error) => {
   debug('unknownProtocol');
 });
+
+const streamHandler = app.callback();
+app.httpServer = server;
 
 server.on('stream', (stream, headers, flags) => {
   streamHandler(stream, headers, flags);

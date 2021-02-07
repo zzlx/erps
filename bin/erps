@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const net = require('net');
 const tls = require('tls');
-const https = require('http2');
+const http2 = require('http2');
 const { X509Certificate } = require('crypto');
 const zlib = require('zlib');
 
@@ -108,11 +108,11 @@ function startDaemon () {
  */
 
 function startHttpd () {
-  const args = [ 
-    path.join(__root, 'server', 'httpd.mjs'),
-  ];
+  const args = [ path.join(__root, 'server', 'httpd.mjs'), ];
+
   const options = {
-    detached: false,
+    detached: true,
+		env: process.env,
     //stdio: ['ignore', 'ignore', 'ignore', 'ipc']
     stdio: [0, 1, 2, null],
   };
@@ -192,30 +192,31 @@ function sendCommand (command) {
     host: settings.host,
     port: settings.port, 
     ca: settings.cert,
+		servername: 'zzlx.org',
+		rejectUnauthorized: false,
     checkServerIdentity: (hostname, cert) => { 
+			debug(hostname);
+			debug(cert);
       return null;
     },
   };
 
   const conn = tls.connect(options, () => {
-    if (conn.authorized) {
-      const message = JSON.stringify({
-        token: settings.passphrase,
-        command: command
-      });
-
-      conn.end(message);
-    }
+		conn.end(JSON.stringify({
+			token: settings.passphrase,
+			authorized: conn.authorized,
+			command: command
+		}));
   });
 
   conn.on('error', e => {
     if (e.code === 'ECONNREFUSED') {
-      debug('The server may not be started, tye again later.');
-    }
-  });
-
-  conn.on('close', () => { 
-    debug('Connection is closed.'); 
+      debug('Run service first!');
+    } else if (e.code === 'UNALBE_TO_GET_ISSUER_CERT') {
+      debug('Unable to get issuer from cert');
+    } else {
+			debug(e);
+		}
   });
 } 
 
