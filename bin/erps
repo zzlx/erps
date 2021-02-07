@@ -95,6 +95,7 @@ let console = {};
  */
 
 function startDaemon () {
+  renderCSS(); // 生成css文件
   startHttpd();
   if (process.env.NODE_ENV === 'development') {
     scssMonitor();
@@ -111,7 +112,7 @@ function startHttpd () {
     path.join(__root, 'server', 'httpd.mjs'),
   ];
   const options = {
-    detached: process.env.NODE_ENV === 'development' ? false : true,
+    detached: false,
     //stdio: ['ignore', 'ignore', 'ignore', 'ipc']
     stdio: [0, 1, 2, null],
   };
@@ -154,13 +155,30 @@ async function scssMonitor () {
     }
 
     timeout = setTimeout(() => {
-      exec(path.join(__dirname, 'css-render'), (error, stdout, stderr) => {
-        debug('计划的渲染程序已执行完成. reason: %s', file);
-        if (error) console.error(error);
-        if (stdout) console.log(stdout);
-        if (stderr) console.log(stderr);
-      });
+      renderCSS();
     }, 1200); // 1200ms延迟
+  });
+}
+
+function renderCSS () {
+  exec(path.join(__dirname, 'css-render') + ' ' + path.join(path.dirname(__dirname), 'src', 'scss', 'styles.scss'),
+    async (error, stdout, stderr) => {
+    if (error) console.error(error);
+    if (stdout) {
+      const css = stdout;
+      const cssFile = path.join(path.dirname(__dirname), 'public', 'assets', 'css', 'styles.css');
+      await fs.promises.mkdir(path.dirname(cssFile), { recursive: true }).catch(console.error); 
+
+      Promise.all([
+        fs.promises.writeFile(cssFile, css),
+        fs.promises.writeFile(cssFile + '.gz', zlib.gzipSync(css)),
+        fs.promises.writeFile(cssFile + '.br', zlib.brotliCompressSync(css)),
+        fs.promises.writeFile(cssFile + '.deflate', zlib.deflateSync(css)),
+      ]);
+      
+
+    };
+    if (stderr) console.log(stderr);
   });
 }
 
@@ -277,10 +295,4 @@ function getChar () {
 }
 
 /*
-    return Promise.all([
-      fs.promises.writeFile(cssFile, res.css),
-      fs.promises.writeFile(cssFile + '.gz', zlib.gzipSync(res.css)),
-      fs.promises.writeFile(cssFile + '.br', zlib.brotliCompressSync(res.css)),
-      fs.promises.writeFile(cssFile + '.deflate', zlib.deflateSync(res.css)),
-    ]);
  */

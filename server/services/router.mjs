@@ -14,7 +14,7 @@ import settings from '../settings/index.mjs';
 
 import docs from './documentation.mjs';
 import homePage from './homePage.mjs';
-import log from './log.mjs';
+//import log from './log.mjs';
 
 const router = new Router();
 

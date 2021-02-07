@@ -36,15 +36,13 @@ router.get('index', '/*', async (ctx, next) => {
   // @TODO:根据路由信息动态更新title
   html.title = '首页|HomePage';
 
-  if (process.env.NODE_ENV === 'development') {
-    const appURL = path.join(settings.paths.PUBLIC, 'assets', 'es', 'App.mjs'); 
-    const app = await import(appURL).then(m => m.default);
-    const element = app({
-      location: { pathname: ctx.pathname }
-    });
-    const container = html.getElementById('root')
-    container.innerHTML = ReactDOMServer.renderToString(element);
-  }
+  const appURL = path.join(settings.paths.PUBLIC, 'assets', 'es', 'app.mjs'); 
+  const app = await import(appURL).then(m => m.default);
+  const element = app({
+    location: { pathname: ctx.pathname }
+  });
+  const container = html.getElementById('root')
+  container.innerHTML = ReactDOMServer.renderToString(element);
 
   ctx.body = html.render();
   next();

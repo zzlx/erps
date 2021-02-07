@@ -29,6 +29,8 @@ import packageJSON from './package.mjs';
 import system from './system.mjs';
 import configs from './configs.mjs';
 
+paths.PATH_LOG = path.join(paths.ROOT, '.cache', 'log');
+
 export default new Proxy({ 
   name: packageJSON.name,
   version: packageJSON.version, 

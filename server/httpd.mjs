@@ -101,6 +101,7 @@ server.on('connection', (socket) => {
   debug('connection envent');
 });
 
+
 // he 'secureConnection' event is emitted after the handshaking process 
 // for a new connection has successfully completed. 
 server.on('secureConnection', socket => {
@@ -129,7 +130,7 @@ server.on('secureConnection', socket => {
 // event is emitted when the client sends a certificate status request. 
 server.on('OCSPRequest', (certificate, issuer, cb) => {
   debug('OCSPRequest event handler: @todo: 支持客户端证书验证');
-  debug(crypto.Certificate.exportPublicKey(certificate));
+  //debug(crypto.Certificate.exportPublicKey(certificate));
   cb(null, null);
 });
 
