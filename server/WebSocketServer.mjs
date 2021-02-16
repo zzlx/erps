@@ -100,7 +100,7 @@ export default class WebSocketServer extends EventEmitter {
     this.connections.set(socketID, socket); 
 
     socket.on('close', () => { 
-      debug('connection from ', address, ' is closed.');
+      debug(`connection from ${address} (id:${socketID}) is closed.`);
       // 关闭时删除链接
       this.connections.delete(socketID);
     });

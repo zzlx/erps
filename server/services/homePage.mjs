@@ -36,7 +36,7 @@ router.get('index', '/*', async (ctx, next) => {
   // @TODO:根据路由信息动态更新title
   html.title = '首页|HomePage';
 
-  const appURL = path.join(settings.paths.PUBLIC, 'assets', 'es', 'app.mjs'); 
+  const appURL = path.join(settings.paths.PUBLIC, 'uis', 'app.mjs'); 
   const app = await import(appURL).then(m => m.default);
   const element = app({
     location: { pathname: ctx.pathname }
