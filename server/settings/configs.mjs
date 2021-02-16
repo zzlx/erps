@@ -26,6 +26,7 @@ const defaults = {
 
 // 监测config目录
 const configPath = path.join(process.env.HOME, '.config', Package.name);
+
 fs.promises.mkdir(configPath).then(() => {
   // 创建配置目录
   defaults.initialSetup = true;
@@ -37,14 +38,12 @@ fs.promises.mkdir(configPath).then(() => {
   }
 });
 
-debug(defaults);
+const configFile = path.join(configPath, 'settings.json');
 
-// 配置文件不存在时
-if (paths.SETTINGS == null) {
-  paths.SETTINGS = path.join(paths.ROOT, 'settings.json');
-  await writeJsonFile(defaults);
+if (!fs.existsSync(configFile)) {
+  await writeJsonFile(configFile, defaults);
 } else {
-  const json = JSON.parse(fs.readFileSync(paths.SETTINGS, 'utf8'));
+  const json = JSON.parse(fs.readFileSync(configFile, 'utf8'));
   Object.assign(defaults, json);
 }
 
@@ -63,10 +62,6 @@ export default new Proxy(defaults, {
  * 写入配置文件
  */
 
-function writeJsonFile (obj) {
-  return fs.promises.writeFile(
-    paths.SETTINGS, 
-    JSON.stringify(obj, null, 2), 
-    'utf8'
-  );
+function writeJsonFile (file, obj) {
+  return fs.promises.writeFile(file, JSON.stringify(obj, null, 2), 'utf8');
 }
