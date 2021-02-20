@@ -31,7 +31,32 @@ import packageJSON from './package.mjs';
 import system from './system.mjs';
 import configs from './configs.mjs';
 
-paths.PATH_LOG = path.join(process.env.HOME, '.cache', 'log');
+// 配置目录
+paths.PATH_CACHE = path.join(process.env.HOME, '.cache');
+paths.PATH_DATA = path.join(paths.PATH_CACHE, 'data');
+paths.PATH_LOG = path.join(paths.PATH_CACHE, 'log');
+
+export default new Proxy({ 
+  name: packageJSON.name,
+  version: packageJSON.version || '1.0.0', 
+  license: packageJSON.license || 'MIT',
+  paths,
+  system,
+  host: isSupportIPv6() ? '::' : '0.0.0.0',
+  port: process.env.PORT || configs.port,
+}, {
+  get: function (target, property, receiver) {
+    if (property === 'writePidFile') return writePidFile;
+    if (property === 'deletePidFile') return deletePidFile;
+    if (property === 'cert') return fs.readFileSync(configs.cert);
+    if (property === 'privateKey') return fs.readFileSync(configs.privateKey);
+    if (property === 'passphrase') return configs.passphrase;
+
+    return Reflect.get(target, property, receiver);
+  },
+  set: function (target, property, value) {
+  }
+});
 
 /**
  *
@@ -157,25 +182,3 @@ function argvParser (argvs = Array.prototype.slice.call(process.argv, 2)) {
 
   return params;
 }
-
-export default new Proxy({ 
-  name: packageJSON.name,
-  version: packageJSON.version || '1.0.0', 
-  license: packageJSON.license || 'MIT',
-  paths,
-  system,
-  host: isSupportIPv6() ? '::' : '0.0.0.0',
-  port: process.env.PORT || configs.port,
-}, {
-  get: function (target, property, receiver) {
-    if (property === 'writePidFile') return writePidFile;
-    if (property === 'deletePidFile') return deletePidFile;
-    if (property === 'cert') return fs.readFileSync(configs.cert);
-    if (property === 'privateKey') return fs.readFileSync(configs.privateKey);
-    if (property === 'passphrase') return configs.passphrase;
-
-    return Reflect.get(target, property, receiver);
-  },
-  set: function (target, property, value) {
-  }
-});

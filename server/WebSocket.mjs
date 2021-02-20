@@ -125,6 +125,7 @@ export default class Server extends EventEmitter {
         case OPCODES.CONTINUE:
           break;
         case OPCODES.TEXT:
+          encodePayload(0x1, buffer.toString('utf8'));
           this.emit('message', buffer.toString('utf8'));
           break;
         case OPCODES.BINARY:
@@ -242,6 +243,93 @@ export class Client extends EventEmitter {
  */
 
 /**
+ * Parse Data Frame 
+ *
+ * Reference: 
+ * [Base Framing Protocol](https://tools.ietf.org/html/rfc6455#section-5.2)
+ *
+ * @param {object} buffer
+ * @return {object}
+ */
+
+function decodeFrame (buffer) {
+  const byte1  = buffer.readUInt8(0);
+  const FIN    = (byte1 & 0b10000000) >>> 7;
+  const RSV1   = (byte1 & 0b01000000) >>> 6;
+  const RSV2   = (byte1 & 0b00100000) >>> 5;
+  const RSV3   = (byte1 & 0b00010000) >>> 4;
+  const opcode = (byte1 & 0b00001111); 
+
+  const byte2  = buffer.readUInt8(1);
+  const MASK   = (byte2 & 0b10000000) >>> 7;
+  let length   = (byte2 & 0b01111111);
+
+  let idx = 2;
+
+  if (length === 0b01111110) {
+    length = buffer.readUInt16BE(idx);
+    idx+=2;
+  } else if (length === 0b01111111) {
+    const heightBits = buffer.readUint32BE(idx);
+    if (heightBits != 0) {}
+    idx+=4;
+    length = buffer.readUInt32BE(idx);
+    idx+=4;
+  }
+
+  let payload = buffer.slice(idx, idx + length);
+
+  if (MASK) {
+    const maskingKey = buffer.slice(idx, idx+=4);
+    payload = unmask(maskingKey, buffer.slice(idx, idx + length));
+  }
+
+  return { FIN, RSV1, RSV2, RSV3, opcode, payload } 
+}
+
+/**
+ * Encode payload
+ *
+ * @param {}
+ * @return {} buffer
+ */
+
+function encodePayload (opcode, payload, mask = false) {
+  const FIN  = 0b10000000;
+  const RSV1 = 0b01000000; 
+  const RSV2 = 0b00100000; 
+  const RSV3 = 0b00010000; 
+  const byte1 = FIN & RSV1 & RSV2 & RSV3 & opcode;
+
+  const length = Buffer.byteLength(payload);
+  let byte2 = null;
+  let extendedLength = null;
+
+  if (length < 126) { 
+    byte2 = Uint8Array.from([length]);
+  } else if (length <= 65535) {
+    byte2 = Uint8Array.from([126]);
+    extendedLength = Uint16Array.from([length]);
+  } else {
+    byte2 = Uint8Array.from(127);
+    extendedLength = Uint64Array.from([length]);
+  }
+
+  debug(byte2);
+  return;
+}
+
+/**
+ * Generate a 32bits masking key
+ */
+
+function generateMaskingKey () {
+  const maskingKey = new ArrayBuffer(4);
+  const view = new DataView(maskingKey);
+  view.setUint32(0, Number('0b' + Math.random().toString(2).substr(2, 32)));
+  return maskingKey;
+}
+/**
  * unmask data
  *
  * @param {} maskBytes
@@ -281,67 +369,3 @@ function getURI (url) {
   return `${protocol}://${hostname}${port}${path}`; 
 }
 
-/**
- * Parse Data Frame 
- *
- * Reference: 
- * [Base Framing Protocol](https://tools.ietf.org/html/rfc6455#section-5.2)
- *
- * @param {object} buffer
- * @return {object}
- */
-
-function decodeFrame (buffer) {
-  const byte1  = buffer.readUInt8(0);
-  const FIN    = (byte1 & 0b10000000) >>> 7;
-  const RSV1   = (byte1 & 0b01000000) >>> 6;
-  const RSV2   = (byte1 & 0b00100000) >>> 5;
-  const RSV3   = (byte1 & 0b00010000) >>> 4;
-  const opcode = (byte1 & 0b00001111); 
-
-  const byte2  = buffer.readUInt8(1);
-  const MASK   = (byte2 & 0b10000000) >>> 7;
-  let length   = (byte2 & 0b01111111);
-
-  let idx = 2;
-
-  if (length === 0b01111110) {
-    length = buffer.readUInt16BE(idx);
-    idx+=2;
-  } else if (length === 0b01111111) {
-    const heightBits = buffer.readUint32BE(idx);
-    if (heightBits != 0) {}
-    idx+=4;
-    length = buffer.readUInt32BE(idx);
-    idx+=4;
-  }
-
-  let payload = buffer.slice(idx, idx + length);
-
-  if (MASK) {
-    payload = unmask(buffer.slice(idx, idx+=4), buffer.slice(idx, idx + length));
-  }
-
-  return { FIN, RSV1, RSV2, RSV3, opcode, payload } 
-}
-
-/**
- * Encode payload
- *
- * @param {}
- *
- */
-
-function encodePayload (opcode, payload) {
-  const FIN  = 0b10000000;
-  const RSV1 = 0b01000000; 
-  const RSV2 = 0b00100000; 
-  const RSV3 = 0b00010000; 
-  const byte1 = FIN & RSV1 & RSV2 & RSV3 & opcode; 
-
-  const length = Buffer.byteLength(payload);
-
-  if ()
-
-
-}

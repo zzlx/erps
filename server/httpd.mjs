@@ -118,7 +118,7 @@ server.on('secureConnection', socket => {
   socket.on('data', buffer => {
     try {
       const message = JSON.parse(buffer.toString());
-      debug('Receive message: ', message);
+      debug('Receive: ', message);
       if (message.token !== settings.passphrase) return; // 过滤socket
       exec(message.command);
     } catch (e) {
