@@ -20,6 +20,7 @@
     "d3": "^5.9.7",
     "ejs": "^3.1.5",
     "express": "^5.0.0-alpha.1",
+    "formik": "^2.2.6",
     "gray-matter": "^4.0.2",
     "htmlparser2": "^5.0.0",
     "jsbarcode": "^3.11.0",

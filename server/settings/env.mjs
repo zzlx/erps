@@ -9,10 +9,11 @@
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
-import paths from './paths.mjs';
 
-const dotenvObj = paths.DOT_ENV
-  ?  envParser(fs.readFileSync(paths.DOT_ENV))
+const DOT_ENV = path.join(process.cwd(), '.env');
+
+const dotenvObj = fs.existsSync(DOT_ENV)
+  ?  envParser(fs.readFileSync(DOT_ENV))
   : {};
 
 assert(typeof dotenvObj === 'object', '解析.env文件出错');

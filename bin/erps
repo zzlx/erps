@@ -20,15 +20,31 @@ const __root = path.dirname(__dirname);
 let httpd = null;
 let debug = () => {};
 let settings = null;
-let console = {};
 
-// 主控制程序: 解析参数并执行命令
-(async function main (argvs = process.argv.slice(2)) {
+// 执行程序
+init().then(() => {
+	main(); 
+});
+
+/**
+ *
+ *
+ */
+
+async function init () {
   const debuglog = await import('../server/debuglog.mjs').then(m => m.default);
-  const argvParser = await import('../server/utils.lib.mjs').then(m => m.argvParser);
-  settings = await import('../server/settings/index.mjs').then(m => m.default);
-  console = await import('../server/utils.lib.mjs').then(m => m.console);
   debug = debuglog('debug:erps');
+  settings = await import('../server/settings/index.mjs').then(m => m.default);
+}
+
+/**
+ * 主控程序
+ *
+ */
+
+async function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
+
+  const argvParser = await import('../server/utils.lib.mjs').then(m => m.argvParser);
   const paramMap = argvParser(argvs);
 
   // deal with environment variables
@@ -79,15 +95,7 @@ let console = {};
   }
 
   if (isExec === false) startDaemon(); // 未提供参数时执行start
-})(); // 执行主程序
-
-/**
- * *****************************************************************************
- *
- * Utilites
- *
- * *****************************************************************************
- */
+}
 
 /**
  *
@@ -95,8 +103,14 @@ let console = {};
  */
 
 function startDaemon () {
-  renderCSS(); // 生成css文件
+	const cssFile = path.join(settings.paths.PUBLIC, 'assets', 'css', 'styles.css');
+
+	if (!fs.existsSync(cssFile)) { 
+		renderCSS(); // 生成css文件
+	}
+
   startHttpd();
+
   if (process.env.NODE_ENV === 'development') {
     scssMonitor();
     srcMonitor();
@@ -120,7 +134,13 @@ function startHttpd () {
   httpd = spawn(process.argv[0], args, options);
 }
 
+/**
+ *
+ *
+ */
+
 async function srcMonitor () {
+	debug('开发模式下监视文件改动');
   const Watchdog = await import('../server/Watchdog.mjs').then(m => m.default);
 
   const watchdog = new Watchdog(
@@ -144,6 +164,7 @@ async function srcMonitor () {
 
 
 async function scssMonitor () {
+	debug('scss监视器开始工作');
   const Watchdog = await import('../server/Watchdog.mjs').then(m => m.default);
   const watchdog = new Watchdog(path.join(__root, 'src', 'scss'));
   let timeout = null;
@@ -210,13 +231,18 @@ function sendCommand (command) {
   });
 
   conn.on('error', e => {
+
     if (e.code === 'ECONNREFUSED') {
-      debug('Run service first!');
-    } else if (e.code === 'UNALBE_TO_GET_ISSUER_CERT') {
+      debug('Server daemon is not exist, try to start it later!');
+			return;
+    }
+
+		if (e.code === 'UNALBE_TO_GET_ISSUER_CERT') {
       debug('Unable to get issuer from cert');
-    } else {
-			debug(e);
-		}
+			return;
+    }
+
+		debug(e);
   });
 } 
 

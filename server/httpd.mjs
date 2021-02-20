@@ -24,12 +24,13 @@ import logWriter from './logWriter.mjs';
 import debuglog from './debuglog.mjs';
 import settings from './settings/index.mjs';
 import app from './services/index.mjs';
-import WebSocketServer from './WebSocketServer.mjs';
+import WebSocketServer from './WebSocket.mjs';
 
 const debug = debuglog('debug:httpd'); // 调试信息打印工具
 const sessionStore = new Map();
 const socketClients = new Map();
 
+// Set process title
 process.title = 'org.zzlx.httpd';
 
 process.on('uncaughtException', (error, origin) => {
@@ -71,13 +72,14 @@ server.on('close', () => {
   debug('The server is closed gracefull.');
 });
 
+
 // 注册error处理程序
 server.on('error', e => {
   if (e.code === 'EADDRINUSE') { 
     if (process.send) {
       process.send(e);
     } else {
-      console.log(`Address ${e.address}:${e.port} is in use, try again latter.`);
+      console.log(`${process.title} is runing on ${e.address}:${e.prot}, try again later`);
     }
   }
 
@@ -93,7 +95,10 @@ server.on('keylog', (line, tlsSocket) => {
 
 // websocket server
 const wss = new WebSocketServer({});
-app.websocketServer = wss;
+
+wss.on('message', data => {
+  debug('websocket message:', data);
+});
 
 server.on('upgrade', (req, socket, head) => {
   wss.upgradeHandler(req, socket, head);
@@ -220,5 +225,7 @@ function exec (cmd) {
         start();
       });
       break;
+    default:
+      debug('Unknown Server Action.');
   }
 }

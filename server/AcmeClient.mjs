@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * *****************************************************************************
  * 
@@ -11,8 +10,7 @@
  * *****************************************************************************
  */
 
-const http = require('http');
-const http2 = require('http2');
+import http2 from 'http2';
 
 // API Server address
 const ACME_API = "https://acme-v02.api.letsencrypt.org";

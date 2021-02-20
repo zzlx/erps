@@ -10,7 +10,6 @@
 
 export { default as argvParser } from '../public/uis/utils/argvParser.mjs';
 export { default as assert } from '../public/uis/utils/assert.mjs';
-export { default as console } from '../public/uis/utils/console.mjs';
 export { default as camelCase } from '../public/uis/utils/camelCase.mjs';
 export { default as date } from '../public/uis/utils/date.mjs';
 export { default as defineToStringTag } from '../public/uis/utils/defineToStringTag.mjs';

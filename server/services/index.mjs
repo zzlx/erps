@@ -22,7 +22,6 @@ import logger from '../koa/middlewares/logger.mjs';
 import markdown from '../koa/middlewares/markdown.mjs';
 import xResponse from '../koa/middlewares/xResponse.mjs';
 
-import { camelCase, console } from '../utils.lib.mjs';
 import settings from '../settings/index.mjs';
 import debuglog from '../debuglog.mjs';
 import router from './router.mjs';
