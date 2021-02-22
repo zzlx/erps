@@ -253,18 +253,18 @@ export class Client extends EventEmitter {
  */
 
 function decodeFrame (buffer) {
-  const byte1  = buffer.readUInt8(0);
+  let idx = 0;
+
+  const byte1  = Uint8Array.from(buffer.slice(idx, ++idx));
   const FIN    = (byte1 & 0b10000000) >>> 7;
   const RSV1   = (byte1 & 0b01000000) >>> 6;
   const RSV2   = (byte1 & 0b00100000) >>> 5;
   const RSV3   = (byte1 & 0b00010000) >>> 4;
   const opcode = (byte1 & 0b00001111); 
 
-  const byte2  = buffer.readUInt8(1);
+  const byte2  = Uint8Array.from(buffer.slice(idx, ++idx));
   const MASK   = (byte2 & 0b10000000) >>> 7;
   let length   = (byte2 & 0b01111111);
-
-  let idx = 2;
 
   if (length === 0b01111110) {
     length = buffer.readUInt16BE(idx);
@@ -291,6 +291,7 @@ function decodeFrame (buffer) {
  * Encode payload
  *
  * @param {}
+ * @param {buffer} payload
  * @return {} buffer
  */
 

@@ -250,7 +250,7 @@ endfunc
 "  进入vim时执行的任务
 function! EnterVim ()
 	if argc() == 0
-		:Vex
+		:E
 	endif
 endfunction
 
