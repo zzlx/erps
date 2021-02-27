@@ -6,7 +6,6 @@
  * Referense:
  *
  * * [The WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
- * * [Websocket protocol PDF format](https://tools.ietf.org/pdf/rfc6455.pdf)
  *
  * *****************************************************************************
  */ 
@@ -31,22 +30,6 @@ export default class Server extends EventEmitter {
   constructor (options = {}) {
     super();
     this.connections = new Map(); // 客户端链接存储器
-  }
-
-  /**
-   * send ping message
-   */
-
-  ping () {
-
-  }
-
-  /**
-   * send pong message
-   */
-
-  pong () {
-
   }
 
   /**
@@ -125,7 +108,6 @@ export default class Server extends EventEmitter {
         case OPCODES.CONTINUE:
           break;
         case OPCODES.TEXT:
-          encodePayload(0x1, buffer.toString('utf8'));
           this.emit('message', buffer.toString('utf8'));
           break;
         case OPCODES.BINARY:
@@ -160,40 +142,6 @@ export default class Server extends EventEmitter {
   }
 
   /**
-   * Close the connection when preconditions are not fulfilled.
-   *
-   * @param {net.Socket} socket The socket of the upgrade request
-   * @param {Number} code The HTTP response status code
-   * @param {String} [message] The HTTP response body
-   * @param {Object} [headers] Additional HTTP response headers
-   * @private
-   */
-
-  abortHandshake(socket, code, message, headers) {
-    if (socket.writable) {
-      message = message || HTTP_STATUS_CODES[code];
-      headers = {
-        Connection: 'close',
-        'Content-Type': 'text/html',
-        'Content-Length': Buffer.byteLength(message),
-        ...headers
-      };
-
-      socket.write(
-        `HTTP/1.1 ${code} ${HTTP_STATUS_CODES[code]}\r\n` +
-          Object.keys(headers)
-            .map((h) => `${h}: ${headers[h]}`)
-            .join('\r\n') +
-          '\r\n\r\n' +
-          message
-      );
-    }
-
-    socket.removeListener('error', () => {});
-    socket.destroy();
-  }
-
-  /**
    *
    */
 
@@ -204,35 +152,7 @@ export default class Server extends EventEmitter {
       }
     }
   }
-
-  /**
-   *
-   *
-   */
-
-  send (socket, data) {
-    let opcode, buffer;
-
-    if (Buffer.isBuffer(data)) { 
-      opcode == OPCODES.BINARY; 
-      buffer = data; 
-    } else if (typeof data === 'string') { 
-      opcode == OPCODES.TEXT; 
-      buffer = Buffer.from(data, 'utf8'); 
-    } else {
-      throw new Error('cannot send object. must be send buffer or string.');
-    }
-
-    socket.write(encodeMessage(opcode, buffer));
-  }
 } // end of WebSoceket class
-
-export class Client extends EventEmitter {
-  constructor (options = {}) {
-    super();
-    this.connections = new Map(); // 客户端链接存储器
-  }
-}
 
 /**
  * *****************************************************************************
@@ -291,18 +211,29 @@ function decodeFrame (buffer) {
  * Encode payload
  *
  * @param {}
- * @param {buffer} payload
- * @return {} buffer
+ * @param {buffer} payload * @return {} buffer
  */
 
-function encodePayload (opcode, payload, mask = false) {
-  const FIN  = 0b10000000;
-  const RSV1 = 0b01000000; 
-  const RSV2 = 0b00100000; 
-  const RSV3 = 0b00010000; 
-  const byte1 = FIN & RSV1 & RSV2 & RSV3 & opcode;
+function encode (payload, opcode, mask = false) {
+  // set opcode if not setting 
+  if (opcode == null) {
+    if (typeof payload === 'string') opcode = 0x1; 
+    if (payload instanceof Uint8Array) opcode = 0x2;
+  }
 
-  const length = Buffer.byteLength(payload);
+  const FIN  = 0b10000000;
+  const RSV1 = 0b00000000; 
+  const RSV2 = 0b00000000; 
+  const RSV3 = 0b00000000; 
+  const byte1 = Uint8Array.from([FIN | RSV1 | RSV2 | RSV3 | opcode]);
+
+  let data = payload instanceof Uint8Array 
+    ? payload
+    : typeof payload === 'string'
+      ? Buffer.from(payload)
+      : new Uint8Array(1);
+  const length = data.byteLength;
+
   let byte2 = null;
   let extendedLength = null;
 
@@ -316,17 +247,9 @@ function encodePayload (opcode, payload, mask = false) {
     extendedLength = Uint64Array.from([length]);
   }
 
-  let data = null;
-
-  if (payload instanceof Uint8Array) {
-  }
-
-  if (typeof payload === 'string') data = Buffer.from(payload);
-
   if (mask) { }
 
-  debug(data);
-  return;
+  return Buffer.concat([byte1, byte2, data]); 
 }
 
 /**
@@ -351,7 +274,7 @@ function generateMaskingKey () {
 function unmask (maskingKey, data) {
   if (!(maskingKey instanceof Uint8Array)) {
   }
-  if (!(data instanceof data)) {
+  if (!(data instanceof Uint8Array)) {
     throw new TypeError('');
   }
 
