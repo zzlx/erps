@@ -97,7 +97,8 @@ server.on('keylog', (line, tlsSocket) => {
 const wss = new WebSocketServer({});
 
 wss.on('message', data => {
-  debug('websocket message:', data);
+  // 放置处事件理器
+  //debug('websocket message:', data);
 });
 
 server.on('upgrade', (req, socket, head) => {

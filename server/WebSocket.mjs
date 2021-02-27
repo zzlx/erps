@@ -14,12 +14,12 @@
 import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import http2 from 'http2';
+import debuglog from './debuglog.mjs';
 import { 
   HTTP_STATUS_CODES,
   WEBSOCKET_STATUS_CODES as STATUS_CODES,
   WEBSOCKET_OPCODES as OPCODES,
 } from './constants.mjs';
-import debuglog from './debuglog.mjs';
 
 const debug = debuglog('debug:websocket');
 
@@ -316,7 +316,16 @@ function encodePayload (opcode, payload, mask = false) {
     extendedLength = Uint64Array.from([length]);
   }
 
-  debug(byte2);
+  let data = null;
+
+  if (payload instanceof Uint8Array) {
+  }
+
+  if (typeof payload === 'string') data = Buffer.from(payload);
+
+  if (mask) { }
+
+  debug(data);
   return;
 }
 
@@ -330,16 +339,25 @@ function generateMaskingKey () {
   view.setUint32(0, Number('0b' + Math.random().toString(2).substr(2, 32)));
   return maskingKey;
 }
+
 /**
  * unmask data
  *
  * @param {} maskBytes
- * @param {buffer} data
+ * @param {Uint8Array} 
+ * @return {Uint8Array} 
  */
 
-function unmask (maskBytes, data) {
+function unmask (maskingKey, data) {
+  if (!(maskingKey instanceof Uint8Array)) {
+  }
+  if (!(data instanceof data)) {
+    throw new TypeError('');
+  }
+
   const payload = Buffer.alloc(data.length);
-  for (let i = 0; i < data.length; i++) payload[i] = maskBytes[i % 4] ^ data[i];
+
+  for (let i = 0; i < data.length; i++) payload[i] = maskingKey[i % 4] ^ data[i];
   return payload;
 }
 
