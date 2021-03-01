@@ -122,7 +122,7 @@ function startDaemon () {
  */
 
 function startHttpd () {
-  const args = [ path.join(__root, 'server', 'httpd.mjs'), ];
+  const args = [ path.join(__root, 'server', 'daemon.mjs'), ];
 
   const options = {
     detached: true,

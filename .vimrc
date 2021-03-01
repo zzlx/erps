@@ -37,7 +37,7 @@ let g:javascript_plugin_ngdoc = 1
 let g:javascript_plugin_flow = 1
 
 " ------------------------------------------------------------------------------
-" netrw配置
+" netrw configurations
 " ------------------------------------------------------------------------------
 let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro nornu'
 let g:netrw_menu = 1
