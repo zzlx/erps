@@ -24,7 +24,7 @@ import logWriter from './logWriter.mjs';
 import debuglog from './debuglog.mjs';
 import settings from './settings/index.mjs';
 import app from './services/index.mjs';
-import WebSocketServer from './websocket/Application.mjs';
+import WebSocketServer from './websocket/Server.mjs';
 
 const debug = debuglog('debug:httpd'); // 调试信息打印工具
 const sessionStore = new Map();
