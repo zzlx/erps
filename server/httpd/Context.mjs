@@ -10,9 +10,9 @@ import net from 'net';
 import accepts from 'accepts';
 //import contentType from 'content-type';
 
-import HttpError from '../HttpError.mjs';
+import HttpError from './HttpError.mjs';
+import MimeTypes from './MimeTypes.mjs';
 import { memCache } from '../utils.lib.mjs';
-import MimeTypes from '../MimeTypes.mjs';
 
 import { 
   HTTP2_METHOD, 
@@ -29,7 +29,7 @@ import {
   REQ_IP,
   RES_BODY,
   RES_HEADERS,
-} from '../constants.mjs'
+} from './constants.mjs'
 
 // define constants
 const mimeTypes = new MimeTypes();

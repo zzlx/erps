@@ -22,7 +22,7 @@ import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import etag from '../../etag.mjs';
+import etag from '../etag.mjs';
 
 export default function statics (root, options = {}) {
   assert('string' === typeof root, 'The root directory must be setting.');

@@ -25,6 +25,10 @@
 set nocompatible  " Use Vim defaults instead of 100% vi compatibility
 set backspace=2
 
+" 语法高亮
+syntax on
+syntax enable
+
 filetype on               " 文件类型检测
 filetype plugin on        " 根据不同类型的文件加载插件
 filetype indent on
@@ -35,6 +39,7 @@ let g:javascript_plugin_jsdoc = 1
 let javascript_enable_domhtmlcss = 1
 let g:javascript_plugin_ngdoc = 1
 let g:javascript_plugin_flow = 1
+let g:ft_ignore_pat = '\.\(Z\|gz\|bz2\|zip\|tgz\)$'
 
 " ------------------------------------------------------------------------------
 " netrw configurations
@@ -119,10 +124,6 @@ set ignorecase   " 搜索时大小写不敏感
 " 标签页配置
 set tabpagemax=12
 set showtabline=1
-
-" 语法高亮
-syntax on
-syntax enable
 
 " ==============================================================================
 " 自定义函数
@@ -259,7 +260,8 @@ endfunction
 " ------------------------------------------------------------------------------
 " c脚本配置
 autocmd BufRead *.c set cindent             "C/C++缩进方式
-autocmd FileType c noremap <buffer> <F12> :!gcc % <CR>
+autocmd FileType c noremap <buffer> <F5> :!gcc % <CR>
+autocmd FileType cpp noremap <buffer> <F5> :!gcc % <CR>
 
 " markdown脚本配置
 autocmd BufRead,BufNewFile *.md setfiletype markdown
@@ -267,19 +269,19 @@ autocmd BufRead,BufNewFile *.md setfiletype markdown
 " shell脚本配置项目
 autocmd BufNewFile *.sh exec ":call SetHeader()"
 autocmd BufRead,BufNewFile *.sh setfiletype shell set noexpandtab sw=2 ts=2 softtabstop=2
-autocmd FileType shell noremap <buffer> <F12> :!sh % <CR>
+autocmd FileType shell noremap <buffer> <F5> :!sh % <CR>
 
 " js脚本配置
 "autocmd BufWinLeave *.mjs,*.cjs mkview
 "autocmd BufWinEnter *.mjs,*.cjs silent loadview
 autocmd BufRead,BufNewFile *.cjs,*.mjs,*.js set expandtab filetype=javascript
-autocmd FileType javascript noremap <buffer> <F12> :!NODE_ENV=test NODE_DEBUG=debug:* node % <CR>
+autocmd FileType javascript noremap <buffer> <F5> :!NODE_ENV=test NODE_DEBUG=debug:* node % <CR>
 
 " python脚本配置
 autocmd Filetype python set fileformat=unix
 autocmd Filetype python set foldmethod=indent
 autocmd Filetype python set foldlevel=99
-autocmd FileType python noremap <buffer> <F12> :!python % <CR>
+autocmd FileType python noremap <buffer> <F5> :!python % <CR>
 
 " html配置
 autocmd BufRead *.html,<&faf;HTML>  runtime! syntax/html.vim
@@ -319,6 +321,8 @@ map <S-Tab> :tabpre<CR> " gT
 "nnoremap <C-H> <C-W><C-H>
 
 " 快捷键映射
-map t :call TargetsTab()<CR> " normal模式下,t键打开当前目标地址
-map <F2> :call Targets()<CR> " 当前窗口打开目标 
-map <F12> :!./%<CR>          " 执行脚本 
+" 当前窗口打开目标 
+map <F2> :call Targets()<CR> 
+
+" 在新标签页中打开目标
+map <F3> :call TargetsTab()<CR> 

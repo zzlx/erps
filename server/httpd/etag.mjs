@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * ETag calculate
+ * ETag calculate algrthem
  *
  * Create a simple ETag.
  *

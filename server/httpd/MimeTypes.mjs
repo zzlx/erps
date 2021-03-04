@@ -8,7 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import settings from './settings/index.mjs';
+import settings from '../settings/index.mjs';
 
 const EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/
 const TEXT_TYPE_REGEXP = /^text\//i

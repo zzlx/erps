@@ -28,9 +28,25 @@ import router from './router.mjs';
 
 const debug = debuglog('debug:/server');
 
+// 设置进程标题
+process.title = 'org.zzlx.httpd';
+
+process.on('uncaughtException', (error, origin) => {
+  console.log(error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.log(reason);
+});
+
+
 // 初始化服务器程序
 // 配置服务器基础功能
-const app = new App();
+const app = new App({
+  key: settings.privateKey,
+  cert: settings.cert,
+  passphrase: settings.passphrase,
+});
 
 app.use(error(path.join(settings.paths.PATH_LOG, 'error.log'))); // 记录中间件错误
 app.use(logger(path.join(settings.paths.PATH_LOG, 'request.log'))); // 记录访问日志
@@ -46,4 +62,20 @@ app.use(router.allowedMethods()); // 路由方法
 app.use(markdown()); // 启用markdown解析
 app.use(compress()); // 启用内容压缩
 
-export default app;
+// 启动服务端口
+app.listen({ 
+  ipv6Only: false, 
+  exclusive: true,
+  host: settings.host,
+  port: settings.port,
+}, function () {
+  if (process.channel && process.send) {
+    process.send({ 
+      message: '服务器已启动',
+      pid: process.pid,
+      address: this.address(),
+    });
+  } else {
+    debug('Http server is listening on:', this.address());
+  }
+});

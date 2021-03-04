@@ -1,10 +1,8 @@
 /**
  * *****************************************************************************
  *
- * http Daemon
+ * http Server
  * ======
- *
- * 服务器端守护进程
  *
  * ## 参考文档
  *
@@ -23,49 +21,18 @@ import { spawn } from 'child_process';
 import logWriter from '../logWriter.mjs';
 import debuglog from '../debuglog.mjs';
 import settings from '../settings/index.mjs';
-import app from '../services/index.mjs';
 import WebSocketServer from '../websocket/Server.mjs';
 
 const debug = debuglog('debug:httpd'); // 调试信息打印工具
 const sessionStore = new Map();
 const socketClients = new Map();
 
-// Set process title
-process.title = 'org.zzlx.httpd';
-
-process.on('uncaughtException', (error, origin) => {
-  console.log(error);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.log(reason);
-});
-
 const opts = {
-  allowHTTP1: true,
-  //ca: [fs.readFileSync('client-cert.pem')],
-  key: settings.privateKey,
-  cert: settings.cert,
-  passphrase: settings.passphrase,
-  requestCert: false, // 客户端证书支持
-  //sigalgs: 
-  //ciphers: 
-  //clientCertEngine: 
-  //dhparam
-  //ecdhCurve
-  //origins: [],
-  //privateKeyEngine
-  //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
-  //ticketKeys: crypto.randomBytes(48), 
-  handshakeTimeout: 120 * 1000, // milliseconds
-  sessionTimeout: 300, // seconds
 };
 
 const server = opts.cert && opts.key 
   ? http2.createSecureServer(opts)
   : http2.createServer(opts);
-
-process.nextTick(() => start()); //  启动服务
 
 // 注册close处理程序
 server.on('close', () => {
@@ -181,31 +148,7 @@ server.on('unknownProtocol', (error) => {
   debug('unknownProtocol');
 });
 
-const streamHandler = app.callback();
-app.httpServer = server;
-
 server.on('stream', streamHandler);
-server.on('listening', listeningHandler);
-
-/**
- * *****************************************************************************
- *
- * Event handler
- *
- * *****************************************************************************
- */
-
-function listeningHandler () {
-  if (process.channel && process.send) {
-    process.send({ 
-      message: '服务器已启动',
-      pid: process.pid,
-      address: this.address(),
-    });
-  } else {
-    debug('Http server is listening on:', this.address());
-  }
-}
 
 /**
  * *****************************************************************************
@@ -214,15 +157,6 @@ function listeningHandler () {
  *
  * *****************************************************************************
  */
-
-function start () {
-  server.listen({ 
-    ipv6Only: false, 
-    exclusive: true,
-    host: settings.host,
-    port: settings.port,
-  });
-}
 
 function exec (cmd) {
   switch(cmd) {

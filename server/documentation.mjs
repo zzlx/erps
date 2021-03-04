@@ -6,10 +6,10 @@
  * *****************************************************************************
  */
 
-import settings from '../settings/index.mjs';
+import settings from './settings/index.mjs';
 
-import Router from './Router.mjs';
-import statics from './middlewares/statics.mjs';
+import Router from './httpd/Router.mjs';
+import statics from './httpd/middlewares/statics.mjs';
 
 const router = new Router();
 

@@ -11,10 +11,11 @@
 import assert from 'assert';
 import cp from 'child_process';
 import EventEmitter from 'events'; 
+import http2 from 'http2';
 
 import Context from './Context.mjs';
 import compose from './compose.mjs';
-import { HTTP_STATUS_EMPTY_CODES } from '../constants.mjs';
+import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
 
 export default class Application extends EventEmitter {
   constructor(opts = {}) {
@@ -46,7 +47,33 @@ export default class Application extends EventEmitter {
   }
 
   listen () {
+    const opts = {
+      allowHTTP1: true,
+      //ca: [fs.readFileSync('client-cert.pem')],
+      key: this.opts.privateKey,
+      cert: this.opts.cert,
+      passphrase: this.opts.passphrase,
+      requestCert: false, // 客户端证书支持
+      //sigalgs: 
+      //ciphers: 
+      //clientCertEngine: 
+      //dhparam
+      //ecdhCurve
+      //origins: [],
+      //privateKeyEngine
+      //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+      //ticketKeys: crypto.randomBytes(48), 
+      handshakeTimeout: 120 * 1000, // milliseconds
+      sessionTimeout: 300, // seconds
+    }
 
+    this.server = opts.cert && opts.key
+      ? http2.createSecureServer(opts)
+      : http2.createServer(opts);
+    //const handler 
+
+    this.server.on('stream', this.callback())
+    this.server.listen(...arguments);
   }
 
   /**
