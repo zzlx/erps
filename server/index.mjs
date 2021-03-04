@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  * 
- * stream处理程序
+ * Http服务程序
  * ==============
  *
  * 🎆 静态文件服务
@@ -13,24 +13,25 @@
 
 import path from 'path';
 
-import Koa from '../koa/Application.mjs';
-import compress from '../koa/middlewares/compress.mjs';
-import cookies from '../koa/middlewares/cookies.mjs';
-import cors from '../koa/middlewares/cors.mjs';
-import error from '../koa/middlewares/error.mjs';
-import logger from '../koa/middlewares/logger.mjs';
-import markdown from '../koa/middlewares/markdown.mjs';
-import xResponse from '../koa/middlewares/xResponse.mjs';
+import App from './httpd/Application.mjs';
+import compress from './httpd/middlewares/compress.mjs';
+import cookies from './httpd/middlewares/cookies.mjs';
+import cors from './httpd/middlewares/cors.mjs';
+import error from './httpd/middlewares/error.mjs';
+import logger from './httpd/middlewares/logger.mjs';
+import markdown from './httpd/middlewares/markdown.mjs';
+import xResponse from './httpd/middlewares/xResponse.mjs';
 
-import settings from '../settings/index.mjs';
-import debuglog from '../debuglog.mjs';
+import settings from './settings/index.mjs';
+import debuglog from './debuglog.mjs';
 import router from './router.mjs';
 
-const debug = debuglog('debug:services/app.mjs');
+const debug = debuglog('debug:/server');
 
 // 初始化服务器程序
 // 配置服务器基础功能
-const app = new Koa();
+const app = new App();
+
 app.use(error(path.join(settings.paths.PATH_LOG, 'error.log'))); // 记录中间件错误
 app.use(logger(path.join(settings.paths.PATH_LOG, 'request.log'))); // 记录访问日志
 app.use(xResponse()); // 响应时间记录

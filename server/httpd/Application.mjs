@@ -45,6 +45,10 @@ export default class Application extends EventEmitter {
     this.middlewares = []; // store middlewares
   }
 
+  listen () {
+
+  }
+
   /**
    *
    */

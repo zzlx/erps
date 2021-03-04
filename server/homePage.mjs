@@ -11,7 +11,7 @@ import fs from 'fs';
 import path from 'path';
 import settings from '../settings/index.mjs';
 import HtmlTemplate from '../HtmlTemplate.mjs';
-import Router from '../koa/Router.mjs';
+import Router from './Router.mjs';
 import debuglog from '../debuglog.mjs';
 
 const debug = debuglog('debug:routes/homePage.mjs');

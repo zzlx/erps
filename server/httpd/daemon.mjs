@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * Daemon
+ * http Daemon
  * ======
  *
  * 服务器端守护进程
@@ -20,11 +20,11 @@ import path from 'path';
 import http2 from 'http2';
 import { spawn } from 'child_process';
 
-import logWriter from './logWriter.mjs';
-import debuglog from './debuglog.mjs';
-import settings from './settings/index.mjs';
-import app from './services/index.mjs';
-import WebSocketServer from './websocket/Server.mjs';
+import logWriter from '../logWriter.mjs';
+import debuglog from '../debuglog.mjs';
+import settings from '../settings/index.mjs';
+import app from '../services/index.mjs';
+import WebSocketServer from '../websocket/Server.mjs';
 
 const debug = debuglog('debug:httpd'); // 调试信息打印工具
 const sessionStore = new Map();
@@ -96,7 +96,8 @@ server.on('keylog', (line, tlsSocket) => {
 // websocket server
 const wss = new WebSocketServer({});
 
-wss.on('message', data => {
+wss.on('message', (data, socket) => {
+  debug('websocket message:', data, ' from :', socket.remoteAddress);
   // 放置处事件理器
   //debug('websocket message:', data);
 });
@@ -183,11 +184,18 @@ server.on('unknownProtocol', (error) => {
 const streamHandler = app.callback();
 app.httpServer = server;
 
-server.on('stream', (stream, headers, flags) => {
-  streamHandler(stream, headers, flags);
-});
+server.on('stream', streamHandler);
+server.on('listening', listeningHandler);
 
-server.on('listening', function () {
+/**
+ * *****************************************************************************
+ *
+ * Event handler
+ *
+ * *****************************************************************************
+ */
+
+function listeningHandler () {
   if (process.channel && process.send) {
     process.send({ 
       message: '服务器已启动',
@@ -197,7 +205,7 @@ server.on('listening', function () {
   } else {
     debug('Http server is listening on:', this.address());
   }
-});
+}
 
 /**
  * *****************************************************************************

@@ -18,7 +18,7 @@ import {
   HTTP_STATUS_CODES,
   WEBSOCKET_STATUS_CODES as STATUS_CODES,
   WEBSOCKET_OPCODES as OPCODES,
-} from '../constants.mjs';
+} from './constants.mjs';
 
 const debug = debuglog('debug:websocket');
 
@@ -108,10 +108,10 @@ export default class Server extends EventEmitter {
         case OPCODES.CONTINUE:
           break;
         case OPCODES.TEXT:
-          this.emit('message', buffer.toString('utf8'));
+          this.emit('message', buffer.toString('utf8'), socket);
           break;
         case OPCODES.BINARY:
-          this.emit('message', buffer);
+          this.emit('message', buffer, socket);
           break;
         case OPCODES.CLOSE:
           socket.end();
