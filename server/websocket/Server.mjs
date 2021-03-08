@@ -15,7 +15,6 @@ import EventEmitter from 'events';
 import http2 from 'http2';
 import debuglog from '../debuglog.mjs';
 import { 
-  HTTP_STATUS_CODES,
   WEBSOCKET_STATUS_CODES as STATUS_CODES,
   WEBSOCKET_OPCODES as OPCODES,
 } from './constants.mjs';

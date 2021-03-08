@@ -11,22 +11,21 @@
  * *****************************************************************************
  */
 
-import path from 'path';
-
 import App from './httpd/Application.mjs';
-import compress from './httpd/middlewares/compress.mjs';
-import cookies from './httpd/middlewares/cookies.mjs';
 import cors from './httpd/middlewares/cors.mjs';
 import error from './httpd/middlewares/error.mjs';
 import logger from './httpd/middlewares/logger.mjs';
+import cookies from './httpd/middlewares/cookies.mjs';
+import compress from './httpd/middlewares/compress.mjs';
 import markdown from './httpd/middlewares/markdown.mjs';
 import xResponse from './httpd/middlewares/xResponse.mjs';
 
 import settings from './settings/index.mjs';
 import debuglog from './debuglog.mjs';
 import router from './router.mjs';
+import WebSocket from './websocket/Server.mjs';
 
-const debug = debuglog('debug:/server');
+const debug = debuglog('debug:server');
 
 // 设置进程标题
 process.title = 'org.zzlx.httpd';
@@ -48,8 +47,19 @@ const app = new App({
   passphrase: settings.passphrase,
 });
 
-app.use(error(path.join(settings.paths.PATH_LOG, 'error.log'))); // 记录中间件错误
-app.use(logger(path.join(settings.paths.PATH_LOG, 'request.log'))); // 记录访问日志
+const ws = new WebSocket({});
+
+// Register upgrade event
+app.server.on('upgrade', (req, socket, head) => {
+  ws.upgradeHandler(req, socket, head);
+});
+
+// he 'secureConnection' event is emitted after the handshaking process 
+// for a new connection has successfully completed. 
+app.server.on('secureConnection', serverCtl);
+
+app.use(error(settings.paths.PATH_LOG)); // 记录中间件错误
+app.use(logger(settings.paths.PATH_LOG)); // 访问日志
 app.use(xResponse()); // 响应时间记录
 app.use(cors()); // 跨域访问支持
 app.use(cookies()); // 全局cookie支持
@@ -62,13 +72,21 @@ app.use(router.allowedMethods()); // 路由方法
 app.use(markdown()); // 启用markdown解析
 app.use(compress()); // 启用内容压缩
 
-// 启动服务端口
-app.listen({ 
-  ipv6Only: false, 
-  exclusive: true,
-  host: settings.host,
-  port: settings.port,
-}, function () {
+process.nextTick(() => {
+  // 启动服务端口
+  app.listen({ 
+    ipv6Only: false, 
+    exclusive: true,
+    host: settings.host,
+    port: settings.port,
+  }, listenCallback);
+});
+
+/**
+ * Utility functions
+ */
+
+function listenCallback () {
   if (process.channel && process.send) {
     process.send({ 
       message: '服务器已启动',
@@ -76,6 +94,39 @@ app.listen({
       address: this.address(),
     });
   } else {
-    debug('Http server is listening on:', this.address());
+    debug('The ERP services is listening on:', this.address());
   }
-});
+}
+
+/**
+ * 管理服务器
+ */
+
+function serverCtl (socket) {
+  socket.on('data', buffer => {
+    try {
+      if (buffer.readUInt8(0) !== 0b11111111) return; // 根据第一个字节判断
+      const data = buffer.slice(1); 
+      debug(data.toString());
+      const message = JSON.parse(data.toString());
+
+      if (message.token !== settings.passphrase) return; // 过滤socket
+
+      switch(message.command) {
+        case 'STOP': 
+          app.server.close(() => { });
+          break;
+
+        case 'RESTART': 
+          app.server.close(() => {
+            start();
+          });
+          break;
+        default:
+          debug('Unknown Server Action.');
+      }
+    } catch (e) {
+      debug(e); //不做处理
+    }
+  });
+}

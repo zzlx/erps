@@ -10,7 +10,11 @@ ERPs
 
 [github](https://github.com/zzlx/erps)
 
-## 开发目标
+## Development
+
+[server entry point](./server/index.mjs)
+
+### 开发目标
 
 * Easy Deploy 易于部署
 * Easy Use 易于使用

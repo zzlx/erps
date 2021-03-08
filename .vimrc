@@ -48,8 +48,8 @@ let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro nornu'
 let g:netrw_menu = 1
 let g:netrw_altv = 1
 let g:netrw_banner = 0
-let g:netrw_browse_split = 4 " 1 水平 2 垂直 3 新标签页 4 前一个窗口
-let g:netrw_winsize = 24
+let g:netrw_browse_split = 0 " 0 当前窗口 1 水平 2 垂直 3 新标签页 4 前一个窗口
+"let g:netrw_winsize = 24
 let g:netrw_liststyle = 3
 
 " 字符编码设置 "
@@ -251,7 +251,7 @@ endfunc
 "  进入vim时执行的任务
 function! EnterVim ()
 	if argc() == 0
-		:E
+		:o README.md
 	endif
 endfunction
 
@@ -321,6 +321,7 @@ map <S-Tab> :tabpre<CR> " gT
 "nnoremap <C-H> <C-W><C-H>
 
 " 快捷键映射
+"
 " 当前窗口打开目标 
 map <F2> :call Targets()<CR> 
 

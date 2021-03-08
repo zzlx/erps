@@ -17,6 +17,10 @@ import Context from './Context.mjs';
 import compose from './compose.mjs';
 import { HTTP_STATUS_EMPTY_CODES } from './constants.mjs';
 
+import debuglog from '../debuglog.mjs';
+
+const debug = debuglog('debug:httpd');
+
 export default class Application extends EventEmitter {
   constructor(opts = {}) {
     super();
@@ -44,13 +48,11 @@ export default class Application extends EventEmitter {
 
     // app storage
     this.middlewares = []; // store middlewares
-  }
 
-  listen () {
-    const opts = {
+    const options = {
       allowHTTP1: true,
       //ca: [fs.readFileSync('client-cert.pem')],
-      key: this.opts.privateKey,
+      key: this.opts.key, // 私钥
       cert: this.opts.cert,
       passphrase: this.opts.passphrase,
       requestCert: false, // 客户端证书支持
@@ -65,14 +67,32 @@ export default class Application extends EventEmitter {
       //ticketKeys: crypto.randomBytes(48), 
       handshakeTimeout: 120 * 1000, // milliseconds
       sessionTimeout: 300, // seconds
-    }
+    };
 
-    this.server = opts.cert && opts.key
-      ? http2.createSecureServer(opts)
-      : http2.createServer(opts);
-    //const handler 
+    this.server = options.cert && options.key
+      ? http2.createSecureServer(options)
+      : http2.createServer(options);
 
-    this.server.on('stream', this.callback())
+    this.server.on('error', e => {
+      if (e.code === 'EADDRINUSE') { 
+        if (process.send) {
+          process.send(e);
+        } else {
+          console.log(`${process.title} is already runing on ${e.address}:${e.port}, try again later`);
+        }
+      } else {
+        debug(error);
+      }
+    });
+  }
+
+  /**
+   *
+   *
+   */
+
+  listen () {
+    this.server.on('stream', this.callback());
     this.server.listen(...arguments);
   }
 
@@ -86,6 +106,7 @@ export default class Application extends EventEmitter {
     if (!this.listenerCount('error')) this.on('error', this.onerror); // 绑定事件处理器
 
     return (stream, headers, flags) => {
+
       const ctx = new Context();
       ctx.stream = stream;
       ctx.headers = headers;
@@ -149,7 +170,7 @@ export default class Application extends EventEmitter {
  * respond algorithm
  */
 
-export function respond (ctx) {
+function respond (ctx) {
   if (ctx.respond === false) return ctx.stream.end(); // allow bypassing respond
 
   if (null == ctx.status) ctx.status = 404; // set 404 status if not set
@@ -170,4 +191,8 @@ export function respond (ctx) {
   if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
   if (typeof ctx.body.pipe === 'function') return ctx.body.pipe(ctx.stream);
   return ctx.stream.end(); // respond with no content
+}
+
+function registerEvents () {
+
 }
