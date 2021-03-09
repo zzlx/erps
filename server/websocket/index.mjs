@@ -1,12 +1,14 @@
-#!/usr/bin/env node
-
 /**
  * *****************************************************************************
- * 
- * ERP服务管理程序
+ *
  *
  * *****************************************************************************
- */
+ */ 
+ 
 
-const main = await import ('../server/main.mjs').then(m => m.default);
-main(); // 执行主程序
+import Server from './Server.mjs';
+
+const app = new Server({
+});
+
+export default app;

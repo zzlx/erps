@@ -14,12 +14,41 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import http2 from 'http2';
 import debuglog from '../debuglog.mjs';
-import { 
-  WEBSOCKET_STATUS_CODES as STATUS_CODES,
-  WEBSOCKET_OPCODES as OPCODES,
-} from './constants.mjs';
-
 const debug = debuglog('debug:websocket');
+
+export const STATUS_CODES = {
+  1000: 'Normal Closure',
+  1001: 'Going Away',
+  1002: 'Protocol Error',
+  1003: 'Unsupported Data',
+  1004: 'Reserved',
+  1007: 'Data Type Error',
+  1008: 'Violates Policy',
+  1009: 'Too Big to Process',
+}
+
+export const OPCODES = {
+  CONTINUE: 0x0,
+  // non-control frame opcodes
+  TEXT:     0x1,
+  BINARY:   0x2,
+  // 0x3-0x7
+  // control frame opcodes
+  CLOSE:    0x8,
+  PING:     0x9,
+  PONG:     0xA,
+}
+
+// opcode value:
+// * 0b0000 denotes a continuation frame
+// * 0b0001 denotes a text frame
+// * 0b0010 denotes a binary frame
+// * 3-7 are reserved for further non-control frames
+// * 0b1000 denotes a connection close
+// * 0b1001 denotes a ping
+// * 0b1010 denotes a pong
+// 11-15 are reserved for further control frames
+
 
 /**
  * The WebSocket application
@@ -31,13 +60,17 @@ export default class Server extends EventEmitter {
     this.connections = new Map(); // 客户端链接存储器
   }
 
+  callback () {
+    return 
+
+  }
+
   /**
-   *
+   * upgrade handshake
    */
 
   upgradeHandler (req, socket, head) {
-    socket.on('error', () => {
-    });
+    socket.on('error', (error) => { debug(error); });
 
     const version = req.headers['sec-websocket-version'] || '';
     const key = req.headers['sec-websocket-key'] || '';
@@ -79,15 +112,16 @@ export default class Server extends EventEmitter {
     // 服务返回正确的信息后后才能正式建立websocket连接
     socket.write(resHeaders.concat('\r\n').join('\r\n'));
 
-    // 添加到服务端存储
+    // 链接存储逻辑
     const address = socket.remoteAddress + ':' + socket.remotePort;
     const socketID = crypto.createHash('sha1').update(address + '_' + Date.now()).digest('hex');
-    this.connections.set(socketID, socket); 
+    this.connections.set(socketID, socket); // 添加到服务端存储
+
+    debug(`websocket connection from ${address} (id:${socketID}) is established.`);
 
     socket.on('close', () => { 
-      debug(`connection from ${address} (id:${socketID}) is closed.`);
-      // 关闭时删除链接
-      this.connections.delete(socketID);
+      debug(`websocket connection from ${address} (id:${socketID}) is closed.`);
+      this.connections.delete(socketID); // 关闭时删除链接
     });
 
     let buffer = null;
@@ -108,6 +142,7 @@ export default class Server extends EventEmitter {
           break;
         case OPCODES.TEXT:
           this.emit('message', buffer.toString('utf8'), socket);
+          socket.write(encode(buffer, 0x2));
           break;
         case OPCODES.BINARY:
           this.emit('message', buffer, socket);
@@ -116,7 +151,13 @@ export default class Server extends EventEmitter {
           socket.end();
           break;
         case OPCODES.PING:
+          // send a pong frame
+          socket.write(encode(buffer, 0xA));
+          break;
         case OPCODES.PONG:
+          // receive a pong frame
+          //socket.write(encode('receive pong', 0x1));
+          break;
         default:
           debug(`opcode: ${opcode}`);
           //this.close(1002, 'unhandled opcode: ' + opcode);
@@ -271,6 +312,7 @@ function generateMaskingKey () {
  */
 
 function unmask (maskingKey, data) {
+
   if (!(maskingKey instanceof Uint8Array)) {
   }
   if (!(data instanceof Uint8Array)) {
@@ -278,8 +320,9 @@ function unmask (maskingKey, data) {
   }
 
   const payload = Buffer.alloc(data.length);
+  const keyLength = maskingKey.byteLength; 
 
-  for (let i = 0; i < data.length; i++) payload[i] = maskingKey[i % 4] ^ data[i];
+  for (let i = 0; i < data.byteLength; i++) payload[i] = maskingKey[i % keyLength] ^ data[i];
   return payload;
 }
 
@@ -291,22 +334,3 @@ function hashKey (key) {
   const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
   return crypto.createHash('sha1').update(key + GUID).digest('base64');
 }
-
-/**
- * 构造wss地址
- *
- * Reference: [WebSocket URIs](https://tools.ietf.org/html/rfc6455#page-14)
- */
-
-function getURI (url) {
-  const urlObj = new URL(url);
-
-  const protocol = urlObj.protocol === 'http' ? 'ws' : 'wss';
-
-  const host = urlObj.hostname;
-  const port = urlObj.port === "" ? "" : ":" + urlObj.port;
-  const path = '/websocket';
-
-  return `${protocol}://${hostname}${port}${path}`; 
-}
-

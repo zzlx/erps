@@ -1,17 +1,21 @@
 /**
  * *****************************************************************************
  * 
- * log routes
+ * 
  *
  * *****************************************************************************
  */
 
 import settings from '../settings/index.mjs';
-import statics from './httpd/middlewares/statics.mjs';
-import Router from './httpd/Router.mjs';
+
+import Router from './Router.mjs';
+import statics from './middlewares/statics.mjs';
+
 const router = new Router();
-// @TODOS:读取log/request.log时,readStream无法关闭
-router.get('log', '/log/*', statics(settings.paths.PATH_LOG, { prefix: '/log' }));
+
+router.get('docs', '/*', statics(settings.paths.DOCS, {
+  directoryIndex: [ 'README.md' ],
+}));
 
 export default router.routes();
 export const allowedMethods = router.allowedMethods();

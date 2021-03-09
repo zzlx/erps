@@ -11,19 +11,19 @@
  * *****************************************************************************
  */
 
-import App from './httpd/Application.mjs';
-import cors from './httpd/middlewares/cors.mjs';
-import error from './httpd/middlewares/error.mjs';
-import logger from './httpd/middlewares/logger.mjs';
-import cookies from './httpd/middlewares/cookies.mjs';
-import compress from './httpd/middlewares/compress.mjs';
-import markdown from './httpd/middlewares/markdown.mjs';
-import xResponse from './httpd/middlewares/xResponse.mjs';
+import App from './Application.mjs';
+import cors from './middlewares/cors.mjs';
+import error from './middlewares/error.mjs';
+import logger from './middlewares/logger.mjs';
+import cookies from './middlewares/cookies.mjs';
+import compress from './middlewares/compress.mjs';
+import markdown from './middlewares/markdown.mjs';
+import xResponse from './middlewares/xResponse.mjs';
 
-import settings from './settings/index.mjs';
-import debuglog from './debuglog.mjs';
-import router from './router.mjs';
-import WebSocket from './websocket/Server.mjs';
+import settings from '../settings/index.mjs';
+import debuglog from '../debuglog.mjs';
+import router from './routes.mjs';
+import WebSocket from '../websocket/Server.mjs';
 
 const debug = debuglog('debug:server');
 
@@ -48,6 +48,10 @@ const app = new App({
 });
 
 const ws = new WebSocket({});
+
+ws.on('message', (msg, socket) => {
+  debug('Receive a ws message: ', msg);
+});
 
 // Register upgrade event
 app.server.on('upgrade', (req, socket, head) => {
@@ -94,6 +98,7 @@ function listenCallback () {
       address: this.address(),
     });
   } else {
+    if (process.env.NODE_ENV === 'development') console.clear(); // clear console
     debug('The ERP services is listening on:', this.address());
   }
 }

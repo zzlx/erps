@@ -9,10 +9,10 @@
 import ReactDOMServer from 'react-dom/server.js';
 import fs from 'fs';
 import path from 'path';
-import settings from './settings/index.mjs';
-import HtmlTemplate from './HtmlTemplate.mjs';
-import Router from './httpd/Router.mjs';
-import debuglog from './debuglog.mjs';
+import settings from '../settings/index.mjs';
+import HtmlTemplate from '../HtmlTemplate.mjs';
+import Router from './Router.mjs';
+import debuglog from '../debuglog.mjs';
 
 const debug = debuglog('debug:routes/homePage.mjs');
 const router = new Router();

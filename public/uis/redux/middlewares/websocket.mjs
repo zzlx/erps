@@ -54,7 +54,8 @@ export default function websocket (store) {
 
     try {
       const startTime = Date.now();
-      ws = new WebSocket(getURI()); 
+
+      ws = new WebSocket(uri(), 'graphql'); // 建立websocket链接,使用graphql协议
 
       ws.onerror = function (error) {
         store.dispatch({ type: 'WEBSOCKET_ERROR', payload: event });
@@ -90,13 +91,17 @@ export default function websocket (store) {
   }
 }
 
-export function getURI (url = import.meta.url) {
+/**
+ * websocket uri
+ */
+
+export function uri (url = import.meta.url) {
   const urlObj = new URL(url);
 
   const protocol = urlObj.protocol === 'http' ? 'ws' : 'wss';
   const hostname = urlObj.hostname;
   const port = urlObj.port === "" ? "" : ":" + urlObj.port;
-  const pathname = '/wss';
+  const pathname = '/api';
 
   return `${protocol}://${hostname}${port}${pathname}`; 
 }
