@@ -23,7 +23,7 @@ import xResponse from './middlewares/xResponse.mjs';
 import settings from '../settings/index.mjs';
 import debuglog from '../debuglog.mjs';
 import router from './routes.mjs';
-import WebSocket from '../websocket/Server.mjs';
+import WebSocket from '../websocket/Application.mjs';
 
 const debug = debuglog('debug:server');
 
@@ -47,15 +47,12 @@ const app = new App({
   passphrase: settings.passphrase,
 });
 
-const ws = new WebSocket({});
+const ws = new WebSocket({
+  server: app.server,
+});
 
 ws.on('message', (msg, socket) => {
   debug('Receive a ws message: ', msg);
-});
-
-// Register upgrade event
-app.server.on('upgrade', (req, socket, head) => {
-  ws.upgradeHandler(req, socket, head);
 });
 
 // he 'secureConnection' event is emitted after the handshaking process 

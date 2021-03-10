@@ -8,7 +8,7 @@ import { parse } from './language/parser.mjs';
 import { validate } from './validation/validate.mjs';
 import { execute } from './execution/execute.mjs';
 
-export function graphql(opts) {
+export default function graphql(opts) {
 
   if (arguments.length > 1) {
     opts = Object.create(null);

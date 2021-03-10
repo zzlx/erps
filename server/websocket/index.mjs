@@ -6,9 +6,9 @@
  */ 
  
 
-import Server from './Server.mjs';
+import Application from './Application.mjs';
 
-const app = new Server({
+const app = new Application({
 });
 
 export default app;

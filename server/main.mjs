@@ -138,7 +138,6 @@ async function srcMonitor () {
       //if (httpd) httpd.kill();
       sendCommand('STOP').then(() => {
         httpd.kill(); // 杀掉子进程
-        debug(httpd);
         startHttpd();
       });
     }, 1000)

@@ -6,33 +6,6 @@
  * *****************************************************************************
  */
 
-export default new Proxy(assert, {
-  apply: function (target, thisArg, argumentsList) {
-    return target.bind(thisArg)(argumentsList);
-  },
-  get: function (target, property, receiver) {
-    if (Object.keys(Fns).includes(property)) return Fns[property];
-
-    return Reflect.get(target, property, receiver);
-  },
-});
-
-const Fns = {
-  isEmail,
-  isInvalid,
-  isIDNumber,
-  isInteger, 
-  isJSON, 
-  isNumber,
-  isNullish,
-  isPromise,
-  isUrl,
-  isZhCN,
-  isPhone,
-  isPlainObject,
-  shallowEqual,
-};
-
 /**
  * isOk
  *
@@ -40,34 +13,34 @@ const Fns = {
  * @param {string} message
  */
 
-export function assert (condition, message) {
+function assert (condition, message) {
   if (condition) return;
   const err = new Error(message || `Assertion failed.`);
   if (Error.captureStackTrace) Error.captureStackTrace(err, assert);
   throw err;
 }
 
-export function isEmail (v) {
+function isEmail (v) {
   return /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/.test(String(v));
 }
 
-export function isIDNumber (v) {
+function isIDNumber (v) {
   return /^\d{15}|\d{18}$/.test(String(v));
 }
 
-export function isInvalid (v) {
+function isInvalid (v) {
   return v === undefined || v !== v;
 }
 
-export function isInteger (v) {
+function isInteger (v) {
   return typeof v === 'number' && Number.isFinite(v) && Math.floor(v) === v;
 }
 
-export function isJSON (v) {
+function isJSON (v) {
   return /^[\x20\x09\x0a\x0d]*(\[|\{)/.test(String(v));
 }
 
-export function isNumber (v) {
+function isNumber (v) {
   const decimalsRegExp = /(?:\.0*|(\.[^0]+)0+)$/;
   const thousandsFormatRegExp = /\B(?=(\d{3})+(?!\d))/g;
 
@@ -76,27 +49,27 @@ export function isNumber (v) {
   return false;
 }
 
-export function isNullish (v) {
+function isNullish (v) {
   return v === null || v === undefined || v !== v;
 }
 
-export function isUrl (v) {
+function isUrl (v) {
   return /[a-zA-z]+:\/\/[^\s]*/.test(str);
 }
 
-export function isPromise (v) {
+function isPromise (v) {
   return Boolean(v && typeof v === 'object' && typeof v.then === 'function');
 }
 
-export function isZhCN (v) {
+function isZhCN (v) {
   return /[\u4e00-\u9fa5]/.test(String(v));
 }
 
-export function isPhone (v) {
+function isPhone (v) {
   return /(?:^\d{3,4}-\d{7,8}$)|(?:^\d{10}$)/.test(String(v));
 }
 
-export function isPlainObject(obj) {
+function isPlainObject(obj) {
   if (typeof obj !== 'object' || obj === null) return false
 
   let proto = Object.getPrototypeOf(obj)
@@ -121,7 +94,7 @@ export function isPlainObject(obj) {
  * @return {boolean} true or false
  */
 
-export function shallowEqual(objA, objB) {
+function shallowEqual(objA, objB) {
   if (is(objA, objB)) return true;
 
   if ( typeof objA !== 'object' || objA === null ||
@@ -156,7 +129,7 @@ export function shallowEqual(objA, objB) {
   return true
 }
 
-export function is (x, y) {
+function is (x, y) {
   // SameValue algorithm
   if (x === y) {
    // 处理为+0 != -0的情况
@@ -167,7 +140,7 @@ export function is (x, y) {
   }
 }
 
-export function valueEqual(a, b) {
+function valueEqual(a, b) {
 	const valueOf = obj => obj.valueOf 
 		? obj.valueOf() 
 		: Object.prototype.valueOf.call(obj);
@@ -201,3 +174,32 @@ export function valueEqual(a, b) {
 
   return false;
 }
+
+const Fns = {
+  ok: assert,
+  isOk: assert,
+  isEmail,
+  isInvalid,
+  isIDNumber,
+  isInteger, 
+  isJSON, 
+  isNumber,
+  isNullish,
+  isPromise,
+  isUrl,
+  isZhCN,
+  isPhone,
+  isPlainObject,
+  shallowEqual,
+};
+
+export default new Proxy(assert, {
+  apply: function (target, thisArg, argumentsList) {
+    return target.bind(thisArg)(argumentsList);
+  },
+  get: function (target, property, receiver) {
+    if (Object.keys(Fns).includes(property)) return Fns[property];
+
+    return Reflect.get(target, property, receiver);
+  },
+});

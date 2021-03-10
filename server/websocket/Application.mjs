@@ -54,10 +54,17 @@ export const OPCODES = {
  * The WebSocket application
  */
 
-export default class Server extends EventEmitter {
+export default class Application extends EventEmitter {
   constructor (options = {}) {
     super();
     this.connections = new Map(); // 客户端链接存储器
+    this.server = options.server;
+
+    // Register upgrade event
+    this.server.on('upgrade', (req, socket, head) => {
+      this.upgradeHandler(req, socket, head);
+    });
+
   }
 
   callback () {
@@ -137,12 +144,17 @@ export default class Server extends EventEmitter {
 
       buffer = buffer ? buffer + res.payload : res.payload;
 
+      const context = new Context({
+        socket: socket,
+        app: this,
+      });
+
       switch (res.opcode) {
         case OPCODES.CONTINUE:
           break;
         case OPCODES.TEXT:
           this.emit('message', buffer.toString('utf8'), socket);
-          socket.write(encode(buffer, 0x2));
+          socket.write(encode(buffer, 0x1));
           break;
         case OPCODES.BINARY:
           this.emit('message', buffer, socket);
@@ -173,9 +185,9 @@ export default class Server extends EventEmitter {
    * 广播消息
    */
 
-  broadcastMessage(data) {
-    for (let client of this.connections) {
-      client.write(data, 'utf8', () => { 
+  broadcast(data) {
+    for (const conn of this.connections) {
+      conn.write(data, 'utf8', () => { 
         debug('broadcast message: ', data);
       });
     }
@@ -193,6 +205,36 @@ export default class Server extends EventEmitter {
     }
   }
 } // end of WebSoceket class
+
+/**
+ * 
+ *
+ */
+
+class Context {
+  constructor (options = {}) {
+    this.socket = options.socket;
+    this.app = options.app;
+
+  }
+
+  /**
+   * 发出消息
+   */
+
+  send () {
+    //this.socket.send(...arguments);
+  }
+
+  /**
+   * 广播消息
+   */
+
+  broadcast () {
+    this.app.broadcast(...arguments);
+  }
+
+}
 
 /**
  * *****************************************************************************
