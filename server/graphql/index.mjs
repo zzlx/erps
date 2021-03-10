@@ -1,87 +1,222 @@
 /**
- * *****************************************************************************
  *
- * GraphQL API
- *
- * 逻辑:
- * 1. POST请求中获取body查询字段;
- * 2. 判断query字段，若未提供，则根据operationName,从务器读取一份标准graphql查询;
- * 3. 执行graphql查询;
- * 4. 返回查询数据;
- *
- *
- * @TODO: 服务器首次响应无效
- * *****************************************************************************
  */
 
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import util from 'util';
-import { graphql, buildASTSchema, parse, Source } from './modules.mjs';
-import settings from '../settings/index.mjs';
+// The primary entry point into fulfilling a GraphQL request.
+export { default as graphql } from './graphql.mjs'; 
 
-const debug = util.debuglog('node:graphql.mjs');
-const paths = settings.paths;
-const schemaPath = path.join(paths.SRC, 'schema');
-const resolversPath = path.join(paths.SERVER, 'resolvers');
-let schemaPromise = fs.promises.readdir(schemaPath, { encoding: 'utf8' })
-.then(files => files.filter(file => file.match(/\.gql$/)))
-.then(files => Promise.all(
-  files.map(file => fs.promises.readFile(path.join(schemaPath, file), 'utf8')))
-)
-.then(content => content.join(os.EOL))
-.then(schema => {
-  const source = parse(schema);
-  return buildASTSchema(source);
-});
+// Create and operate on GraphQL type definitions and schema.
+export { 
+  GraphQLSchema, // Definitions
+  GraphQLScalarType, 
+  GraphQLObjectType, 
+  GraphQLInterfaceType, 
+  GraphQLUnionType, 
+  GraphQLEnumType, 
+  GraphQLInputObjectType, 
+  GraphQLList, 
+  GraphQLNonNull, 
+  GraphQLDirective, // "Enum" of Type Kinds
+  TypeKind, // Scalars
+  specifiedScalarTypes, 
+  GraphQLInt, 
+  GraphQLFloat, 
+  GraphQLString, 
+  GraphQLBoolean, 
+  GraphQLID, // Built-in Directives defined by the Spec
+  specifiedDirectives, 
+  GraphQLIncludeDirective, 
+  GraphQLSkipDirective, 
+  GraphQLDeprecatedDirective, // Constant Deprecation Reason
+  DEFAULT_DEPRECATION_REASON, // Meta-field definitions.
+  SchemaMetaFieldDef, 
+  TypeMetaFieldDef, 
+  TypeNameMetaFieldDef, // GraphQL Types for introspection.
+  introspectionTypes, 
+  __Schema, 
+  __Directive, 
+  __DirectiveLocation, 
+  __Type, 
+  __Field, 
+  __InputValue, 
+  __EnumValue, 
+  __TypeKind, // Predicates
+  isSchema, 
+  isDirective, 
+  isType, 
+  isScalarType, 
+  isObjectType, 
+  isInterfaceType, 
+  isUnionType, 
+  isEnumType, 
+  isInputObjectType, 
+  isListType, 
+  isNonNullType, 
+  isInputType, 
+  isOutputType, 
+  isLeafType, 
+  isCompositeType, 
+  isAbstractType, 
+  isWrappingType, 
+  isNullableType, 
+  isNamedType, 
+  isRequiredArgument, 
+  isRequiredInputField, 
+  isSpecifiedScalarType, 
+  isIntrospectionType, 
+  isSpecifiedDirective, // Assertions
+  assertSchema, 
+  assertDirective, 
+  assertType, 
+  assertScalarType, 
+  assertObjectType, 
+  assertInterfaceType, 
+  assertUnionType, 
+  assertEnumType, 
+  assertInputObjectType, 
+  assertListType, 
+  assertNonNullType, 
+  assertInputType, 
+  assertOutputType, 
+  assertLeafType, 
+  assertCompositeType, 
+  assertAbstractType, 
+  assertWrappingType, 
+  assertNullableType, 
+  assertNamedType, // Un-modifiers
+  getNullableType, 
+  getNamedType, // Validate GraphQL schema.
+  validateSchema, 
+  assertValidSchema 
+} from './type/index.mjs';
 
-const schema = await schemaPromise;
-const fieldResolver = await getModules(resolversPath); 
+// Parse and operate on GraphQL language source files.
+export { 
+  Source, 
+  getLocation, 
 
-export default async function graphqlAPI () {
-  return graphql({
-    schema: schema, 
-    source: '{welcome}',
-    rootValue: {},
-    contextValue: {},
-    variableValues: request.variables,
-    operationName: request.operationName,
-    fieldResolver: fieldResolver,
-  });
-}
+  // Parse
+  parse, 
+  parseValue, 
+  parseType, 
 
-/**
- * 读取目录模块 
- *
- * 遍历文件并读入模块对象中
- */
+  // Print
+  print, 
 
-function getModules (dir) {
+  // Visit
+  visit, visitInParallel, visitWithTypeInfo, 
+  getVisitFn, 
+  Kind, 
+  TokenKind, 
+  DirectiveLocation, 
+  BREAK, 
 
-  if (!path.isAbsolute(dir)) dir = path.join(process.cwd(), dir);
+  // Predicates
+  isDefinitionNode, 
+  isExecutableDefinitionNode, 
+  isSelectionNode, 
+  isValueNode, 
+  isTypeNode, 
+  isTypeSystemDefinitionNode, 
+  isTypeDefinitionNode, 
+  isTypeSystemExtensionNode, 
+  isTypeExtensionNode 
+} from './language/index.mjs';
 
-  // return a promise 
-  return fs.promises.readdir(dir, { 
-    encoding: 'utf8', 
-    withFileTypes: true,
-  }).then( async (files) => {
-    const Modules = {};
+// Execute GraphQL queries.
+export { 
+  execute, 
+  defaultFieldResolver, 
+  responsePathAsArray, 
+  getDirectiveValues 
+} from './execution/index.mjs';
 
-    for (let f of files) {
-      if (f.isDirectory()) {
-        Modules[f.name] = await getModules(path.join(dir, f.name));
-      }
+export { 
+  subscribe, 
+  createSourceEventStream 
+} from './subscription/index.mjs'; 
 
-      if (f.isFile() && f.name.match(/\.mjs$/)) {
-        await import(path.join(dir, f.name)).then(fn => {
-          Modules[path.basename(f.name, '.mjs')] = fn.default ? fn.default : fn;
-        }).catch(err => {
-          console.log('file: %s %o', f.name, err);
-        });
-      }
-    }
+// Validate GraphQL queries.
+export { 
+  validate, 
+  ValidationContext, // All validation rules in the GraphQL Specification.
+  specifiedRules, // Individual validation rules.
+  FieldsOnCorrectTypeRule, 
+  FragmentsOnCompositeTypesRule, 
+  KnownArgumentNamesRule, 
+  KnownDirectivesRule, 
+  KnownFragmentNamesRule, 
+  KnownTypeNamesRule, 
+  LoneAnonymousOperationRule, 
+  NoFragmentCyclesRule, 
+  NoUndefinedVariablesRule, 
+  NoUnusedFragmentsRule, 
+  NoUnusedVariablesRule, 
+  OverlappingFieldsCanBeMergedRule, 
+  PossibleFragmentSpreadsRule, 
+  ProvidedRequiredArgumentsRule, 
+  ScalarLeafsRule, 
+  SingleFieldSubscriptionsRule, 
+  UniqueArgumentNamesRule, 
+  UniqueDirectivesPerLocationRule, 
+  UniqueFragmentNamesRule, 
+  UniqueInputFieldNamesRule, 
+  UniqueOperationNamesRule, 
+  UniqueVariableNamesRule, 
+  ValuesOfCorrectTypeRule, 
+  VariablesAreInputTypesRule, 
+  VariablesInAllowedPositionRule 
+} from './validation/index.mjs';
 
-    return Modules;
-  });
-}
+// Create, format, and print GraphQL errors.
+export { 
+  GraphQLError, 
+  formatError, 
+  printError 
+} from './error/index.mjs';
+
+// Utilities for operating on GraphQL type schema and parsed sources.
+export { 
+  // Produce the GraphQL query recommended for a full schema introspection.
+  // Accepts optional IntrospectionOptions.
+  getIntrospectionQuery, // @deprecated: use getIntrospectionQuery - will be removed in v15
+  introspectionQuery, // Gets the target Operation from a Document
+  getOperationAST, // Gets the Type for the target Operation AST.
+  getOperationRootType, // Convert a GraphQLSchema to an IntrospectionQuery
+  introspectionFromSchema, // Build a GraphQLSchema from an introspection result.
+  // Build a GraphQLSchema from a parsed GraphQL Schema language AST.
+  buildClientSchema, 
+  // Build a GraphQLSchema from a GraphQL schema language document.
+  buildASTSchema, 
+  // syntax for specifying descriptions - will be removed in v16
+  getDescription, // Extends an existing GraphQLSchema from a parsed GraphQL Schema
+  // language AST.
+  extendSchema, // Sort a GraphQLSchema.
+  lexicographicSortSchema, // Print a GraphQLSchema to GraphQL Schema language.
+  printSchema, // Prints the built-in introspection schema in the Schema Language
+  // format.
+  printIntrospectionSchema, // Print a GraphQLType to GraphQL Schema language.
+  printType, // Create a GraphQLType from a GraphQL language AST.
+  typeFromAST, // Create a JavaScript value from a GraphQL language AST with a Type.
+  valueFromAST, // Create a JavaScript value from a GraphQL language AST without a Type.
+  valueFromASTUntyped, // Create a GraphQL language AST from a JavaScript value.
+  astFromValue, // A helper to use within recursive-descent visitors which need to be aware of
+  // the GraphQL type system.
+  TypeInfo, // Coerces a JavaScript value to a GraphQL type, or produces errors.
+  coerceValue, // @deprecated use coerceValue - will be removed in v15
+  isValidJSValue, // @deprecated use validation - will be removed in v15
+  isValidLiteralValue, // Concatenates multiple AST together.
+  concatAST, // Separates an AST into an AST per Operation.
+  separateOperations, // Comparators for types
+  isEqualType, 
+  isTypeSubTypeOf, 
+  doTypesOverlap, // Asserts a string is a valid GraphQL name.
+  assertValidName, // Determine if a string is a valid GraphQL name.
+  isValidNameError, // Compares two GraphQLSchemas and detects breaking changes.
+  findBreakingChanges, 
+  findDangerousChanges, 
+  BreakingChangeType, 
+  DangerousChangeType, 
+  // Report all deprecated usage within a GraphQL document.
+  findDeprecatedUsages 
+} from './utilities/index.mjs';

@@ -6,20 +6,7 @@ ERPs
 此项目致力于为企业管理提供一套基础软件平台，可以方便的集成各种应用,并提供标准化API数据接口服务。
 此软件平台将围绕帮助企业管理资源，并有效利用资源进行开发。
 
-## 
-
-[github](https://github.com/zzlx/erps)
-
-## Development
-
-[server entry point](./server/index.mjs)
-
-### 开发目标
-
-* Easy Deploy 易于部署
-* Easy Use 易于使用
-* Easy Maintainable 易于维护
-* Easy Extend 易于扩展
+[https://github.com/zzlx/erps](https://github.com/zzlx/erps)
 
 ## 使用帮助
 

@@ -198,7 +198,7 @@ export default new Proxy(assert, {
     return target.bind(thisArg)(argumentsList);
   },
   get: function (target, property, receiver) {
-    if (Object.keys(Fns).includes(property)) return Fns[property];
+    if (Fns[property]) return Fns[property];
 
     return Reflect.get(target, property, receiver);
   },
