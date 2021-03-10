@@ -9,7 +9,8 @@
 //Detect environment and render UI Application
 const global = getGlobal();
 const __url = new URL(import.meta.url);
-global.env = __url.searchParams.get('env') || 'production';
+globalThis.env = __url.searchParams.get('env') || 'production';
+console.log(globalThis.env);
 
 import('./app.mjs').then(m => m.default).then(app => {
   const element = app({ location});
@@ -50,6 +51,7 @@ function cb () {
   console.groupCollapsed('欢迎使用前端UI程序!');
   if (device) console.log(`检测到当前客户端设备为:${device}`);
   else console.warn('未检测出当前设备类型😢');
+  if (globalThis.env === 'development') console.log('当前为开发环境.');
   //console.log(`帮助文档: ${location.origin}/documentation`);
   console.groupEnd();
 }

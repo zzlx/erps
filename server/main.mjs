@@ -9,24 +9,23 @@
 import { exec, execFile, fork, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import net from 'net';
 import tls from 'tls';
-import { X509Certificate } from 'crypto';
 import zlib from 'zlib';
 
 import settings from './settings/index.mjs';
 import debuglog from './debuglog.mjs';
 import { argvParser } from './utils.lib.mjs';
 
+const debug = debuglog('debug:erps');
 let httpd = null;
-let debug = debuglog('debug:erps');
 
 /**
- * 主控程序
+ * 主控制程序
  *
+ * 解析启动参数，执行命令任务
  */
 
-export default async function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
+export default function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
 
   const paramMap = argvParser(argvs);
 
@@ -136,8 +135,12 @@ async function srcMonitor () {
 
     // 延迟执行
     timeout = setTimeout(() => {
-      if (httpd) httpd.kill();
-      startHttpd();
+      //if (httpd) httpd.kill();
+      sendCommand('STOP').then(() => {
+        httpd.kill(); // 杀掉子进程
+        debug(httpd);
+        startHttpd();
+      });
     }, 1000)
   });
 }
@@ -202,33 +205,38 @@ function sendCommand (command) {
     },
   };
 
-  const conn = tls.connect(options, () => {
-    // byte1: token
-    const byte1 = new Uint8Array(1);
-    byte1.set([0b11111111], 0);
+  return new Promise((resolve, reject) => {
+    const conn = tls.connect(options, () => {
+      // byte1: token
+      const byte1 = new Uint8Array(1);
+      byte1.set([0b11111111], 0);
 
-    const data = Buffer.from(JSON.stringify({
-			token: settings.passphrase,
-			authorized: conn.authorized,
-			command: command
-		}));
+      const data = Buffer.from(JSON.stringify({
+        token: settings.passphrase,
+        authorized: conn.authorized,
+        command: command
+      }));
 
-    conn.end(Buffer.concat([byte1, data]));
-  });
+      conn.end(Buffer.concat([byte1, data]));
+      resolve();
+    });
 
-  conn.on('error', e => {
+    conn.on('error', e => {
+      if (e.code === 'ECONNREFUSED') {
+        debug('Server daemon is not exist, try to start it later!');
+        resolve();
+        return;
+      }
 
-    if (e.code === 'ECONNREFUSED') {
-      debug('Server daemon is not exist, try to start it later!');
-			return;
-    }
+      if (e.code === 'UNALBE_TO_GET_ISSUER_CERT') {
+        debug('Unable to get issuer from cert');
+        resolve();
+        return;
+      }
 
-		if (e.code === 'UNALBE_TO_GET_ISSUER_CERT') {
-      debug('Unable to get issuer from cert');
-			return;
-    }
-
-		debug(e);
+      debug(e);
+      reject(e);
+    });
   });
 } 
 
@@ -258,10 +266,10 @@ function setupProcess () {
  */
 
 function showHelp () {
+  const divideLine = new Array(process.stdout.columns).join('-');
   process.stdout.write(
-    `${console.divideLine()}
+    `${divideLine}
 ERP服务器使用帮助
-${console.divideLine('-')}
 Usage: erps.mjs [options]
 
 Options:
@@ -270,7 +278,7 @@ Options:
   --start                     启动服务
   --stop                      关闭服务
   --restart                   重启服务
-${console.divideLine()}
+${divideLine}
 `);
 }
 
@@ -309,3 +317,23 @@ function getChar () {
 
 /*
  */
+
+function copyUmd2Assets () {
+  // 定义样式文件路径
+  const paths = settings.paths; // 获取目录配置
+  const destPath = path.join(paths.PUBLIC, 'assets', 'js');
+  fs.mkdirSync(destPath, {recursive: true});
+
+  // 执行拷贝任务
+  Promise.all([ 
+    // source files
+    //path.join('@babel', 'polyfill', 'dist', 'polyfill.min.js'),
+    path.join('react', 'umd', 'react.development.js'),
+    path.join('react', 'umd', 'react.production.min.js'),
+    path.join('react-dom', 'umd', 'react-dom.development.js'),
+    path.join('react-dom', 'umd', 'react-dom.production.min.js'),
+  ] 
+    .map(src => path.join(paths.NODE_MODULES, src))
+    .map(src => fs.promises.copyFile(src, path.join(destPath, path.basename(src))))
+  );
+}

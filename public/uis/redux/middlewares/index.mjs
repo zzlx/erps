@@ -113,10 +113,13 @@ export const normalization = store => next => action => {
  */
 
 export const logger = store => next => action => {
-  console.groupCollapsed('Dispatch:', action);
+
+  console.group(`Dispatch: ${action.type}`);
   console.log('prevState:', store.getState());
   const result = next(action);
+  console.log('action:', action);
   console.log('newState:', store.getState());
   console.groupEnd();
   return result;
+
 }

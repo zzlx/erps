@@ -8,5 +8,6 @@
  * *****************************************************************************
  */
 
-const main = await import ('../server/main.mjs').then(m => m.default);
-main(); // 执行主程序
+import ('../server/main.mjs').then(m => m.default).then(main => {
+	main(); // 执行主程序
+});
