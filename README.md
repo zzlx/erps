@@ -10,7 +10,7 @@ ERPs
 
 ## 使用帮助
 
-> [Manual](./docs/READM.md)
+> [Manual](./docs/README.md)
 
 ## License
 
