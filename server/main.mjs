@@ -336,3 +336,20 @@ function copyUmd2Assets () {
     .map(src => fs.promises.copyFile(src, path.join(destPath, path.basename(src))))
   );
 }
+
+function systemdSetup () {
+  return `
+[Unit]
+Description=ERP daemon
+
+[Service]
+Type=simple
+ExecStart=${path.join(settings.paths.BIN, 'erpd')}
+
+[Install]
+WantedBy=multi-user.target
+`; 
+
+}
+
+

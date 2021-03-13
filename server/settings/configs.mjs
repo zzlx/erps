@@ -22,7 +22,6 @@ const defaults = {
   cert: '/etc/ssl/localhost-cert.pem',
   privateKey: '/etc/ssl/private.pem',
   initialSetup: true, // 首次配置
-  port: 8888,
 }
 
 // 监测config目录

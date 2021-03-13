@@ -40,3 +40,6 @@ function isSupportIPv6 () {
 
   return hasIPv6;
 }
+
+function isLinux () {
+}

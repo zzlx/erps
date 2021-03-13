@@ -166,7 +166,7 @@ endfunction
 " 3. 如果是字符串，首先查找字符串对应的函数定义,否则使用grep查找关键字
 " ------------------------------------------------------------------------------
 function! Targets()
-python << EOM
+python3 << EOM
 # coding=utf-8
 
 import re
@@ -188,13 +188,13 @@ elif match_path:
 		# @TODO:根据参数决定是否使用'tabnew'打开文件
     vim.command('open ' + path)
 else:
-    print 'fialed! : open URL'
+    print('fialed! : open URL')
 
 EOM
 endfunction
 
 function! TargetsTab()
-python << EOM
+python3 << EOM
 # coding=utf-8
 
 import re
@@ -216,7 +216,7 @@ elif match_path:
 		# @TODO:根据参数决定是否使用'tabnew'打开文件
     vim.command('tabnew ' + path)
 else:
-    print 'fialed! : open URL'
+    print('fialed! : open URL')
 
 EOM
 endfunction

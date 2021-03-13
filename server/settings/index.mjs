@@ -36,15 +36,21 @@ paths.PATH_CACHE = path.join(process.env.HOME, '.cache');
 paths.PATH_DATA = path.join(paths.PATH_CACHE, 'data');
 paths.PATH_LOG = path.join(paths.PATH_CACHE, 'log');
 
-export default new Proxy({ 
+const defaults = { 
   name: packageJSON.name,
   version: packageJSON.version || '1.0.0', 
   license: packageJSON.license || 'MIT',
   paths,
   system,
   host: isSupportIPv6() ? '::' : '0.0.0.0',
-  port: process.env.PORT || configs.port,
-}, {
+  port: process.env.PORT 
+    ? process.env.PORT
+    : configs.port 
+      ? configs.port
+      : process.env.NODE_ENV === 'development' ? 8888 : 3000,
+};
+
+export default new Proxy(defaults, {
   get: function (target, property, receiver) {
     if (property === 'writePidFile') return writePidFile;
     if (property === 'deletePidFile') return deletePidFile;
