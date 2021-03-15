@@ -8,9 +8,10 @@ ERPs
 
 [https://github.com/zzlx/erps](https://github.com/zzlx/erps)
 
-## 使用帮助
+## Development
 
-> [Manual](./docs/README.md)
+* [Documentation](./docs/README.md)
+* [Server源码](./server/main.mjs)
 
 ## License
 

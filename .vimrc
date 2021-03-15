@@ -327,4 +327,4 @@ map <F2> :call Targets()<CR>
 
 " 在新标签页中打开目标
 map <F3> :call TargetsTab()<CR> 
-map <F4> :call append(line('.'), strftime('%c'))<CR>
+"map <F4> :call append(line('.'), strftime('%c'))<CR>

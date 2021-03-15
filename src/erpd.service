@@ -1,0 +1,17 @@
+[Unit]
+# 控制单元
+Description=ERP daemon
+Wants=network.target
+
+[Service]
+# 服务
+Type=simple
+ExecStart=/mnt/data/erps/bin/erpd --start --env=development --debug
+#ExecReload
+#ExecStop
+
+[Install]
+# 安装
+WantedBy=multi-user.target
+#Alias
+#Also
