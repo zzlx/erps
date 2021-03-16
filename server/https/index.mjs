@@ -73,32 +73,8 @@ app.use(router.allowedMethods()); // 路由方法
 app.use(markdown()); // 启用markdown解析
 app.use(compress()); // 启用内容压缩
 
-process.nextTick(() => {
-  // 启动服务端口
-  app.listen({ 
-    ipv6Only: false, 
-    exclusive: true,
-    host: settings.host,
-    port: settings.port,
-  }, listenCallback);
-});
 
-/**
- * Utility functions
- */
-
-function listenCallback () {
-  if (process.channel && process.send) {
-    process.send({ 
-      message: '服务器已启动',
-      pid: process.pid,
-      address: this.address(),
-    });
-  } else {
-    if (process.env.NODE_ENV === 'development') console.clear(); // clear console
-    debug('The ERP services is listening on:', this.address());
-  }
-}
+export default app;
 
 /**
  * 管理服务器
@@ -107,6 +83,8 @@ function listenCallback () {
 function serverCtl (socket) {
   socket.on('data', buffer => {
     try {
+
+      // 过滤数据帧
       if (buffer.readUInt8(0) !== 0b11111111) return; // 根据第一个字节判断
       const data = buffer.slice(1); 
       debug(data.toString());

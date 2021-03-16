@@ -1,9 +1,9 @@
 /**
  * *****************************************************************************
  *
- * Kernel of services
+ * Application
  *
- * KOAS(Kernel of application service), A framwork for backend service.
+ * A framwork for http request
  *
  * *****************************************************************************
  */

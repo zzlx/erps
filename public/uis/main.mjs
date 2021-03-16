@@ -48,9 +48,9 @@ function render (element) {
 function cb () {
   const device = deviceDetect(window.navigator.userAgent);
   console.groupCollapsed('欢迎使用前端UI程序!');
+  if (globalThis.env === 'development') console.warn('当前为开发环境.');
   if (device) console.log(`当前客户端设备为:${device}`);
   else console.warn('未检测出当前设备类型😢');
-  if (globalThis.env === 'development') console.warn('当前为开发环境.');
   //console.log(`帮助文档: ${location.origin}/documentation`);
   console.groupEnd();
 }

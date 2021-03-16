@@ -101,7 +101,7 @@ export function uri (url = import.meta.url) {
   const protocol = urlObj.protocol === 'http' ? 'ws' : 'wss';
   const hostname = urlObj.hostname;
   const port = urlObj.port === "" ? "" : ":" + urlObj.port;
-  const pathname = '/api';
+  const pathname = '/wsapi';
 
   return `${protocol}://${hostname}${port}${pathname}`; 
 }

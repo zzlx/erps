@@ -251,7 +251,7 @@ endfunc
 "  进入vim时执行的任务
 function! EnterVim ()
 	if argc() == 0
-		:o README.md
+		:E
 	endif
 endfunction
 

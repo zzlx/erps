@@ -1,11 +1,12 @@
 /**
  * *****************************************************************************
  * 
- * ERP服务管理程序
+ * 后端服务主程序
  *
  * *****************************************************************************
  */
 
+import assert from 'assert';
 import { exec, execFile, fork, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -16,8 +17,20 @@ import settings from './settings/index.mjs';
 import debuglog from './debuglog.mjs';
 import { argvParser } from './utils.lib.mjs';
 
+const onMacOS =() => process.platform === 'darwin';
+const onLinux =() => process.platform === 'linux';
+const onWindows =() => process.platform === 'win32';
+
 const debug = debuglog('debug:erps');
-let httpd = null;
+const cache = {}; //
+
+assert(onLinux(), 'Linux platrom is recomanded.');
+
+// 执行主控制程序
+process.nextTick(() => {
+  main();
+});
+
 
 /**
  * 主控制程序
@@ -27,18 +40,17 @@ let httpd = null;
 
 export default function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
 
+
   const paramMap = argvParser(argvs);
 
   // deal with environment variables
   for (let param of Object.keys(paramMap)) { 
     switch(param) { 
-      case 'env': 
-        process.env.NODE_ENV = paramMap['env'];
-        delete paramMap['env'];
-        continue;
-      case 'debug': 
+      case 'devel': 
+      case 'development': 
+        process.env.NODE_ENV = 'development';
         process.env.NODE_DEBUG = 'debug*';
-        delete paramMap['debug'];
+        delete paramMap[param];
         continue;
     }
   }
@@ -59,9 +71,10 @@ export default function main (argvs = Array.prototype.slice.call(process.argv, 2
         break;
       case 'start':
         isExec = true;
-        startDaemon();
+        start();
         break;
       case 'stop':
+
         isExec = true;
         sendCommand('STOP');
         break;
@@ -76,7 +89,12 @@ export default function main (argvs = Array.prototype.slice.call(process.argv, 2
     }
   }
 
-  if (isExec === false) startDaemon(); // 未提供参数时执行start
+ // if (isExec === false) start(); // 未提供参数时执行start
+ if (isExec === false) {
+    getChar('请输入执行环境').then(data => {
+      debug(data);
+    });
+ }
 }
 
 /**
@@ -84,12 +102,9 @@ export default function main (argvs = Array.prototype.slice.call(process.argv, 2
  *
  */
 
-function startDaemon () {
+function start () {
 	const cssFile = path.join(settings.paths.PUBLIC, 'assets', 'css', 'styles.css');
-
-	if (!fs.existsSync(cssFile)) { 
-		renderCSS(); // 生成css文件
-	}
+	if (!fs.existsSync(cssFile)) renderCSS(); // css文档不存在时进行生成
 
   startHttpd();
 
@@ -103,17 +118,28 @@ function startDaemon () {
  * 启动HTTPD服务
  */
 
-function startHttpd () {
-  const args = [ path.join(settings.paths.SERVER, 'https', 'index.mjs'), ];
+async function startHttpd () {
+  const app = await import(path.join(settings.paths.SERVER, 'https', 'index.mjs'))
+    .then(m => m.default);
+  // 启动服务端口
+  app.listen({ 
+    ipv6Only: false, 
+    exclusive: true,
+    host: settings.host,
+    port: settings.port,
+  }, listenCallback);
 
+
+  /*
   const options = {
     detached: true,
 		env: process.env,
-    //stdio: ['ignore', 'ignore', 'ignore', 'ipc']
+    // stdio: process.env.NODE_ENV === 'development' ? [0, 1, 2, null] : 'ignore',
     stdio: [0, 1, 2, null],
   };
 
-  httpd = spawn(process.argv[0], args, options);
+  cache.httpd = spawn(process.argv[0], args, options);
+  */
 }
 
 /**
@@ -137,7 +163,7 @@ async function srcMonitor () {
     timeout = setTimeout(() => {
       //if (httpd) httpd.kill();
       sendCommand('STOP').then(() => {
-        httpd.kill(); // 杀掉子进程
+        //if (cache.httpd) cache.httpd.kill(); // 杀掉子进程
         startHttpd();
       });
     }, 1000)
@@ -337,6 +363,11 @@ function copyUmd2Assets () {
   );
 }
 
+/**
+ * 配置
+ *
+ */
+
 function systemdSetup () {
   return `
 [Unit]
@@ -352,4 +383,20 @@ WantedBy=multi-user.target
 
 }
 
+/**
+ * Utility functions
+ */
+
+function listenCallback () {
+  if (process.channel && process.send) {
+    process.send({ 
+      message: '服务器已启动',
+      pid: process.pid,
+      address: this.address(),
+    });
+  } else {
+    if (process.env.NODE_ENV === 'development') console.clear(); // clear console
+    debug('The ERP services is listening on:', this.address());
+  }
+}
 

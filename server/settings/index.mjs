@@ -43,11 +43,6 @@ const defaults = {
   paths,
   system,
   host: isSupportIPv6() ? '::' : '0.0.0.0',
-  port: process.env.PORT 
-    ? process.env.PORT
-    : configs.port 
-      ? configs.port
-      : process.env.NODE_ENV === 'development' ? 8888 : 3000,
 };
 
 export default new Proxy(defaults, {
@@ -57,6 +52,13 @@ export default new Proxy(defaults, {
     if (property === 'cert') return fs.readFileSync(configs.cert);
     if (property === 'privateKey') return fs.readFileSync(configs.privateKey);
     if (property === 'passphrase') return configs.passphrase;
+    if (property === 'port') {
+      return process.env.PORT 
+        ? process.env.PORT 
+        : configs.port 
+          ? configs.port
+          : process.env.NODE_ENV === 'development' ? 8888 : 3000;
+    }
 
     return Reflect.get(target, property, receiver);
   },
