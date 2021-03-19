@@ -36,6 +36,7 @@
     "remarkable": "^1.7.1",
     "sass": "^1.29.0",
     "socket.io": "^3.0.0",
+    "systemd": "^0.4.0",
     "tedious": "^9.2.1",
     "whatwg-fetch": "^3.5.0",
     "xlsx": "^0.14.5"

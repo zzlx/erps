@@ -11,6 +11,7 @@
  * *****************************************************************************
  */
 
+process.title = process.title + 'css render';
 const sass = require('sass');
 
 // 配置项目

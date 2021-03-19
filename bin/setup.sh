@@ -1,7 +1,14 @@
 #!/bin/sh
 # ------------------------------------------------------------------------------
-# 执行安装任务
-# 仅支持在Linux环境安装部署
+# 系统部署工具  
+#
+# 用于在Linux系统环境部署ERPs
+#
+# 任务:
+# 1. 支持配置systemd服务文件  
+# 2. 支持获取letencrypt域名CA证书
+# 3. 
+# 
 # ------------------------------------------------------------------------------
 
 # 执行环境设定
@@ -1135,6 +1142,37 @@ _parse_argv() {
 _getPID() {
   echo $(lsof -i:${port} | grep 'LISTEN' \ | awk \'NR==1{print $2}\');
 }
+
+_setupSystemdService () {
+
+  cat <<- EOF
+[Unit]
+Description=ERP Service daemon
+Wants=network.target
+After=network.target
+
+[Service]
+Type=simple
+#Type=forking
+User=zzlx
+Group=zzlx
+Environment=NODE_ENV=production
+ExecReload=$(which node) $(_BIN/erpd) --restart
+ExecStart=$(which node) $(_BIN/erpd) --start
+ExecStop=$(which node) $(_BIN/erpd) --stop
+#ExecStop=/bin/kill -s QUIT $MAINPID
+#Restart=always
+
+[Install]
+# Install开机启动
+WantedBy=multi-user.target
+#Alias
+#Also
+
+ EOF
+
+}
+
 
 _readDotEnv() {
 	# 读入.env环境变量
