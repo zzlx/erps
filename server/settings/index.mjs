@@ -54,10 +54,7 @@ export default new Proxy(defaults, {
     if (property === 'passphrase') return configs.passphrase;
     if (property === 'port') {
       return process.env.PORT 
-        ? process.env.PORT 
-        : configs.port 
-          ? configs.port
-          : process.env.NODE_ENV === 'development' ? 8888 : 3000;
+        ? process.env.PORT : configs.port ? configs.port : 8888;
     }
 
     return Reflect.get(target, property, receiver);

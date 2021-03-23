@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  * 
- * 后端服务主程序
+ * 主服务程序
  *
  * *****************************************************************************
  */
@@ -22,15 +22,32 @@ const onLinux =() => process.platform === 'linux';
 const onWindows =() => process.platform === 'win32';
 
 const debug = debuglog('debug:erps');
-const cache = {}; //
+// Process container
+const proc = { }; 
 
 assert(onLinux(), 'Linux platrom is recomanded.');
 
-// 执行主控制程序
+// 主进程
+process.title = 'org.zzlx.erpsd'; // 命名主进程
+
+process.on('SIGINT', signal => {
+  debug('receive signal: ', signal);
+});
+
+process.on('SIGQUIT', signal => {
+  process.exit();
+});
+
+// 执行主程序
 process.nextTick(() => {
   main();
 });
 
+/**
+ * *****************************************************************************
+ * Utility Functions
+ * *****************************************************************************
+ */
 
 /**
  * 主控制程序
@@ -38,7 +55,7 @@ process.nextTick(() => {
  * 解析启动参数，执行命令任务
  */
 
-export default function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
+function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
 
 
   const paramMap = argvParser(argvs);
@@ -119,27 +136,18 @@ function start () {
  */
 
 async function startHttpd () {
-  const app = await import(path.join(settings.paths.SERVER, 'https', 'index.mjs'))
-    .then(m => m.default);
-  // 启动服务端口
-  app.listen({ 
-    ipv6Only: false, 
-    exclusive: true,
-    host: settings.host,
-    port: settings.port,
-  }, listenCallback);
+  const args = [
+    path.join(settings.paths.SERVER, 'https', 'httpd.mjs'),
+  ]; 
 
-
-  /*
   const options = {
-    detached: true,
+    detached: false, // 主进程退出后是否保持执行
 		env: process.env,
     // stdio: process.env.NODE_ENV === 'development' ? [0, 1, 2, null] : 'ignore',
     stdio: [0, 1, 2, null],
   };
 
-  cache.httpd = spawn(process.argv[0], args, options);
-  */
+  proc.httpd = spawn(process.argv[0], args, options);
 }
 
 /**
@@ -163,7 +171,7 @@ async function srcMonitor () {
     timeout = setTimeout(() => {
       //if (httpd) httpd.kill();
       sendCommand('STOP').then(() => {
-        //if (cache.httpd) cache.httpd.kill(); // 杀掉子进程
+        if (proc.httpd) process.kill(proc.httpd.pid, 'SIGTERM');
         startHttpd();
       });
     }, 1000)
@@ -381,24 +389,4 @@ ExecStart=${path.join(settings.paths.BIN, 'erpd')}
 WantedBy=multi-user.target
 `; 
 
-}
-
-/**
- * Utility functions
- */
-
-function listenCallback () {
-  if (process.channel && process.send) {
-    process.send({ 
-      message: '服务器已启动',
-      pid: process.pid,
-      address: this.address(),
-    });
-  } else {
-    if (process.env.NODE_ENV === 'development') console.clear(); // clear console
-    debug('The ERP services is listening on:', this.address());
-  }
-}
-
-function () {
 }
