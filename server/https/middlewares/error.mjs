@@ -7,7 +7,6 @@
  */
 
 import path from 'path';
-import logWriter from '../../logWriter.mjs';
 
 export default function error (options = {}) {
   const opts = Object.assign({
@@ -18,10 +17,10 @@ export default function error (options = {}) {
 
   return async function errorMiddleware (ctx, next) {
     try {
-      attachEvents(ctx.stream);
+      //attachEvents(ctx.stream);
       await next();
     } catch (err) {
-      await logWriter(logFile, err);
+      console.error(err);
       return Promise.reject(err);
     }
   } 

@@ -74,7 +74,7 @@ ws.on('message', (msg, socket) => {
 
 // he 'secureConnection' event is emitted after the handshaking process 
 // for a new connection has successfully completed. 
-app.server.on('secureConnection', serverCtl);
+//app.server.on('secureConnection', serverCtl);
 
 app.use(error(settings.paths.PATH_LOG)); // 记录中间件错误
 app.use(logger(settings.paths.PATH_LOG)); // 访问日志
@@ -104,11 +104,9 @@ app.listen({
     });
   } else {
     if (process.env.NODE_ENV === 'development') console.clear(); // clear console
-    debug('The ERP services is listening on:', this.address());
+    debug('The %s http daemon is listening on: %s', process.env.NODE_ENV, this.address());
   }
 });
-
-
 
 /**
  * 管理服务器

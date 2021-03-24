@@ -30,8 +30,14 @@ assert(onLinux(), 'Linux platrom is recomanded.');
 // 主进程
 process.title = 'org.zzlx.erpsd'; // 命名主进程
 
+
+let time = 0;
 process.on('SIGINT', signal => {
-  debug('receive signal: ', signal);
+  if (time >= 1) {
+    return process.exit();
+  }
+  time++;
+  console.log('Control + C twice to exit;');
 });
 
 process.on('SIGQUIT', signal => {
@@ -93,11 +99,11 @@ function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
       case 'stop':
 
         isExec = true;
-        sendCommand('STOP');
+        //sendCommand('STOP');
         break;
       case 'restart':
         isExec = true;
-        sendCommand('RESTART');
+        //sendCommand('RESTART');
         break;
       default:
         isExec = true;
@@ -169,12 +175,9 @@ async function srcMonitor () {
 
     // 延迟执行
     timeout = setTimeout(() => {
-      //if (httpd) httpd.kill();
-      sendCommand('STOP').then(() => {
-        if (proc.httpd) process.kill(proc.httpd.pid, 'SIGTERM');
-        startHttpd();
-      });
-    }, 1000)
+      if (proc.httpd) process.kill(proc.httpd.pid, 'SIGTERM');
+      startHttpd();
+    }, 1000);
   });
 }
 

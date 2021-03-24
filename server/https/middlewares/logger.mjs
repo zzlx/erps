@@ -15,7 +15,6 @@
 import path from 'path';
 import assert from 'assert';
 import { date } from '../../utils.lib.mjs';
-import logWriter from '../../logWriter.mjs';
 
 export default function logger (options = {}) {
   const opts = Object.assign({
@@ -46,6 +45,6 @@ export default function logger (options = {}) {
 
     if (ctx.state.noLog) return; // 记录request log
 
-    logWriter(logFile, ctx.state.log);
+    console.log(ctx.state.log);
   } 
 }
