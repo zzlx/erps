@@ -78,7 +78,7 @@ export default class Application extends EventEmitter {
         if (process.send) {
           process.send(e);
         } else {
-          console.log(`${process.title} is already runing on ${e.address}:${e.port}, try again later`);
+          console.error(`${process.title} is already runing on ${e.address}:${e.port}, try again later`);
         }
       } else {
         debug(error);

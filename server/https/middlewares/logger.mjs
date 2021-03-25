@@ -45,6 +45,6 @@ export default function logger (options = {}) {
 
     if (ctx.state.noLog) return; // 记录request log
 
-    console.log(ctx.state.log);
+    console.log(JSON.stringify(ctx.state.log));
   } 
 }

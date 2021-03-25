@@ -9,8 +9,9 @@
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
+import paths from './paths.mjs';
 
-const DOT_ENV = path.join(process.cwd(), '.env');
+const DOT_ENV = path.join(paths.ROOT, '.env');
 
 const dotenvObj = fs.existsSync(DOT_ENV)
   ?  envParser(fs.readFileSync(DOT_ENV))

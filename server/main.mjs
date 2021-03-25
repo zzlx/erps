@@ -30,8 +30,9 @@ assert(onLinux(), 'Linux platrom is recomanded.');
 // 主进程
 process.title = 'org.zzlx.erpsd'; // 命名主进程
 
-
+/*
 let time = 0;
+
 process.on('SIGINT', signal => {
   if (time >= 1) {
     return process.exit();
@@ -43,6 +44,7 @@ process.on('SIGINT', signal => {
 process.on('SIGQUIT', signal => {
   process.exit();
 });
+*/
 
 // 执行主程序
 process.nextTick(() => {

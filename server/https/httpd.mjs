@@ -30,6 +30,7 @@ const debug = debuglog('debug:server');
 // 设置进程标题
 process.title = 'org.zzlx.httpd';
 
+/*
 // this is the Fast shutdown mode.
 process.on('SIGINT', signal => {
   debug(signal);
@@ -46,6 +47,7 @@ process.on('SIGQUIT', signal => {
 process.on('SIGTERM', signal => {
   debug(signal);
 });
+*/
 
 process.on('uncaughtException', (error, origin) => {
   console.log(error);
