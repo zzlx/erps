@@ -3,6 +3,7 @@
  * 
  * 主服务程序
  *
+ *
  * *****************************************************************************
  */
 
@@ -27,8 +28,8 @@ const proc = { };
 
 assert(onLinux(), 'Linux platrom is recomanded.');
 
-// 主进程
-process.title = 'org.zzlx.erpd'; // 命名主进程
+// 设置进程名
+process.title = 'org.zzlx.erps:main';
 
 /*
 let time = 0;
@@ -166,6 +167,7 @@ async function startHttpd () {
 async function srcMonitor () {
 	debug('开发模式下监视文件改动');
   const Watchdog = await import('../server/Watchdog.mjs').then(m => m.default);
+
 
   const watchdog = new Watchdog(settings.paths.SERVER);
 
@@ -374,24 +376,4 @@ function copyUmd2Assets () {
     .map(src => path.join(paths.NODE_MODULES, src))
     .map(src => fs.promises.copyFile(src, path.join(destPath, path.basename(src))))
   );
-}
-
-/**
- * 配置
- *
- */
-
-function systemdSetup () {
-  return `
-[Unit]
-Description=ERP daemon
-
-[Service]
-Type=simple
-ExecStart=${path.join(settings.paths.BIN, 'erpd')}
-
-[Install]
-WantedBy=multi-user.target
-`; 
-
 }

@@ -28,7 +28,7 @@ import WebSocket from '../websocket/Application.mjs';
 const debug = debuglog('debug:server');
 
 // 设置进程标题
-process.title = 'org.zzlx.httpd';
+process.title = 'org.zzlx.erps:httpd';
 
 /*
 // this is the Fast shutdown mode.
