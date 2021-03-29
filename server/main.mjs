@@ -28,7 +28,8 @@ const proc = { };
 assert(onLinux(), 'Linux platrom is recomanded.');
 
 // 主进程
-process.title = 'org.zzlx.erpsd'; // 命名主进程
+process.title = 'org.zzlx.erpd'; // 命名主进程
+debug(process.env);
 
 /*
 let time = 0;
