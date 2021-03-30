@@ -41,13 +41,13 @@ process.on('SIGQUIT', signal => {
   process.exit();
 });
 
+*/
 // This is the smart shutdown mode.
 // After receiving SIGTERM the server disallows new connections, 
 // but let the existing sessions and their work nornally.
 process.on('SIGTERM', signal => {
-  debug(signal);
+  app.server.close();
 });
-*/
 
 process.on('uncaughtException', (error, origin) => {
   console.log(error);

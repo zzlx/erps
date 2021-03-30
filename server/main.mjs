@@ -31,21 +31,22 @@ assert(onLinux(), 'Linux platrom is recomanded.');
 // 设置进程名
 process.title = 'org.zzlx.erps:main';
 
-/*
-let time = 0;
-
+// This is the Fast shutdown mode.
+// The server will send all existing server processes SIGTERM
 process.on('SIGINT', signal => {
-  if (time >= 1) {
-    return process.exit();
+  if (proc.httpd) {
+    if (proc.httpd.kill('SIGTERM')) {
+      process.exit(0);
+    }
+  } else {
+    process.exit(0);
   }
-  time++;
-  console.log('Control + C twice to exit;');
 });
 
+// This is the Immediate Shutdown mode.
 process.on('SIGQUIT', signal => {
   process.exit();
 });
-*/
 
 // 执行主程序
 process.nextTick(() => {
