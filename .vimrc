@@ -272,7 +272,7 @@ autocmd FileType shell noremap <buffer> <F5> :!sh % <CR>
 "autocmd BufWinLeave *.mjs,*.cjs mkview
 "autocmd BufWinEnter *.mjs,*.cjs silent loadview
 autocmd BufRead,BufNewFile *.cjs,*.mjs,*.js set expandtab filetype=javascript
-autocmd FileType javascript noremap <buffer> <F5> :!NODE_ENV=test NODE_DEBUG=debug:* node % <CR>
+autocmd FileType javascript noremap <buffer> <F5> :!NODE_ENV=test NODE_DEBUG=debug:* node --trace-warnings % <CR>
 
 " python脚本配置
 autocmd Filetype python set fileformat=unix

@@ -9,8 +9,6 @@
  * 3. 执行graphql查询;
  * 4. 返回查询数据;
  *
- *
- * @TODO: 服务器首次响应无效
  * *****************************************************************************
  */
 
@@ -20,11 +18,13 @@ import path from 'path';
 import util from 'util';
 import { graphql, buildASTSchema, parse, Source } from '../graphql/index.mjs';
 import settings from '../settings/index.mjs';
+import debuglog from '../debuglog.mjs';
 
-const debug = util.debuglog('node:graphql.mjs');
+const debug = debuglog('debug:graphqlAPI');
 const paths = settings.paths;
 const schemaPath = path.join(paths.SRC, 'schema');
 const resolversPath = path.join(paths.SERVER, 'resolvers');
+
 let schemaPromise = fs.promises.readdir(schemaPath, { encoding: 'utf8' })
 .then(files => files.filter(file => file.match(/\.gql$/)))
 .then(files => Promise.all(

@@ -2,6 +2,8 @@
  * *****************************************************************************
  * PostgreSQL客户端接口
  * 
+ * [node-postgres](https://node-postgres.com)
+ *
  * *****************************************************************************
  */
 
@@ -10,39 +12,51 @@ import settings from '../settings/index.mjs';
 import debuglog from '../debuglog.mjs';
 
 const debug = debuglog('debug:postgres');
-const Client = pg.Client;
-const Pool = pg.Pool;
+const { Pool } = pg;
 
 const options = {
-  user: settings.configs.PGUSER,
   host: 'localhost',
+  user: settings.configs.PGUSER,
+  max: 20, // 连接池最大客户端数量
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
   database: settings.configs.PGDATABASE,
   password: settings.configs.PGPASSWORD,
 };
 
-const pool = new Pool(options);
-pool.on('error', (err, client) => {
-  debug('Unexpected error', err);
-});
+class PostgreSQLPool {
+  constructor () {
+    this.pool = new Pool(options);
 
-pool.connect().then();
+    this.pool.on('error', (err, client) => {
+      debug('Unexpected error', err);
+    });
 
-const client = new Client(options);
+  }
 
-await client.connect();
-
-//const res = await client.query('SELECT * from pg_roles;');
-const res = await client.query('SELECT NOW();');
-console.log(res); 
-await client.end();
-
-class PostgreSQLClient {
-  query () {
-    return this.client.query(...arguments);
+  async query (text, params) {
+    const start = Date.now();
+    const res = await this.pool.query(text, params);
+    const duration = Date.now() - start;
+    debug('Executed query', {text, duration, rows: res.rowCount});
+    return res;
   }
 }
 
-export default new Proxy(new PostgreSQLClient(), {
-  get: function (target, property, receiver) {
-  },
-}); 
+export default new PostgreSQLPool();
+
+async function transactionQuery () {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const queryText = 'INSERT INTO users(name) VALUES($1) RETURNING id';
+    const res = await client.query(queryText, ['test']);
+
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
+}
