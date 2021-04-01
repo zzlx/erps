@@ -42,6 +42,7 @@ const defaults = {
   license: packageJSON.license || 'MIT',
   paths,
   system,
+  configs,
   host: isSupportIPv6() ? '::' : '0.0.0.0',
 };
 

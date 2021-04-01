@@ -29,3 +29,4 @@ node_modules
 *.local.json
 .env
 NetrwTreeListing *
+.settings.json
