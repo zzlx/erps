@@ -20,36 +20,47 @@ import { graphql, buildASTSchema, parse, Source } from '../graphql/index.mjs';
 import settings from '../settings/index.mjs';
 import debuglog from '../debuglog.mjs';
 
-const debug = debuglog('debug:graphqlAPI');
-const paths = settings.paths;
-const schemaPath = path.join(paths.SRC, 'schema');
-const resolversPath = path.join(paths.SERVER, 'resolvers');
+const __file = import.meta.url.substr(7);
+const __dirname = path.dirname(import.meta.url.substr(7));
 
-let schemaPromise = fs.promises.readdir(schemaPath, { encoding: 'utf8' })
+const debug = debuglog('debug:GraphQL_Query');
+
+const schemaPath = path.join(settings.paths.SRC, 'schema');
+const schema = await fs.promises.readdir(schemaPath, { encoding: 'utf8' })
 .then(files => files.filter(file => file.match(/\.gql$/)))
 .then(files => Promise.all(
   files.map(file => fs.promises.readFile(path.join(schemaPath, file), 'utf8')))
 )
 .then(content => content.join(os.EOL))
-.then(schema => {
-  const source = parse(schema);
-  return buildASTSchema(source);
-});
+.then(schema => buildASTSchema(parse(schema)));
 
-const schema = await schemaPromise;
-const fieldResolver = await getModules(resolversPath); 
+const fieldResolver = await getModules(path.join(path.dirname(__dirname), 'resolvers')); 
 
-export default async function graphqlAPI () {
+export default function graphqlQuery (query, variables, operationName) {
+
   return graphql({
     schema: schema, 
-    source: '{welcome}',
+    source: query,
     rootValue: {},
-    contextValue: {},
-    variableValues: request.variables,
-    operationName: request.operationName,
+    contextValue: {}, // 用于传递上下文数据
+    variableValues: variables,
+    operationName: operationName,
     fieldResolver: fieldResolver,
   });
 }
+
+// test
+if (process.env.NODE_ENV === 'test') { 
+  debug(schema);
+  debug(fieldResolver);
+  graphqlQuery('{help}').then(res => debug(res)); 
+}
+
+/**
+ * *****************************************************************************
+ * Utility functions
+ * *****************************************************************************
+ */
 
 /**
  * 读取目录模块 

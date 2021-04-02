@@ -1,14 +1,15 @@
 /**
+ * *****************************************************************************
+ *
  *
  * Given [ A, B, C ] return 'A, B, or C'.
  *
+ * *****************************************************************************
  */
 
-import assert from './assert.mjs';
-const MAX_LENGTH = 5;
+export default function orList(items, MAX_LENGTH = 5) {
+  if (items.length === 0) throw new Error('orList item length is 0');
 
-export default function orList(items) {
-  assert(item.length !== 0);
   if (items.length === 1) return items[0];
   if (items.length === 2) return items[0] + ' or ' + items[1];
 

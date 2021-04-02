@@ -11,7 +11,7 @@ import os from 'os';
 import path from 'path';
 
 const __file = import.meta.url.substr(7);
-const __root = path.dirname(path.dirname(path.dirname(__file)));
+const __root = path.dirname(path.dirname(path.dirname(path.dirname(__file))));
 
 const paths = (root => {
   const paths = Object.create(null);

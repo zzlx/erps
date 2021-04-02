@@ -25,10 +25,10 @@ import debuglog from '../debuglog.mjs';
 import router from './routes.mjs';
 import WebSocket from '../websocket/Application.mjs';
 
-const debug = debuglog('debug:server');
+const debug = debuglog('debug:https');
 
 // 设置进程标题
-process.title = 'org.zzlx.erps:httpd';
+process.title = 'org.zzlx.erps.https';
 
 /*
 // this is the Fast shutdown mode.

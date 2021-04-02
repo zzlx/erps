@@ -14,7 +14,7 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import http2 from 'http2';
 import debuglog from '../debuglog.mjs';
-const debug = debuglog('debug:websocket');
+const debug = debuglog('debug:websocket-server');
 
 export const STATUS_CODES = {
   1000: 'Normal Closure',

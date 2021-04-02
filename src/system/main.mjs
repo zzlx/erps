@@ -29,7 +29,7 @@ const proc = { };
 assert(onLinux(), 'Linux platrom is recomanded.');
 
 // 设置进程名
-process.title = 'org.zzlx.erps:main';
+process.title = 'org.zzlx.erps.main';
 
 // This is the Fast shutdown mode.
 // The server will send all existing server processes SIGTERM
@@ -147,13 +147,11 @@ function start () {
 
 async function startHttpd () {
   const args = [
-    path.join(settings.paths.SERVER, 'https', 'httpd.mjs'),
+    path.join(settings.paths.SRC, 'system', 'https', 'index.mjs'),
   ]; 
 
   const options = {
     detached: false, // 主进程退出后是否保持执行
-		env: process.env,
-    // stdio: process.env.NODE_ENV === 'development' ? [0, 1, 2, null] : 'ignore',
     stdio: [0, 1, 2, null],
   };
 
@@ -167,10 +165,10 @@ async function startHttpd () {
 
 async function srcMonitor () {
 	debug('开发模式下监视文件改动');
-  const Watchdog = await import('../server/Watchdog.mjs').then(m => m.default);
+  const Watchdog = await import('./Watchdog.mjs').then(m => m.default);
 
 
-  const watchdog = new Watchdog(settings.paths.SERVER);
+  const watchdog = new Watchdog(path.join(settings.paths.SRC, 'system'));
 
   let timeout = null;
   let test = null;
@@ -189,7 +187,7 @@ async function srcMonitor () {
 
 async function scssMonitor () {
 	debug('scss监视器开始工作');
-  const Watchdog = await import('../server/Watchdog.mjs').then(m => m.default);
+  const Watchdog = await import('./Watchdog.mjs').then(m => m.default);
   const watchdog = new Watchdog(path.join(settings.paths.SRC, 'scss'));
   let timeout = null;
 
