@@ -1,10 +1,15 @@
 /**
+ * *****************************************************************************
+ *
  * GraphQL
  *
+ * https://spec.graphql.cn/
+ *
+ * *****************************************************************************
  */
 
-import { validateSchema } from './type/validate.mjs';
 import { parse } from './language/parser.mjs';
+import { validateSchema } from './type/validate.mjs';
 import { validate } from './validation/validate.mjs';
 import { execute } from './execution/execute.mjs';
 
@@ -33,7 +38,16 @@ export default function graphql(opts) {
   )));
 }
 
-function graphqlImpl(
+/**
+ *
+ *
+ *
+ *
+ */
+
+let isSchemaValid = false; // schema validation状态
+
+function graphqlImpl (
   schema, 
   source, 
   rootValue, 
@@ -44,8 +58,9 @@ function graphqlImpl(
 ) {
   let document = null;
 
-  // Validate Schema
-  const schemaValidationErrors = validateSchema(schema);
+  // Validate Schema just once
+  const schemaValidationErrors = isSchemaValid ? [] : validateSchema(schema);
+  if (isSchemaValid === false) isSchemaValid = true;
 
   if (schemaValidationErrors.length > 0) {
     return { errors: schemaValidationErrors };
@@ -57,7 +72,7 @@ function graphqlImpl(
     return { errors: [syntaxError] };
   } 
 
-  // Validate
+  // Validate document
   const validationErrors = validate(schema, document);
 
   if (validationErrors.length > 0) {

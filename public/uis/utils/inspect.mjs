@@ -8,26 +8,16 @@
  * *****************************************************************************
  */
 
-import {
-  unicode_to_utf8,
-  utf8_to_unicode,
-} from './utf8.mjs';
-
 export default function inspect(value) {
-
-  //if (value instanceof Uint8Array) return value.toString('hex');
+  if (value instanceof Uint8Array) return value.toString('hex');
         
   switch (typeof(value)) {
     case 'string':
       return JSON.stringify(value);
-
     case 'function':
       return value.toString();
-      //return value.name ? `[function ${value.name}]` : '[function unnamed]';
-
     case 'object':
       if (value) {
-
         const customInspectFn = getCustomFn(value);
 
         if (customInspectFn) {
@@ -47,18 +37,15 @@ export default function inspect(value) {
       }
 
       return String(value);
-
+    case 'number':
+    case 'undefined':
     default:
       return String(value);
   }
 }
 
 function getCustomFn(object) {
-  const nodejsCustomInspectSymbol = typeof Symbol === 'function' 
-    ? Symbol.for('nodejs.util.inspect.custom') 
-    : undefined;
-
-  const customInspectFn = object[String(nodejsCustomInspectSymbol)];
+  const customInspectFn = object[Symbol.for('nodejs.util.inspect.custom')];
   if (typeof customInspectFn === 'function') return customInspectFn;
   if (typeof object.inspect === 'function') return object.inspect;
 }

@@ -29,7 +29,7 @@ const proc = { };
 assert(onLinux(), 'Linux platrom is recomanded.');
 
 // 设置进程名
-process.title = 'org.zzlx.erps.main';
+process.title = 'org.zzlx.erps';
 
 // This is the Fast shutdown mode.
 // The server will send all existing server processes SIGTERM
@@ -131,14 +131,11 @@ function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
 
 function start () {
 	const cssFile = path.join(settings.paths.PUBLIC, 'assets', 'css', 'styles.css');
-	if (!fs.existsSync(cssFile)) renderCSS(); // css文档不存在时进行生成
+  // @TODO:每次重启都进行重建？对比文档修改时间戳决定重建
+  // css文档不存在时进行生成
+	if (!fs.existsSync(cssFile)) renderCSS(); 
 
   startHttpd();
-
-  if (process.env.NODE_ENV === 'development') {
-    scssMonitor();
-    srcMonitor();
-  }
 }
 
 /**
@@ -147,7 +144,7 @@ function start () {
 
 async function startHttpd () {
   const args = [
-    path.join(settings.paths.SRC, 'system', 'https', 'index.mjs'),
+    path.join(settings.paths.SRC, 'backends', 'https', 'index.mjs'),
   ]; 
 
   const options = {
@@ -156,51 +153,6 @@ async function startHttpd () {
   };
 
   proc.httpd = spawn(process.argv[0], args, options);
-}
-
-/**
- *
- *
- */
-
-async function srcMonitor () {
-	debug('开发模式下监视文件改动');
-  const Watchdog = await import('./Watchdog.mjs').then(m => m.default);
-
-
-  const watchdog = new Watchdog(path.join(settings.paths.SRC, 'system'));
-
-  let timeout = null;
-  let test = null;
-
-  watchdog.on('change', () => {
-    if (timeout) clearTimeout(timeout);
-
-    // 延迟执行
-    timeout = setTimeout(() => {
-      if (proc.httpd) process.kill(proc.httpd.pid, 'SIGTERM');
-      startHttpd();
-    }, 1000);
-  });
-}
-
-
-async function scssMonitor () {
-	debug('scss监视器开始工作');
-  const Watchdog = await import('./Watchdog.mjs').then(m => m.default);
-  const watchdog = new Watchdog(path.join(settings.paths.SRC, 'scss'));
-  let timeout = null;
-
-  watchdog.on('change', (file) => {
-    if (timeout) {
-      debug('file:%s发生改动, 取消上次改动计划的重新渲染', file);
-      clearTimeout(timeout);
-    }
-
-    timeout = setTimeout(() => {
-      renderCSS();
-    }, 1200); // 1200ms延迟
-  });
 }
 
 function renderCSS () {
@@ -218,8 +170,6 @@ function renderCSS () {
         fs.promises.writeFile(cssFile + '.br', zlib.brotliCompressSync(css)),
         fs.promises.writeFile(cssFile + '.deflate', zlib.deflateSync(css)),
       ]);
-      
-
     };
     if (stderr) console.log(stderr);
   });
@@ -375,4 +325,17 @@ function copyUmd2Assets () {
     .map(src => path.join(paths.NODE_MODULES, src))
     .map(src => fs.promises.copyFile(src, path.join(destPath, path.basename(src))))
   );
+}
+
+/**
+ * 检测是否配置systemd service
+ */
+
+function detectSystemdService (service) {
+  const test = [
+    '/usr/lib/systemd/system',
+    '/etc/systemd/system/multi-user.target.wants',
+  ].map(loc => fs.existsSync(path.join(loc, service)));
+
+  debug(test);
 }

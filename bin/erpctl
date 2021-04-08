@@ -1143,6 +1143,15 @@ _getPID() {
   echo $(lsof -i:${port} | grep 'LISTEN' \ | awk \'NR==1{print $2}\');
 }
 
+_setupTimer () {
+cat <<- EOF
+[Unit]
+[Timer]
+[Timer]
+EOF
+
+}
+
 _setupSystemdService () {
 
   cat <<- EOF
@@ -1169,7 +1178,7 @@ WantedBy=multi-user.target
 #Alias
 #Also
 
- EOF
+EOF
 
 }
 
@@ -1211,4 +1220,5 @@ _main() {
 	_parse_argv $_ORIG_ARGV
 }
 
-_main # 执行主程序 
+# 执行主程序 
+_main 

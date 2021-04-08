@@ -1,7 +1,12 @@
-import {
-  inspect,
-  keyMap,
-} from '../../utils.lib.mjs';
+/**
+ * *****************************************************************************
+ *
+ * Values
+ *
+ * *****************************************************************************
+ */
+
+import { inspect, keyMap } from '../../utils.lib.mjs';
 
 import { coerceValue } from '../utilities/coerceValue.mjs';
 import { typeFromAST } from '../utilities/typeFromAST.mjs';

@@ -51,8 +51,6 @@ export default function graphqlQuery (query, variables, operationName) {
 
 // test
 if (process.env.NODE_ENV === 'test') { 
-  debug(schema);
-  debug(fieldResolver);
   graphqlQuery('{help}').then(res => debug(res)); 
 }
 

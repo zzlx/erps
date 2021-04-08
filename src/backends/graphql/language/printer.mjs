@@ -1,6 +1,9 @@
 /**
+ * *****************************************************************************
+ *
  * Converts an AST into a string, using one set of reasonable formatting rules.
  *
+ * *****************************************************************************
  */
 
 import { visit } from './visitor.mjs';
@@ -282,8 +285,8 @@ function block(array) {
  * print an empty string.
  */
 
-function wrap(start, maybeString, end) {
-  return maybeString ? start + maybeString + (end || '') : '';
+function wrap(start, maybeString, end = '') {
+  return maybeString ? start + maybeString + end : '';
 }
 
 function indent(maybeString) {
@@ -291,7 +294,13 @@ function indent(maybeString) {
 }
 
 function isMultiline(string) {
-  return string.indexOf('\n') !== -1;
+  //return string.indexOf('\n') !== -1;
+  
+  for (let c of string) {
+    if (c === '\n') { break; return true; }
+  }
+
+  return false;
 }
 
 function hasMultilineItems(maybeArray) {

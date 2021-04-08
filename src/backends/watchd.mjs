@@ -7,7 +7,6 @@
  * 
  * 当源码文件发生修改时,触发change事件，需要给实例绑定change事件处理程序
  * 
- *
  * *****************************************************************************
  */
 
@@ -16,8 +15,30 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import fs from 'fs';
 import path from 'path';
+import cp from 'child_process';
 
-export default class Watchdog extends EventEmitter {
+const __dirname = path.dirname(import.meta.url.substr(7));
+
+process.nextTick(() => {
+  const watchdog = new Watchdog(__dirname);
+  let timeout = null;
+  let test = null;
+
+  watchdog.on('change', () => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      cp.exec('systemctl restart erpd');
+    }, 1000);
+  });
+
+});
+
+/**
+ *
+ *
+ */
+
+class Watchdog extends EventEmitter {
   constructor() {
     super();
 
@@ -65,7 +86,7 @@ export default class Watchdog extends EventEmitter {
  *
  */
 
-export function readDir (dir) {
+function readDir (dir) {
   let files = []; // 文件列表
   
   if (Array.isArray(dir)) {

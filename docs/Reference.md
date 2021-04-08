@@ -20,6 +20,7 @@
 * [GraphQL](https://github.com/graphql)
   * [GraphQL简介](https://graphql.cn/)
   * [GraphQL-spec](https://spec.graphql.cn/)
+  * [GraphQL-spec-draft](http://spec.graphql.org/draft/)
   * [GraphQL-spec](https://github.com/graphql/graphql-spec)
   * [GraphQL-js](https://github.com/graphql/graphql-js)
 * [free-books](https://github.com/justjavac/free-programming-books-zh_CN)

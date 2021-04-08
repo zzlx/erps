@@ -8,13 +8,7 @@
  * *****************************************************************************
  */
 
-import { 
-  assert, 
-  inspect,
-  forEach, 
-  isCollection,
-} from '../../utils.lib.mjs';
-
+import { assert, inspect, forEach, isCollection, } from '../../utils.lib.mjs';
 import memoize3 from '../utilities/memoize3.mjs';
 import promiseForObject from '../utilities/promiseForObject.mjs';
 import promiseReduce from '../utilities/promiseReduce.mjs';
@@ -23,9 +17,7 @@ import { getOperationRootType } from '../utilities/getOperationRootType.mjs';
 import { typeFromAST } from '../utilities/typeFromAST.mjs';
 import { Kind } from '../language/kinds.mjs';
 import { 
-  getVariableValues, 
-  getArgumentValues, 
-  getDirectiveValues 
+  getVariableValues, getArgumentValues, getDirectiveValues 
 } from './values.mjs';
 
 import { 
@@ -136,9 +128,9 @@ export function addPath(prev, key) {
 
 export function assertValidExecutionArguments(schema, document, rawVariableValues) { 
   // If the schema used for execution is invalid, throw an error.
-  assert.ok(document, 'Must provide document');
-
   assertValidSchema(schema);
+
+  assert.ok(document, 'document argument is nedded.');
 
   // Variables, if provided, must be an object.
   assert.ok(
@@ -167,7 +159,7 @@ export function buildExecutionContext(
   const errors = [];
 
   let operation;
-  let hasMultipleAssumedOperations = false;
+  let hasMultipleAssumedOperations = false; // 
   let fragments = Object.create(null);
 
   for (let i = 0; i < document.definitions.length; i++) {
