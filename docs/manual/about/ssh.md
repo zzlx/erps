@@ -20,4 +20,5 @@ ssh-keygen -t rsa
 
 ## 7. Use Public/Private Keys for Authentication
 
+# SELinux配置
 semanage port -a -t ssh_port_t -p tcp 2345
