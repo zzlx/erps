@@ -18,13 +18,10 @@ import path from 'path';
 import util from 'util';
 import { graphql as graphqlModule } from '../utils.lib.mjs';
 import settings from '../settings/index.mjs';
-import debuglog from '../debuglog.mjs';
 
 const { graphql, buildASTSchema, parse, Source } = graphqlModule;
 const __file = import.meta.url.substr(7);
 const __dirname = path.dirname(import.meta.url.substr(7));
-
-const debug = debuglog('debug:GraphQL_Query');
 
 const schemaPath = path.join(settings.paths.SRC, 'schema');
 const schema = await fs.promises.readdir(schemaPath, { encoding: 'utf8' })
@@ -52,7 +49,7 @@ export default function graphqlQuery (query, variables, operationName) {
 
 // test
 if (process.env.NODE_ENV === 'test') { 
-  graphqlQuery('{ help }').then(res => debug(res)); 
+  graphqlQuery('{ help }').then(res => console.log(res)); 
 }
 
 /**

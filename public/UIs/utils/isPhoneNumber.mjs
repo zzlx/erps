@@ -1,0 +1,4 @@
+export default function isPhoneNumber (v) {
+  return /(?:^\d{3,4}-\d{7,8}$)|(?:^\d{10}$)/.test(String(v));
+}
+

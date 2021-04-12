@@ -26,7 +26,6 @@ process.nextTick(() => {
   let timeout = null;
   let test = null;
 
-
   watchdog.on('change', () => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => {
@@ -83,13 +82,12 @@ class Watchdog extends EventEmitter {
   }
 }
 
-
 /**
  * 循环读取目录,返回文件路径列表
  *
  */
 
-function readDir (dir) {
+export function readDir (dir) {
   let files = []; // 文件列表
   
   if (Array.isArray(dir)) {

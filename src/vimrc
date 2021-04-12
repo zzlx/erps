@@ -266,7 +266,7 @@ autocmd BufRead,BufNewFile *.md setfiletype markdown
 " shell脚本配置项目
 autocmd BufNewFile *.sh exec ":call SetHeader()"
 autocmd BufRead,BufNewFile *.sh setfiletype shell set noexpandtab sw=2 ts=2 softtabstop=2
-autocmd FileType shell noremap <buffer> <F5> :!sh % <CR>
+autocmd FileType shell noremap <buffer> <F5> :!/bin/bash % <CR>
 
 " js脚本配置
 "autocmd BufWinLeave *.mjs,*.cjs mkview

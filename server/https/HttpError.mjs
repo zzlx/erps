@@ -10,6 +10,8 @@ import { HTTP_STATUS_CODES } from './constants.mjs';
 
 export default class HttpError extends Error {
   constructor() {
+    this.name = 'HttpError';
+
     if (arguments[0] instanceof Error) {
       super();
       const err = arguments[0];
@@ -43,7 +45,7 @@ export default class HttpError extends Error {
   }
 
   /**
-   * 检查错误代码
+   * Check error
    */
 
   checkErrorCode () {

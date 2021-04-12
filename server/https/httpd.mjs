@@ -76,7 +76,7 @@ const ws = new WebSocket({
 });
 
 ws.on('message', (msg, socket) => {
-  debug(`Receive ${msg} from ${socket.remoteAddress}:${socket.remotePort}`);
+  debug(`Receive websocket message: ${msg} from client(${socket.remoteAddress}:${socket.remotePort})`);
 });
 
 // he 'secureConnection' event is emitted after the handshaking process 

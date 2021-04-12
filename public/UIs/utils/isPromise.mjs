@@ -1,11 +1,10 @@
-#!/usr/bin/env node
-
 /**
  * *****************************************************************************
- * 
- * ERP服务管理程序
+ *
  *
  * *****************************************************************************
  */
 
-import('../server/main.mjs');
+export default function isPromise (v) {
+  return Boolean(v && typeof v === 'object' && typeof v.then === 'function');
+}

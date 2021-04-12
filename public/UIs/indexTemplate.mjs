@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+const template =  `<!DOCTYPE html>
 <html lang="zh-cmn-Hans">
   <head>
     <meta charset="UTF-8"/>
@@ -18,3 +18,4 @@
     <div id="root"></div>
   </body>
 </html>
+`

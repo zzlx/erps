@@ -46,12 +46,8 @@ export default new Proxy(paths, {
     return Reflect.get(target, property, receiver);
   },
 	set: function (target, property, value, receiver) {
-
-    if (/^PATH_/.test(property)) {
-      // 创建配置的目录
-      fs.promises.mkdir(value, { recursive: true }).catch(console.error); 
-    }
-
+    // 创建配置的目录
+    if (/_D$/.test(property)) fs.mkdirSync(value, { recursive: true }); 
     return Reflect.set(...arguments);
 	}
 });

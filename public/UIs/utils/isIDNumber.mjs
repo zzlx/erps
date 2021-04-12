@@ -1,0 +1,4 @@
+export default function isIDNumber (v) {
+  return /^\d{15}|\d{18}$/.test(String(v));
+}
+

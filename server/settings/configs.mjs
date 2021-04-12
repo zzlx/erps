@@ -10,11 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import paths from './paths.mjs';
 import Package from './package.mjs';
-import debuglog from '../debuglog.mjs';
 
-const debug = debuglog('debug:configs.mjs');
-
-// 系统预设配置项目
 const defaults = {
   description: '系统配置',
   keys: null,
@@ -23,7 +19,8 @@ const defaults = {
   privateKey: '/etc/ssl/private.pem',
 }
 
-const configFile = path.join(paths.ROOT, '.settings.json');
+paths.CONF_D = path.join(paths.ROOT, 'conf');
+const configFile = path.join(paths.CONF_D, 'settings.json');
 
 if (!fs.existsSync(configFile)) {
   await writeJsonFile(configFile, defaults);

@@ -1,0 +1,4 @@
+export default function isInteger (v) {
+  return typeof v === 'number' && Number.isFinite(v) && Math.floor(v) === v;
+}
+
