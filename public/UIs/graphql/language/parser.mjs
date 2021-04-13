@@ -1,18 +1,24 @@
+/**
+ * *****************************************************************************
+ *
+ * Parser
+ *
+ * Given a GraphQL source, parses it into a Document.
+ * Throws GraphQLError if a syntax error is encountered.
+ *
+ * *****************************************************************************
+ */
+
 import { inspect, defineToJSON, } from '../../utils.lib.mjs';
+import { syntaxError } from '../error/index.mjs';
+
 import { Lexer, TokenKind, getTokenDesc } from './lexer.mjs';
 import { DirectiveLocation } from './directiveLocation.mjs';
 import Kind from './kinds.mjs';
 import Source from './Source.mjs';
-import { syntaxError } from '../error/index.mjs';
-
-/**
- * Given a GraphQL source, parses it into a Document.
- * Throws GraphQLError if a syntax error is encountered.
- */
+import Location from './Location.mjs';
 
 export function parse(source, options) {
-
-  // 
   const sourceObj = typeof source === 'string' ? new Source(source) : source;
 
   if (!(sourceObj instanceof Source)) {
@@ -22,7 +28,8 @@ export function parse(source, options) {
   }
 
   const lexer = new Lexer(sourceObj, options || {});
-  return parseDocument(lexer);
+
+  return parseDocument(lexer); // parse document
 }
 
 /**
@@ -37,6 +44,7 @@ export function parse(source, options) {
  */
 
 export function parseValue(source, options) {
+
   const sourceObj = typeof source === 'string' ? new Source(source) : source;
   const lexer = new Lexer(sourceObj, options || {});
 
@@ -48,8 +56,11 @@ export function parseValue(source, options) {
 }
 
 /**
- * Given a string containing a GraphQL Type (ex. `[Int!]`), parse the AST for
- * that type.
+ *
+ * Parse Type
+ *
+ * Given a string containing a GraphQL Type (ex. `[Int!]`), 
+ * parse the AST for that type.
  * Throws GraphQLError if a syntax error is encountered.
  *
  * This is useful within tools that operate upon GraphQL Types directly and
@@ -59,11 +70,13 @@ export function parseValue(source, options) {
  */
 
 export function parseType(source, options) {
-  var sourceObj = typeof source === 'string' ? new Source(source) : source;
-  var lexer = new Lexer(sourceObj, options || {});
+  const sourceObj = typeof source === 'string' ? new Source(source) : source;
+  const lexer = new Lexer(sourceObj, options || {});
+
   expect(lexer, TokenKind.SOF);
-  var type = parseTypeReference(lexer);
+  const type = parseTypeReference(lexer);
   expect(lexer, TokenKind.EOF);
+
   return type;
 }
 
@@ -244,13 +257,14 @@ function parseVariableDefinition(lexer) {
     loc: loc(lexer, start)
   };
 }
+
 /**
  * Variable : $ Name
  */
 
 
 function parseVariable(lexer) {
-  var start = lexer.token;
+  const start = lexer.token;
   expect(lexer, TokenKind.DOLLAR);
   return {
     kind: Kind.VARIABLE,
@@ -292,10 +306,10 @@ function parseSelection(lexer) {
  */
 
 function parseField(lexer) {
-  var start = lexer.token;
-  var nameOrAlias = parseName(lexer);
-  var alias;
-  var name;
+  const start = lexer.token;
+  const nameOrAlias = parseName(lexer);
+  let alias;
+  let name;
 
   if (skip(lexer, TokenKind.COLON)) {
     alias = nameOrAlias;
@@ -333,7 +347,6 @@ function parseArguments(lexer, isConst) {
 /**
  * Argument[Const] : Name : Value[?Const]
  */
-
 
 function parseArgument(lexer) {
   const start = lexer.token;
@@ -1378,27 +1391,9 @@ function parseDirectiveLocation(lexer) {
 
 function loc(lexer, startToken) {
   if (!lexer.options.noLocation) {
-    return new Loc(startToken, lexer.lastToken, lexer.source);
+    return new Location(startToken, lexer.lastToken, lexer.source);
   }
 }
-
-class Loc {
-  constructor (startToken, endToken, source) {
-    this.start = startToken.start;
-    this.end = endToken.end;
-    this.startToken = startToken;
-    this.endToken = endToken;
-    this.source = source;
-  }
-}
-
-// Print a simplified form when appearing in JSON/util.inspect.
-defineToJSON(Loc, function () {
-  return {
-    start: this.start,
-    end: this.end
-  }
-});
 
 /**
  * Determines if the next token is of a given kind
@@ -1424,9 +1419,12 @@ function skip(lexer, kind) {
 }
 
 /**
+ * expect the next token
+ *
  * If the next token is of the given kind, 
  * return that token after advancing the lexer. 
  * Otherwise, do not change the parser state and throw an error.
+ *
  */
 
 function expect(lexer, kind) {
@@ -1460,9 +1458,11 @@ function skipKeyword(lexer, value) {
 }
 
 /**
+ *
  * If the next token is a keyword with the given value, 
  * return that token after advancing the lexer. 
  * Otherwise, do not change the parser state and throw an error.
+ *
  */
 
 function expectKeyword(lexer, value) {
@@ -1481,6 +1481,7 @@ function expectKeyword(lexer, value) {
 
 function unexpected(lexer, atToken) {
   const token = atToken || lexer.token;
+
   return syntaxError(
     lexer.source, 
     token.start, 

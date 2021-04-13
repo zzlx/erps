@@ -19,8 +19,12 @@ const defaults = {
   privateKey: '/etc/ssl/private.pem',
 }
 
-paths.CONF_D = path.join(paths.ROOT, 'conf');
-const configFile = path.join(paths.CONF_D, 'settings.json');
+
+const configFile = path.join('/etc', 'erps', 'settings.json');
+
+if (!fs.existsSync(path.dirname(configFile))) {
+  throw new Error('配置目录不存在,请先创建/etc/erps目录');
+}
 
 if (!fs.existsSync(configFile)) {
   await writeJsonFile(configFile, defaults);

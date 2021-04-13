@@ -53,9 +53,9 @@ export const QueryDocumentKeys = {
 export const BREAK = {};
 
 /**
- * visit() will walk through an AST using a depth first traversal, calling
- * the visitor's enter function at each node in the traversal, and calling the
- * leave function after visiting that node and all of its child nodes.
+ * visit() will walk through an AST using a depth first traversal, 
+ * calling the visitor's enter function at each node in the traversal, 
+ * and calling the leave function after visiting that node and all of its child nodes.
  *
  * By returning different values from the enter and leave functions, the
  * behavior of the visitor can be altered, including skipping over a sub-tree of
@@ -390,12 +390,19 @@ export function visitWithTypeInfo(typeInfo, visitor) {
   };
 }
 /**
- * Given a visitor instance, if it is leaving or not, and a node kind, return
- * the function the visitor runtime should call.
+ *
+ * Given a visitor instance, 
+ * if it is leaving or not, and a node kind, 
+ * return the function the visitor runtime should call.
+ *
+ * @param {object} visitor
+ * @param {string} kind
+ * @param {boolean} isLeaving
+ *
  */
 
 export function getVisitFn(visitor, kind, isLeaving) {
-  var kindVisitor = visitor[kind];
+  const kindVisitor = visitor[kind];
 
   if (kindVisitor) {
     if (!isLeaving && typeof kindVisitor === 'function') {
@@ -403,14 +410,14 @@ export function getVisitFn(visitor, kind, isLeaving) {
       return kindVisitor;
     }
 
-    var kindSpecificVisitor = isLeaving ? kindVisitor.leave : kindVisitor.enter;
+    const kindSpecificVisitor = isLeaving ? kindVisitor.leave : kindVisitor.enter;
 
     if (typeof kindSpecificVisitor === 'function') {
       // { Kind: { enter() {}, leave() {} } }
       return kindSpecificVisitor;
     }
   } else {
-    var specificVisitor = isLeaving ? visitor.leave : visitor.enter;
+    const specificVisitor = isLeaving ? visitor.leave : visitor.enter;
 
     if (specificVisitor) {
       if (typeof specificVisitor === 'function') {
@@ -418,7 +425,7 @@ export function getVisitFn(visitor, kind, isLeaving) {
         return specificVisitor;
       }
 
-      var specificKindVisitor = specificVisitor[kind];
+      const specificKindVisitor = specificVisitor[kind];
 
       if (typeof specificKindVisitor === 'function') {
         // { enter: { Kind() {} }, leave: { Kind() {} } }

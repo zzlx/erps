@@ -2,6 +2,7 @@
  * *****************************************************************************
  *
  * A representation of source input to GraphQL.
+ *
  * `name` and `locationOffset` are optional. 
  * They are useful for clients who store GraphQL documents in source files; 
  * for example, if the GraphQL input starts at line 40 in a file named Foo.graphql, 

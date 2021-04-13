@@ -14,7 +14,6 @@
 
 import path from 'path';
 import assert from 'assert';
-import { date } from '../../utils.lib.mjs';
 
 export default function logger (options = {}) {
   const opts = Object.assign({
@@ -26,7 +25,7 @@ export default function logger (options = {}) {
 
   return async function logMiddleware (ctx, next) {
     ctx.state.log = {
-      "datetime": date.toISOString(),
+      "atimeMs": Date.now(), //  access time in mill sec
       "c-address": ctx.socket.remoteAddress,
       "c-port": ctx.socket.remotePort,
       "user-agent": ctx.get("user-agent"),

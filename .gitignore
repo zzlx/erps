@@ -20,12 +20,8 @@
 
 # 忽略的目录及文件
 node_modules
-conf
 
 # 其他临时文件
 *.log
-*.local
-*.local.conf
-*.local.json
 .env
 NetrwTreeListing *

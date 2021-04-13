@@ -30,8 +30,8 @@ export class Lexer {
     this.options   = options;
 
     const startOfFileToken = new Tok(TokenKind.SOF, 0, 0, 0, 0, null);
-    this.token     = startOfFileToken;
-    this.lastToken = startOfFileToken;
+    this.token     = startOfFileToken; // current token
+    this.lastToken = startOfFileToken; // last token
 
     this.line      = 1;
     this.lineStart = 0;
