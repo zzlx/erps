@@ -18,6 +18,7 @@ const debug = debuglog('debug:routes/homePage.mjs');
 const router = new Router();
 const template = fs.readFileSync(path.join(settings.paths.PUBLIC, 'index.html'), 'utf8');
 
+
 router.get('index', '/*', async (ctx, next) => {
   // 转发有扩展名的路径至下一中间件
   if (/\.\w+$/.test(ctx.pathname)) return next();
@@ -36,7 +37,7 @@ router.get('index', '/*', async (ctx, next) => {
   // @TODO:根据路由信息动态更新title
   html.title = '首页|HomePage';
 
-  const appURL = path.join(settings.paths.PUBLIC, 'UIs', 'App.mjs'); 
+  const appURL = path.join(settings.paths.PUBLIC, 'UI', 'App.mjs'); 
   const app = await import(appURL).then(m => m.default);
   const element = app({
     location: { pathname: ctx.pathname }

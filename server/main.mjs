@@ -30,7 +30,7 @@ const proc = { };
 assert(onLinux(), 'Linux platrom is recomanded.');
 
 // 设置进程名
-process.title = settings.name || 'erps';
+process.title = 'org.zzlx.erps';
 
 // This is the Fast shutdown mode.
 // The server will send all existing server processes SIGTERM

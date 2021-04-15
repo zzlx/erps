@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+const template =  `<!DOCTYPE html>
 <html lang="zh-cmn-Hans">
   <head>
     <meta charset="UTF-8"/>
@@ -9,8 +9,8 @@
 		<link rel="stylesheet" href="/assets/css/styles.css"/>
     <script src="/assets/js/react.production.min.js"></script>
     <script src="/assets/js/react-dom.production.min.js"></script>
-    <script src="/noModule.js" nomodule></script>
     <script src="/UI/index.mjs" type="module"></script>
+    <script src="/UI/noModule.js" nomodule></script>
   </head>
   <body>
     <!-- 必须启用javascript支持 -->
@@ -18,3 +18,4 @@
     <div id="root"></div>
   </body>
 </html>
+`

@@ -26,6 +26,7 @@ process.nextTick(() => {
   let timeout = null;
   let test = null;
 
+
   watchdog.on('change', () => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => {

@@ -134,6 +134,8 @@ export default class Application extends EventEmitter {
 
     let buffer = null;
 
+    const ua = req.headers['user-agent']; // 记录客户端类型
+
     // 接收到data frame
     socket.on('data', dataFrame => {
       const res = decodeFrame(dataFrame);
