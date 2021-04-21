@@ -1,4 +1,5 @@
 import { GraphQLError } from '../../error/index.mjs';
+
 export function schemaDefinitionNotAloneMessage() {
   return 'Must provide only one schema definition.';
 }

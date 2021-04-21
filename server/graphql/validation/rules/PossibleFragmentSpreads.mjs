@@ -2,7 +2,7 @@ import { inspect } from '../../../utils.lib.mjs';
 import { GraphQLError } from '../../error/index.mjs';
 import { doTypesOverlap } from '../../utilities/typeComparators.mjs';
 import { typeFromAST } from '../../utilities/typeFromAST.mjs';
-import { isCompositeType } from '../../type/definition.mjs';
+import { isCompositeType } from '../../type/index.mjs';
 export function typeIncompatibleSpreadMessage(fragName, parentType, fragType) {
   return "Fragment \"".concat(fragName, "\" cannot be spread here as objects of ") + "type \"".concat(parentType, "\" can never be of type \"").concat(fragType, "\".");
 }

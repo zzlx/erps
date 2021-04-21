@@ -1,13 +1,10 @@
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 import { GraphQLError } from '../../error/index.mjs';
-import { Kind } from '../../language/kinds.mjs';
-import { inspect, keyMap } from '../../../utils.lib.mjs';
-import { isType, isRequiredArgument } from '../../type/definition.mjs';
-import { print } from '../../language/printer.mjs';
-import { specifiedDirectives } from '../../type/directives.mjs';
+import { Kind,print } from '../../language/index.mjs';
+import { inspect, keyMap, objectSpread } from '../../../utils.lib.mjs';
+import { 
+  isType, isRequiredArgument,
+  specifiedDirectives,
+} from '../../type/index.mjs';
 export function missingFieldArgMessage(fieldName, argName, type) {
   return "Field \"".concat(fieldName, "\" argument \"").concat(argName, "\" of type ") + "\"".concat(type, "\" is required but not provided.");
 }
@@ -22,7 +19,7 @@ export function missingDirectiveArgMessage(directiveName, argName, type) {
  */
 
 export function ProvidedRequiredArguments(context) {
-  return _objectSpread({}, ProvidedRequiredArgumentsOnDirectives(context), {
+  return objectSpread({}, ProvidedRequiredArgumentsOnDirectives(context), {
     Field: {
       // Validate on leave to allow for deeper errors to appear first.
       leave: function leave(fieldNode) {

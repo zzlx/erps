@@ -4,9 +4,12 @@ function _inheritsLoose(subClass, superClass) {
   subClass.__proto__ = superClass; 
 }
 
-import { visit, visitWithTypeInfo } from '../language/visitor.mjs';
-import { Kind } from '../language/kinds.mjs';
-import { TypeInfo } from '../utilities/TypeInfo.mjs';
+import { 
+  visit, 
+  visitWithTypeInfo, 
+  Kind,
+} from '../language/index.mjs';
+import { TypeInfo } from '../utilities/index.mjs';
 
 /**
  * An instance of this class is passed as the "this" context to all validators,

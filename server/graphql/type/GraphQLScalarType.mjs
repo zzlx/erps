@@ -68,16 +68,3 @@ export class GraphQLScalarType {
 // Conditionally apply `[Symbol.toStringTag]` if `Symbol`s are supported
 defineToStringTag(GraphQLScalarType);
 defineToJSON(GraphQLScalarType);
-
-// eslint-disable-next-line no-redeclare
-export function isScalarType(type) {
-  return type instanceof GraphQLScalarType;
-}
-
-export function assertScalarType(type) {
-  assert(
-    isScalarType(type), 
-    "Expected ".concat(inspect(type), " to be a GraphQL Scalar type.")
-  ); 
-  return type;
-}

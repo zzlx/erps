@@ -1,5 +1,5 @@
 import { GraphQLError } from '../../error/index.mjs';
-import { isObjectType, isInterfaceType, isInputObjectType } from '../../type/definition.mjs';
+import { isObjectType, isInterfaceType, isInputObjectType } from '../../type/index.mjs';
 export function duplicateFieldDefinitionNameMessage(typeName, fieldName) {
   return "Field \"".concat(typeName, ".").concat(fieldName, "\" can only be defined once.");
 }

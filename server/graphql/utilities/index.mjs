@@ -29,9 +29,6 @@ export { extendSchema } from './extendSchema.mjs'; // Sort a GraphQLSchema.
 
 export { lexicographicSortSchema } from './lexicographicSortSchema.mjs'; 
 
-// Print a GraphQLSchema to GraphQL Schema language.
-export { printSchema, printType, printIntrospectionSchema } from './schemaPrinter.mjs'; 
-
 // Create a GraphQLType from a GraphQL language AST.
 export { typeFromAST } from './typeFromAST.mjs'; 
 
@@ -59,6 +56,12 @@ export { concatAST } from './concatAST.mjs';
 // Separates an AST into an AST per Operation.
 export { separateOperations } from './separateOperations.mjs'; // Comparators for types
 
+// Report all deprecated usage within a GraphQL document.
+export { findDeprecatedUsages } from './findDeprecatedUsages.mjs';
+
+// Print a GraphQLSchema to GraphQL Schema language.
+export { printSchema, printType, printIntrospectionSchema } from './schemaPrinter.mjs'; 
+
 export { isEqualType, isTypeSubTypeOf, doTypesOverlap } from './typeComparators.mjs'; // Asserts that a string is a valid GraphQL name
 
 export { assertValidName, isValidNameError } from './assertValidName.mjs'; 
@@ -71,5 +74,3 @@ export {
   findDangerousChanges 
 } from './findBreakingChanges.mjs';
 
-// Report all deprecated usage within a GraphQL document.
-export { findDeprecatedUsages } from './findDeprecatedUsages.mjs';

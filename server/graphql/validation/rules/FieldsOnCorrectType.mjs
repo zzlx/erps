@@ -4,7 +4,7 @@ import {
 } from '../../../utils.lib.mjs';
 
 import { GraphQLError } from '../../error/index.mjs';
-import { isObjectType, isInterfaceType, isAbstractType } from '../../type/definition.mjs';
+import { isObjectType, isInterfaceType, isAbstractType } from '../../type/index.mjs';
 export function undefinedFieldMessage(fieldName, type, suggestedTypeNames, suggestedFieldNames) {
   var message = "Cannot query field \"".concat(fieldName, "\" on type \"").concat(type, "\".");
 

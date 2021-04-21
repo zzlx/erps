@@ -1,7 +1,9 @@
 import { GraphQLError } from '../../error/index.mjs';
+
 export function unknownFragmentMessage(fragName) {
   return "Unknown fragment \"".concat(fragName, "\".");
 }
+
 /**
  * Known fragment names
  *

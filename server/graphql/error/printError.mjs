@@ -6,9 +6,9 @@
  *
  */
 
-import { getLocation } from '../language/location.mjs';
+import { getLocation } from '../language/index.mjs';
 
-export default function printError(error) {
+export function printError(error) {
   var printedLocations = [];
 
   if (error.nodes) {

@@ -6,8 +6,8 @@ import {
 } from '../../utils.lib.mjs';
 
 import { valueFromAST } from './valueFromAST.mjs';
-import { parseValue } from '../language/parser.mjs';
-import { GraphQLSchema } from '../type/schema.mjs';
+import { parseValue } from '../language/index.mjs';
+import { GraphQLSchema } from '../type/index.mjs';
 import { 
   isInputType, 
   isOutputType, 
@@ -22,10 +22,10 @@ import {
   assertNullableType, 
   assertObjectType, 
   assertInterfaceType 
-} from '../type/definition.mjs';
-import { GraphQLDirective } from '../type/directives.mjs';
-import { introspectionTypes, TypeKind } from '../type/introspection.mjs';
-import { specifiedScalarTypes } from '../type/scalars.mjs';
+} from '../type/index.mjs';
+import { GraphQLDirective } from '../type/index.mjs';
+import { introspectionTypes, TypeKind } from '../type/index.mjs';
+import { specifiedScalarTypes } from '../type/index.mjs';
 
 /**
  * Build a GraphQLSchema for use by client tools.

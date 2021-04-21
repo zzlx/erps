@@ -71,17 +71,3 @@ function defineTypes(config) {
     : void 0;
   return types;
 }
-
-// eslint-disable-next-line no-redeclare
-export function isUnionType(type) {
-  return type instanceof GraphQLUnionType;
-}
-
-export function assertUnionType(type) {
-  assert(
-    isUnionType(type), 
-    "Expected ".concat(inspect(type), " to be a GraphQL Union type.")
-  ); 
-  return type;
-}
-

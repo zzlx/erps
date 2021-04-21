@@ -20,14 +20,12 @@ import {
   blockStringValue,
 } from '../../utils.lib.mjs';
 
-import { valueFromAST } from './valueFromAST.mjs';
-import { assertValidSDL } from '../validation/validate.mjs';
-import { TokenKind } from '../language/lexer.mjs';
-import { parse } from '../language/parser.mjs';
-import { getDirectiveValues } from '../execution/values.mjs';
-import { Kind } from '../language/kinds.mjs';
-import { isTypeDefinitionNode } from '../language/predicates.mjs';
-
+import { 
+  parse,
+  TokenKind,
+  Kind,
+  isTypeDefinitionNode,
+} from '../language/index.mjs';
 import { 
   GraphQLScalarType, 
   GraphQLObjectType, 
@@ -36,19 +34,19 @@ import {
   GraphQLEnumType, 
   GraphQLInputObjectType, 
   GraphQLList, 
-  GraphQLNonNull 
-} from '../type/definition.mjs';
-
-import { 
+  GraphQLNonNull, 
   GraphQLDirective, 
   GraphQLSkipDirective, 
   GraphQLIncludeDirective, 
-  GraphQLDeprecatedDirective 
-} from '../type/directives.mjs';
-
-import { introspectionTypes } from '../type/introspection.mjs';
-import { specifiedScalarTypes } from '../type/scalars.mjs';
-import { GraphQLSchema } from '../type/schema.mjs';
+  GraphQLDeprecatedDirective,
+  introspectionTypes,
+  specifiedScalarTypes,
+  GraphQLSchema,
+} from '../type/index.mjs';
+import { getDirectiveValues } from '../execution/index.mjs';
+import { assertValidSDL } from '../validation/index.mjs';
+import { valueFromAST } from './valueFromAST.mjs';
+import { getDescription } from './getDescription.mjs';
 
 export function buildASTSchema(documentAST, options) {
 	if (documentAST && documentAST.kind !== Kind.DOCUMENT) {
@@ -417,48 +415,4 @@ function keyByNameNode(list, valFn) {
 function getDeprecationReason(node) {
   var deprecated = getDirectiveValues(GraphQLDeprecatedDirective, node);
   return deprecated && deprecated.reason;
-}
-
-/**
- * Given an ast node, returns its string description.
- * @deprecated: provided to ease adoption and will be removed in v16.
- *
- * Accepts options as a second argument:
- *
- *    - commentDescriptions:
- *        Provide true to use preceding comments as the description.
- *
- */
-
-export function getDescription(node, options) {
-  if (node.description) {
-    return node.description.value;
-  }
-
-  if (options && options.commentDescriptions) {
-    var rawValue = getLeadingCommentBlock(node);
-
-    if (rawValue !== undefined) {
-      return blockStringValue('\n' + rawValue);
-    }
-  }
-}
-
-function getLeadingCommentBlock(node) {
-  var loc = node.loc;
-
-  if (!loc) {
-    return;
-  }
-
-  var comments = [];
-  var token = loc.startToken.prev;
-
-  while (token && token.kind === TokenKind.COMMENT && token.next && token.prev && token.line + 1 === token.next.line && token.line !== token.prev.line) {
-    var value = String(token.value);
-    comments.push(value);
-    token = token.prev;
-  }
-
-  return comments.reverse().join('\n');
 }

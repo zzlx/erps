@@ -22,6 +22,7 @@ export { default as assert } from './utils/assert.mjs';
 export { default as blockStringValue } from './utils/blockStringValue.mjs';
 export { default as camelCase } from './utils/camelCase.mjs';
 export { default as date } from './utils/date.mjs';
+export { default as defineProperty } from './utils/defineProperty.mjs';
 export { default as defineToStringTag } from './utils/defineToStringTag.mjs';
 export { default as defineToJSON } from './utils/defineToJSON.mjs';
 export { default as objectSpread } from './utils/objectSpread.mjs';

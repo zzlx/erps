@@ -1,7 +1,7 @@
 import { GraphQLError } from '../../error/index.mjs';
-import { print } from '../../language/printer.mjs';
-import { isInputType } from '../../type/definition.mjs';
-import { typeFromAST } from '../../utilities/typeFromAST.mjs';
+import { print } from '../../language/index.mjs';
+import { isInputType } from '../../type/index.mjs';
+import { typeFromAST } from '../../utilities/index.mjs';
 export function nonInputTypeOnVarMessage(variableName, typeName) {
   return "Variable \"$".concat(variableName, "\" cannot be non-input type \"").concat(typeName, "\".");
 }

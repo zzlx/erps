@@ -15,8 +15,8 @@
  * will be created from the provided schema.
  */
 
-import { visit, visitInParallel, visitWithTypeInfo } from '../language/visitor.mjs';
-import { assertValidSchema } from '../type/validate.mjs';
+import { visit, visitInParallel, visitWithTypeInfo } from '../language/index.mjs';
+import { assertValidSchema } from '../type/index.mjs';
 import { TypeInfo } from '../utilities/TypeInfo.mjs';
 import { specifiedRules, specifiedSDLRules } from './specifiedRules.mjs';
 import { SDLValidationContext, ValidationContext } from './ValidationContext.mjs';

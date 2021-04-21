@@ -30,7 +30,8 @@ import {
   inspect,
 } from '../../utils.lib.mjs';
 
-import { isType } from './definition.mjs';
+import { isType } from './isType.mjs';
+import { assertNullableType } from './assertNullableType.mjs';
 
 // eslint-disable-next-line no-redeclare
 export class GraphQLNonNull {
@@ -49,43 +50,3 @@ export class GraphQLNonNull {
 
 defineToStringTag(GraphQLNonNull);
 defineToJSON(GraphQLNonNull);
-
-/**
- * These types can all accept null as a value.
- */
-
-// eslint-disable-next-line no-redeclare
-export function isNonNullType(type) {
-  return type instanceof GraphQLNonNull;
-}
-
-export function assertNonNullType(type) {
-  assert(
-    isNonNullType(type), 
-    "Expected ".concat(inspect(type), " to be a GraphQL Non-Null type.")
-  );
-  return type;
-}
-
-/**
- * test if it is a nullable type
- */
-
-export function isNullableType(type) {
-  return isType(type) && !isNonNullType(type);
-}
-
-export function assertNullableType(type) {
-  assert(
-    isNullableType(type), 
-    "Expected ".concat(inspect(type), " to be a GraphQL nullable type.")
-  );
-  return type;
-}
-
-/* eslint-disable no-redeclare */
-export function getNullableType(type) {
-  if (type) {
-    return isNonNullType(type) ? type.ofType : type;
-  }
-}

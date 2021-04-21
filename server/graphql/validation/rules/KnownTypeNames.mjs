@@ -4,8 +4,10 @@ import {
 } from '../../../utils.lib.mjs';
 
 import { GraphQLError } from '../../error/index.mjs';
-import { isTypeDefinitionNode, isTypeSystemDefinitionNode, isTypeSystemExtensionNode } from '../../language/predicates.mjs';
-import { specifiedScalarTypes } from '../../type/scalars.mjs';
+import { 
+  isTypeDefinitionNode, isTypeSystemDefinitionNode, isTypeSystemExtensionNode 
+} from '../../language/index.mjs';
+import { specifiedScalarTypes } from '../../type/index.mjs';
 export function unknownTypeMessage(typeName, suggestedTypes) {
   var message = "Unknown type \"".concat(typeName, "\".");
 

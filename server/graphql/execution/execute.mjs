@@ -15,34 +15,28 @@ import {
   isNullish,
   isInvalid,
 } from '../../utils.lib.mjs';
+
 import memoize3 from '../utilities/memoize3.mjs';
 import promiseForObject from '../utilities/promiseForObject.mjs';
 import promiseReduce from '../utilities/promiseReduce.mjs';
 import { GraphQLError, locatedError, } from '../error/index.mjs';
 import { getOperationRootType } from '../utilities/getOperationRootType.mjs';
 import { typeFromAST } from '../utilities/typeFromAST.mjs';
-import { Kind } from '../language/kinds.mjs';
-import { 
-  getVariableValues, getArgumentValues, getDirectiveValues 
-} from './values.mjs';
+import { Kind } from '../language/index.mjs';
+import { getVariableValues } from './getVariableValues.mjs';
+import { getArgumentValues } from './getArgumentValues.mjs';
+import { getDirectiveValues } from './getDirectiveValues.mjs';
 
 import { 
   isObjectType, 
 	isAbstractType, 
 	isLeafType, 
 	isListType, 
-	isNonNullType 
-} from '../type/definition.mjs';
-
-import { 
-  SchemaMetaFieldDef, TypeMetaFieldDef, TypeNameMetaFieldDef 
-} from '../type/introspection.mjs';
-
-import { 
-  GraphQLIncludeDirective, GraphQLSkipDirective 
-} from '../type/directives.mjs';
-
-import { assertValidSchema } from '../type/validate.mjs';
+	isNonNullType,
+  SchemaMetaFieldDef, TypeMetaFieldDef, TypeNameMetaFieldDef,
+  GraphQLIncludeDirective, GraphQLSkipDirective, 
+  assertValidSchema,
+} from '../type/index.mjs';
 
 export function execute(
   schema,
@@ -98,52 +92,6 @@ function buildResponse(exeContext, data) {
   return exeContext.errors.length === 0 
     ? { data: data } 
     : { errors: exeContext.errors, data: data };
-}
-
-/**
- * Given a ResponsePath 
- * (found in the `path` entry,
- * in the information provided as the last argument to a field resolver), 
- * return an Array of the path keys.
- */
-
-export function responsePathAsArray(path) {
-  const flattened = [];
-  let curr = path;
-
-  while (curr) {
-    flattened.push(curr.key);
-    curr = curr.prev;
-  }
-
-  return flattened.reverse();
-}
-
-/**
- * Return a new ResponsePath containing the new key.
- */
-
-export function addPath(prev, key) {
-  return { prev: prev, key: key };
-}
-
-/**
- * Essential assertions before executing to provide developer feedback for
- * improper use of the GraphQL library.
- */
-
-export function assertValidExecutionArguments(schema, document, rawVariableValues) { 
-  // If the schema used for execution is invalid, throw an error.
-  assertValidSchema(schema);
-
-  assert(document, 'document argument is nedded.');
-
-  // Variables, if provided, must be an object.
-  assert(
-    !rawVariableValues || typeof(rawVariableValues) === 'object',
-    'Variables must be provided as an Object where each property is a variable value. ' + 
-    'Perhaps look to see if an unparsed JSON string was provided.'
-  ); 
 }
 
 /**
@@ -974,26 +922,6 @@ function defaultResolveTypeFn(value, contextValue, info, abstractType) {
 }
 
 /**
- * If a resolve function is not given, then a default resolve behavior is used
- * which takes the property of the source object of the same name as the field
- * and returns it as the result, or if it's a function, returns the result
- * of calling that function while passing along args and context value.
- */
-
-export function defaultFieldResolver(source, args, contextValue, info) {
-  // ensure source is a value for which property access is acceptable.
-  if (typeof source === 'object' || typeof source === 'function') {
-    const property = source[info.fieldName];
-
-    if (typeof property === 'function') {
-      return source[info.fieldName](args, contextValue, info);
-    }
-
-    return property;
-  }
-}
-
-/**
  * This method looks up the field on the given type definition.
  * It has two special casing for the introspection fields:
  * 1. __typename is special because it can always be queried as a field, 
@@ -1004,8 +932,7 @@ export function defaultFieldResolver(source, args, contextValue, info) {
 
 export function getFieldDef(schema, parentType, fieldName) {
   if (
-    fieldName === SchemaMetaFieldDef.name && 
-    schema.getQueryType() === parentType
+    fieldName === SchemaMetaFieldDef.name && schema.getQueryType() === parentType
   ) {
     return SchemaMetaFieldDef;
   } else if (

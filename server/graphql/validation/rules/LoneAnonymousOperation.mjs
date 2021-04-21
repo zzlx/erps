@@ -1,8 +1,6 @@
 import { GraphQLError } from '../../error/index.mjs';
-import { Kind } from '../../language/kinds.mjs';
-export function anonOperationNotAloneMessage() {
-  return 'This anonymous operation must be the only defined operation.';
-}
+import { Kind } from '../../language/index.mjs';
+
 /**
  * Lone anonymous operation
  *
@@ -24,4 +22,8 @@ export function LoneAnonymousOperation(context) {
       }
     }
   };
+}
+
+export function anonOperationNotAloneMessage() {
+  return 'This anonymous operation must be the only defined operation.';
 }

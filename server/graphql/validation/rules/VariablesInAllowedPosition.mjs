@@ -1,9 +1,9 @@
 import { inspect } from '../../../utils.lib.mjs';
 import { GraphQLError } from '../../error/index.mjs';
-import { Kind } from '../../language/kinds.mjs';
-import { isNonNullType } from '../../type/definition.mjs';
-import { isTypeSubTypeOf } from '../../utilities/typeComparators.mjs';
-import { typeFromAST } from '../../utilities/typeFromAST.mjs';
+import { Kind } from '../../language/index.mjs';
+import { isNonNullType } from '../../type/index.mjs';
+import { isTypeSubTypeOf } from '../../utilities/index.mjs';
+import { typeFromAST } from '../../utilities/index.mjs';
 export function badVarPosMessage(varName, varType, expectedType) {
   return "Variable \"$".concat(varName, "\" of type \"").concat(varType, "\" used in ") + "position expecting type \"".concat(expectedType, "\".");
 }

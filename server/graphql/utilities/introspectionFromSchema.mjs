@@ -8,9 +8,9 @@
  * of the server context, for instance when doing schema comparisons.
  */
 
-import { getIntrospectionQuery } from './introspectionQuery.mjs';
-import { execute } from '../execution/execute.mjs';
-import { parse } from '../language/parser.mjs';
+import { getIntrospectionQuery } from './getIntrospectionQuery.mjs';
+import { execute } from '../execution/index.mjs';
+import { parse } from '../language/index.mjs';
 
 export function introspectionFromSchema(schema, options) {
   var queryAST = parse(getIntrospectionQuery(options));

@@ -8,7 +8,7 @@
  *
  */
 
-import { Kind } from '../language/kinds.mjs';
+import { Kind } from '../language/Kind.mjs';
 import { 
   isObjectType, 
   isInterfaceType, 
@@ -19,14 +19,11 @@ import {
   isInputType, 
   isOutputType, 
   getNullableType, 
-  getNamedType 
-} from '../type/definition.mjs';
-
-import { 
+  getNamedType, 
   SchemaMetaFieldDef, 
   TypeMetaFieldDef, 
   TypeNameMetaFieldDef 
-} from '../type/introspection.mjs';
+} from '../type/index.mjs';
 
 import { typeFromAST } from './typeFromAST.mjs';
 

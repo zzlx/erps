@@ -20,14 +20,14 @@
  */
 
 import { assert, keyMap } from '../../utils.lib.mjs';
-import { Kind } from '../language/kinds.mjs';
+import { Kind } from '../language/index.mjs';
 import { 
   isScalarType, 
   isEnumType, 
   isInputObjectType, 
   isListType, 
   isNonNullType 
-} from '../type/definition.mjs';
+} from '../type/index.mjs';
 
 export function valueFromAST(valueNode, type, variables) {
   if (!valueNode) {

@@ -1,6 +1,11 @@
 import { GraphQLError } from '../../error/index.mjs';
-import { print } from '../../language/printer.mjs';
-import { isScalarType, isEnumType, isInputObjectType, isListType, isNonNullType, isRequiredInputField, getNullableType, getNamedType } from '../../type/definition.mjs';
+import { print } from '../../language/index.mjs';
+import { 
+  isScalarType, isEnumType, 
+  isInputObjectType, isListType, 
+  isNonNullType, isRequiredInputField, 
+  getNullableType, getNamedType 
+} from '../../type/index.mjs';
 
 import {
   assert,

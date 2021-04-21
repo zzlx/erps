@@ -3,11 +3,13 @@ import {
   keyValMap,
 } from '../../utils.lib.mjs';
 
-import { GraphQLSchema } from '../type/schema.mjs';
-import { GraphQLDirective } from '../type/directives.mjs';
-import { GraphQLObjectType, GraphQLInterfaceType, GraphQLUnionType, GraphQLEnumType, GraphQLInputObjectType, GraphQLList, GraphQLNonNull, isListType, isNonNullType, isScalarType, isObjectType, isInterfaceType, isUnionType, isEnumType, isInputObjectType } from '../type/definition.mjs';
-import { isSpecifiedScalarType } from '../type/scalars.mjs';
-import { isIntrospectionType } from '../type/introspection.mjs';
+import { 
+  GraphQLSchema,
+  GraphQLDirective,
+  GraphQLObjectType, GraphQLInterfaceType, GraphQLUnionType, GraphQLEnumType, GraphQLInputObjectType, GraphQLList, GraphQLNonNull, isListType, isNonNullType, isScalarType, isObjectType, isInterfaceType, isUnionType, isEnumType, isInputObjectType,
+  isSpecifiedScalarType,
+  isIntrospectionType,
+} from '../type/index.mjs';
 
 export function lexicographicSortSchema(schema) {
   var cache = Object.create(null);

@@ -1,7 +1,7 @@
 import { GraphQLError } from '../../error/index.mjs';
-import { print } from '../../language/printer.mjs';
-import { isCompositeType } from '../../type/definition.mjs';
-import { typeFromAST } from '../../utilities/typeFromAST.mjs';
+import { print } from '../../language/index.mjs';
+import { isCompositeType } from '../../type/index.mjs';
+import { typeFromAST } from '../../utilities/index.mjs';
 export function inlineFragmentOnNonCompositeErrorMessage(type) {
   return "Fragment cannot condition on non composite type \"".concat(type, "\".");
 }

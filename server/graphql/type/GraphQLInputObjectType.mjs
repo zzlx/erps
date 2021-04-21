@@ -73,15 +73,3 @@ function defineInputFieldMap(config) {
     return _objectSpread({}, fieldConfig, { name: fieldName });
   });
 }
-
-export function isInputObjectType(type) {
-  return type instanceof GraphQLInputObjectType;
-}
-
-export function assertInputObjectType(type) {
-  assert(
-    isInputObjectType(type), 
-    "Expected ".concat(inspect(type), " to be a GraphQL Input Object type.")
-  );
-  return type;
-}

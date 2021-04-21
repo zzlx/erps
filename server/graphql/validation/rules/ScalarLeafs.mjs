@@ -1,6 +1,6 @@
 import { inspect } from '../../../utils.lib.mjs';
 import { GraphQLError } from '../../error/index.mjs';
-import { getNamedType, isLeafType } from '../../type/definition.mjs';
+import { getNamedType, isLeafType } from '../../type/index.mjs';
 export function noSubselectionAllowedMessage(fieldName, type) {
   return "Field \"".concat(fieldName, "\" must not have a selection since ") + "type \"".concat(type, "\" has no subfields.");
 }

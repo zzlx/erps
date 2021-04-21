@@ -9,8 +9,8 @@
  */
 
 import { GraphQLError } from '../../error/index.mjs';
-import { Kind } from '../../language/kinds.mjs';
-import { isExecutableDefinitionNode } from '../../language/predicates.mjs';
+import { Kind } from '../../language/index.mjs';
+import { isExecutableDefinitionNode } from '../../language/index.mjs';
 
 export function nonExecutableDefinitionMessage(defName) {
   return "The ".concat(defName, " definition is not executable.");

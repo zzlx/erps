@@ -57,7 +57,7 @@ export class GraphQLInterfaceType {
 defineToStringTag(GraphQLInterfaceType);
 defineToJSON(GraphQLInterfaceType);
 
-function defineFieldMap(config) {
+export function defineFieldMap(config) {
   const resolveThunk = thunk => typeof thunk === 'function' ? thunk() : thunk;
   const fieldMap = resolveThunk(config.fields) || {};
 
@@ -89,17 +89,4 @@ function defineFieldMap(config) {
       args: args
     });
   });
-}
-
-// eslint-disable-next-line no-redeclare
-export function isInterfaceType(type) {
-  return type instanceof GraphQLInterfaceType;
-}
-
-export function assertInterfaceType(type) {
-  assert(
-    isInterfaceType(type),
-    "Expected ".concat(inspect(type), " to be a GraphQL Interface type.")
-  ); 
-  return type;
 }

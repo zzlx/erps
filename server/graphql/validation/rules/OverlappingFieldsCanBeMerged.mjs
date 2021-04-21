@@ -1,8 +1,9 @@
 import { inspect } from '../../../utils.lib.mjs';
 import { GraphQLError } from '../../error/index.mjs';
-import { Kind } from '../../language/kinds.mjs';
-import { print } from '../../language/printer.mjs';
-import { getNamedType, isNonNullType, isLeafType, isObjectType, isListType, isInterfaceType } from '../../type/definition.mjs';
+import { Kind, print } from '../../language/index.mjs';
+import { 
+  getNamedType, isNonNullType, isLeafType, isObjectType, isListType, isInterfaceType 
+} from '../../type/index.mjs';
 import { typeFromAST } from '../../utilities/typeFromAST.mjs';
 export function fieldsConflictMessage(responseName, reason) {
   return "Fields \"".concat(responseName, "\" conflict because ").concat(reasonMessage(reason), ". ") + 'Use different aliases on the fields to fetch both if this was intentional.';

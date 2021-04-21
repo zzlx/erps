@@ -30,6 +30,7 @@ import {
   defineToJSON,
   inspect,
   keyMap,
+  isPlainObject,
 } from '../../utils.lib.mjs';
 
 export class GraphQLEnumType {
@@ -101,18 +102,3 @@ function defineEnumValues(type, valueMap) {
     };
   });
 }
-
-// eslint-disable-next-line no-redeclare
-export function isEnumType(type) {
-  return type instanceof GraphQLEnumType;
-}
-
-export function assertEnumType(type) {
-  assert(
-    isEnumType(type), 
-    "Expected ".concat(inspect(type), " to be a GraphQL Enum type.")
-  );
-  return type;
-}
-
-// eslint-disable-next-line no-redeclare

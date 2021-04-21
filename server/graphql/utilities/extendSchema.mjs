@@ -6,14 +6,14 @@ import {
 } from '../../utils.lib.mjs';
 
 import { ASTDefinitionBuilder } from './buildASTSchema.mjs';
-import { assertValidSDLExtension } from '../validation/validate.mjs';
-import { assertSchema, GraphQLSchema } from '../type/schema.mjs';
-import { isIntrospectionType } from '../type/introspection.mjs';
-import { isSpecifiedScalarType } from '../type/scalars.mjs';
-import { isScalarType, isObjectType, isInterfaceType, isUnionType, isListType, isNonNullType, isEnumType, isInputObjectType, GraphQLList, GraphQLNonNull, GraphQLScalarType, GraphQLObjectType, GraphQLInterfaceType, GraphQLUnionType, GraphQLEnumType, GraphQLInputObjectType } from '../type/definition.mjs';
-import { GraphQLDirective } from '../type/directives.mjs';
-import { Kind } from '../language/kinds.mjs';
-import { isTypeDefinitionNode, isTypeExtensionNode } from '../language/predicates.mjs';
+import { assertValidSDLExtension } from '../validation/index.mjs';
+import { assertSchema, GraphQLSchema } from '../type/index.mjs';
+import { isIntrospectionType } from '../type/index.mjs';
+import { isSpecifiedScalarType } from '../type/index.mjs';
+import { isScalarType, isObjectType, isInterfaceType, isUnionType, isListType, isNonNullType, isEnumType, isInputObjectType, GraphQLList, GraphQLNonNull, GraphQLScalarType, GraphQLObjectType, GraphQLInterfaceType, GraphQLUnionType, GraphQLEnumType, GraphQLInputObjectType } from '../type/index.mjs';
+import { GraphQLDirective } from '../type/index.mjs';
+import { Kind } from '../language/index.mjs';
+import { isTypeDefinitionNode, isTypeExtensionNode } from '../language/index.mjs';
 
 /**
  * Produces a new schema given an existing schema and a document which may

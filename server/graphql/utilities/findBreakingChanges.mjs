@@ -10,49 +10,47 @@ import {
   isNamedType, 
   isRequiredArgument, 
   isRequiredInputField 
-} from '../type/definition.mjs';
+} from '../type/index.mjs';
 import { keyMap } from '../../utils.lib.mjs';
-export var BreakingChangeType = {
-  FIELD_CHANGED_KIND: 'FIELD_CHANGED_KIND',
-  FIELD_REMOVED: 'FIELD_REMOVED',
-  TYPE_CHANGED_KIND: 'TYPE_CHANGED_KIND',
-  TYPE_REMOVED: 'TYPE_REMOVED',
-  TYPE_REMOVED_FROM_UNION: 'TYPE_REMOVED_FROM_UNION',
-  VALUE_REMOVED_FROM_ENUM: 'VALUE_REMOVED_FROM_ENUM',
-  ARG_REMOVED: 'ARG_REMOVED',
-  ARG_CHANGED_KIND: 'ARG_CHANGED_KIND',
-  REQUIRED_ARG_ADDED: 'REQUIRED_ARG_ADDED',
-  REQUIRED_INPUT_FIELD_ADDED: 'REQUIRED_INPUT_FIELD_ADDED',
-  INTERFACE_REMOVED_FROM_OBJECT: 'INTERFACE_REMOVED_FROM_OBJECT',
-  DIRECTIVE_REMOVED: 'DIRECTIVE_REMOVED',
-  DIRECTIVE_ARG_REMOVED: 'DIRECTIVE_ARG_REMOVED',
-  DIRECTIVE_LOCATION_REMOVED: 'DIRECTIVE_LOCATION_REMOVED',
-  REQUIRED_DIRECTIVE_ARG_ADDED: 'REQUIRED_DIRECTIVE_ARG_ADDED'
-};
-export var DangerousChangeType = {
-  ARG_DEFAULT_VALUE_CHANGE: 'ARG_DEFAULT_VALUE_CHANGE',
-  VALUE_ADDED_TO_ENUM: 'VALUE_ADDED_TO_ENUM',
-  INTERFACE_ADDED_TO_OBJECT: 'INTERFACE_ADDED_TO_OBJECT',
-  TYPE_ADDED_TO_UNION: 'TYPE_ADDED_TO_UNION',
-  OPTIONAL_INPUT_FIELD_ADDED: 'OPTIONAL_INPUT_FIELD_ADDED',
-  OPTIONAL_ARG_ADDED: 'OPTIONAL_ARG_ADDED'
-};
+import { BreakingChangeType } from './BreakingChangeType.mjs';
+import { DangerousChangeType } from './DangerousChangeType.mjs';
 
 /**
  * Given two schemas, returns an Array containing descriptions of all the types
  * of breaking changes covered by the other functions down below.
  */
 export function findBreakingChanges(oldSchema, newSchema) {
-  return [].concat(findRemovedTypes(oldSchema, newSchema), findTypesThatChangedKind(oldSchema, newSchema), findFieldsThatChangedTypeOnObjectOrInterfaceTypes(oldSchema, newSchema), findFieldsThatChangedTypeOnInputObjectTypes(oldSchema, newSchema).breakingChanges, findTypesRemovedFromUnions(oldSchema, newSchema), findValuesRemovedFromEnums(oldSchema, newSchema), findArgChanges(oldSchema, newSchema).breakingChanges, findInterfacesRemovedFromObjectTypes(oldSchema, newSchema), findRemovedDirectives(oldSchema, newSchema), findRemovedDirectiveArgs(oldSchema, newSchema), findAddedNonNullDirectiveArgs(oldSchema, newSchema), findRemovedDirectiveLocations(oldSchema, newSchema));
+  return [].concat(
+    findRemovedTypes(oldSchema, newSchema), 
+    findTypesThatChangedKind(oldSchema, newSchema),
+    findFieldsThatChangedTypeOnObjectOrInterfaceTypes(oldSchema, newSchema),
+    findFieldsThatChangedTypeOnInputObjectTypes(oldSchema, newSchema).breakingChanges, 
+    findTypesRemovedFromUnions(oldSchema, newSchema),
+    findValuesRemovedFromEnums(oldSchema, newSchema), 
+    findArgChanges(oldSchema, newSchema).breakingChanges,
+    findInterfacesRemovedFromObjectTypes(oldSchema, newSchema),
+    findRemovedDirectives(oldSchema, newSchema),
+    findRemovedDirectiveArgs(oldSchema, newSchema),
+    findAddedNonNullDirectiveArgs(oldSchema, newSchema),
+    findRemovedDirectiveLocations(oldSchema, newSchema)
+  );
 }
+
 /**
  * Given two schemas, returns an Array containing descriptions of all the types
  * of potentially dangerous changes covered by the other functions down below.
  */
 
 export function findDangerousChanges(oldSchema, newSchema) {
-  return [].concat(findArgChanges(oldSchema, newSchema).dangerousChanges, findValuesAddedToEnums(oldSchema, newSchema), findInterfacesAddedToObjectTypes(oldSchema, newSchema), findTypesAddedToUnions(oldSchema, newSchema), findFieldsThatChangedTypeOnInputObjectTypes(oldSchema, newSchema).dangerousChanges);
+  return [].concat(
+    findArgChanges(oldSchema, newSchema).dangerousChanges,
+    findValuesAddedToEnums(oldSchema, newSchema), 
+    findInterfacesAddedToObjectTypes(oldSchema, newSchema), 
+    findTypesAddedToUnions(oldSchema, newSchema), 
+    findFieldsThatChangedTypeOnInputObjectTypes(oldSchema, newSchema).dangerousChanges
+  );
 }
+
 /**
  * Given two schemas, returns an Array containing descriptions of any breaking
  * changes in the newSchema related to removing an entire type.
@@ -78,6 +76,7 @@ export function findRemovedTypes(oldSchema, newSchema) {
 
   return breakingChanges;
 }
+
 /**
  * Given two schemas, returns an Array containing descriptions of any breaking
  * changes in the newSchema related to changing the type of a type.
@@ -255,29 +254,12 @@ export function findArgChanges(oldSchema, newSchema) {
 }
 
 function typeKindName(type) {
-  if (isScalarType(type)) {
-    return 'a Scalar type';
-  }
-
-  if (isObjectType(type)) {
-    return 'an Object type';
-  }
-
-  if (isInterfaceType(type)) {
-    return 'an Interface type';
-  }
-
-  if (isUnionType(type)) {
-    return 'a Union type';
-  }
-
-  if (isEnumType(type)) {
-    return 'an Enum type';
-  }
-
-  if (isInputObjectType(type)) {
-    return 'an Input type';
-  }
+  if (isScalarType(type)) { return 'a Scalar type'; }
+  if (isObjectType(type)) { return 'an Object type'; }
+  if (isInterfaceType(type)) { return 'an Interface type'; }
+  if (isUnionType(type)) { return 'a Union type'; }
+  if (isEnumType(type)) { return 'an Enum type'; }
+  if (isInputObjectType(type)) { return 'an Input type'; }
 
   throw new TypeError('Unknown type ' + type.constructor.name);
 }

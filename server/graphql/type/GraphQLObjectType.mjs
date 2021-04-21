@@ -45,6 +45,7 @@ import {
   defineToJSON,
   inspect,
 } from '../../utils.lib.mjs';
+import { defineFieldMap } from './GraphQLInterfaceType.mjs';
 
 export class GraphQLObjectType {
   constructor(config) {
@@ -94,17 +95,3 @@ function defineInterfaces(config) {
   );
   return interfaces;
 }
-
-// eslint-disable-next-line no-redeclare
-export function isObjectType(type) {
-  return type instanceof GraphQLObjectType;
-}
-
-export function assertObjectType(type) {
-  assert(
-    isObjectType(type), 
-    "Expected ".concat(inspect(type), " to be a GraphQL Object type.")
-  );
-  return type;
-}
-

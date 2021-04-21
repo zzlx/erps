@@ -10,7 +10,7 @@
 
 import { $$asyncIterator, getAsyncIterator } from '../../utils.lib.mjs';
 
-export default function mapAsyncIterator(iterable, callback, rejectCallback) {
+export function mapAsyncIterator(iterable, callback, rejectCallback) {
   var iterator = getAsyncIterator(iterable);
   var $return;
   var abruptClose; 

@@ -45,17 +45,3 @@ export class GraphQLList {
 
 defineToStringTag(GraphQLList);
 defineToJSON(GraphQLList);
-
-// eslint-disable-next-line no-redeclare
-export function isListType(type) {
-  return type instanceof GraphQLList;
-}
-
-export function assertListType(type) {
-  assert(
-    isListType(type),
-    "Expected ".concat(inspect(type), " to be a GraphQL List type.")
-  );
-  return type;
-}
-

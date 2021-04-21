@@ -12,7 +12,7 @@
  * *****************************************************************************
  */
 
-export default class Source {
+export class Source {
   constructor (body, name, locationOffset) {
     this.body = body;
     this.name = name || 'GraphQL source';

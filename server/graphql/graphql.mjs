@@ -7,10 +7,10 @@
  * *****************************************************************************
  */
 
-import { parse } from './language/parser.mjs';
-import { validateSchema } from './type/validate.mjs';
-import { validate } from './validation/validate.mjs';
-import { execute } from './execution/execute.mjs';
+import { parse } from './language/index.mjs';
+import { validateSchema } from './type/index.mjs';
+import { validate } from './validation/index.mjs';
+import { execute } from './execution/index.mjs';
 
 export default function graphql(opts) {
 

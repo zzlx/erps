@@ -16,10 +16,11 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import { graphql as graphqlModule } from '../utils.lib.mjs';
+import { graphql } from '../graphql/graphql.mjs';
+import { parse } from '../graphql/language/index.mjs';
+import { buildASTSchema } from '../graphql/utilities/buildASTSchema.mjs';
 import settings from '../settings/index.mjs';
 
-const { graphql, buildASTSchema, parse, Source } = graphqlModule;
 const __file = import.meta.url.substr(7);
 const __dirname = path.dirname(import.meta.url.substr(7));
 

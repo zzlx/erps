@@ -1,16 +1,17 @@
 var _defKindToExtKind;
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 import {
   quotedOrList,
   suggestionList,
+  defineProperty as _defineProperty,
 } from '../../../utils.lib.mjs';
 
 import { GraphQLError } from '../../error/index.mjs';
-import { Kind } from '../../language/kinds.mjs';
-import { isTypeDefinitionNode } from '../../language/predicates.mjs';
-import { isScalarType, isObjectType, isInterfaceType, isUnionType, isEnumType, isInputObjectType } from '../../type/definition.mjs';
+import { Kind, isTypeDefinitionNode } from '../../language/index.mjs';
+import { 
+  isScalarType, isObjectType, isInterfaceType, isUnionType, 
+  isEnumType, isInputObjectType 
+} from '../../type/index.mjs';
 export function extendingUnknownTypeMessage(typeName, suggestedTypes) {
   var message = "Cannot extend type \"".concat(typeName, "\" because it does not defined.");
 

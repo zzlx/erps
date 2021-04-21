@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-export default class Location {
+export class Location {
   constructor (startToken, endToken, source) {
     this.startToken = startToken;
     this.endToken = endToken;
@@ -23,4 +23,3 @@ export default class Location {
     }
   }
 }
-

@@ -16,7 +16,7 @@
  */
 
 import { assert, keyValMap } from '../../utils.lib.mjs';
-import { Kind } from '../language/kinds.mjs';
+import { Kind } from '../language/index.mjs';
 
 export function valueFromASTUntyped(valueNode, variables) {
   switch (valueNode.kind) {

@@ -8,7 +8,7 @@
  *
  */
 
-import { Kind } from '../language/kinds.mjs';
+import { Kind } from '../language/index.mjs';
 
 export function getOperationAST(documentAST, operationName) {
   let operation = null;

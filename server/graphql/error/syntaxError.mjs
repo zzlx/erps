@@ -7,9 +7,9 @@
  * *****************************************************************************
  */
 
-import GraphQLError from './GraphQLError.mjs';
+import { GraphQLError } from './GraphQLError.mjs';
 
-export default function syntaxError(source, position, description) {
+export function syntaxError(source, position, description) {
   return new GraphQLError(
     "Syntax Error: ".concat(description), 
     undefined, 

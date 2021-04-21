@@ -1,7 +1,9 @@
 import { GraphQLError } from '../../error/index.mjs';
-import { Kind } from '../../language/kinds.mjs';
-import { DirectiveLocation } from '../../language/directiveLocation.mjs';
-import { specifiedDirectives } from '../../type/directives.mjs';
+import { 
+  Kind,
+  DirectiveLocation,
+} from '../../language/index.mjs';
+import { specifiedDirectives } from '../../type/index.mjs';
 export function unknownDirectiveMessage(directiveName) {
   return "Unknown directive \"".concat(directiveName, "\".");
 }

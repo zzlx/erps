@@ -18,17 +18,31 @@
 
 import { 
   assert, 
+  isNullish,
+  isInvalid,
   inspect,
   forEach,
   isCollection,
 } from '../../utils.lib.mjs';
 
-import { Kind } from '../language/kinds.mjs';
-import { isScalarType, isEnumType, isInputObjectType, isListType, isNonNullType } from '../type/definition.mjs';
-import { GraphQLID } from '../type/scalars.mjs';
+import { Kind } from '../language/index.mjs';
 
-const isNullish = assert.isNullish;
-const isInvalid = assert.isInvalid;
+import { 
+  isScalarType,
+  isEnumType,
+  isInputObjectType,
+  isListType,
+  isNonNullType,
+  GraphQLID, 
+} from '../type/index.mjs';
+
+/**
+ * IntValue:
+ *   - NegativeSign? 0
+ *   - NegativeSign? NonZeroDigit ( Digit+ )?
+ */
+
+const integerStringRegExp = /^-?(0|[1-9][0-9]*)$/;
 
 export function astFromValue(value, type) {
   if (isNonNullType(type)) {
@@ -185,10 +199,3 @@ export function astFromValue(value, type) {
 
   throw new Error("Unknown type: ".concat(type, "."));
 }
-/**
- * IntValue:
- *   - NegativeSign? 0
- *   - NegativeSign? NonZeroDigit ( Digit+ )?
- */
-
-const integerStringRegExp = /^-?(0|[1-9][0-9]*)$/;

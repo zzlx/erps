@@ -5,9 +5,9 @@
  * for the original Error.
  */
 
-import GraphQLError from './GraphQLError.mjs';
+import { GraphQLError } from './GraphQLError.mjs';
 
-export default function locatedError(originalError, nodes, path) {
+export function locatedError(originalError, nodes, path) {
   // Note: this uses a brand-check to support GraphQL errors originating from
   // other contexts.
   if (originalError && Array.isArray(originalError.path)) {

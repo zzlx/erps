@@ -1,15 +1,13 @@
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 import {
   suggestionList,
   quotedOrList,
+  objectSpread,
+
 } from '../../../utils.lib.mjs';
 
 import { GraphQLError } from '../../error/index.mjs';
-import { Kind } from '../../language/kinds.mjs';
-import { specifiedDirectives } from '../../type/directives.mjs';
+import { Kind } from '../../language/index.mjs';
+import { specifiedDirectives } from '../../type/index.mjs';
 export function unknownArgMessage(argName, fieldName, typeName, suggestedArgs) {
   var message = "Unknown argument \"".concat(argName, "\" on field \"").concat(fieldName, "\" of ") + "type \"".concat(typeName, "\".");
 
@@ -36,7 +34,7 @@ export function unknownDirectiveArgMessage(argName, directiveName, suggestedArgs
  */
 
 export function KnownArgumentNames(context) {
-  return _objectSpread({}, KnownArgumentNamesOnDirectives(context), {
+  return objectSpread({}, KnownArgumentNamesOnDirectives(context), {
     Argument: function Argument(argNode) {
       var argDef = context.getArgument();
       var fieldDef = context.getFieldDef();

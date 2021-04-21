@@ -1,5 +1,5 @@
 import { GraphQLError } from '../../error/index.mjs';
-import { isEnumType } from '../../type/definition.mjs';
+import { isEnumType } from '../../type/index.mjs';
 export function duplicateEnumValueNameMessage(typeName, valueName) {
   return "Enum value \"".concat(typeName, ".").concat(valueName, "\" can only be defined once.");
 }

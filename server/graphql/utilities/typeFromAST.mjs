@@ -8,8 +8,8 @@
  *
  */
 
-import { Kind } from '../language/kinds.mjs';
-import { GraphQLList, GraphQLNonNull } from '../type/definition.mjs';
+import { Kind } from '../language/index.mjs';
+import { GraphQLList, GraphQLNonNull } from '../type/index.mjs';
 
 export function typeFromAST(schema, typeNode) {
   let innerType;

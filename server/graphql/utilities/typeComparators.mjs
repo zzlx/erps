@@ -1,9 +1,7 @@
-import { 
-  isObjectType, 
-  isListType, 
-  isNonNullType, 
-  isAbstractType 
-} from '../type/definition.mjs';
+import { isObjectType } from '../type/isObjectType.mjs';
+import { isListType } from '../type/isListType.mjs';
+import { isNonNullType } from '../type/isNonNullType.mjs';
+import { isAbstractType } from '../type/isAbstractType.mjs';
 
 /**
  * Provided two types, return true if the types are equal (invariant).

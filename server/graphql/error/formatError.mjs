@@ -8,7 +8,7 @@
  * *****************************************************************************
  */
 
-export default function formatError(error) {
+export function formatError(error) {
 	if (!error) {
 		throw new Error('Received null or undefined error.');
 	}

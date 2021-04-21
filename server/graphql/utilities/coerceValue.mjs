@@ -14,7 +14,7 @@ import {
 	isInputObjectType, 
 	isListType, 
 	isNonNullType 
-} from '../type/definition.mjs';
+} from '../type/index.mjs';
 
 /**
  * Coerces a JavaScript value given a GraphQL Type.

@@ -4,10 +4,10 @@
  * *****************************************************************************
  */
 
-import printError from './printError.mjs';
-import { getLocation } from '../language/location.mjs';
+import { printError } from './printError.mjs';
+import { getLocation } from '../language/index.mjs';
 
-export default function GraphQLError(
+export function GraphQLError(
   message, 
   nodes, 
   source, 

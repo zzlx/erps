@@ -8,9 +8,9 @@
  *
  */
 
-import { $$asyncIterator } from '../../utils/iterall.mjs';
+import { $$asyncIterator } from '../../utils.lib.mjs';
 
-export default function asyncIteratorReject(error) {
+export function asyncIteratorReject(error) {
   let isComplete = false;
 
   return Object.defineProperty({
