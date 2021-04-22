@@ -8,9 +8,11 @@
  */
 
 import { TypeInfo } from './TypeInfo.mjs';
-import { Kind } from '../language/kinds.mjs';
-import { visit, visitWithTypeInfo } from '../language/visitor.mjs';
-import { GraphQLSchema } from '../type/schema.mjs';
+import { 
+  Kind,
+  visit, visitWithTypeInfo,
+} from '../language/index.mjs';
+import { GraphQLSchema } from '../type/index.mjs';
 import { ValuesOfCorrectType } from '../validation/rules/ValuesOfCorrectType.mjs';
 import { ValidationContext } from '../validation/ValidationContext.mjs';
 

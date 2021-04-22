@@ -1,4 +1,4 @@
-import { visit } from '../language/visitor.mjs';
+import { visit } from '../language/index.mjs';
 
 /**
  * separateOperations accepts a single AST document which may contain many

@@ -38,6 +38,9 @@ fs.promises.readdir(dir, { encoding: 'utf8', withFileTypes: true }).then(files =
       if (file.name === 'index.mjs') return;
       if (/^\./.test(file.name)) return;
       if (!/.mjs$/.test(file.name)) return;
+
+      const fileContent = fs.readFileSync
+
       retval += `export { ${path.basename(file.name, '.mjs')} } from './${file.name}';\n`;
       count++;
     }

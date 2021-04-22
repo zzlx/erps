@@ -1,8 +1,7 @@
 // The GraphQL query recommended for a full schema introspection.
-export { 
-  getIntrospectionQuery, // @deprecated, use getIntrospectionQuery() - will be removed in v15
-  introspectionQuery 
-} from './introspectionQuery.mjs';
+export { introspectionQuery } from './introspectionQuery.mjs';
+
+export { getIntrospectionQuery, } from './getIntrospectionQuery.mjs';
 
 // Gets the target Operation from a Document
 export { getOperationAST } from './getOperationAST.mjs'; 
@@ -59,12 +58,14 @@ export { separateOperations } from './separateOperations.mjs'; // Comparators fo
 // Report all deprecated usage within a GraphQL document.
 export { findDeprecatedUsages } from './findDeprecatedUsages.mjs';
 
+export { assertValidName, isValidNameError } from './assertValidName.mjs'; 
+
+
 // Print a GraphQLSchema to GraphQL Schema language.
 export { printSchema, printType, printIntrospectionSchema } from './schemaPrinter.mjs'; 
 
 export { isEqualType, isTypeSubTypeOf, doTypesOverlap } from './typeComparators.mjs'; // Asserts that a string is a valid GraphQL name
 
-export { assertValidName, isValidNameError } from './assertValidName.mjs'; 
 
 // Compares two GraphQLSchemas and detects breaking changes.
 export { 

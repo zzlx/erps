@@ -1,7 +1,9 @@
-import { isObjectType } from '../type/isObjectType.mjs';
-import { isListType } from '../type/isListType.mjs';
-import { isNonNullType } from '../type/isNonNullType.mjs';
-import { isAbstractType } from '../type/isAbstractType.mjs';
+import { 
+  isObjectType,
+  isListType,
+  isNonNullType,
+  isAbstractType 
+} from '../type/index.mjs';
 
 /**
  * Provided two types, return true if the types are equal (invariant).
@@ -9,9 +11,7 @@ import { isAbstractType } from '../type/isAbstractType.mjs';
 
 export function isEqualType(typeA, typeB) {
   // Equivalent types are equal.
-  if (typeA === typeB) {
-    return true;
-  } 
+  if (typeA === typeB) { return true; } 
 
   // If either type is non-null, the other must also be non-null.
   if (isNonNullType(typeA) && isNonNullType(typeB)) {
@@ -26,6 +26,7 @@ export function isEqualType(typeA, typeB) {
   // Otherwise the types are not equal.
   return false;
 }
+
 /**
  * Provided a type and a super type, 
  * return true if the first type is either equal or a subset of the super type.
@@ -74,6 +75,7 @@ export function isTypeSubTypeOf(schema, maybeSubType, superType) {
   // Otherwise, the child type is not a valid subtype of the parent type.
   return false;
 }
+
 /**
  * Provided two composite types, determine if they "overlap". 
  * Two composite types overlap when the Sets of possible concrete types for each intersect.

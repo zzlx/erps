@@ -7,12 +7,12 @@
  */
 
 import { assert } from '../../utils.lib.mjs';
-import { astFromValue } from '../utilities/astFromValue.mjs';
-import { print } from '../language/printer.mjs';
-import { isScalarType, isObjectType, isInterfaceType, isUnionType, isEnumType, isInputObjectType } from '../type/definition.mjs';
-import { GraphQLString, isSpecifiedScalarType } from '../type/scalars.mjs';
-import { GraphQLDirective, DEFAULT_DEPRECATION_REASON, isSpecifiedDirective } from '../type/directives.mjs';
-import { isIntrospectionType } from '../type/introspection.mjs';
+import { astFromValue } from '../utilities/index.mjs';
+import { print } from '../language/index.mjs';
+import { isScalarType, isObjectType, isInterfaceType, isUnionType, isEnumType, isInputObjectType } from '../type/index.mjs';
+import { GraphQLString, isSpecifiedScalarType } from '../type/index.mjs';
+import { GraphQLDirective, DEFAULT_DEPRECATION_REASON, isSpecifiedDirective } from '../type/index.mjs';
+import { isIntrospectionType } from '../type/index.mjs';
 
 export function printSchema(schema, options) {
   return printFilteredSchema(schema, function (n) {

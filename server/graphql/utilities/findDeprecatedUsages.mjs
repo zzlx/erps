@@ -5,8 +5,8 @@
  */
 
 import { GraphQLError } from '../error/index.mjs';
-import { visit, visitWithTypeInfo } from '../language/visitor.mjs';
-import { getNamedType } from '../type/definition.mjs';
+import { visit, visitWithTypeInfo } from '../language/index.mjs';
+import { getNamedType } from '../type/index.mjs';
 import { TypeInfo } from './TypeInfo.mjs';
 
 export function findDeprecatedUsages(schema, ast) {
