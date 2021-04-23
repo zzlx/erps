@@ -8,11 +8,6 @@ ERPs
 
 [https://github.com/zzlx/erps](https://github.com/zzlx/erps)
 
-## Development
-
-* [Documentation](./docs/README.md)
-* [Server源码](./server/main.mjs)
-
 ## License
 
 [MIT License](./LICENSE)
