@@ -7,7 +7,7 @@
  * *****************************************************************************
  */
 
-export default function orList(items, MAX_LENGTH = 5) {
+export function orList(items, MAX_LENGTH = 5) {
   if (items.length === 0) throw new Error('orList item length is 0');
 
   if (items.length === 1) return items[0];

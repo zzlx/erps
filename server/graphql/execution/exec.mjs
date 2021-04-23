@@ -7,13 +7,12 @@
  * *****************************************************************************
  */
 
-import { parse } from './language/index.mjs';
-import { validateSchema } from './type/index.mjs';
-import { validate } from './validation/index.mjs';
-import { execute } from './execution/index.mjs';
+import { parse } from '../language/index.mjs';
+import { validateSchema } from '../type/index.mjs';
+import { validate } from '../validation/index.mjs';
+import { execute } from './execute.mjs';
 
-export default function graphql(opts) {
-
+export function exec(opts) {
   if (arguments.length > 1) {
     opts = Object.create(null);
     opts.schema = arguments[0];

@@ -153,9 +153,9 @@
  * *****************************************************************************
  */ 
 
-import base64 from './base64.mjs'; 
+import { base64 } from './base64.mjs'; 
 
-export default () => new Proxy({
+export const jwt = () => new Proxy({
   header: { 
     "alg": "HS256", // algorithm HS256: HMAC sha256
     "typ": "JWT"    // token type

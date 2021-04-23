@@ -1,4 +1,4 @@
-export default function isInvalid (v) {
+export function isInvalid (v) {
   return v === undefined || v !== v;
 }
 

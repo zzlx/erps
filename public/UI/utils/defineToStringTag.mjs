@@ -12,7 +12,7 @@
  * for example.
  */
 
-export default function defineToStringTag(classObject) {
+export function defineToStringTag(classObject) {
   if (classObject.prototype.toString == null) {
     Object.defineProperty(classObject.prototype, 'toString', {
       get: getName

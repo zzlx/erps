@@ -9,30 +9,7 @@
  * *****************************************************************************
  */
 
-import assert from './assert.mjs';
-
-export default new Proxy(Date, {
-	apply: function (target, thisArg, argumentsList) {
-    return target(...argumentsList);
-	},
-
-	construct: function (target, argumentsList, newTarget) {
-    return new target(...argumentsList);
-	},
-
-	get: function (target, property, receiver) {
-
-    if (property === 'format') return format;
-    if (property === 'weekday') return weekday;
-    if (property === 'toISOString') return toISOString;
-    if (property === 'tPlusN') return tPlusN;
-    if (property === 'getFormattedDate') return getFormattedDate;
-
-
-		return Reflect.get(target, property, receiver);
-  }
-});
-
+import { assert } from './assert.mjs';
 
 /*
 const months = [
@@ -106,7 +83,7 @@ function weekday (date) {
  * @return {string} locale iso string
  */
 
-function toISOString (date) {
+export function dateToISOString (date) {
   const d = date ? new Date(date) : new Date(); 
 	const tzOffset = (d.getTimezoneOffset())/60;
 	const timestamp = d.valueOf() - tzOffset * 3600000;

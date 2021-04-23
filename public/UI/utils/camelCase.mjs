@@ -10,7 +10,7 @@
  * *****************************************************************************
  */
 
-export default function camelCase (value, capitalized = false) {
+export function camelCase (value, capitalized = false) {
   return value.toLowerCase()
     .replace(/\./g, '-')
     .replace(/(\b|-|_)\w/g, m => m.toUpperCase())

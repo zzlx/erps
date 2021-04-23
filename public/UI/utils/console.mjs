@@ -16,7 +16,7 @@ const isNode = global.process && typeof global.process.cwd === 'function';
 const isBrowser = global.window && typeof global.window === 'object';
 const isWin = !isBrowser && global.process && global.process.platform === 'win32';
 
-export default new Proxy(console, {
+export const console = new Proxy(globalThis.console, {
 	get: function (target, property, receiver) {
 
     if (property === 'CLEAR_PAGE') return isWin ?  '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H';

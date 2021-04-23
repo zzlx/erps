@@ -17,4 +17,4 @@ export * from './rules/index.mjs';
 export { specifiedRules } from './specifiedRules.mjs';
 export { specifiedSDLRules } from './specifiedSDLRules.mjs';
 export { validate } from './validate.mjs';
-export { validdateSDL } from './validdateSDL.mjs';
+export { validateSDL } from './validateSDL.mjs';

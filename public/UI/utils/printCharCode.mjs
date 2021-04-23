@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-export default function printCharCode(code) {
+export function printCharCode(code) {
   return (
     isNaN(code) 
       // NaN/undefined represents access beyond the end of the file.

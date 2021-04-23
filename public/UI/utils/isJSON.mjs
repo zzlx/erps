@@ -1,4 +1,4 @@
-export default function isJSON (v) {
+export function isJSON (v) {
   return /^[\x20\x09\x0a\x0d]*(\[|\{)/.test(String(v));
 }
 

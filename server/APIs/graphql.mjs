@@ -16,9 +16,11 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import util from 'util';
-import { graphql } from '../graphql/graphql.mjs';
-import { parse } from '../graphql/language/index.mjs';
-import { buildASTSchema } from '../graphql/utilities/buildASTSchema.mjs';
+import { 
+  exec,
+  parse,
+  buildASTSchema,
+} from '../graphql/index.mjs';
 import settings from '../settings/index.mjs';
 
 const __file = import.meta.url.substr(7);
@@ -37,7 +39,7 @@ const fieldResolver = await getModules(path.join(path.dirname(__dirname), 'resol
 
 export default function graphqlQuery (query, variables, operationName) {
 
-  return graphql({
+  return exec({
     schema: schema, 
     source: query,
     rootValue: {},

@@ -9,7 +9,7 @@
 
 const matchHtmlRegExp = /["'&<>]/;
 
-export default function escapeHtml(string) {
+export function escapeHtml(string) {
   let str = '' + string;
   const match = matchHtmlRegExp.exec(str);
 

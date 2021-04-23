@@ -5,7 +5,7 @@
  *
  */
 
-export default function mapValue(map, fn) {
+export function mapValue(map, fn) {
   var result = Object.create(null);
   var _iteratorNormalCompletion = true;
   var _didIteratorError = false;

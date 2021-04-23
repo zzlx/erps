@@ -10,7 +10,7 @@
  * *****************************************************************************
  */
 
-export default function arrayFlatten (array, depth) {
+export function arrayFlatten (array, depth) {
   if (depth == null) {
     return flattenForever(array, [])
   }

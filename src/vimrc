@@ -271,7 +271,7 @@ autocmd FileType shell noremap <buffer> <F5> :!/bin/bash % <CR>
 " js脚本配置
 "autocmd BufWinLeave *.mjs,*.cjs mkview
 "autocmd BufWinEnter *.mjs,*.cjs silent loadview
-autocmd BufRead,BufNewFile *.cjs,*.mjs,*.js set expandtab filetype=javascript
+autocmd BufRead,BufNewFile *.cjs,*.mjs,*.js set expandtab autochdir filetype=javascript
 autocmd FileType javascript noremap <buffer> <F5> :!NODE_ENV=test NODE_DEBUG=debug:* node --trace-warnings % <CR>
 
 " python脚本配置

@@ -8,7 +8,7 @@
  * *****************************************************************************
  */
 
-export default function inspect(value) {
+export function inspect(value) {
   if (value instanceof Uint8Array) return value.toString('hex');
         
   switch (typeof(value)) {

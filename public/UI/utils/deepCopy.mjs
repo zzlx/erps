@@ -1,4 +1,4 @@
-const cloneDeep1 = (target, hash = new WeakMap()) => {
+export const deepCopy = (target, hash = new WeakMap()) => {
   // 对于传入参数处理
   if (typeof target !== 'object' || target === null) {
     return target;

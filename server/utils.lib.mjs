@@ -6,4 +6,4 @@
  * *****************************************************************************
  */
 
-export * from '../public/UI/utils.lib.mjs';
+export * from '../public/UI/utils/index.mjs';

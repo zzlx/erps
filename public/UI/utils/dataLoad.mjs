@@ -1,3 +1,6 @@
+export const dataLoad = {};
+
+/*
 setTimeout(() => {
   // 插入十万条数据
   const total = 100000;
@@ -26,3 +29,4 @@ setTimeout(() => {
   }
   loop();
 }, 0)
+*/

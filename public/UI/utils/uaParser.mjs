@@ -11,7 +11,7 @@
  * *****************************************************************************
  */
 
-export default function userAgentParser (ua) {
+export function uaParser (ua) {
   if (typeof ua !== 'string') throw new TypeError('Param ua must be a string.');
 
   // 构造设备信息的对象

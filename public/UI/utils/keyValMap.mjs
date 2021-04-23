@@ -16,7 +16,7 @@
  *
  */
 
-export default function keyValMap(list, keyFn, valFn) {
+export function keyValMap(list, keyFn, valFn) {
   return list.reduce(function (map, item) {
     return map[keyFn(item)] = valFn(item), map;
   }, Object.create(null));

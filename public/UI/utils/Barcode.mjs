@@ -79,7 +79,7 @@ export const CODE128_BARS = [
   1100011101011, // 106 stop
 ];
 
-export default class Barcode {
+export class Barcode {
   /**
    * constructor
    *

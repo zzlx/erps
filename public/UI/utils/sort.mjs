@@ -13,7 +13,7 @@
  * *****************************************************************************
  */
 
-export default function sort (list) {
+export function sort (list) {
   const opts = Object.assign({}, {
   }, arguments.length === 2 
     ? typeof arguments[1] === 'string' 

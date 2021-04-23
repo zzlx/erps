@@ -8,7 +8,7 @@
  * *****************************************************************************
  */
 
-export default function query (db) {
+export function query (db) {
 }
 
 function find (predicate, projection) {
@@ -17,7 +17,3 @@ function find (predicate, projection) {
 
 function findOne() {
 }
-
-function query () {
-}
-

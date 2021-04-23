@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-let fetch =  globalThis.fetch ? globalThis.fetch : function fetch () {
+export const fetch =  globalThis.fetch ? globalThis.fetch : function fetch () {
   function getXhr() {
     const noXhrPatch =
       typeof window !== 'undefined' && !!window.ActiveXObject &&
@@ -20,5 +20,3 @@ let fetch =  globalThis.fetch ? globalThis.fetch : function fetch () {
     return new XMLHttpRequest();
   }
 }
-
-export default fetch;

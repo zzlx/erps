@@ -9,7 +9,7 @@
  * *****************************************************************************
  */
 
-export default new Proxy({
+export const path =  new Proxy({
   dirname,
   extname,
   isURLPath,

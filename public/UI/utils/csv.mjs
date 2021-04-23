@@ -11,7 +11,7 @@
  * *****************************************************************************
  */
 
-export default function csvProcessor (value) {
+export function csv (value) {
   const target = {};
 
   if (typeof(value) === 'string' && isCSV(value)) {

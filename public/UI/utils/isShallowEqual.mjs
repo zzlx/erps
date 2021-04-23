@@ -9,7 +9,7 @@
  * @return {boolean} true or false
  */
 
-export default function shallowEqual(objA, objB) {
+export function isShallowEqual(objA, objB) {
   if (is(objA, objB)) return true;
 
   if ( typeof objA !== 'object' || objA === null ||

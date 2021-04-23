@@ -19,7 +19,8 @@
 import { visit, visitInParallel, visitWithTypeInfo } from '../language/index.mjs';
 import { assertValidSchema } from '../type/index.mjs';
 import { TypeInfo } from '../utilities/index.mjs';
-import { specifiedRules, specifiedSDLRules } from './specifiedRules.mjs';
+import { specifiedRules } from './specifiedRules.mjs';
+import { specifiedSDLRules } from './specifiedSDLRules.mjs';
 import { SDLValidationContext, ValidationContext } from './ValidationContext.mjs';
 
 export function validate(schema, documentAST) {

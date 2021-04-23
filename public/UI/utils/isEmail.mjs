@@ -5,6 +5,6 @@
  * *****************************************************************************
  */
 
-export default function isEmail (v) {
+export function isEmail (v) {
   return /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/.test(String(v));
 }

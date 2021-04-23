@@ -1,3 +1,4 @@
+export const vdom = () => {}
 // vnode结构：
 // {
 //   tag,

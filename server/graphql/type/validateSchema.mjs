@@ -19,8 +19,11 @@ import { isRequiredArgument } from './isRequiredArgument.mjs';
 
 import { isDirective } from './isDirective.mjs';
 import { isIntrospectionType } from './isIntrospectionType.mjs';
-import { isValidNameError } from '../utilities/assertValidName.mjs';
-import { isEqualType, isTypeSubTypeOf } from '../utilities/typeComparators.mjs';
+import { 
+  isValidNameError,
+  isEqualType, 
+  isTypeSubTypeOf
+} from '../utilities/index.mjs';
 import { assertSchema } from './assertSchema.mjs';
 
 export function validateSchema(schema) {

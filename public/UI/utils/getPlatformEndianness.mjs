@@ -9,7 +9,7 @@
  * *****************************************************************************
  */
 
-export default function getPlatformEndianness() {
+export function getPlatformEndianness() {
   let arr32 = Uint32Array.of(0x12345678); // 
   let arr8 = new Uint8Array(arr32.buffer);
 

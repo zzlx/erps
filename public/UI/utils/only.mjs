@@ -4,7 +4,7 @@
  *
  */
 
-export default function only (obj, keys) {
+export function only (obj, keys) {
   obj = obj || {};
   if ('string' == typeof keys) keys = keys.split(/ +/);
 

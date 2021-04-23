@@ -8,9 +8,9 @@
  * *****************************************************************************
  */
 
-import { pathToRegexp } from './path-to-regexp.mjs';
+import { pathToRegexp } from './pathToRegexp.mjs';
 
-export default function matchPath(pathname, options = {}) {
+export function matchPath(pathname, options = {}) {
   const opts = { 
     path: '/', 
     exact: false, 

@@ -1,7 +1,9 @@
 /**
  * *****************************************************************************
  *
- * iterall 遍历器
+ * 遍历器对象
+ *
+ * iterall 
  *
  *
  * *****************************************************************************
@@ -435,7 +437,7 @@ const SYMBOL_ASYNC_ITERATOR = SYMBOL && SYMBOL.asyncIterator
  * @type {Symbol|string}
  */
 /*:: declare export var $$asyncIterator: '@@asyncIterator'; */
-export var $$asyncIterator = SYMBOL_ASYNC_ITERATOR || '@@asyncIterator'
+export const $$asyncIterator = SYMBOL_ASYNC_ITERATOR || '@@asyncIterator'
 
 /**
  * Returns true if the provided object implements the AsyncIterator protocol via
@@ -478,7 +480,7 @@ export function isAsyncIterable(obj) {
   & (<+TValue>(asyncIterable: AsyncIterable<TValue>) => AsyncIterator<TValue>)
   & ((asyncIterable: mixed) => (void | AsyncIterator<mixed>)); */
 export function getAsyncIterator(asyncIterable) {
-  var method = getAsyncIteratorMethod(asyncIterable)
+  const method = getAsyncIteratorMethod(asyncIterable)
   if (method) {
     return method.call(asyncIterable)
   }
@@ -579,10 +581,12 @@ AsyncFromSyncIterator.prototype[$$asyncIterator] = function() {
 // A simple state-machine determines the IteratorResult returned, yielding
 // each value in the Array-like object in order of their indicies.
 AsyncFromSyncIterator.prototype.next = function() {
-  var step = this._i.next()
-  return Promise.resolve(step.value).then(function(value) {
-    return { value: value, done: step.done }
-  })
+  const step = this._i.next()
+
+  return Promise.resolve(step.value).then(value => ({
+    value: value, 
+    done: step.done
+  }));
 }
 
 /**

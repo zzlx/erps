@@ -10,7 +10,7 @@
  * *****************************************************************************
  */
 
-export default function bytesToUUID(buf, offset) {
+export function uuid(buf, offset) {
   const byteToHex = [];
 
   for (let i = 0; i < 256; ++i) {

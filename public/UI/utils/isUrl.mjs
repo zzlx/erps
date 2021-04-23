@@ -1,4 +1,4 @@
-export default function isUrl (v) {
+export function isUrl (v) {
   return /[a-zA-z]+:\/\/[^\s]*/.test(str);
 }
 

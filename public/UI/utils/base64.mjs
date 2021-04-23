@@ -16,7 +16,7 @@
  * *****************************************************************************
  */
 
-import utf8 from './utf8.mjs';
+import { utf8 } from './utf8.mjs';
 
 // The Base64 Alphabet
 const b64a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -154,7 +154,7 @@ const Base64 = {
   },
 };
 
-export default new Proxy(Base64, { 
+export const base64 = new Proxy(Base64, { 
 	get: function (target, property, receiver) {
     if ('btoa' === property) {
       return typeof Buffer === 'function' 

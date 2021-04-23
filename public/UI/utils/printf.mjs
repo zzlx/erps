@@ -1,18 +1,4 @@
 /*
- * extsprintf.js: extended POSIX-style sprintf
- */
-
-var mod_assert = require('assert');
-var mod_util = require('util');
-
-/*
- * Public interface
- */
-exports.sprintf = jsSprintf;
-exports.printf = jsPrintf;
-exports.fprintf = jsFprintf;
-
-/*
  * Stripped down version of s[n]printf(3c).  We make a best effort to throw an
  * exception when given a format string we don't understand, rather than
  * ignoring it, so that we won't break existing programs if/when we go implement
@@ -30,8 +16,8 @@ exports.fprintf = jsFprintf;
  * Everything else is currently unsupported, most notably precision, unsigned
  * numbers, non-decimal numbers, and characters.
  */
-function jsSprintf(fmt)
-{
+
+export function printf(fmt) {
 	var regex = [
 	    '([^%]*)',				/* normal text */
 	    '%',				/* start of format */
@@ -181,5 +167,3 @@ function dumpException(ex)
 
 	return (ret);
 }
-
-

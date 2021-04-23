@@ -1,4 +1,6 @@
 /**
+ * *****************************************************************************
+ *
  * Creates a keyed JS object from an array, 
  * given a function to produce the keys for each value in the array.
  *
@@ -20,10 +22,14 @@
  *     // { name: 'Jenny', num: '857-6309' }
  *     const jennyEntry = entriesByName['Jenny']
  *
+ * *****************************************************************************
  */
 
-export default function keyMap(list, keyFn) {
-  return list.reduce(function (map, item) {
-    return map[keyFn(item)] = item, map;
+export function keyMap(list, keyFn) {
+  if (typeof keyFn !== 'function') throw new Error(`${keyFn} must be a function.`);
+
+  return list.reduce((map, item) => {
+    map[keyFn(item)] = item;
+    return map;
   }, Object.create(null));
 }

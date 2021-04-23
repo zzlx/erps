@@ -9,7 +9,7 @@
  * *****************************************************************************
  */
 
-export default function warning () {
+export function warning () {
   let message, condition;
 
   if (arguments.length === 0) return;

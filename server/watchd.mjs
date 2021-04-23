@@ -16,24 +16,22 @@ import EventEmitter from 'events';
 import fs from 'fs';
 import path from 'path';
 import cp from 'child_process';
+
 import debuglog from './debuglog.mjs';
+import { throttleFn } from './utils.lib.mjs';
 
 const debug = debuglog('debug:watchd');
 const __dirname = path.dirname(import.meta.url.substr(7));
 
+const restart = throttleFn(1000, () => {
+  cp.exec('systemctl restart erps');
+});
+
 process.nextTick(() => {
   const watchdog = new Watchdog(__dirname);
-  let timeout = null;
-  let test = null;
-
-  watchdog.on('change', () => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      cp.exec('systemctl restart erps');
-    }, 1000);
-  });
-
+  watchdog.on('change', restart);
 });
+
 
 /**
  *

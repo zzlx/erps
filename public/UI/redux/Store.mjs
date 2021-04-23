@@ -6,8 +6,8 @@
  * *****************************************************************************
  */
 
-import assert from '../utils/assert.mjs';
-import isPlainObject from '../utils/isPlainObject.mjs';
+import { assert } from '../utils/assert.mjs';
+import { isPlainObject } from '../utils/isPlainObject.mjs';
 
 import * as reducers from './reducers/index.mjs';
 import types from './actionTypes.mjs';

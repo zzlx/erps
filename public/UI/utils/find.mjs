@@ -16,9 +16,9 @@
  * *****************************************************************************
  */
 
-import assert from './assert.mjs';
+import { assert } from './assert.mjs';
 
-export default function find (query = {}, projection = {}) {
+export function find (query = {}, projection = {}) {
   const { data } = this;
   assert(Array.isArray(data), 'Data must be an array object');
 

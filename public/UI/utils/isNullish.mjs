@@ -5,6 +5,6 @@
  * *****************************************************************************
  */
 
-export default function isNullish (v) {
+export function isNullish (v) {
   return v === null || v === undefined || v !== v;
 }

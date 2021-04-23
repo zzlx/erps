@@ -1,6 +1,6 @@
 
 
-export default function setMap (map, key_1, key_2, qz) {
+export function setMap (map, key_1, key_2, qz) {
 	qz = qz ? qz : 1;
 	if (null == map.get(key_1)) {
 		return map.set(key_1, new Map().set(key_2, qz));

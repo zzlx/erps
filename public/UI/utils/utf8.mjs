@@ -34,7 +34,7 @@
  *
  */
 
-export default new Proxy({}, {
+export const utf8 = new Proxy({}, {
 	get: function (target, property, receiver) {
     if ('encode' === property) {
       return unicode_to_utf8;

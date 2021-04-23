@@ -1,3 +1,5 @@
+export const promise = () => {}
+
 const PENDING = 'PENDING';      // 进行中
 const FULFILLED = 'FULFILLED';  // 已成功
 const REJECTED = 'REJECTED';    // 已失败

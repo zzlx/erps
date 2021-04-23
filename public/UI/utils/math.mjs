@@ -8,7 +8,7 @@
  * *****************************************************************************
  */
 
-export default new Proxy(Math, {
+export const math = new Proxy(Math, {
 	get: function (target, property, receiver) {
 		return Reflect.get(target, property, receiver);
 	}

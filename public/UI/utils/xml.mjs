@@ -6,6 +6,7 @@
  * *****************************************************************************
  */
 
-export default class XMLParser {
+export const xml = () => {};
+class XMLParser {
 
 }

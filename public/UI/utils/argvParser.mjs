@@ -12,7 +12,7 @@
  * *****************************************************************************
  */
 
-export default function parser (argvs) {
+export function argvParser (argvs) {
   if ('string' === typeof argvs) argvs = argvStr.split(/\s+/);
   const params = Object.create(null);
 	const it = argvs[Symbol.iterator]();

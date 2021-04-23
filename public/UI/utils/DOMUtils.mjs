@@ -1,3 +1,5 @@
+export const DOMUtils = {}
+
 const canUseDOM = !!(
   typeof window !== 'undefined' && 
   window.document && 

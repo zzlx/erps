@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import { compile } from "./path-to-regexp.mjs";
+import { compile } from "./pathToRegexp.mjs";
 
 const cache = {};
 const cacheLimit = 10000;
@@ -26,8 +26,6 @@ function compilePath(path) {
   return generator;
 }
 
-function generatePath(path = "/", params = {}) {
+export function generatePath(path = "/", params = {}) {
   return path === "/" ? path : compilePath(path)(params, { pretty: true });
 }
-
-export default generatePath;

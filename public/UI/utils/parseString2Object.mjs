@@ -5,7 +5,7 @@
  * @returns {Object} keys and values from src
  */
 
-export default function parseString2Object(src) {
+export function parseString2Object(src) {
   const obj = {};
 
   // convert Buffers before splitting into lines and processing

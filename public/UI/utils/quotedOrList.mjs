@@ -2,8 +2,8 @@
  * Given [ A, B, C ] return '"A", "B", or "C"'.
  */
 
-import orList from './orList.mjs';
+import { orList } from './orList.mjs';
 
-export default function quotedOrList(items) {
+export function quotedOrList(items) {
   return orList(items.map(item => "\"".concat(item, "\"")));
 }

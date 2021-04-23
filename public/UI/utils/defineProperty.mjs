@@ -1,5 +1,5 @@
 
-export default function defineProperty(obj, key, value) { 
+export function defineProperty(obj, key, value) { 
   if (key in obj) { 
     Object.defineProperty(obj, key, { 
       value: value, 

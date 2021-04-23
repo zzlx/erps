@@ -10,7 +10,7 @@
  * *****************************************************************************
  */
 
-const template = (str, obj) => new Proxy({
+export const template = (str, obj) => new Proxy({
   rawStr: str,
   obj: obj,
 }, {
@@ -71,5 +71,4 @@ export function match (str, obj) {
 
 //console.log(match('a.b', {b: 'test'}));
 //console.log(parse.call({rawStr: '${a.b}', obj:{b: 'test'}}));
-console.log(String(template('${a.b}', {b:'test'})));
-export default template;
+//console.log(String(template('${a.b}', {b:'test'})));

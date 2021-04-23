@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-export default new Proxy({
+export const crypto = new Proxy({
 }, {
 
 });

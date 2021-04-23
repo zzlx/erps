@@ -13,7 +13,7 @@
  * @return {obj} 返回包含个人信息的对象
  */
 
-export default function IDParser (value) {
+export function IDParser (value) {
 	const v = String(value); //value
 	const r = {}; // retval
 

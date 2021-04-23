@@ -9,7 +9,7 @@
  * *****************************************************************************
  */
 
-export default function isPlainObject(obj) {
+export function isPlainObject(obj) {
   if (typeof obj !== 'object' || obj === null) return false
 
   let proto = Object.getPrototypeOf(obj)

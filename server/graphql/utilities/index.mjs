@@ -17,11 +17,9 @@ export { introspectionFromSchema } from './introspectionFromSchema.mjs';
 // Build a GraphQLSchema from GraphQL Schema language.
 export { buildClientSchema } from './buildClientSchema.mjs'; 
 
-export { 
-  buildASTSchema, 
-  // syntax for specifying descriptions - will be removed in v16
-  getDescription 
-} from './buildASTSchema.mjs';
+export { buildASTSchema, } from './buildASTSchema.mjs';
+export { getDescription } from './getDescription.mjs';
+
 
 // Extends an existing GraphQLSchema from a parsed GraphQL Schema language AST.
 export { extendSchema } from './extendSchema.mjs'; // Sort a GraphQLSchema.
@@ -58,7 +56,8 @@ export { separateOperations } from './separateOperations.mjs'; // Comparators fo
 // Report all deprecated usage within a GraphQL document.
 export { findDeprecatedUsages } from './findDeprecatedUsages.mjs';
 
-export { assertValidName, isValidNameError } from './assertValidName.mjs'; 
+export { assertValidName } from './assertValidName.mjs'; 
+export { isValidNameError } from './isValidNameError.mjs'; 
 
 
 // Print a GraphQLSchema to GraphQL Schema language.
@@ -68,10 +67,7 @@ export { isEqualType, isTypeSubTypeOf, doTypesOverlap } from './typeComparators.
 
 
 // Compares two GraphQLSchemas and detects breaking changes.
-export { 
-  BreakingChangeType, 
-  DangerousChangeType, 
-  findBreakingChanges, 
-  findDangerousChanges 
-} from './findBreakingChanges.mjs';
-
+export { BreakingChangeType, } from './BreakingChangeType.mjs';
+export { DangerousChangeType } from './DangerousChangeType.mjs'; 
+export { findBreakingChanges, } from './findBreakingChanges.mjs';
+export { findDangerousChanges } from './findDangerousChanges.mjs'; 

@@ -1,3 +1,6 @@
+export const schedule = () => {
+}
+
 //并行限制的Promise调度器
 class Scheduler {
   constructor() {
@@ -26,13 +29,14 @@ class Scheduler {
   }
 }
 
+/*
 const timeout = time => new Promise(resolve => {
   setTimeout(resolve, time);
 })
 
 const scheduler = new Scheduler();
 
-const addTask = (time,order) => {
+const addTask = (time, order) => {
   scheduler.add(() => timeout(time).then(()=>console.log(order)))
 }
 
@@ -42,6 +46,7 @@ addTask(500, '2');
 addTask(300, '3');
 addTask(400, '4');
 scheduler.taskStart()
+*/
 // 2
 // 3
 // 1

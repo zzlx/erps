@@ -12,10 +12,12 @@
  * *****************************************************************************
  */
 
-import assert from './assert.mjs';
-const isBuffer = b => b instanceof Uint8Array;
+import { assert } from './assert.mjs';
+import { isBuffer } from './isBuffer.mjs';
 
-export default class HMAC {
+export const hmac = function () {}
+
+class HMAC {
   /**
    * Create an HMAC.
    * @param {Function} Hash

@@ -1,11 +1,12 @@
 /**
  * *****************************************************************************
  *
- * Buffer对象
- * ==========
+ * Buffer
  *
  * *****************************************************************************
  */
+
+export const buffer = {};
 
 // Temporary buffers to convert numbers.
 const float32Array = new Float32Array(1);
@@ -19,10 +20,11 @@ float32Array[0] = -1; // 0xBF800000
 // check this with `os.endianness()` because that is determined at compile time.
 const bigEndian = uInt8Float32Array[3] === 0;
 
-
-export default class Buffer extends Uint8Array {
+class Buffer extends Uint8Array {
   constructor () {
+    super();
   }
+
 
   swap32 () {
     // For Buffer.length < 192, it's generally faster to
@@ -263,3 +265,5 @@ function fromObject(obj) {
     return fromArrayLike(obj.data);
   }
 }
+
+export const buf = new Buffer();

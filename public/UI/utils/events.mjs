@@ -1,3 +1,6 @@
+export function events () {
+}
+
 function EventEmitter() {
   this.events = new Map();
 }

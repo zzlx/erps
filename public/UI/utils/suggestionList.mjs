@@ -3,7 +3,7 @@
  * list of valid options sorted based on their similarity with the input.
  */
 
-export default function suggestionList(input, options) {
+export function suggestionList(input, options) {
   var optionsByDistance = Object.create(null);
   var oLength = options.length;
   var inputThreshold = input.length / 2;

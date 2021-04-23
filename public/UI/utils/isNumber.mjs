@@ -1,4 +1,4 @@
-export default function isNumber (v) {
+export function isNumber (v) {
   const decimalsRegExp = /(?:\.0*|(\.[^0]+)0+)$/;
   const thousandsFormatRegExp = /\B(?=(\d{3})+(?!\d))/g;
 

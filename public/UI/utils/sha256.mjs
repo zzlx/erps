@@ -9,8 +9,7 @@
  * *****************************************************************************
  */
 
-const assert = require('./assert.mjs');
-const HMAC = require('./hmac.mjs');
+export const sha256 = () => {}
 
 /*
  * Constants
@@ -45,7 +44,7 @@ const K = new Uint32Array([
  * SHA256
  */
 
-export default class SHA256 {
+class SHA256 {
   constructor() {
     this.state = new Uint32Array(8);
     this.msg = new Uint32Array(64);

@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-export default (max) => new Proxy({
+export const memCache = (max) => new Proxy({
   max: max,
   size: 0,
   cache: new Map(),

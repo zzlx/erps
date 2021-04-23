@@ -5,7 +5,7 @@
  *
  */
 
-export default function objectSpread(target) { 
+export function objectSpread(target) { 
   for (let i = 1; i < arguments.length; i++) { 
     const source = arguments[i] != null ? arguments[i] : {}; 
 

@@ -9,9 +9,7 @@
  *
  */
 
-import date from './date.mjs';
-
-export default new Proxy(Array, {
+export const arrayUtils = new Proxy(Array, {
   get: function (target, prop, receiver) {
     if (prop === 'sort') receiver.sort = sort;
     if (prop === 'keyMap') receiver.keyMap = keyMap;

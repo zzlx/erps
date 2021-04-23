@@ -8,7 +8,7 @@
  * *****************************************************************************
  */
 
-export default new Proxy({
+export const number = new Proxy({
 }, {
 	get: function (target, property, receiver) {
 		return Reflect.get(target, property, receiver);

@@ -4,7 +4,9 @@
  *
  */
 
-export default class PDF {
+export const pdf = () => {}
+
+class PDF {
 
   /**
    * 读取pdf文件,并解析

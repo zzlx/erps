@@ -67,9 +67,9 @@
  * *****************************************************************************
  */
 
-import md5_Utf8Encode from './utf8.mjs';
+import { utf8 } from './utf8.mjs';
 
-export default function md5(string) {
+export function md5(string) {
 
   function md5_RotateLeft(lValue, iShiftBits) {
     // 左移iShift bits
@@ -197,7 +197,7 @@ export default function md5(string) {
 
   // step_1: 数据补位
   // step_2: 扩展长度
-  let x = md5_ConvertToWordArray(md5_Utf8Encode(string));
+  let x = md5_ConvertToWordArray(md5.nncode(string));
 
   // step_3: 初始化寄存器
   let a = 0b01100111010001010010001100000001,

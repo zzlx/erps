@@ -10,7 +10,7 @@
  * *****************************************************************************
  */
 
-export default function blockStringValue(rawString) {
+export function blockStringValue(rawString) {
   // Expand a block string's raw value into independent lines.
   // Remove common indentation from all lines but first.
   const lines = rawString.split(/\r\n|[\n\r]/g); 

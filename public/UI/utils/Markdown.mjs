@@ -21,7 +21,7 @@
  * *****************************************************************************
  */
 
-export default class Markdown {
+export class Markdown {
   constructor(source, options) {
     this.opts = Object.assign({}, {
       format: ['json', 'html', 'xml', 'pdf'][1],
