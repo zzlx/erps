@@ -157,11 +157,6 @@ export function parse (str, options) {
   return tokens;
 }
 
-// test
-//console.log(parse('/test/:id(\\d+)/:name(\w+)/haha:ha'));
-//console.log(parse('/test/:id'));
-//console.log(parse('/(\d+)/:qr(\w+)'));
-
 /**
  * 编译路径字符串为模版函数
  * Compile a string to a template function for the path.

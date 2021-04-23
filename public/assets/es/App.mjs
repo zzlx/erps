@@ -14,7 +14,7 @@ import React from './components/_React.mjs';
 import Redirect from './components/_Redirect.mjs';
 import Route from './components/_Route.mjs';
 import Switcher from './components/_Switcher.mjs';
-import * as Pages from './apps/index.mjs';
+import * as Pages from './pages/index.mjs';
 import Store from './redux/Store.mjs';
 
 export default function (state) {
