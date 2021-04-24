@@ -14,48 +14,73 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import http2 from 'http2';
 import debuglog from './debuglog.mjs';
-import { 
-  HTTP_STATUS_CODES,
-  WEBSOCKET_STATUS_CODES as STATUS_CODES,
-  WEBSOCKET_OPCODES as OPCODES,
-} from './constants.mjs';
 
-const debug = debuglog('debug:websocket');
+const debug = debuglog('debug:websocket-server');
+
+export const STATUS_CODES = {
+  1000: 'Normal Closure',
+  1001: 'Going Away',
+  1002: 'Protocol Error',
+  1003: 'Unsupported Data',
+  1004: 'Reserved',
+  1007: 'Data Type Error',
+  1008: 'Violates Policy',
+  1009: 'Too Big to Process',
+}
+
+export const OPCODES = {
+  CONTINUE: 0x0,
+  // non-control frame opcodes
+  TEXT:     0x1,
+  BINARY:   0x2,
+  // 0x3-0x7
+  // control frame opcodes
+  CLOSE:    0x8,
+  PING:     0x9,
+  PONG:     0xA,
+}
+
+export const websocket = (opts) => new Websocket(opts);
+
+// opcode value:
+// * 0b0000 denotes a continuation frame
+// * 0b0001 denotes a text frame
+// * 0b0010 denotes a binary frame
+// * 3-7 are reserved for further non-control frames
+// * 0b1000 denotes a connection close
+// * 0b1001 denotes a ping
+// * 0b1010 denotes a pong
+// 11-15 are reserved for further control frames
+
 
 /**
  * The WebSocket application
  */
 
-export default class Server extends EventEmitter {
+class WebSocketServer extends EventEmitter {
   constructor (options = {}) {
     super();
     this.connections = new Map(); // 客户端链接存储器
-  }
+    this.server = options.server;
 
-  /**
-   * send ping message
-   */
-
-  ping () {
-
+    // Register upgrade event
+    this.server.on('upgrade', (req, socket, head) => {
+      this.upgradeHandler(req, socket, head);
+    });
 
   }
 
-  /**
-   * send pong message
-   */
-
-  pong () {
+  callback () {
+    return 
 
   }
 
   /**
-   *
+   * upgrade handshake
    */
 
   upgradeHandler (req, socket, head) {
-    socket.on('error', () => {
-    });
+    socket.on('error', (error) => { debug(error); });
 
     const version = req.headers['sec-websocket-version'] || '';
     const key = req.headers['sec-websocket-key'] || '';
@@ -97,18 +122,22 @@ export default class Server extends EventEmitter {
     // 服务返回正确的信息后后才能正式建立websocket连接
     socket.write(resHeaders.concat('\r\n').join('\r\n'));
 
-    // 添加到服务端存储
+    // 链接存储逻辑
     const address = socket.remoteAddress + ':' + socket.remotePort;
+
     const socketID = crypto.createHash('sha1').update(address + '_' + Date.now()).digest('hex');
-    this.connections.set(socketID, socket); 
+    this.connections.set(socketID, socket); // 添加到服务端存储
+
+    debug(`websocket connection from ${address} (id:${socketID}) is established.`);
 
     socket.on('close', () => { 
-      debug(`connection from ${address} (id:${socketID}) is closed.`);
-      // 关闭时删除链接
-      this.connections.delete(socketID);
+      debug(`websocket connection from ${address} (id:${socketID}) is closed.`);
+      this.connections.delete(socketID); // 关闭时删除链接
     });
 
     let buffer = null;
+
+    const ua = req.headers['user-agent']; // 记录客户端类型
 
     // 接收到data frame
     socket.on('data', dataFrame => {
@@ -121,23 +150,32 @@ export default class Server extends EventEmitter {
 
       buffer = buffer ? buffer + res.payload : res.payload;
 
+      const context = new Context({
+        socket: socket,
+        app: this,
+      });
+
       switch (res.opcode) {
         case OPCODES.CONTINUE:
           break;
         case OPCODES.TEXT:
-          const msg = encode(buffer.toString());
-          socket.write(msg);
-          this.ping('test');
-          this.emit('message', buffer.toString('utf8'));
+          this.emit('message', buffer.toString('utf8'), socket);
+          socket.write(encode(buffer, 0x1));
           break;
         case OPCODES.BINARY:
-          this.emit('message', buffer);
+          this.emit('message', buffer, socket);
           break;
         case OPCODES.CLOSE:
           socket.end();
           break;
         case OPCODES.PING:
+          // send a pong frame
+          socket.write(encode(buffer, 0xA));
+          break;
         case OPCODES.PONG:
+          // receive a pong frame
+          //socket.write(encode('receive pong', 0x1));
+          break;
         default:
           debug(`opcode: ${opcode}`);
           //this.close(1002, 'unhandled opcode: ' + opcode);
@@ -153,46 +191,12 @@ export default class Server extends EventEmitter {
    * 广播消息
    */
 
-  broadcastMessage(data) {
-    for (let client of this.connections) {
-      client.write(data, 'utf8', () => { 
+  broadcast(data) {
+    for (const conn of this.connections) {
+      conn.write(data, 'utf8', () => { 
         debug('broadcast message: ', data);
       });
     }
-  }
-
-  /**
-   * Close the connection when preconditions are not fulfilled.
-   *
-   * @param {net.Socket} socket The socket of the upgrade request
-   * @param {Number} code The HTTP response status code
-   * @param {String} [message] The HTTP response body
-   * @param {Object} [headers] Additional HTTP response headers
-   * @private
-   */
-
-  abortHandshake(socket, code, message, headers) {
-    if (socket.writable) {
-      message = message || HTTP_STATUS_CODES[code];
-      headers = {
-        Connection: 'close',
-        'Content-Type': 'text/html',
-        'Content-Length': Buffer.byteLength(message),
-        ...headers
-      };
-
-      socket.write(
-        `HTTP/1.1 ${code} ${HTTP_STATUS_CODES[code]}\r\n` +
-          Object.keys(headers)
-            .map((h) => `${h}: ${headers[h]}`)
-            .join('\r\n') +
-          '\r\n\r\n' +
-          message
-      );
-    }
-
-    socket.removeListener('error', () => {});
-    socket.destroy();
   }
 
   /**
@@ -206,34 +210,36 @@ export default class Server extends EventEmitter {
       }
     }
   }
-
-  /**
-   *
-   *
-   */
-
-  send (socket, data) {
-    let opcode, buffer;
-
-    if (Buffer.isBuffer(data)) { 
-      opcode == OPCODES.BINARY; 
-      buffer = data; 
-    } else if (typeof data === 'string') { 
-      opcode == OPCODES.TEXT; 
-      buffer = Buffer.from(data, 'utf8'); 
-    } else {
-      throw new Error('cannot send object. must be send buffer or string.');
-    }
-
-    socket.write(encodeMessage(opcode, buffer));
-  }
 } // end of WebSoceket class
 
-export class Client extends EventEmitter {
+/**
+ * 
+ *
+ */
+
+class Context {
   constructor (options = {}) {
-    super();
-    this.connections = new Map(); // 客户端链接存储器
+    this.socket = options.socket;
+    this.app = options.app;
+
   }
+
+  /**
+   * 发出消息
+   */
+
+  send () {
+    //this.socket.send(...arguments);
+  }
+
+  /**
+   * 广播消息
+   */
+
+  broadcast () {
+    this.app.broadcast(...arguments);
+  }
+
 }
 
 /**
@@ -354,6 +360,7 @@ function generateMaskingKey () {
  */
 
 function unmask (maskingKey, data) {
+
   if (!(maskingKey instanceof Uint8Array)) {
   }
   if (!(data instanceof Uint8Array)) {
@@ -361,8 +368,9 @@ function unmask (maskingKey, data) {
   }
 
   const payload = Buffer.alloc(data.length);
+  const keyLength = maskingKey.byteLength; 
 
-  for (let i = 0; i < data.length; i++) payload[i] = maskingKey[i % 4] ^ data[i];
+  for (let i = 0; i < data.byteLength; i++) payload[i] = maskingKey[i % keyLength] ^ data[i];
   return payload;
 }
 
@@ -374,22 +382,3 @@ function hashKey (key) {
   const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
   return crypto.createHash('sha1').update(key + GUID).digest('base64');
 }
-
-/**
- * 构造wss地址
- *
- * Reference: [WebSocket URIs](https://tools.ietf.org/html/rfc6455#page-14)
- */
-
-function getURI (url) {
-  const urlObj = new URL(url);
-
-  const protocol = urlObj.protocol === 'http' ? 'ws' : 'wss';
-
-  const host = urlObj.hostname;
-  const port = urlObj.port === "" ? "" : ":" + urlObj.port;
-  const path = '/websocket';
-
-  return `${protocol}://${hostname}${port}${path}`; 
-}
-

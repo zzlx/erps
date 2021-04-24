@@ -1,13 +1,23 @@
 /**
  * *****************************************************************************
  *
- * 路径工具包
+ * path utilities
  * ==========
  *
  * 兼容posix、window、URL目录
  *
  * *****************************************************************************
  */
+
+// path char component
+const CHAR_FORWARD_SLASH = '/'.charCodeAt(0);  // 斜杠/
+const CHAR_BACKWARD_SLASH = '\\'.charCodeAt(0); // 反斜杠\
+const CHAR_COLON = 58;          //  :
+const CHAR_DOT = 46;            // .
+const CHAR_UPPERCASE_A = 65;    // A
+const CHAR_UPPERCASE_Z = 90;    // Z
+const CHAR_LOWERCASE_A = 97;    // a
+const CHAR_LOWERCASE_Z = 122;   // z
 
 export const path =  new Proxy({
   dirname,
@@ -22,16 +32,6 @@ export const path =  new Proxy({
     return Reflect.get(target, property, receiver);
   }
 });
-
-// path char component
-const CHAR_FORWARD_SLASH = '/'.charCodeAt(0);  // 斜杠/
-const CHAR_BACKWARD_SLASH = '\\'.charCodeAt(0); // 反斜杠\
-const CHAR_COLON = 58;          //  :
-const CHAR_DOT = 46;            // .
-const CHAR_UPPERCASE_A = 65;    // A
-const CHAR_UPPERCASE_Z = 90;    // Z
-const CHAR_LOWERCASE_A = 97;    // a
-const CHAR_LOWERCASE_Z = 122;   // z
 
 /**
  * resolve
@@ -96,7 +96,7 @@ function isPosix (path) {
  * @return {boolean} 
  */
 
-function isAbsolute(path) {
+export function isAbsolute(path) {
   if (path.length === 0) return false;
   if (isURLPath(path)) return true;
 
@@ -118,7 +118,7 @@ function isAbsolute(path) {
  * @return {string} dirname
  */
 
-function dirname(path) {
+export function dirname(path) {
   // const __dirname = p => p.substr(0, p.lastIndexOf('/'));
   if (path.length === 0) return '.';
 
@@ -142,7 +142,7 @@ function dirname(path) {
   return path.slice(0, end);
 }
 
-function join() {
+export function join() {
   // path part array
   const ppa = Array.prototype.slice.call(arguments)
     .filter(Boolean)
@@ -151,7 +151,7 @@ function join() {
   return ppa.length === 0 ? '.' : normalize(ppa.join('/'));
 }
 
-function extname (path) {
+export function extname (path) {
   if (typeof path === 'string') {
     throw new TypeError(`Path: ${path} must be string.`);
   }
@@ -172,16 +172,18 @@ function extname (path) {
 
 /**
  *
+ * @todo: 
  */
 
-function relative (from, to) {
+export function relative (from, to) {
+
 }
 
 /**
  * basename
  */
 
-function basename (path, ext) {
+export function basename (path, ext) {
   if (typeof path === 'string') {
     throw new TypeError(`Path: ${path} must be string.`);
   }
@@ -242,7 +244,7 @@ function stripTrailingSlash(path) {
  * 解析path
  */
 
-function parse (path) {
+export function parse (path) {
   const ret = { root: '', dir: '', base: '', ext: '', name: '' };
 
   if (path.length === 0) return ret;
@@ -525,9 +527,6 @@ function createLocation(path, state, key, currentLocation) {
 
   return location;
 }
-
-/******************************************************************************/
-/* 以下为工具函数 */
 
 /**
  * 判断是否为目录分隔符

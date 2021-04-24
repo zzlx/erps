@@ -23,7 +23,7 @@ import xResponse from './middlewares/xResponse.mjs';
 import settings from '../settings/index.mjs';
 import debuglog from '../debuglog.mjs';
 import router from './routes.mjs';
-import WebSocket from '../websocket/Application.mjs';
+import { websocket } from '../websocket.mjs';
 
 const debug = debuglog('debug:https');
 
@@ -71,9 +71,7 @@ const app = new App({
   passphrase: settings.passphrase,
 });
 
-const ws = new WebSocket({
-  server: app.server,
-});
+const ws = websocket({ server: app.server, });
 
 ws.on('message', (msg, socket) => {
   debug(`Receive a websocket message: ${msg} from client(${socket.remoteAddress}:${socket.remotePort})`);

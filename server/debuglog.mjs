@@ -1,12 +1,30 @@
 /**
  * *****************************************************************************
  *
- * Debug log printer
+ * Debug Log Printer
+ *
+ * Backend Environment Only
  *
  * *****************************************************************************
  */ 
 
 import util from 'util';
+
+// debuglogImpl depends on process.pid and process.env.NODE_DEBUG,
+// so it needs to be called lazily in top scopes of internal modules
+// that may be loaded before these run time states are allowed to be accessed.
+export default function debuglog(set, cb) {
+  let debug = (...args) => {
+    // Only invokes debuglogImpl() when the debug function is
+    // called for the first time.
+    debug = debuglogImpl(set);
+
+    if (typeof cb === 'function') cb(debug);
+    debug(...args);
+  };
+
+  return (...args) => debug(...args);
+}
 
 // `debugs` is deliberately initialized to undefined so any call to
 // debuglog() before initializeDebugEnv() is called will throw.
@@ -55,20 +73,4 @@ function debuglogImpl(set) {
   }
 
   return debugs[set];
-}
-
-// debuglogImpl depends on process.pid and process.env.NODE_DEBUG,
-// so it needs to be called lazily in top scopes of internal modules
-// that may be loaded before these run time states are allowed to be accessed.
-export default function debuglog(set, cb) {
-  let debug = (...args) => {
-    // Only invokes debuglogImpl() when the debug function is
-    // called for the first time.
-    debug = debuglogImpl(set);
-
-    if (typeof cb === 'function') cb(debug);
-    debug(...args);
-  };
-
-  return (...args) => debug(...args);
 }
