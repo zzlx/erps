@@ -8,9 +8,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Blockquote(props = {}) {
+export function Blockquote(props = {}) {
   const { theme, className, children, ...rests } = props;
 
   // blockquote className

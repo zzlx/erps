@@ -7,9 +7,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Ellipse (props) {
+export function Ellipse (props) {
   const { data, fill, stroke, strokeWidth, cx, ...rests } = props;
 
   const ellipse = React.createElement('ellipse', {

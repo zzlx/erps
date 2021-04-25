@@ -11,9 +11,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Accordion (props) {
+export function Accordion (props) {
   const { flush, className, children, ...rests } = props;
 
   const cn = [

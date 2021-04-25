@@ -6,9 +6,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Embed(props) {
+export function Embed(props) {
   const {aspectRatios, className, children, ...rests} = props;
 
   const cn = ['embed-responsive'];

@@ -6,9 +6,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function ScrollLoad(props) {
+export function ScrollLoad(props) {
   const { offset, target, ...rests } = props;
 
   return React.createElement('div', {

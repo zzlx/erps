@@ -6,12 +6,9 @@
  *
  */
 
-import React from './_React.mjs';
-export default function tooltip (props) {
-  return React.createElement(Tooltip, props);
-}
+import { React } from './React.mjs';
 
-class Tooltip extends React.PureComponent { constructor(props) {
+export class Tooltip extends React.PureComponent { constructor(props) {
     super(props);
     this.Ref = React.createRef();
   }

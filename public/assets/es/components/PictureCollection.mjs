@@ -7,10 +7,10 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-import Button from './Button.mjs';
+import { React } from './React.mjs';
+import { Button } from './Button.mjs';
 
-export default class PictureCollection extends React.PureComponent {
+export class PictureCollection extends React.PureComponent {
   constructor (props) {
     super(props);
     this.state = { 

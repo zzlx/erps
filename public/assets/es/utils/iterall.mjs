@@ -1,60 +1,23 @@
 /**
  * *****************************************************************************
  *
- * 遍历器对象
- *
  * iterall 
- *
  *
  * *****************************************************************************
  */
 
-// In ES2015 environments, Symbol exists
-var SYMBOL /*: any */ = typeof Symbol === 'function' ? Symbol : void 0
+export const SYMBOL /*: any */ = typeof Symbol === 'function' ? Symbol : void 0
+export const SYMBOL_ITERATOR = SYMBOL && SYMBOL.iterator
+export const SYMBOL_ASYNC_ITERATOR = SYMBOL && SYMBOL.asyncIterator
+export const $$iterator = SYMBOL_ITERATOR || '@@iterator'
+export const $$asyncIterator = SYMBOL_ASYNC_ITERATOR || '@@asyncIterator'
 
-// In ES2015 (or a polyfilled) environment, this will be Symbol.iterator
-var SYMBOL_ITERATOR = SYMBOL && SYMBOL.iterator
-
-/**
- * A property name to be used as the name of an Iterable's method responsible
- * for producing an Iterator, referred to as `@@iterator`. Typically represents
- * the value `Symbol.iterator` but falls back to the string `"@@iterator"` when
- * `Symbol.iterator` is not defined.
- *
- * Use `$$iterator` for defining new Iterables instead of `Symbol.iterator`,
- * but do not use it for accessing existing Iterables, instead use
- * {@link getIterator} or {@link isIterable}.
- *
- * @example
- *
- * var $$iterator = require('iterall').$$iterator
- *
- * function Counter (to) {
- *   this.to = to
- * }
- *
- * Counter.prototype[$$iterator] = function () {
- *   return {
- *     to: this.to,
- *     num: 0,
- *     next () {
- *       if (this.num >= this.to) {
- *         return { value: undefined, done: true }
- *       }
- *       return { value: this.num++, done: false }
- *     }
- *   }
- * }
- *
- * var counter = new Counter(3)
- * for (var number of counter) {
- *   console.log(number) // 0 ... 1 ... 2
- * }
- *
- * @type {Symbol|string}
- */
-/*:: declare export var $$iterator: '@@iterator'; */
-export var $$iterator = SYMBOL_ITERATOR || '@@iterator'
+export const iterall = {
+  isIterable,
+  isAsyncIterable,
+  getIteratorMethod,
+  getAsyncIteratorMethod,
+};
 
 /**
  * Returns true if the provided object implements the Iterator protocol via
@@ -74,6 +37,7 @@ export var $$iterator = SYMBOL_ITERATOR || '@@iterator'
  * @return {boolean} true if Iterable.
  */
 /*:: declare export function isIterable(obj: any): boolean; */
+
 export function isIterable(obj) {
   return !!getIteratorMethod(obj)
 }
@@ -98,7 +62,7 @@ export function isIterable(obj) {
 
 /*:: declare export function isArrayLike(obj: any): boolean; */
 export function isArrayLike(obj) {
-  var length = obj != null && obj.length
+  const length = obj != null && obj.length
   return typeof length === 'number' && length >= 0 && length % 1 === 0
 }
 
@@ -162,7 +126,7 @@ export function isCollection(obj) {
   & (<+TValue>(iterable: Iterable<TValue>) => Iterator<TValue>)
   & ((iterable: mixed) => void | Iterator<mixed>); */
 export function getIterator(iterable) {
-  var method = getIteratorMethod(iterable);
+  const method = getIteratorMethod(iterable);
   if (method) return method.call(iterable);
 }
 
@@ -192,7 +156,7 @@ export function getIterator(iterable) {
   & ((iterable: mixed) => (void | (() => Iterator<mixed>))); */
 export function getIteratorMethod(iterable) {
   if (iterable != null) {
-    var method =
+    const method =
       (SYMBOL_ITERATOR && iterable[SYMBOL_ITERATOR]) || iterable['@@iterator']
     if (typeof method === 'function') {
       return method
@@ -246,24 +210,27 @@ export function createIterator(collection) {
 
 // When the object provided to `createIterator` is not Iterable but is
 // Array-like, this simple Iterator is created.
-function ArrayLikeIterator(obj) {
-  this._o = obj
-  this._i = 0
-}
-
-// Note: all Iterators are themselves Iterable.
-ArrayLikeIterator.prototype[$$iterator] = function() {
-  return this
-}
-
-// A simple state-machine determines the IteratorResult returned, yielding
-// each value in the Array-like object in order of their indicies.
-ArrayLikeIterator.prototype.next = function() {
-  if (this._o === void 0 || this._i >= this._o.length) {
-    this._o = void 0
-    return { value: void 0, done: true }
+class ArrayLikeIterator {
+  constructor (obj) {
+    this._o = obj
+    this._i = 0
   }
-  return { value: this._o[this._i++], done: false }
+
+  // Note: all Iterators are themselves Iterable.
+  $$iterator () {
+    return this;
+  }
+
+  // A simple state-machine determines the IteratorResult returned, yielding
+  // each value in the Array-like object in order of their indicies.
+  next () {
+    if (this._o === undefined || this._i >= this._o.length) {
+      this._o = undefined;
+      return { value: undefined, done: true }
+    }
+    return { value: this._o[this._i++], done: false }
+  }
+
 }
 
 /**
@@ -372,72 +339,6 @@ export function forEach(collection, callback, thisArg) {
  * @property {function (): AsyncIterator<T>} Symbol.asyncIterator
  *   A method which produces an AsyncIterator for this AsyncIterable.
  */
-
-/**
- * [AsyncIterator](https://tc39.github.io/proposal-async-iteration/#sec-asynciterator-interface)
- * is a *protocol* which describes a standard way to produce and consume an
- * asynchronous sequence of values, typically the values of the
- * {@link AsyncIterable} represented by this {@link AsyncIterator}.
- *
- * AsyncIterator is similar to Observable or Stream. Like an {@link Iterator} it
- * also as a `next()` method, however instead of an IteratorResult,
- * calling this method returns a {@link Promise} for a IteratorResult.
- *
- * While described as a proposed addition to the [ES2017 version of JavaScript](https://tc39.github.io/proposal-async-iteration/)
- * it can be utilized by any version of JavaScript.
- *
- * @external AsyncIterator
- * @see {@link https://tc39.github.io/proposal-async-iteration/#sec-asynciterator-interface|Async Iteration Proposal}
- */
-
-// In ES2017 (or a polyfilled) environment, this will be Symbol.asyncIterator
-const SYMBOL_ASYNC_ITERATOR = SYMBOL && SYMBOL.asyncIterator
-
-/**
- * A property name to be used as the name of an AsyncIterable's method
- * responsible for producing an Iterator, referred to as `@@asyncIterator`.
- * Typically represents the value `Symbol.asyncIterator` but falls back to the
- * string `"@@asyncIterator"` when `Symbol.asyncIterator` is not defined.
- *
- * Use `$$asyncIterator` for defining new AsyncIterables instead of
- * `Symbol.asyncIterator`, but do not use it for accessing existing Iterables,
- * instead use {@link getAsyncIterator} or {@link isAsyncIterable}.
- *
- * @example
- *
- * var $$asyncIterator = require('iterall').$$asyncIterator
- *
- * function Chirper (to) {
- *   this.to = to
- * }
- *
- * Chirper.prototype[$$asyncIterator] = function () {
- *   return {
- *     to: this.to,
- *     num: 0,
- *     next () {
- *       return new Promise(resolve => {
- *         if (this.num >= this.to) {
- *           resolve({ value: undefined, done: true })
- *         } else {
- *           setTimeout(() => {
- *             resolve({ value: this.num++, done: false })
- *           }, 1000)
- *         }
- *       })
- *     }
- *   }
- * }
- *
- * var chirper = new Chirper(3)
- * for await (var number of chirper) {
- *   console.log(number) // 0 ...wait... 1 ...wait... 2
- * }
- *
- * @type {Symbol|string}
- */
-/*:: declare export var $$asyncIterator: '@@asyncIterator'; */
-export const $$asyncIterator = SYMBOL_ASYNC_ITERATOR || '@@asyncIterator'
 
 /**
  * Returns true if the provided object implements the AsyncIterator protocol via
@@ -569,24 +470,26 @@ export function createAsyncIterator(source) {
 
 // When the object provided to `createAsyncIterator` is not AsyncIterable but is
 // sync Iterable, this simple wrapper is created.
-function AsyncFromSyncIterator(iterator) {
-  this._i = iterator
-}
+class AsyncFromSyncIterator {
+  constructor (iterator) {
+    this._i = iterator
+  }
 
-// Note: all AsyncIterators are themselves AsyncIterable.
-AsyncFromSyncIterator.prototype[$$asyncIterator] = function() {
-  return this
-}
+  // Note: all AsyncIterators are themselves AsyncIterable.
+  $$asyncIterator () {
+    return this
+  }
 
-// A simple state-machine determines the IteratorResult returned, yielding
-// each value in the Array-like object in order of their indicies.
-AsyncFromSyncIterator.prototype.next = function() {
-  const step = this._i.next()
+  // A simple state-machine determines the IteratorResult returned, yielding
+  // each value in the Array-like object in order of their indicies.
+  next () {
+    const step = this._i.next();
 
-  return Promise.resolve(step.value).then(value => ({
-    value: value, 
-    done: step.done
-  }));
+    return Promise.resolve(step.value).then(value => ({
+      value: value, 
+      done: step.done
+    }));
+  }
 }
 
 /**

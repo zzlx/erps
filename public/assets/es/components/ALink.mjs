@@ -9,10 +9,10 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-import Context from './_Context.mjs';
+import { React } from './React.mjs';
+import { Context } from './Context.mjs';
 
-export default class AnchorLink extends React.PureComponent {
+export class ALink extends React.PureComponent {
   render() {
     const { active, disabled, onClick, className, ...rests } = this.props;
 
@@ -23,7 +23,7 @@ export default class AnchorLink extends React.PureComponent {
     ].filter(Boolean).join(' ');
 
     return React.createElement('a', { 
-      className: cn : null,
+      className: cn,
       tabIndex: disabled ? "-1" : null,
       "aria-disabled": disabled ? "true" : null,
       disabled: disabled ? true : null,
@@ -33,4 +33,4 @@ export default class AnchorLink extends React.PureComponent {
   }
 }
 
-AnchorLink.contextType = Context;
+ALink.contextType = Context;

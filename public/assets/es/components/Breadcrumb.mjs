@@ -11,9 +11,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Breadcrumb(props) {
+export function Breadcrumb(props) {
   const { data, children, ...rests } = props;
 
   const items = [];

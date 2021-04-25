@@ -6,8 +6,8 @@
  * *****************************************************************************
  */
 
-import React from '../components/_React.mjs';
-import Context from '../components/_Context.mjs';
+import { React } from '../components/React.mjs';
+import { Context } from '../components/Context.mjs';
 import Circular from '../components/Circular.mjs';
 import Nav from '../components/Nav.mjs';
 import { Header, Footer } from '../components/Layout.mjs';

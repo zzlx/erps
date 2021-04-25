@@ -1,4 +1,4 @@
-export const DOMUtils = {}
+export const domUtils = {}
 
 const canUseDOM = !!(
   typeof window !== 'undefined' && 

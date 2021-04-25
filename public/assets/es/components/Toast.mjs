@@ -8,14 +8,10 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-import Button from './Button.mjs';
+import { React } from './React.mjs';
+import { Button } from './Button.mjs';
 
-export default function toast (props) {
-  return React.createElement(Toast, props);
-}
-
-class Toast extends React.PureComponent {
+export class Toast extends React.PureComponent {
   constructor(props) {
     super(props);
     this.Ref = React.createRef();

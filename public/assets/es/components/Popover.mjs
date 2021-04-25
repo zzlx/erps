@@ -2,8 +2,8 @@
  * Popover 
  */
 
-import React from './_React.mjs';
-export default function popover (props) {
+import { React } from './React.mjs';
+export function Popover (props) {
   const {type, children, onClick} = props;
 
   return React.createElement('button', {

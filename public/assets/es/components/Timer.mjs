@@ -4,8 +4,8 @@
  *
  */
 
-import React from './_React.mjs';
-export default class Timer extends React.PureComponent {
+import { React } from './React.mjs';
+export class Timer extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = { seconds: 0 };

@@ -6,11 +6,10 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
+import { Button } from './Button.mjs';
 
-import Button from './Button.mjs';
-
-export default function Modal(props) {
+export function Modal(props) {
   const children = props.children;
 
   const cn_modal = ['modal'];

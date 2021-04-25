@@ -8,9 +8,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function List (props) {
+export function List (props) {
   const {
     action, disabled, row, flush,
     onClick, onKeyDown, withBadge,

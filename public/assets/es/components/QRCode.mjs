@@ -6,9 +6,9 @@
  *
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default class QRCode extends React.PureComponent { 
+export class QRCode extends React.PureComponent { 
     constructor(props) {
         super(props);
         this._ref = React.createRef();

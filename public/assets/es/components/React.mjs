@@ -8,5 +8,14 @@
  * *****************************************************************************
  */
 
-import React from 'react';
-export default React;
+let React = globalThis.React;
+
+try {
+  if (React == null) {
+    React = await import('react');
+  }
+} catch (e) {
+  //
+}
+
+export { React };

@@ -9,7 +9,7 @@
  * *****************************************************************************
  */
 
-export default function Graphql () {
+export function FetchContainer () {
   const url = opts.url 
     ? new URL(opts.url)
     : new URL(window.location.href);

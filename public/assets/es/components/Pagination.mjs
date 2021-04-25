@@ -11,11 +11,10 @@
  *
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
+import { ALink } from './ALink.mjs';
 
-import Anchor from './Anchor.mjs';
-
-export default function Pagination (props) {
+export function Pagination (props) {
   let { data, align, sm, lg, className, children, ...rests } = props;
 
   const cn = ['pagination'];

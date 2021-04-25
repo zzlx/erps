@@ -13,11 +13,11 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
 const breakpoints = ['sm', 'md', 'lg', 'xl'];
 
-export default function Jumbotron (props) {
+export function Jumbotron (props) {
   const { fluid, className, ...rests } = props;
 
   // 根据props属性构造className

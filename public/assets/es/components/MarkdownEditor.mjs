@@ -6,9 +6,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default class MarkdownEditor extends React.Component {
+export class MarkdownEditor extends React.Component {
   constructor(props) {
     super(props);
     this.md = new Remarkable();

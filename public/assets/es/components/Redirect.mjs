@@ -8,14 +8,14 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-import Context from "./_Context.mjs";
-import Countdown from './Countdown.mjs';
+import { React } from './React.mjs';
+import { Context } from "./Context.mjs";
+import { Countdown } from './Countdown.mjs';
 
-import generatePath from "../utils/generatePath.mjs";
-import path from '../utils/path.mjs';
+import { generatePath } from "../utils/generatePath.mjs";
+import { path } from '../utils/path.mjs';
 
-export default class Redirect extends React.PureComponent {
+export class Redirect extends React.PureComponent {
   render () {
     const { match, to, push  } = this.props;
 

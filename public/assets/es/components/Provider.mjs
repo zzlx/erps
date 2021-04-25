@@ -8,12 +8,12 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-import Context from './_Context.mjs';
-import assert from '../utils/assert.mjs';
-import isShallowEqual from '../utils/isShallowEqual.mjs';
+import { React } from './React.mjs';
+import { Context } from './Context.mjs';
+import { assert } from '../utils/assert.mjs';
+import { isShallowEqual } from '../utils/isShallowEqual.mjs';
 
-export default class Provider extends React.Component {
+export class Provider extends React.Component {
   constructor (props) {
     super(props);
     this.state = {

@@ -19,9 +19,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React }from './React.mjs';
 
-export default class Alert extends React.PureComponent {
+export class Alert extends React.PureComponent {
   constructor (props) {
     super(props);
     this.state = {

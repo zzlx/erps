@@ -8,9 +8,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Layout (props) {
+export function Layout (props) {
   const { 
     className, 
     header,

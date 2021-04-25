@@ -1,9 +1,13 @@
 /**
  * *****************************************************************************
- * 
- * React
+ *
+ * 剪切板操作
  *
  * *****************************************************************************
  */
 
-export default globalThis.React;
+import { React } from './React.mjs';
+
+export function Clipboard () {
+  const cb = navigator.clipboard;
+}

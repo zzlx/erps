@@ -8,9 +8,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Badge (props) {
+export function Badge (props) {
   const { 
     theme, 
     pill, 
@@ -18,7 +18,7 @@ export default function Badge (props) {
   } = props;
 
   const cn = [
-    'badge'
+    'badge',
     pill && 'badge-pill',
     theme && `badge-${theme}`,
     className,

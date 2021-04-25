@@ -14,12 +14,12 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 const random = (start = 0, end = 100) => Math.floor(Math.random() * (end - start)) + start;
 
 const sizes = ['xsmall', 'small', 'medium', 'large', 'full'];
 
-export default class Placeholder extends React.PureComponent {
+export class Placeholder extends React.PureComponent {
   constructor(props) {
     super(props);
     this.Ref = React.createRef();

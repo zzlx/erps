@@ -8,9 +8,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Table (props) {
+export function DataTable (props) {
   const { 
     data, 
     hover, dark, light, striped, bordered, 

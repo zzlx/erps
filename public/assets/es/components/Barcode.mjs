@@ -9,10 +9,10 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-import Barcode from '../utils/Barcode.mjs';
+import { React } from './React.mjs';
+import { barcode } from '../utils/barcode.mjs';
 
-export default class BarcodeComponent extends React.PureComponent { 
+export class Barcode extends React.PureComponent { 
   constructor(props) {
     super(props);
     this._ref = React.createRef();

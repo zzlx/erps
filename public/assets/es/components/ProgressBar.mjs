@@ -7,9 +7,9 @@
  *
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default class ProgressBar extends React.PureComponent {
+export class ProgressBar extends React.PureComponent {
   render() {
     const { 
       min, now, max, label,striped, animated

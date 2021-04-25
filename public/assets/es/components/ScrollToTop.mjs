@@ -8,10 +8,10 @@
  *
  */
 
-import React from './_React.mjs';
-import Sprite from './Sprite.mjs';
+import { React } from './React.mjs';
+import { Sprite } from './Sprite.mjs';
 
-export default class ScrollToTop extends React.PureComponent {
+export class ScrollToTop extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = { show: false };

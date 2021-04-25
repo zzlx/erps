@@ -8,7 +8,7 @@
  *
  */
 
-export default function print(e) {
+export function Printer(e) {
   const url = '';
   const windowName = 'newwindow'
   const windowFeatures = "location=0,locationbar=0,menubar=0,resizable=0,scrollbars=0,status=0,titlebar=0,toolbar=0";

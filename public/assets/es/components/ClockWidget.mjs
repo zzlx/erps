@@ -9,9 +9,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default class Clock extends React.PureComponent {
+export class ClockWidget extends React.PureComponent {
   constructor(props) {
     super(props);
 

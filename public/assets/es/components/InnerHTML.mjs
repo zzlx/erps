@@ -6,9 +6,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function InnerHTML (props) {
+export function InnerHTML (props) {
   return React.createElement('div', {
     dangerouslySetInnerHTML: { __html: 'content'}
   });

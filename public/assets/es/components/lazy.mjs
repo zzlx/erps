@@ -7,9 +7,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function lazy (fn) {
+export function lazy (fn) {
   return class LazyComponent extends React.PureComponent {
     render () {
       const { fallback, ...rests } = this.props;

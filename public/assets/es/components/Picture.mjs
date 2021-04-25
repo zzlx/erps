@@ -15,9 +15,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Picture (props) {
+export function Picture (props) {
   const { src, sources, ...rests } = props;
 
   const Sources = Array.isArray(sources) 

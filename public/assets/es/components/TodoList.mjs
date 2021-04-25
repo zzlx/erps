@@ -7,13 +7,13 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-import Context from './_Context.mjs';
-import Button from './Button.mjs';
-import Message from './Alert.mjs';
-import Form from './Form.mjs';
+import { React } from './React.mjs';
+import { Context } from './Context.mjs';
+import { Button } from './Button.mjs';
+import { Alert as Message } from './Alert.mjs';
+import { Form } from './Form.mjs';
 
-export default class TodoList extends React.Component {
+export class TodoList extends React.Component {
   constructor(props) {
     super(props);
     this.state = { items: [], text: '' };

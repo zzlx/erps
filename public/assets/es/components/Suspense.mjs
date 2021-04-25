@@ -6,10 +6,10 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-import assert from '../utils/assert.mjs';
+import { React } from './React.mjs';
+import { assert } from '../utils/assert.mjs';
 
-export default class Suspense extends React.Component {
+export class Suspense extends React.Component {
    render() {
     const { fallback, children } = this.props
     const { promise } = this.state

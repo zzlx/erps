@@ -8,9 +8,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default class Card extends React.PureComponent {
+export class Card extends React.PureComponent {
   constructor(props) {
     super(props);
     this.Ref = React.createRef();

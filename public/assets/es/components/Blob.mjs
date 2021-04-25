@@ -1,4 +1,4 @@
-export default () => {}
+export const Blob =  () => {}
 /*-----------------------------------------------------------------------*/
 // canvas转dataURL：canvas对象、转换格式、图像品质
 function canvasToDataURL(canvas, format, quality){

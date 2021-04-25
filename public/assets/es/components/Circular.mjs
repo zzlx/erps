@@ -10,9 +10,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Circular (props) {
+export function Circular (props) {
   const { 
     size,
     className, ...rests 

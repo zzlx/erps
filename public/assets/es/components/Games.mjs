@@ -1,3 +1,4 @@
+import { React } from './React.mjs';
 const el = React.createElement;
 
 function Square(props) {
@@ -44,7 +45,7 @@ class Board extends React.Component {
  *
  */
 
-export default class Game extends React.Component {
+export class Games extends React.Component {
   constructor(props) {
     super(props);
     this.state = {

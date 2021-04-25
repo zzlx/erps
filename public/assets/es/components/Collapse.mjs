@@ -8,9 +8,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Collapse (props) {
+export function Collapse (props) {
   const { className, ...rests} = props;
 
   const cn = [

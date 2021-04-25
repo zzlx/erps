@@ -5,8 +5,8 @@
  * @api public
  */
 
-import React from './_React.mjs';
-export default function Sprite (props = {}) {
+import { React } from './React.mjs';
+export function Sprite (props = {}) {
   const { 
     showAll, 
     id, 

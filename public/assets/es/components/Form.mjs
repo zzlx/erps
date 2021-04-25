@@ -7,9 +7,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Form (props) {
+export function Form (props) {
   const { 
     inline, 
     className, 

@@ -8,9 +8,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function dropdown (props) {
+export function Dropdown (props) {
   const { directions, split, className, children, ...rests } = props;
   
   const cn = ['dropdown'];
@@ -35,7 +35,7 @@ export default function dropdown (props) {
  * Dropdown Menu
  */
 
-dropdown.Menu = (props) => {
+Dropdown.Menu = (props) => {
   const { className, children, ...rests } = props;
 
   const cn = ['dropdown-menu'];

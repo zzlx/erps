@@ -8,8 +8,8 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-export default class Spinner extends React.PureComponent {
+import { React } from './React.mjs';
+export class Spinner extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = { 

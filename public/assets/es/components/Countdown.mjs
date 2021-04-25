@@ -6,9 +6,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default class Countdown extends React.PureComponent {
+export class Countdown extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = { seconds: Number.parseInt(props.count || 10) };

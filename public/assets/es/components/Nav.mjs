@@ -6,9 +6,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default class Nav extends React.PureComponent {
+export class Nav extends React.PureComponent {
     constructor(props) {
 				super(props);
 

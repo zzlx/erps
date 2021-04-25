@@ -7,9 +7,9 @@
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
+import { React } from './React.mjs';
 
-export default function Button (props) {
+export function Button (props) {
   const { 
     link, theme, outline, lg, sm, block, // 样式配置
     onClick, onKeyDown, onMouseOver, 

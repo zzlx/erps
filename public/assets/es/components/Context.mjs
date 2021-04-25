@@ -1,13 +1,10 @@
 /**
  * *****************************************************************************
- *
- * 剪切板操作
+ * 
+ * Context
  *
  * *****************************************************************************
  */
 
-import React from './_React.mjs';
-
-export default function Clipboard () {
-  const cb = navigator.clipboard;
-}
+import { React } from './React.mjs';
+export const Context = React.createContext(null);

@@ -46,6 +46,9 @@
  * *****************************************************************************
  */
 
+export const barcode = () => {
+}
+
 /**
  * 条形码编码集
  * CODE128 includes 107 symbols:
@@ -79,7 +82,7 @@ export const CODE128_BARS = [
   1100011101011, // 106 stop
 ];
 
-export class Barcode {
+class Barcode {
   /**
    * constructor
    *
