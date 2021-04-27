@@ -10,6 +10,6 @@
 import mongodb from 'mongodb';
 const ObjectID = mongodb.ObjectId;
 
-export default function getObjectID () {
+export function getID () {
   return new ObjectID(); 
 }

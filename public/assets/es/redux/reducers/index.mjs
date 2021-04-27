@@ -1,12 +1,19 @@
 /**
- * Reducers
+ * *****************************************************************************
+ *
+ * reducers modules
+ *
+ * 模块计数: 8
+ * 模块说明: 此模块由工具自动生成
+ * 生成时间: 2021/4/25 下午4:50:39
+ * *****************************************************************************
  */
 
-export { default as files } from './files.mjs';
-export { default as messages } from './messages.mjs';
-export { default as navs } from './navs.mjs';
-export { default as layout } from './layout.mjs';
-export { default as location } from './location.mjs';
-export { default as routes } from './routes.mjs';
-export { default as profiles } from './profiles.mjs';
-export { default as todos } from './todos.mjs';
+export { files } from './files.mjs';
+export { layout } from './layout.mjs';
+export { location } from './location.mjs';
+export { messages } from './messages.mjs';
+export { navs } from './navs.mjs';
+export { profiles } from './profiles.mjs';
+export { routes } from './routes.mjs';
+export { todos } from './todos.mjs';

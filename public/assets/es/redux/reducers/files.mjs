@@ -4,6 +4,6 @@
  *
  */
 
-export default (state = [], action) => {
+export const files = (state = [], action) => {
   return state;
 }

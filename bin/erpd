@@ -8,4 +8,9 @@
  * *****************************************************************************
  */
 
-import('../server/main.mjs');
+process.title = require('path').basename(__filename); // 配置可执行文件进程名称
+
+import('../src/server/main.mjs').then(m => {
+  const main = m.main;
+  if (main && typeof main === 'function') main(); // 执行主程序
+});

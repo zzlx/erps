@@ -8,17 +8,16 @@
 
 import { React } from '../components/React.mjs';
 import { Context } from '../components/Context.mjs';
-import Circular from '../components/Circular.mjs';
-import Nav from '../components/Nav.mjs';
+import { Circular } from '../components/Circular.mjs';
+import { Nav } from '../components/Nav.mjs';
 import { Header, Footer } from '../components/Layout.mjs';
-import Placeholder from '../components/Placeholder.mjs';
-import PictureCollection from '../components/PictureCollection.mjs';
-import TodoList from '../components/TodoList.mjs';
-import Accordion from '../components/Accordion.mjs';
-import Blockquote from '../components/Blockquote.mjs';
-//import Barcode from '../components/Barcode.mjs';
+import { Placeholder } from '../components/Placeholder.mjs';
+import { PictureCollection } from '../components/PictureCollection.mjs';
+import { TodoList } from '../components/TodoList.mjs';
+import { Accordion } from '../components/Accordion.mjs';
+import { Blockquote } from '../components/Blockquote.mjs';
 
-export default class HomePage extends React.Component {
+export class HomePage extends React.Component {
   constructor(props, context) {
     super(props);
 

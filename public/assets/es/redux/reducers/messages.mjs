@@ -3,7 +3,7 @@
  *
  */
 
-export default (state = [], action) => {
+export const messages = (state = [], action) => {
   switch(action.type){
     case 'GRAPHQL_QUERY_RESULT':
       if (action.payload.errors && action.payload.errors.length > 0) {

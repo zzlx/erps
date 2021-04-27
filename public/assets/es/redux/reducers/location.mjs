@@ -12,7 +12,7 @@ const initialState = {
   pathname: '/',
 };
 
-export default function profiles (state = initialState, action) {
+export const loaction = function (state = initialState, action) {
   switch(action.type){
     default: 
     return state;

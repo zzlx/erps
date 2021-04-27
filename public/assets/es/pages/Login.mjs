@@ -6,14 +6,14 @@
  * *****************************************************************************
  */
 
-import React from '../components/_React.mjs';
-import Context from '../components/_Context.mjs';
-import Circular from '../components/Circular.mjs';
+import { React } from '../components/React.mjs';
+import { Context } from '../components/Context.mjs';
+import { Circular } from '../components/Circular.mjs';
 import { Footer } from '../components/Layout.mjs';
-import Placeholder from '../components/Placeholder.mjs';
-import Picture from '../components/Picture.mjs';
+import { Placeholder } from '../components/Placeholder.mjs';
+import { Picture } from '../components/Picture.mjs';
 
-export default class Login extends React.PureComponent {
+export class Login extends React.PureComponent {
   constructor(props, context) {
     super(props);
     this.state = { };

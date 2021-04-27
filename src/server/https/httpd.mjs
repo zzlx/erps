@@ -25,23 +25,8 @@ import debuglog from '../debuglog.mjs';
 import router from './routes.mjs';
 import { websocket } from '../websocket.mjs';
 
-const debug = debuglog('debug:https');
+const debug = debuglog('debug:httpd');
 
-// 设置进程标题
-process.title = 'org.zzlx.erps.httpd';
-
-/*
-// this is the Fast shutdown mode.
-process.on('SIGINT', signal => {
-  debug(signal);
-});
-
-// This is the Immediate Shutdown mode
-process.on('SIGQUIT', signal => {
-  process.exit();
-});
-
-*/
 // This is the smart shutdown mode.
 // After receiving SIGTERM the server disallows new connections, 
 // but let the existing sessions and their work nornally.

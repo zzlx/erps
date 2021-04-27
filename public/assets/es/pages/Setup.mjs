@@ -17,7 +17,7 @@ import TodoList from '../components/TodoList.mjs';
 import Accordion from '../components/Accordion.mjs';
 import Blockquote from '../components/Blockquote.mjs';
 
-export default class HomePage extends React.Component {
+export class HomePage extends React.Component {
   constructor(props, context) {
     super(props);
 

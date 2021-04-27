@@ -12,6 +12,8 @@
 
 import http2 from 'http2';
 
+export const acme = () => {};
+
 // API Server address
 const ACME_API = "https://acme-v02.api.letsencrypt.org";
 const ACME_API_STAGING = "https://acme-staging-v02.api.letsencrypt.org";

@@ -8,7 +8,7 @@
  * *****************************************************************************
  */
 
-import { pathToRegexp } from './pathToRegexp.mjs';
+import { pathToRegexp } from './regularPath.mjs';
 
 export function matchPath(pathname, options = {}) {
   const opts = { 

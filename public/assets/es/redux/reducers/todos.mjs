@@ -2,7 +2,7 @@
  *
  */
 
-export default function todos(state = [], action) {
+export function todos(state = [], action) {
   if (action.error) return state;
   if (action.payload && action.payload.error) return state;
 

@@ -11,6 +11,6 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 
-export default class JWS {
+export class JWS {
 
 }

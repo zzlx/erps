@@ -14,7 +14,7 @@ const initialState = [
   {name: 'About', url: '/HomePage', active: false},
 ];
 
-export default (state = initialState, action) => {
+export const navs = (state = initialState, action) => {
   switch (action.type) {
     case 'QUERY_NAVS':
     case 'REVEIVE_NAVS':

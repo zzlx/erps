@@ -12,6 +12,7 @@
  * *****************************************************************************
  */
 
+import assert from 'assert';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -37,7 +38,7 @@ const schema = await fs.promises.readdir(schemaPath, { encoding: 'utf8' })
 
 const fieldResolver = await getModules(path.join(path.dirname(__dirname), 'resolvers')); 
 
-export default function graphqlQuery (query, variables, operationName) {
+export function graphql(query, variables, operationName) {
 
   return exec({
     schema: schema, 
@@ -78,8 +79,10 @@ function getModules (dir) {
       }
 
       if (f.isFile() && f.name.match(/\.mjs$/)) {
-        await import(path.join(dir, f.name)).then(fn => {
-          Modules[path.basename(f.name, '.mjs')] = fn.default ? fn.default : fn;
+        await import(path.join(dir, f.name)).then(m => {
+          const wanted = path.basename(f.name, '.mjs')
+          Modules[wanted] = m.default ? m.default : m[wangted];
+          assert(Modules[wanted], `${f.name} does not exported an correct module.`);
         }).catch(err => {
           console.log('file: %s %o', f.name, err);
         });

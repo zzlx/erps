@@ -43,7 +43,7 @@ class PostgreSQLPool {
   }
 }
 
-export default new PostgreSQLPool();
+export new PostgreSQLPool();
 
 async function transactionQuery () {
   const client = await pool.connect();

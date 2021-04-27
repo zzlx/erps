@@ -1,12 +1,11 @@
 /**
  * *****************************************************************************
  *
- * utils Module
+ * utils modules
  *
- * 此模块由index-path-module工具自动生成
- *
- * 模块计数: 85
- * 生成时间: 2021/4/24 下午2:33:32
+ * 模块计数: 84
+ * 模块说明: 此模块由工具自动生成
+ * 生成时间: 2021/4/26 下午5:33:08
  * *****************************************************************************
  */
 
@@ -72,13 +71,13 @@ export { only } from './only.mjs';
 export { orList } from './orList.mjs';
 export { parseString2Object } from './parseString2Object.mjs';
 export { path } from './path.mjs';
-export { pathToRegexp } from './pathToRegexp.mjs';
 export { pdf } from './pdf.mjs';
 export { printCharCode } from './printCharCode.mjs';
 export { printf } from './printf.mjs';
 export { promise } from './promise.mjs';
 export { query } from './query.mjs';
 export { quotedOrList } from './quotedOrList.mjs';
+export { regularPath } from './regularPath.mjs';
 export { schedule } from './schedule.mjs';
 export { setMap } from './setMap.mjs';
 export { sha1 } from './sha1.mjs';

@@ -50,7 +50,7 @@ const types = [
   { name: 'ZZZ', desc: '休眠' },
 ];
 
-export default new Proxy(types, {
+export const actionTypes = new Proxy(types, {
   get: function(target, property, receiver) {
     if (property === 'toString') return JSON.stringify(target);
     if (property === 'toJSON') return target;

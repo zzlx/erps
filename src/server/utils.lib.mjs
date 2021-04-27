@@ -6,4 +6,4 @@
  * *****************************************************************************
  */
 
-export * from '../public/assets/es/utils/index.mjs';
+export * from '../../public/assets/es/utils/index.mjs';

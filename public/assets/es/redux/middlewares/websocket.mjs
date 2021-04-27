@@ -46,7 +46,7 @@
 
 let ws = null;
 
-export default function websocket (store) {
+export function websocket (store) {
   const getWS = url => new Promise((resolve, reject) => {
     if (ws && ws.readyState === 1) { 
       return resolve(ws); 
@@ -101,7 +101,7 @@ export function uri (url = import.meta.url) {
   const protocol = urlObj.protocol === 'http' ? 'ws' : 'wss';
   const hostname = urlObj.hostname;
   const port = urlObj.port === "" ? "" : ":" + urlObj.port;
-  const pathname = '/api';
+  const pathname = '/api-gataway'; // api网关
 
   return `${protocol}://${hostname}${port}${pathname}`; 
 }

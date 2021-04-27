@@ -24,4 +24,4 @@ node_modules
 # 其他临时文件
 *.log
 .env
-NetrwTreeListing *
+NetrwTreeListing*

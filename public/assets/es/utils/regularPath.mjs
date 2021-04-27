@@ -1,6 +1,19 @@
 /**
  * *****************************************************************************
  *
+ * Regular Path Functions
+ *
+ *
+ * *****************************************************************************
+ */
+
+export const regularPath = {
+  pathToRegexp,
+  parse,
+  compile,
+}
+
+/**
  * PathToRegexp
  *
  * Normalize the given path string, and returning a regular expression.
@@ -16,8 +29,6 @@
  * @param  {(Array|Object)=}       keys
  * @param  {Object=}               options
  * @return {!RegExp}
- *
- * *****************************************************************************
  */
 
 export function pathToRegexp (path, keys, options = {}) {
@@ -30,7 +41,7 @@ export function pathToRegexp (path, keys, options = {}) {
   if (Array.isArray(path)) return arrayToRegexp(path, keys, options); 
   if (typeof path === 'string') return stringToRegexp(path, keys, options); 
 
-  throw new Error(`Unexpected param type: ${typeof(path)}`);
+  throw new TypeError(`Unexpected param type: ${typeof(path)}`);
 }
 
 /**
@@ -64,7 +75,6 @@ function regexpToRegexp (path, keys) {
 }
 
 /**
- *
  * Transform an array into a regexp.
  *
  * @param  {!Array}  path
@@ -100,7 +110,6 @@ function stringToRegexp (path, keys, options) {
 
 
 /**
- *
  * Taking tokens and returning a RegExp.
  *
  * @param  {!Array}          tokens
@@ -173,6 +182,7 @@ export function tokensToRegExp (tokens, keys, options) {
 
   return attachKeys(new RegExp('^' + route, flags(options)), keys);
 }
+
 /**
  *
  * The main path matching regexp utility.
@@ -212,7 +222,6 @@ export const PATH_REGEXP = new RegExp([
 ].join(''), 'g');
 
 /**
- * 解析字符串为tokens
  * Parse a string for the raw tokens.
  *
  * @param  {string}  str
@@ -328,7 +337,6 @@ function encodeAsterisk (str) {
 }
 
 /**
- *
  * Transforming tokens into the path function.
  *
  * @param {array} tokens
@@ -336,8 +344,7 @@ function encodeAsterisk (str) {
  */
 
 export function tokensToFunction (tokens) {
-  // Compile all the tokens into regexps.
-  const matches = new Array(tokens.length);
+  const matches = new Array(tokens.length); // Compile all the tokens into regexps.
 
   // Compile all the patterns before compilation.
   for (let i = 0; i < tokens.length; i++) {
@@ -346,7 +353,8 @@ export function tokensToFunction (tokens) {
     }
   }
 
-  return (obj, opts) => {
+  return function pathFn (obj, opts) {
+
     let path = '';
     let data = obj || {};
     let options = opts || {};
@@ -445,19 +453,6 @@ function escapeGroup (group) {
 }
 
 /**
- * Attach the keys as a property of the regexp.
- *
- * @param  {!RegExp} re
- * @param  {Array}   keys
- * @return {!RegExp}
- */
-
-function attachKeys (re, keys) {
-  re.keys = keys;
-  return re;
-}
-
-/**
  *
  * Get the flags for a regexp from the options.
  *
@@ -469,3 +464,15 @@ function flags (options) {
   return options.sensitive ? '' : 'i';
 }
 
+/**
+ * Attach the keys as a property of the regexp.
+ *
+ * @param  {!RegExp} re
+ * @param  {Array}   keys
+ * @return {!RegExp}
+ */
+
+function attachKeys (re, keys) {
+  re.keys = keys;
+  return re;
+}

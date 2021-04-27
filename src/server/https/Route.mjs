@@ -15,7 +15,17 @@
  * *****************************************************************************
  */
 
-import { assert, compile, parse, path, pathToRegexp } from '../utils.lib.mjs';
+import { 
+  assert, 
+  path, 
+  regularPath,
+} from '../utils.lib.mjs';
+
+const {
+  pathToRegexp,
+  compile, 
+  parse, 
+} = regularPath;
 
 export default class Route {
   constructor (path, methods, middleware, opts = {}) {

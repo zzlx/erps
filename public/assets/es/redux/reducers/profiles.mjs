@@ -14,7 +14,7 @@ const initialState = [
   { location: { pathname: '/' } },
 ];
 
-export default function profiles (state = initialState, action) {
+export function profiles (state = initialState, action) {
   switch(action.type){
     case 'GET_API_ADDRESS':
       return Object.assign({}, state, {api_address: action.payload.api_address}); 

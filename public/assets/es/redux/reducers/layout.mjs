@@ -8,7 +8,7 @@ const layouts = [
   { footer: {} },
 ];
 
-export default function layout(state = layouts, action) {
+export const layout = (state = layouts, action) => {
   switch (action.type) {
     case 'TOGGLE_TODO':
     default:

@@ -9,9 +9,11 @@
 import { assert } from '../utils/assert.mjs';
 import { isPlainObject } from '../utils/isPlainObject.mjs';
 
+import { actionTypes as types } from './actionTypes.mjs';
 import * as reducers from './reducers/index.mjs';
-import types from './actionTypes.mjs';
 import * as M from './middlewares/index.mjs'
+
+export const store = state => new Store(state);
 
 /**
  * Redux Store
@@ -20,7 +22,7 @@ import * as M from './middlewares/index.mjs'
  * @return {object} store
  */
 
-export default class ReduxStore {
+class Store {
   constructor (state) {
     this.currentState = state;
     this.currentReducer = combineReducers(reducers);

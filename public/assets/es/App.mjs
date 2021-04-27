@@ -9,16 +9,17 @@
  * *****************************************************************************
  */
 
-import Provider from './components/_Provider.mjs';
-import React from './components/_React.mjs';
-import Redirect from './components/_Redirect.mjs';
-import Route from './components/_Route.mjs';
-import Switcher from './components/_Switcher.mjs';
+import { Provider } from './components/Provider.mjs';
+import { React } from './components/React.mjs';
+import { Redirect } from './components/Redirect.mjs';
+import { Route } from './components/Route.mjs';
+import { Switcher } from './components/Switcher.mjs';
+
+import { store } from './redux/store.mjs';
 import * as Pages from './pages/index.mjs';
-import Store from './redux/Store.mjs';
 
 export default function (state) {
-  const store = new Store(state);
+  const appState = store(state);
 
   const routes = store.getState('routes')
     .map(item => Object.assign({}, item, { app: Pages[item.app] }))
@@ -28,7 +29,7 @@ export default function (state) {
     }));
 
   return React.createElement(Provider, { 
-    store: store,
+    store: appState,
     children: React.createElement(Switcher, null, ...routes),
   }); 
 }

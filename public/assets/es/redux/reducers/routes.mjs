@@ -41,7 +41,7 @@ const routes = [
   }
 ];
 
-export default function (state = routes, action) {
+export function routes (state = routes, action) {
   switch(action.type){
     default: 
     return state;

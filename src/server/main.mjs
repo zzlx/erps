@@ -1,8 +1,9 @@
 /**
  * *****************************************************************************
  * 
- * 主服务程序
+ * 主控制程序
  *
+ * 解析启动参数，执行命令任务
  *
  * *****************************************************************************
  */
@@ -19,18 +20,14 @@ import debuglog from './debuglog.mjs';
 import { argvParser } from './utils.lib.mjs';
 import { readDir } from './watchd.mjs';
 
+const debug = debuglog('debug:main');
+const __dirname = path.dirname(import.meta.url.substr(7));
+
+const onWindows =() => process.platform === 'win32';
 const onMacOS =() => process.platform === 'darwin';
 const onLinux =() => process.platform === 'linux';
-const onWindows =() => process.platform === 'win32';
 
-const debug = debuglog('debug:erps');
-// Process container
-const proc = { }; 
-
-assert(onLinux(), 'Linux platrom is recomanded.');
-
-// 设置进程名
-process.title = 'org.zzlx.erps';
+const proc = { }; // Process container
 
 // This is the Fast shutdown mode.
 // The server will send all existing server processes SIGTERM
@@ -44,29 +41,7 @@ process.on('SIGINT', signal => {
   }
 });
 
-// This is the Immediate Shutdown mode.
-process.on('SIGQUIT', signal => {
-  process.exit();
-});
-
-// 执行主程序
-process.nextTick(() => {
-  main();
-});
-
-/**
- * *****************************************************************************
- * Utility Functions
- * *****************************************************************************
- */
-
-/**
- * 主控制程序
- *
- * 解析启动参数，执行命令任务
- */
-
-function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
+export function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
   const paramMap = argvParser(argvs);
 
   // deal with environment variables
@@ -129,6 +104,7 @@ function main (argvs = Array.prototype.slice.call(process.argv, 2)) {
  */
 
 function start () {
+  assert(onLinux(), 'Linux platform is recomanded.');
   renderCSS();  // 渲染生成CSS文件
   startHttpd();
 }
@@ -139,7 +115,7 @@ function start () {
 
 async function startHttpd () {
   const args = [
-    path.join(settings.paths.SERVER, 'https', 'httpd.mjs'),
+    path.join(__dirname, 'https', 'httpd.mjs'),
   ]; 
 
   const options = {
