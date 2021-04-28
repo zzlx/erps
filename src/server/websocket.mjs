@@ -1,7 +1,7 @@
 /**
  * *****************************************************************************
  *
- * WebSocket Server
+ * WebSocket Protocol implementation
  *
  * Referense:
  *
@@ -15,7 +15,7 @@ import EventEmitter from 'events';
 import http2 from 'http2';
 import debuglog from './debuglog.mjs';
 
-const debug = debuglog('debug:websocket-server');
+const debug = debuglog('debug:websocket');
 
 export const STATUS_CODES = {
   1000: 'Normal Closure',
@@ -40,7 +40,7 @@ export const OPCODES = {
   PONG:     0xA,
 }
 
-export const websocket = (opts) => new Websocket(opts);
+export const websocket = (opts) => new WebSocketServer(opts);
 
 // opcode value:
 // * 0b0000 denotes a continuation frame

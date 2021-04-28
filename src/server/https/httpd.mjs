@@ -20,7 +20,7 @@ import compress from './middlewares/compress.mjs';
 import markdown from './middlewares/markdown.mjs';
 import xResponse from './middlewares/xResponse.mjs';
 
-import settings from '../settings/index.mjs';
+import { paths, system } from '../settings/index.mjs';
 import debuglog from '../debuglog.mjs';
 import router from './routes.mjs';
 import { websocket } from '../websocket.mjs';
@@ -47,13 +47,12 @@ process.on('unhandledRejection', (reason, promise) => {
   console.log(reason);
 });
 
-
 // 初始化服务器程序
 // 配置服务器基础功能
 const app = new App({
-  key: settings.privateKey,
-  cert: settings.cert,
-  passphrase: settings.passphrase,
+  key: system.privateKey,
+  cert: system.cert,
+  passphrase: system.passphrase,
 });
 
 const ws = websocket({ server: app.server, });
@@ -66,8 +65,8 @@ ws.on('message', (msg, socket) => {
 // for a new connection has successfully completed. 
 //app.server.on('secureConnection', serverCtl);
 
-app.use(error(settings.paths.PATH_LOG)); // 记录中间件错误
-app.use(logger(settings.paths.PATH_LOG)); // 访问日志
+app.use(error()); // 记录中间件错误
+app.use(logger()); // 访问日志
 app.use(xResponse()); // 响应时间记录
 app.use(cors()); // 跨域访问支持
 app.use(cookies()); // 全局cookie支持
@@ -83,8 +82,8 @@ app.use(compress()); // 启用内容压缩
 app.listen({ 
   ipv6Only: false, 
   exclusive: true,
-  host: settings.host,
-  port: settings.port,
+  host: system.isSupportIPv6 ? "::" : '0.0.0.0',
+  port: '8888',
 }, function () {
   if (process.channel && process.send) {
     process.send({ 

@@ -1,15 +1,17 @@
 /**
  * *****************************************************************************
  *
- * 配置项管理器
+ * 配置项容器
+ *
+ * 
  *
  * *****************************************************************************
  */
 
 import fs from 'fs';
 import path from 'path';
-import paths from './paths.mjs';
-import Package from './package.mjs';
+import { appinfo } from './appinfo.mjs';
+import { paths } from './paths.mjs';
 
 const defaults = {
   description: '系统配置',
@@ -19,14 +21,14 @@ const defaults = {
   privateKey: '/etc/ssl/private.pem',
 }
 
-const configFile = path.join('/etc', 'erps', 'settings.json');
+const configFile = path.join('/etc', 'erps.json');
 
 if (fs.existsSync(configFile)) {
   const json = JSON.parse(fs.readFileSync(configFile, 'utf8'));
   Object.assign(defaults, json);
 }
 
-export default new Proxy(defaults, {
+export const configs = new Proxy(defaults, {
   get: function (target, property, receiver) {
     return Reflect.get(target, property, receiver);
   },

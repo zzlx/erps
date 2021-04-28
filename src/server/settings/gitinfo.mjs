@@ -8,9 +8,9 @@
 
 import fs from 'fs';
 import path from 'path';
-import paths from './paths.mjs';
+import { paths } from './paths.mjs';
 
-export default paths.DOT_GIT ? new Proxy({}, {
+export const gitinfo = new Proxy({}, {
   get: function (target, property, receiver) {
     if (property === 'HEAD') {
       return String(fs.readFileSync(path.join(paths.DOT_GIT, 'head'))).split(':')[1].trim();
@@ -28,4 +28,4 @@ export default paths.DOT_GIT ? new Proxy({}, {
   },
   set: function (target, property, value) {
   }
-}) : null;
+});

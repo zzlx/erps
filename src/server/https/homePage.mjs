@@ -9,14 +9,14 @@
 import ReactDOMServer from 'react-dom/server.js';
 import fs from 'fs';
 import path from 'path';
-import settings from '../settings/index.mjs';
+import { paths } from '../settings/index.mjs';
 import HtmlTemplate from '../HtmlTemplate.mjs';
 import Router from './Router.mjs';
 import debuglog from '../debuglog.mjs';
 
 const debug = debuglog('debug:routes/homePage.mjs');
 const router = new Router();
-const template = fs.readFileSync(path.join(settings.paths.PUBLIC, 'index.html'), 'utf8');
+const template = fs.readFileSync(path.join(paths.PUBLIC, 'index.html'), 'utf8');
 
 
 router.get('index', '/*', async (ctx, next) => {
@@ -37,7 +37,7 @@ router.get('index', '/*', async (ctx, next) => {
   // @TODO:根据路由信息动态更新title
   html.title = '首页|HomePage';
 
-  const appURL = path.join(settings.paths.PUBLIC, 'assets', 'es', 'App.mjs'); 
+  const appURL = path.join(paths.PUBLIC, 'assets', 'es', 'App.mjs'); 
   const app = await import(appURL).then(m => m.default);
   const element = app({
     location: { pathname: ctx.pathname }

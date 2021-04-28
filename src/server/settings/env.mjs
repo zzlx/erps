@@ -9,7 +9,7 @@
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
-import paths from './paths.mjs';
+import { paths } from './paths.mjs';
 
 const DOT_ENV = path.join(paths.ROOT, '.env');
 
@@ -23,7 +23,7 @@ for (let env of Object.keys(dotenvObj)) {
   if (process.env[env] == null) process.env[env] = dotenvObj[env];
 }
 
-export default new Proxy(dotenvObj, {
+export const env = new Proxy(dotenvObj, {
   get: function (target, property, receiver) {
     return Reflect.get(target, property, receiver);
   },

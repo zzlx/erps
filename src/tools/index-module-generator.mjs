@@ -3,13 +3,13 @@
 /**
  * *****************************************************************************
  *
- * 读取目录,输出模块列表
+ * generate index module
  *
  * *****************************************************************************
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const argvs = Array.prototype.slice.call(process.argv, 2);
 const dir = argvs[0]; 

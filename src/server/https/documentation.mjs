@@ -6,14 +6,14 @@
  * *****************************************************************************
  */
 
-import settings from '../settings/index.mjs';
+import { paths } from '../settings/index.mjs';
 
 import Router from './Router.mjs';
 import statics from './middlewares/statics.mjs';
 
 const router = new Router();
 
-router.get('docs', '/*', statics(settings.paths.DOCS, {
+router.get('docs', '/*', statics(paths.DOCS, {
   directoryIndex: [ 'README.md' ],
 }));
 

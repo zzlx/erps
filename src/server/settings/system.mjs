@@ -7,14 +7,18 @@
  */
 
 import os from 'os';
+import fs from 'fs';
+import { configs } from './configs.mjs';
 
-const system = {
-};
-
-export default new Proxy(system, {
+export const system = new Proxy({
+  isSupportIPv6: isSupportIPv6(),
+}, {
   get: function (target, property, receiver) {
     // 动态获取的配置
     if (property === 'IPv6') return isSupportIPv6();
+    if (property === 'passphrase') return configs.passphras;
+    if (property === 'cert') return fs.readFileSync(configs.cert);
+    if (property === 'privateKey') return fs.readFileSync(configs.privateKey);
 
     return Reflect.get(target, property, receiver);
   },

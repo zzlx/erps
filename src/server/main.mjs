@@ -14,11 +14,14 @@ import fs from 'fs';
 import path from 'path';
 import tls from 'tls';
 import zlib from 'zlib';
-
-import settings from './settings/index.mjs';
-import debuglog from './debuglog.mjs';
+import {
+  appinfo,
+  configs,
+  paths,
+} from './settings/index.mjs';
 import { argvParser } from './utils.lib.mjs';
 import { readDir } from './watchd.mjs';
+import debuglog from './debuglog.mjs';
 
 const debug = debuglog('debug:main');
 const __dirname = path.dirname(import.meta.url.substr(7));
@@ -133,9 +136,9 @@ async function startHttpd () {
 
 function sendCommand (command) {
   const options = {
-    host: settings.host,
-    port: settings.port, 
-    ca: settings.cert,
+    host: configs.host,
+    port: configs.port, 
+    ca: configs.cert,
 		servername: 'zzlx.org',
 		rejectUnauthorized: false,
     checkServerIdentity: (hostname, cert) => { 
@@ -152,7 +155,7 @@ function sendCommand (command) {
       byte1.set([0b11111111], 0);
 
       const data = Buffer.from(JSON.stringify({
-        token: settings.passphrase,
+        token: configs.passphrase,
         authorized: conn.authorized,
         command: command
       }));
@@ -185,7 +188,6 @@ function sendCommand (command) {
  */
 
 function setupProcess () {
-  //process.title = settings.packageJSON.name;
   process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
   process.on('exit', code => {
@@ -227,7 +229,7 @@ ${divideLine}
  */
 
 function showVersion () {
-  console.log(settings.version);
+  console.log(appinfo.version);
 }
 
 
@@ -260,7 +262,6 @@ function getChar () {
 
 function copyUmd2Assets () {
   // 定义样式文件路径
-  const paths = settings.paths; // 获取目录配置
   const destPath = path.join(paths.PUBLIC, 'assets', 'js');
   fs.mkdirSync(destPath, {recursive: true});
 
@@ -297,8 +298,8 @@ function detectSystemdService (service) {
  */
 
 function renderCSS () {
-	const cssFile = path.join(settings.paths.PUBLIC, 'assets', 'css', 'styles.css');
-  const scssFile = path.join(settings.paths.SRC, 'scss', 'styles.scss');
+	const cssFile = path.join(paths.PUBLIC, 'assets', 'css', 'styles.css');
+  const scssFile = path.join(paths.SRC, 'scss', 'styles.scss');
 
   // 比对cssFile与scssFile所在目录所有文件时间戳
   // 决定是否需要执行CSS文件渲染程序

@@ -23,6 +23,7 @@ import { throttleFn } from './utils.lib.mjs';
 const debug = debuglog('debug:watchd');
 const __dirname = path.dirname(import.meta.url.substr(7));
 
+// throttle function
 const restart = throttleFn(1000, () => {
   cp.exec('systemctl restart erps');
 });

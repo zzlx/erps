@@ -16,13 +16,6 @@ import path from 'path';
 import assert from 'assert';
 
 export default function logger (options = {}) {
-  const opts = Object.assign({
-  }, typeof options === 'string' ? { path: options } : options);
-
-  const logFile = path.join(opts.path, 'request.log'); 
-
-  assert(logFile, 'opts.logFile must be setting.');
-
   return async function logMiddleware (ctx, next) {
     ctx.state.log = {
       "atimeMs": Date.now(), //  access time in mill sec
