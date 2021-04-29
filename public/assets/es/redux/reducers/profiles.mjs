@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import find from '../../utils/find.mjs';
+import { find } from '../../utils/find.mjs';
 
 const initialState = [
   { theme: 'default', themeList: [ 

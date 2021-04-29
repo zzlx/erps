@@ -17,11 +17,12 @@ import fs from 'fs';
 import path from 'path';
 import cp from 'child_process';
 
+import { paths } from './settings/index.mjs';
 import debuglog from './debuglog.mjs';
 import { throttleFn } from './utils.lib.mjs';
 
 const debug = debuglog('debug:watchd');
-const __dirname = path.dirname(import.meta.url.substr(7));
+//const __dirname = path.dirname(import.meta.url.substr(7));
 
 // throttle function
 const restart = throttleFn(1000, () => {
@@ -29,7 +30,10 @@ const restart = throttleFn(1000, () => {
 });
 
 process.nextTick(() => {
-  const watchdog = new Watchdog(__dirname);
+  const watchdog = new Watchdog(
+    path.join(paths.SRC, 'server'),
+    path.join(paths.PUBLIC, 'assets', 'es')
+  );
   watchdog.on('change', restart);
 });
 

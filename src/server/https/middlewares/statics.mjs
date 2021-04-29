@@ -87,7 +87,7 @@ export default function statics (root, options = {}) {
     if (!fs.existsSync(url)) return next(); // 文件不存在时,不再响应
 
     // @TODOS:
-    if (path.basename(url) === '_React.mjs') url = path.join(path.dirname(url), '_React.browser.mjs');
+    //if (path.basename(url) === 'React.mjs') url = path.join(path.dirname(url), 'ReactBrowser.mjs');
 
     // Set content type
     ctx.type = path.extname(url);

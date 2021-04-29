@@ -6,13 +6,13 @@
  * *****************************************************************************
  */
 
-import find from '../../utils/find.mjs';
+import { find } from '../../utils/find.mjs';
 
 const initialState = {
   pathname: '/',
 };
 
-export const loaction = function (state = initialState, action) {
+export const location = function (state = initialState, action) {
   switch(action.type){
     default: 
     return state;

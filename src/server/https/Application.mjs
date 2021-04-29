@@ -123,10 +123,9 @@ export default class Application extends EventEmitter {
 
   handleRequest (ctx, fn) {
     fn(ctx).then(() => respond(ctx)).catch(err => {
-      console.log(err);
-      if (err.code === 'ENOENT') ctx.status = 404;
-      else ctx.status = 500;
-      if (this.env === 'development') ctx.body = err.stack;
+      // response error message
+      ctx.status = err.code === 'ENOENT' ? 404 : 500;
+      ctx.body = this.env === 'development' ? err.stack : err.message;
       respond(ctx);
     });
   }
@@ -191,8 +190,4 @@ function respond (ctx) {
   if (typeof ctx.body === 'string') return ctx.stream.end(ctx.body);
   if (typeof ctx.body.pipe === 'function') return ctx.body.pipe(ctx.stream);
   return ctx.stream.end(); // respond with no content
-}
-
-function registerEvents () {
-
 }

@@ -24,10 +24,9 @@ export function find (query = {}, projection = {}) {
 
   let result = null;
 
-  // 遍历data数组
   for (const doc of data) {
-    for (const k of Object.keys(query)) {
-      if (doc[k] !== query[k]) {
+    for (const key of Object.keys(query)) {
+      if (doc[key] !== query[key]) {
         continue;
       }
     }

@@ -1,20 +1,22 @@
 /**
  * *****************************************************************************
  *
- * Main programe
+ * Entry Point for frontend
  *
  * *****************************************************************************
  */
 
-//Detect environment and render UI Application
 const global = getGlobal();
 const __url = new URL(import.meta.url);
-globalThis.env = __url.searchParams.get('env') || 'production';
+global.env = __url.searchParams.get('env') || 'production';
 
-import('./App.mjs').then(m => m.default).then(app => {
-  const element = app({ location});
-  render(element);
-});
+if (global && global.window && typeof window === 'object') {
+  import('./App.mjs').then(m => {
+    const app = m.default ? m.default : m['App'];
+    const element = app({ location: global.window.location });
+    render(element);
+  });
+}
 
 /**
  * *****************************************************************************

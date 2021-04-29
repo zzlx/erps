@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-const routes = [
+const defaults = [
   { 
     "path": [ "/", "/homepage", "/homepage/:module(\\w+)?" ], 
     "app": "HomePage",
@@ -41,7 +41,7 @@ const routes = [
   }
 ];
 
-export function routes (state = routes, action) {
+export function routes (state = defaults, action) {
   switch(action.type){
     default: 
     return state;
