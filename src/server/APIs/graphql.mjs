@@ -39,7 +39,6 @@ const schema = await fs.promises.readdir(schemaPath, { encoding: 'utf8' })
 const fieldResolver = await getModules(path.join(path.dirname(__dirname), 'resolvers')); 
 
 export function graphql(query, variables, operationName) {
-
   return exec({
     schema: schema, 
     source: query,

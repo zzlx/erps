@@ -8,7 +8,7 @@
  *
  */
 
-import { $$asyncIterator } from '../../utils.lib.mjs';
+import { iterall } from '../../utils.lib.mjs';
 
 export function asyncIteratorReject(error) {
   let isComplete = false;
@@ -33,7 +33,7 @@ export function asyncIteratorReject(error) {
       isComplete = true;
       return Promise.reject(error);
     }
-  }, $$asyncIterator, {
+  }, iterall.$$asyncIterator, {
     value: function () { return this; }
   });
 }

@@ -4,8 +4,31 @@ import { UniqueTypeNames } from './rules/UniqueTypeNames.mjs';
 import { UniqueEnumValueNames } from './rules/UniqueEnumValueNames.mjs';
 import { UniqueFieldDefinitionNames } from './rules/UniqueFieldDefinitionNames.mjs';
 import { UniqueDirectiveNames } from './rules/UniqueDirectiveNames.mjs';
+import { KnownTypeNames } from './rules/KnownTypeNames.mjs';
+import { KnownDirectives } from './rules/KnownDirectives.mjs';
+import { UniqueDirectivesPerLocation } from './rules/UniqueDirectivesPerLocation.mjs';
 import { PossibleTypeExtensions } from './rules/PossibleTypeExtensions.mjs';
 import { KnownArgumentNamesOnDirectives } from './rules/KnownArgumentNames.mjs';
-import { ProvidedRequiredArgumentsOnDirectives } from './rules/ProvidedRequiredArguments.mjs'; // @internal
+import { UniqueArgumentNames } from './rules/UniqueArgumentNames.mjs';
+import { UniqueInputFieldNames } from './rules/UniqueInputFieldNames.mjs'; // @internal
 
-export const specifiedSDLRules = [LoneSchemaDefinition, UniqueOperationTypes, UniqueTypeNames, UniqueEnumValueNames, UniqueFieldDefinitionNames, UniqueDirectiveNames, KnownTypeNames, KnownDirectives, UniqueDirectivesPerLocation, PossibleTypeExtensions, KnownArgumentNamesOnDirectives, UniqueArgumentNames, UniqueInputFieldNames, ProvidedRequiredArgumentsOnDirectives];
+export const specifiedSDLRules = [
+  LoneSchemaDefinition, 
+  UniqueOperationTypes, 
+  UniqueTypeNames, 
+  UniqueEnumValueNames, 
+  UniqueFieldDefinitionNames, 
+  UniqueDirectiveNames, 
+
+  KnownTypeNames, 
+  KnownDirectives, 
+  UniqueDirectivesPerLocation, 
+
+  PossibleTypeExtensions, 
+  KnownArgumentNamesOnDirectives, 
+
+  UniqueArgumentNames, 
+  UniqueInputFieldNames, 
+
+  ProvidedRequiredArgumentsOnDirectives
+];

@@ -1,3 +1,10 @@
+/**
+ * *****************************************************************************
+ *
+ *
+ * *****************************************************************************
+ */
+
 export function getIntrospectionQuery(options) {
   const descriptions = !(options && options.descriptions === false);
 
@@ -11,7 +18,7 @@ export function getIntrospectionQuery(options) {
         ...FullType
       }
       directives {
-        name${description ? '\ndescription\n' : ''}
+        name${descriptions ? '\ndescription\n' : ''}
         locations
         args {
           ...InputValue
@@ -22,9 +29,9 @@ export function getIntrospectionQuery(options) {
 
   fragment FullType on __Type {
     kind
-    name${description ? '\ndescription\n' : ''}
+    name${descriptions ? '\ndescription\n' : ''}
     fields(includeDeprecated: true) {
-      name${description ? '\ndescription\n' : ''}
+      name${descriptions ? '\ndescription\n' : ''}
       args {
         ...InputValue
       }
@@ -41,7 +48,7 @@ export function getIntrospectionQuery(options) {
       ...TypeRef
     }
     enumValues(includeDeprecated: true) {
-      name${description ? '\ndescription\n' : ''}
+      name${descriptions ? '\ndescription\n' : ''}
       isDeprecated
       deprecationReason
     }
@@ -51,7 +58,7 @@ export function getIntrospectionQuery(options) {
   }
 
   fragment InputValue on __InputValue {
-    name${description ? '\ndescription\n' : ''}
+    name${descriptions ? '\ndescription\n' : ''}
     type { 
       ...TypeRef 
     }

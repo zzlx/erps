@@ -16,7 +16,7 @@ import path from 'path';
 import util from 'util';
 import { HTTP_STATUS } from '../constants.mjs';
 
-export default function dynamics (options = {}) {
+export function dynamics (options = {}) {
   const opts = Object.assign({
     directoryIndex: ['index.html', 'index.mjs'],
     immutable: false,

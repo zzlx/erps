@@ -1,32 +1,27 @@
 /**
  * *****************************************************************************
  *
- * Entry Point for frontend
+ * Frontend UI Entry Point
  *
  * *****************************************************************************
  */
 
-const global = getGlobal();
-const __url = new URL(import.meta.url);
-global.env = __url.searchParams.get('env') || 'production';
+if (globalThis && globalThis.window && typeof window === 'object') {
+  const __url = new URL(import.meta.url);
+  globalThis.env = __url.searchParams.get('env') || 'production';
 
-if (global && global.window && typeof window === 'object') {
   import('./App.mjs').then(m => {
     const app = m.default ? m.default : m['App'];
-    const element = app({ location: global.window.location });
-    render(element);
+    const element = app({ location: window.location });
+    browserRender(element);
   });
 }
 
 /**
- * *****************************************************************************
- *
- * Utility functions
- *
- * *****************************************************************************
+ * Browser Render function
  */
 
-function render (element) {
+function browserRender (element) {
   // 存在服务端渲染等页面使用hydrate方法渲
   // 空的容器对象上使用render方法渲染
   // 判断container是否存在服务端渲染内容
@@ -44,10 +39,11 @@ function render (element) {
 }
 
 /**
- * callback function
+ * render callback
  */
 
-function cb () {
+async function cb () {
+  const { deviceDetect } = await import('./utils/deviceDetect.mjs');
   const device = deviceDetect(window.navigator.userAgent);
   console.groupCollapsed('欢迎使用前端UI程序!');
   if (globalThis.env === 'development') console.warn('当前为开发环境.');
@@ -79,39 +75,4 @@ function notification () {
     window.focus();
     notification.close();
   };
-}
-
-/**
- * 根据提供的ua字符串,解析出设备、浏览器客户端类型
- */
-
-export default function deviceDetect (ua) {
-  let device = null;
-  //if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
-
-  if (/iPhone;/.test(ua)) {
-    device = 'iPhone';
-  } else if (/iPad;/.test(ua)) {
-    device = 'iPad';
-  } else if (/Android/.test(ua)) {
-    device = 'android';
-  } else if (/Intel Mac OS X/.test(ua)) {
-    device = 'Mac';
-  } else if (/Windows NT/.test(ua)) {
-    device = 'Windows';
-  }
-
-  return device;
-}
-
-/**
- * 获取环境global对象
- */
-
-export function getGlobal () {
-  if (typeof globalThis !== 'undefined') return globalThis;
-  if (typeof window !== 'undefined') return window;
-  if (typeof self !== 'undefined') return self;
-  if (typeof global !== 'undefined') return global;
-  return Object.create(null);
 }

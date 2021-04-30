@@ -11,7 +11,7 @@
 
 import zlib from 'zlib';
 
-export default function compress (options) {
+export function compress (options) {
   const opts = Object.assign({
     compressFormats: ['', '.html', '.css', '.js', '.mjs', '.doc'], // supported formats
     threshold: 500*1024, // 500kb

@@ -13,7 +13,7 @@ import crypto from 'crypto';
 
 const COOKIES = Symbol('middleware#cookies');
 
-export default (opts) => function cookieMiddleware (ctx, next) {
+export const cookies = (opts) => function cookieMiddleware (ctx, next) {
   Object.defineProperty(ctx, 'cookies', {
     get: function () {
       if (null == this[COOKIES]) {

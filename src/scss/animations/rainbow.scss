@@ -1,8 +1,6 @@
 // 动画效果类
 
-.rainbow {
-  animation: rainbow_animation 3s none 1;
-}
+.rainbow { animation: rainbow_animation 3s none 1; }
 
 @keyframes rainbow_animation {
   0% { background: snow; }

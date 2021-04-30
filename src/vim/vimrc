@@ -179,14 +179,13 @@ match_path = re_path.search(line)
 
 if match_url:
     url = match_url.group()
-    webbrowser.open(url)
+    #webbrowser.open(url)
 elif match_path:
     path = match_path.group()
 		# @TODO:根据参数决定是否使用'tabnew'打开文件
     vim.command('open ' + path)
 else:
     print('fialed! : open URL')
-
 EOM
 endfunction
 
@@ -207,7 +206,7 @@ match_path = re_path.search(line)
 
 if match_url:
     url = match_url.group()
-    webbrowser.open(url)
+    # webbrowser.open(url)
 elif match_path:
     path = match_path.group()
 		# @TODO:根据参数决定是否使用'tabnew'打开文件
@@ -309,8 +308,8 @@ map! <C-A> <Esc>ggVGY
 "nmap <c-c> "+y
 "nmap <silent> <leader>fe :Sexplore!<CR> 
 "
-map <Tab> :tabnext<CR>  " gt
-map <S-Tab> :tabpre<CR> " gT
+"map <Tab> :tabnext<CR>  " gt
+"map <S-Tab> :tabpre<CR> " gT
 
 "nnoremap <C-J> <C-W><C-J>
 "nnoremap <C-K> <C-W><C-K>
@@ -323,5 +322,10 @@ map <S-Tab> :tabpre<CR> " gT
 map <F2> :call Targets()<CR> 
 
 " 在新标签页中打开目标
-map <F3> :call TargetsTab()<CR> 
+map <C-l> :call TargetsTab()<CR> 
+
 "map <F4> :call append(line('.'), strftime('%c'))<CR>
+"
+"
+" 系统定义的快捷键
+" CTRL-T or CTRL-O jump back

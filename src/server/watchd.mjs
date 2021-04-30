@@ -37,7 +37,6 @@ process.nextTick(() => {
   watchdog.on('change', restart);
 });
 
-
 /**
  *
  *

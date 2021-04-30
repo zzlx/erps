@@ -8,7 +8,7 @@
 
 import path from 'path';
 
-export default function error (options = {}) {
+export function error (options = {}) {
   return async function errorMiddleware (ctx, next) {
     try {
       //attachEvents(ctx.stream);

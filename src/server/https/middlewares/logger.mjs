@@ -15,7 +15,7 @@
 import path from 'path';
 import assert from 'assert';
 
-export default function logger (options = {}) {
+export function logger (options = {}) {
   return async function logMiddleware (ctx, next) {
     ctx.state.log = {
       "atimeMs": Date.now(), //  access time in mill sec

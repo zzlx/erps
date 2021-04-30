@@ -12,7 +12,7 @@
 import http2 from 'http2';
 import http from 'http';
 
-export default function (opts) {
+export function proxy (opts) {
   return async function proxyMiddleware (ctx, next) {
 
     const req = http.get({

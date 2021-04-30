@@ -8,19 +8,17 @@
  * *****************************************************************************
  */
 
-var message = '当前浏览器不支持ES Module，请升级或更换至最新版本浏览器重试.\n';
-var ua = window.navigator.userAgent;
-
-if (/MSIE/.test(ua)) {
-  message = '前端UI程序不支持IE浏览器, 推荐使用Edge浏览器继续访问!\n';
-}
+const ua = window.navigator.userAgent;
+const message = /MSIE/.test(ua) 
+  ? '前端UI程序不支持IE浏览器, 推荐使用Edge浏览器继续访问!\n'
+  : '当前浏览器不支持ES Module，请升级或更换至最新版本浏览器重试.\n';
 
 // 控制台打印提示信息
 if (console.warn) console.warn(message);
 
 // 页面显示提示信息
-if (document && 'function' === document.createElement) {
-  var preContainer = document.createElement('pre');
+if (document && 'function' === typeof document.createElement) {
+  const preContainer = document.createElement('pre');
   preContainer.innerHTML = message;
   document.body.prepend(preContainer);
 }

@@ -4,6 +4,7 @@
  */
 
 const NAME_RX = /^[_a-zA-Z][_a-zA-Z0-9]*$/;
+import { GraphQLError } from '../error/index.mjs';
 
 export function isValidNameError(name, node) {
 

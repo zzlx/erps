@@ -24,7 +24,7 @@ import mongodb from 'mongodb';
 const MongoDBA = mongodb.MongoDBA;
 const MongoClient = Symbol('mongoClient');
 
-export default function (opts = null) {
+export function dba (opts = null) {
 
 	let mongodbURL = opts && opts.mongodb
     ? new URL(opts.mongodb)

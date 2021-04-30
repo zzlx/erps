@@ -21,8 +21,7 @@ import {
   isNullish,
   isInvalid,
   inspect,
-  forEach,
-  isCollection,
+  iterall,
 } from '../../utils.lib.mjs';
 
 import { Kind } from '../language/index.mjs';
@@ -72,9 +71,10 @@ export function astFromValue(value, type) {
   if (isListType(type)) {
     var itemType = type.ofType;
 
-    if (isCollection(value)) {
+    if (iterall.isCollection(value)) {
       var valuesNodes = [];
-      forEach(value, function (item) {
+      iterall.forEach(value, function (item) {
+
         var itemNode = astFromValue(item, itemType);
 
         if (itemNode) {

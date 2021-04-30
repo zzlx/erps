@@ -12,7 +12,7 @@
  * *****************************************************************************
  */
 
-export default function xResponse(opts = {}) {
+export function xResponse(opts = {}) {
   //const gitINFO = opts.getGitInfo();
 
 	return async function xResponseMiddleware (ctx, next) {

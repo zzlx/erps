@@ -16,7 +16,7 @@
  * *****************************************************************************
  */
 
-export default function (options) {
+export function cors (options) {
 
   options = options || {};
   options.allowMethods = options.allowMethods || 'GET,POST,HEAD,OPTIONS';

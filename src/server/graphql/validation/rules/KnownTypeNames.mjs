@@ -4,10 +4,12 @@ import {
 } from '../../../utils.lib.mjs';
 
 import { GraphQLError } from '../../error/index.mjs';
-import { 
-  isTypeDefinitionNode, isTypeSystemDefinitionNode, isTypeSystemExtensionNode 
+import { isTypeDefinitionNode, 
+  isTypeSystemDefinitionNode, 
+  isTypeSystemExtensionNode
 } from '../../language/index.mjs';
 import { specifiedScalarTypes } from '../../type/index.mjs';
+
 export function unknownTypeMessage(typeName, suggestedTypes) {
   var message = "Unknown type \"".concat(typeName, "\".");
 
@@ -17,6 +19,7 @@ export function unknownTypeMessage(typeName, suggestedTypes) {
 
   return message;
 }
+
 /**
  * Known type names
  *
@@ -74,9 +77,8 @@ export function KnownTypeNames(context) {
     }
   };
 }
-var specifiedScalarsNames = specifiedScalarTypes.map(function (type) {
-  return type.name;
-});
+
+var specifiedScalarsNames = specifiedScalarTypes.map(type => type.name );
 
 function isSpecifiedScalarName(typeName) {
   return specifiedScalarsNames.indexOf(typeName) !== -1;

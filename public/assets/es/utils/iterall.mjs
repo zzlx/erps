@@ -6,17 +6,20 @@
  * *****************************************************************************
  */
 
-export const SYMBOL /*: any */ = typeof Symbol === 'function' ? Symbol : void 0
-export const SYMBOL_ITERATOR = SYMBOL && SYMBOL.iterator
-export const SYMBOL_ASYNC_ITERATOR = SYMBOL && SYMBOL.asyncIterator
-export const $$iterator = SYMBOL_ITERATOR || '@@iterator'
-export const $$asyncIterator = SYMBOL_ASYNC_ITERATOR || '@@asyncIterator'
+const SYMBOL /*: any */ = typeof Symbol === 'function' ? Symbol : void 0
+const SYMBOL_ITERATOR = SYMBOL && SYMBOL.iterator
+const SYMBOL_ASYNC_ITERATOR = SYMBOL && SYMBOL.asyncIterator
+const $$iterator = SYMBOL_ITERATOR || '@@iterator'
+const $$asyncIterator = SYMBOL_ASYNC_ITERATOR || '@@asyncIterator'
 
 export const iterall = {
   isIterable,
   isAsyncIterable,
   getIteratorMethod,
   getAsyncIteratorMethod,
+  forEach,
+  $$asyncIterator,
+  $$iterator,
 };
 
 /**
@@ -289,6 +292,7 @@ class ArrayLikeIterator {
       callbackFn: (value: mixed, index: number, collection: TCollection) => any,
       thisArg?: any
     ) => void); */
+
 export function forEach(collection, callback, thisArg) {
   if (collection != null) {
     if (typeof collection.forEach === 'function') {

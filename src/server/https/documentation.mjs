@@ -9,7 +9,7 @@
 import { paths } from '../settings/index.mjs';
 
 import Router from './Router.mjs';
-import statics from './middlewares/statics.mjs';
+import { statics } from './middlewares/statics.mjs';
 
 const router = new Router();
 

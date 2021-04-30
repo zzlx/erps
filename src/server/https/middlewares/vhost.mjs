@@ -10,7 +10,7 @@
  * *****************************************************************************
  */
 
-export default (opts) => async function vhost (ctx, next) {
+export const vhost = (opts) => async function vhost (ctx, next) {
   if('string' === typeof ctx.hostname) {
     return ctx.body = 'Hostname: ' + ctx.hostname + ' 未被正确配置';
   }

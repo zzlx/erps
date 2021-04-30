@@ -1,4 +1,4 @@
-import { getDirectiveMapForSchema } from './getDirectiveMapForSchame.mjs';
+import { getDirectiveMapForSchema } from './getDirectiveMapForSchema.mjs';
 
 export function findAddedNonNullDirectiveArgs(oldSchema, newSchema) {
   var addedNonNullableArgs = [];

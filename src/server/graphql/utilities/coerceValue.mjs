@@ -1,7 +1,6 @@
 import { 
   assert, 
-  forEach, 
-  isCollection,
+  iterall,
   inspect,
   orList,
   suggestionList,
@@ -74,10 +73,10 @@ export function coerceValue(value, type, blameNode, path) {
   if (isListType(type)) {
     var itemType = type.ofType;
 
-    if (isCollection(value)) {
+    if (iterall.isCollection(value)) {
       var errors;
       var coercedValue = [];
-      forEach(value, function (itemValue, index) {
+      iterall.forEach(value, function (itemValue, index) {
         var coercedItem = coerceValue(itemValue, itemType, blameNode, atPath(path, index));
 
         if (coercedItem.errors) {

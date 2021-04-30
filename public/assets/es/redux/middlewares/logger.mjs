@@ -14,5 +14,6 @@ export const logger = store => next => action => {
   console.log('action:', action);
   console.log('newState:', store.getState());
   console.groupEnd();
+
   return result;
 }

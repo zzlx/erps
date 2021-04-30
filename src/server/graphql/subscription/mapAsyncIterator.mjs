@@ -8,10 +8,10 @@
  *
  */
 
-import { $$asyncIterator, getAsyncIterator } from '../../utils.lib.mjs';
+import { iterall } from '../../utils.lib.mjs';
 
 export function mapAsyncIterator(iterable, callback, rejectCallback) {
-  var iterator = getAsyncIterator(iterable);
+  var iterator = iterall.getAsyncIterator(iterable);
   var $return;
   var abruptClose; 
 
@@ -64,7 +64,7 @@ export function mapAsyncIterator(iterable, callback, rejectCallback) {
 
       return Promise.reject(error).catch(abruptClose);
     }
-  }, $$asyncIterator, { 
+  }, iterall.$$asyncIterator, { 
     value: function () { return this; }
   });
 }

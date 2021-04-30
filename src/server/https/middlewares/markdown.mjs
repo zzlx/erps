@@ -12,7 +12,7 @@
 
 import Remarkable from 'remarkable';
 
-export default function markdown () {
+export function markdown () {
   return async function markdownMiddleware (ctx, next) {
     // process content by url?raw=true
     if ('text/markdown' === ctx.type && ctx.searchParams.get('format') === "html") {

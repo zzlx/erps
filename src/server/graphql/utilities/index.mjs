@@ -59,7 +59,6 @@ export { findDeprecatedUsages } from './findDeprecatedUsages.mjs';
 export { assertValidName } from './assertValidName.mjs'; 
 export { isValidNameError } from './isValidNameError.mjs'; 
 
-
 // Print a GraphQLSchema to GraphQL Schema language.
 export { printSchema, printType, printIntrospectionSchema } from './schemaPrinter.mjs'; 
 

@@ -12,13 +12,13 @@
  */
 
 import App from './Application.mjs';
-import cors from './middlewares/cors.mjs';
-import error from './middlewares/error.mjs';
-import logger from './middlewares/logger.mjs';
-import cookies from './middlewares/cookies.mjs';
-import compress from './middlewares/compress.mjs';
-import markdown from './middlewares/markdown.mjs';
-import xResponse from './middlewares/xResponse.mjs';
+import { cors } from './middlewares/cors.mjs';
+import { error } from './middlewares/error.mjs';
+import { logger } from './middlewares/logger.mjs';
+import { cookies } from './middlewares/cookies.mjs';
+import { compress } from './middlewares/compress.mjs';
+import { markdown } from './middlewares/markdown.mjs';
+import { xResponse } from './middlewares/xResponse.mjs';
 
 import { paths, system } from '../settings/index.mjs';
 import debuglog from '../debuglog.mjs';

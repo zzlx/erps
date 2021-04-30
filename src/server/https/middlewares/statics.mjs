@@ -24,7 +24,7 @@ import path from 'path';
 import util from 'util';
 import etag from '../etag.mjs';
 
-export default function statics (root, options = {}) {
+export function statics (root, options = {}) {
   assert('string' === typeof root, 'The root directory must be setting.');
 
   const opts = Object.assign({
@@ -87,7 +87,7 @@ export default function statics (root, options = {}) {
     if (!fs.existsSync(url)) return next(); // 文件不存在时,不再响应
 
     // @TODOS:
-    //if (path.basename(url) === 'React.mjs') url = path.join(path.dirname(url), 'ReactBrowser.mjs');
+    if (path.basename(url) === 'React.mjs') url = path.join(path.dirname(url), 'ReactBrowser.mjs');
 
     // Set content type
     ctx.type = path.extname(url);
