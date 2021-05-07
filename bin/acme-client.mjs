@@ -22,8 +22,8 @@ const ACME_API_STAGING = "https://acme-staging-v02.api.letsencrypt.org";
 
 // main program
 (async function main () {
-  const debuglog = await import('../server/debuglog.mjs').then(m => m.default);
-  const settings = await import('../server/settings/index.mjs').then(m => m.default);
+  const debuglog = await import('../src/backend/debuglog.mjs').then(m => m.default);
+  const settings = await import('../src/backend/settings/index.mjs').then(m => m.default);
   const debug = debuglog('debug:acme');
   debug('ACME client');
 

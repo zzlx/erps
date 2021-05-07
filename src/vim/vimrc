@@ -333,11 +333,8 @@ map! <C-A> <Esc>ggVGY
 
 " 快捷键映射
 "
-" 当前窗口打开目标 
-map <F2> :call Targets()<CR> 
-
-" 在新标签页中打开目标
-map <C-l> :call TargetsTab()<CR> 
+map <F3> :call Targets()<CR>      " 当前窗口打开目标 
+map <C-F3> :call TargetsTab()<CR> " 在新标签页中打开目标
 
 "map <F4> :call append(line('.'), strftime('%c'))<CR>
 "

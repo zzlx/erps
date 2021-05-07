@@ -1,11 +1,11 @@
 import { 
-  isAsyncIterable,
+  iterall,
   inspect,
 } from '../../utils.lib.mjs';
 
 import { GraphQLError, locatedError, } from '../error/index.mjs';
 import { getOperationRootType } from '../utilities/getOperationRootType.mjs';
-import mapAsyncIterator from './mapAsyncIterator.mjs';
+import { mapAsyncIterator } from './mapAsyncIterator.mjs';
 import { 
   addPath, 
   assertValidExecutionArguments, 
@@ -16,8 +16,8 @@ import {
   getFieldDef, 
   resolveFieldValueOrError, 
   responsePathAsArray 
-} from '../execution/execute.mjs';
-import createSourceEventStream from './createSourceEventStream.mjs';
+} from '../execution/index.mjs';
+import { createSourceEventStream } from './createSourceEventStream.mjs';
 
 
 /**
@@ -138,7 +138,7 @@ function subscribeImpl(
   return sourcePromise.then(function (resultOrStream) {
     return (
       // Note: Flow can't refine isAsyncIterable, so explicit casts are used.
-      isAsyncIterable(resultOrStream) 
+      iterall.isAsyncIterable(resultOrStream) 
         ? mapAsyncIterator(
           resultOrStream, 
           mapSourceToResponse, 

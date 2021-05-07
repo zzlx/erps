@@ -6,6 +6,11 @@
  * 用于监测源码文件监视器
  * 
  * 当源码文件发生修改时,触发change事件，需要给实例绑定change事件处理程序
+ *
+ *
+ *
+ *
+ *
  * 
  * *****************************************************************************
  */
@@ -19,26 +24,29 @@ import cp from 'child_process';
 
 import { paths } from './settings/index.mjs';
 import debuglog from './debuglog.mjs';
-import { throttleFn } from './utils.lib.mjs';
+import { throttleFn, debounceFn } from './utils.lib.mjs';
 
 const debug = debuglog('debug:watchd');
-//const __dirname = path.dirname(import.meta.url.substr(7));
+const __dirname = path.dirname(import.meta.url.substr(7));
 
-// throttle function
-const restart = throttleFn(1000, () => {
+// 防抖算法,高频触发时,仅在结束最后一次触发后nMs执行工作任务
+const restart = debounceFn(() => {
   cp.exec('systemctl restart erps');
-});
+}, 1500);
 
 process.nextTick(() => {
   const watchdog = new Watchdog(
-    path.join(paths.SRC, 'server'),
+    __dirname,
     path.join(paths.PUBLIC, 'assets', 'es')
   );
-  watchdog.on('change', restart);
+
+  watchdog.on('change', () => {
+    debug('change一次');
+    restart();
+  });
 });
 
 /**
- *
  *
  */
 
@@ -47,20 +55,20 @@ class Watchdog extends EventEmitter {
     super();
 
     this.watchPaths = Array.prototype.slice.call(arguments);
-    this.interval = 800;
     this.cache = new Map(); // 存储器
+    this.interval = 800;
 
-    this.on('complete', () => {
-      this.timeout = setTimeout(() => {
-        this.detect();
-      }, this.inverval);
-    });
+    // 节流算法,高频触发时,this.interval毫秒内仅执行一次
+    const reDetect = throttleFn(() => {
+      this.detect();
+    }, this.interval);
+
+    this.on('complete', reDetect);
 
     this.detect();
   }
 
   detect () {
-
     for (const file of readDir(this.watchPaths)) {
       try {
         const content = fs.readFileSync(file, 'utf8');

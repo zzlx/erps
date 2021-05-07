@@ -7,20 +7,33 @@
  */
 
 export function deviceDetect (ua) {
-  let device = null;
-  //if (/MSIE/.test(ua)) .innerHTML = '请使用Edge浏览器继续访问!';
+  let platform = null, browser = null;
 
   if (/iPhone;/.test(ua)) {
-    device = 'iPhone';
+    const v = /\(iPhone; CPU iPhone OS (\d{1,2})_(\d{1,2})_(\d{1,2}) like Mac OS X\)/g.exec(ua);
+    platform = `iPhone ${v[1]}.${v[2]}.${v[3]}`;
+    if (/Safari\/\d{1,3}.\d{1,3}/.test(ua)) {
+      browser = 'Safari';
+    }
   } else if (/iPad;/.test(ua)) {
-    device = 'iPad';
+    platform = 'iPad';
   } else if (/Android/.test(ua)) {
-    device = 'android';
+    platform = 'android';
   } else if (/Intel Mac OS X/.test(ua)) {
-    device = 'Mac';
+    platform = 'Mac';
   } else if (/Windows NT/.test(ua)) {
-    device = 'Windows';
+    const v = /\(Windows NT \d{1,2}.\d{1,2}; Win64; x64\)/g.exec(ua);
+    platform = `Windows ${v[1]}.${v[2]}`;
+
+    if (/Edg\/90.0.818.51/.test(ua)) {
+      browser = 'Edg';
+    } else if (/Firefox\/\d{1,2}.\d{1,2}/.test(ua)) {
+      browser = 'Firefox';
+    }
   }
 
-  return device;
+  return {
+    platform,
+    browser,
+  };
 }

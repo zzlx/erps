@@ -10,4 +10,4 @@
 
 process.title = require('path').basename(__filename); // 配置可执行文件进程名称
 
-import('../src/server/watchd.mjs');
+import('../src/backend/watchd.mjs');

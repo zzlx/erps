@@ -1,5 +1,5 @@
 import { 
-  isAsyncIterable,
+  iterall,
   inspect,
 } from '../../utils.lib.mjs';
 
@@ -18,6 +18,7 @@ import {
   responsePathAsArray 
 } from '../execution/index.mjs';
 
+const isAsyncIterable = iterall.isAsyncIterable;
 
 /**
  * This function checks if the error is a GraphQLError. 

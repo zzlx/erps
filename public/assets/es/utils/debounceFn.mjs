@@ -1,19 +1,28 @@
 /**
  * *****************************************************************************
  *
- * debounce 防抖
- * 触发高频时间后n秒内函数只会执行一次,如果n秒内高频时间再次触发,则重新计算时间。
+ * Debounce algorithm
+ *
+ * 防抖算法: 高频触发结束后nMs执行一次工作任务
  *
  * *****************************************************************************
  */
 
-export const debounceFn = (time, fn) => {
+export const debounceFn = (taskFn, nMs) => {
   let timeout = null;
 
-  return function() {
-    clearTimeout(timeout)
-    timeout = setTimeout(() => {
-      fn.apply(this, arguments);
-    }, time);
+  return function () {
+    console.log('触发一次');
+
+    if (timeout && timeout['_idleTimeout'] > 0) {
+      console.log('取消一次');
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(() => { 
+      console.log('执行一次');
+      taskFn.apply(this, arguments); 
+    }, nMs);
+
   }
 }
