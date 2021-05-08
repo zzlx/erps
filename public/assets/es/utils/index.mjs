@@ -3,9 +3,9 @@
  *
  * utils modules
  *
- * 模块计数: 84
+ * 模块计数: 89
  * 模块说明: 此模块由工具自动生成
- * 生成时间: 2021/4/26 下午5:33:08
+ * 生成时间: 2021/5/8 下午3:02:15
  * *****************************************************************************
  */
 
@@ -17,11 +17,13 @@ export { barcode } from './barcode.mjs';
 export { base64 } from './base64.mjs';
 export { blockStringValue } from './blockStringValue.mjs';
 export { buffer } from './buffer.mjs';
+export { buildExecutionContext } from './buildExecutionContext.mjs';
 export { camelCase } from './camelCase.mjs';
 export { console } from './console.mjs';
 export { crypto } from './crypto.mjs';
 export { csv } from './csv.mjs';
 export { dataLoad } from './dataLoad.mjs';
+export { dateTPlusN } from './dateTPlusN.mjs';
 export { dateToISOString } from './dateToISOString.mjs';
 export { debounceFn } from './debounceFn.mjs';
 export { dedent } from './dedent.mjs';
@@ -35,8 +37,10 @@ export { escapeHtml } from './escapeHtml.mjs';
 export { events } from './events.mjs';
 export { fetch } from './fetch.mjs';
 export { find } from './find.mjs';
+export { formatDate } from './formatDate.mjs';
 export { generatePath } from './generatePath.mjs';
 export { getPlatformEndianness } from './getPlatformEndianness.mjs';
+export { global } from './global.mjs';
 export { hmac } from './hmac.mjs';
 export { idParser } from './idParser.mjs';
 export { inspect } from './inspect.mjs';
@@ -92,4 +96,5 @@ export { uuid } from './uuid.mjs';
 export { vdom } from './vdom.mjs';
 export { verifyPlainObject } from './verifyPlainObject.mjs';
 export { warning } from './warning.mjs';
+export { weekday } from './weekday.mjs';
 export { xml } from './xml.mjs';

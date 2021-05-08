@@ -12,7 +12,6 @@ import Router from './Router.mjs';
 import { statics } from './middlewares/statics.mjs';
 import { paths } from '../settings/index.mjs';
 
-import docs from './documentation.mjs';
 import homePage from './homePage.mjs';
 
 const router = new Router();

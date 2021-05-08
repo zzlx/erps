@@ -197,7 +197,7 @@ export function md5(string) {
 
   // step_1: 数据补位
   // step_2: 扩展长度
-  let x = md5_ConvertToWordArray(md5.nncode(string));
+  let x = md5_ConvertToWordArray(utf8.encode(string));
 
   // step_3: 初始化寄存器
   let a = 0b01100111010001010010001100000001,

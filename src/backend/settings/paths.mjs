@@ -19,8 +19,7 @@ export const paths = new Proxy(getPaths(__root), {
     return Reflect.get(target, property, receiver);
   },
 	set: function (target, property, value, receiver) {
-    // 创建配置的目录
-    if (/_D$/.test(property)) fs.mkdirSync(value, { recursive: true }); 
+    if (/[_\.]D$/i.test(property)) fs.mkdirSync(value, { recursive: true }); 
     return Reflect.set(...arguments);
 	}
 });

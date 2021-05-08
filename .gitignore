@@ -21,6 +21,7 @@
 # 忽略的目录及文件
 node_modules
 cert
+cache
 
 # 其他临时文件
 *.log

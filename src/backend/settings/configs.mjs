@@ -21,7 +21,7 @@ const defaults = {
   privateKey: '/etc/ssl/private.pem',
 }
 
-const configFile = path.join('/etc', 'erps.json');
+const configFile = path.join(paths.CACHE, 'config.json');
 
 if (fs.existsSync(configFile)) {
   const json = JSON.parse(fs.readFileSync(configFile, 'utf8'));

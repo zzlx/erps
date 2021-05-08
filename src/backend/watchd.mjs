@@ -41,12 +41,15 @@ process.nextTick(() => {
   );
 
   watchdog.on('change', () => {
-    debug('change一次');
     restart();
   });
+
+  watchdog.detect();
 });
 
 /**
+ *
+ *
  *
  */
 
@@ -58,14 +61,12 @@ class Watchdog extends EventEmitter {
     this.cache = new Map(); // 存储器
     this.interval = 800;
 
-    // 节流算法,高频触发时,this.interval毫秒内仅执行一次
-    const reDetect = throttleFn(() => {
-      this.detect();
-    }, this.interval);
+    this.on('complete', () => {
+      setTimeout(() => {
+        this.detect();
+      },this.interval);
+    });
 
-    this.on('complete', reDetect);
-
-    this.detect();
   }
 
   detect () {
