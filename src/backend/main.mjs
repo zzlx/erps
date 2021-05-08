@@ -6,8 +6,7 @@
  * 解析启动参数，执行命令任务
  *
  * *****************************************************************************
- */
-
+ */ 
 import assert from 'assert';
 import { exec, execFile, fork, spawn } from 'child_process';
 import fs from 'fs';
@@ -299,7 +298,7 @@ function detectSystemdService (service) {
 
 function renderCSS () {
 	const cssFile = path.join(paths.PUBLIC, 'assets', 'css', 'styles.css');
-  const scssFile = path.join(paths.SRC, 'scss', 'styles.scss');
+  const scssFile = path.join(paths.SRC, 'styles', 'main.scss');
 
   // 比对cssFile与scssFile所在目录所有文件时间戳
   // 决定是否需要执行CSS文件渲染程序
