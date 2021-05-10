@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * *****************************************************************************
  * 
@@ -14,9 +16,9 @@
 import assert from 'assert';
 import crypto from 'crypto';
 import http2 from 'http2';
-import debuglog from './debuglog.mjs';
-import { paths } from './settings/index.mjs';
-import { formatDate } from './utils.lib.mjs';
+import debuglog from '../src/backend/debuglog.mjs';
+import { paths } from '../src/backend/settings/index.mjs';
+import { formatDate } from '../src/backend/utils.lib.mjs';
 
 const debug = debuglog('debug:acme-client'); // debug tool
 
@@ -28,13 +30,33 @@ export class ACMEClient {
 
     debug(formatDate('yymmddHHMMss'));
 
-    this.request();
+    this.registerAccount();
   }
 
-  request () {
-    const c = http2.connect(this.API);
-    c.on('error', (err) => debug(err));
-    const req = c.request({ ':path': '/directory'});
+  /**
+   * Register an account
+   *
+   */
+
+  registerAccount() {
+
+    this.conn = http2.connect(this.API);
+    this.conn.on('error', err => {
+      debug(err)
+    });
+    this.conn.on('close', (e) => {
+      debug(`client connection is closed.`);
+    });
+
+
+    const req = this.conn.request({ 
+      ':method': '',
+      ':path': '/directory'
+    });
+
+    req.on('error', err => {
+      debug(`request error: `, err.message);
+    });
 
     req.on('response', (headers, flags) => { 
       for (const name in headers) { 
@@ -47,12 +69,24 @@ export class ACMEClient {
     req.on('data', (chunk) => { data += chunk; });
     req.on('end', () => {
       debug(`\n${data}`);
-      c.close();
+      this.conn.close();
     });
-    req.close();
+    req.close(); // close request
   }
 
   
+  /**
+   * Submit CSR
+   */
+
+  getCertificate () {
+    // step_1: Submit an order for a certificate to be issued
+    // step_2: Prove control of any identifiers requested in the certificate
+    // step_3: Finalize the order by submitting a CSR
+    // step_4: Await issuance and download the issued certificate
+
+
+  }
 
 
 }
