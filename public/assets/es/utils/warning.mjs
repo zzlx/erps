@@ -21,5 +21,5 @@ export function warning () {
 
   if (!!condition) return; 
   if (console && console.warn) return console.warn(message);
-  console.log('Warning: ', message);
+  if (console && console.log) return console.log('Warning: ', message);
 }

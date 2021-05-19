@@ -16,6 +16,7 @@ export function isPlainObject(obj) {
   if (proto === null) return true
 
   let baseProto = proto
+
   while (Object.getPrototypeOf(baseProto) !== null) {
     baseProto = Object.getPrototypeOf(baseProto)
   }

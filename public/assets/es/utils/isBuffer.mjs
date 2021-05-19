@@ -1,1 +1,8 @@
-export const isBuffer = b => b instanceof Uint8Array;
+/**
+ *
+ *
+ */
+
+export const isBuffer = buf => {
+  return buf && buf.buffer && buf.buffer instanceof ArrayBuffer;
+}

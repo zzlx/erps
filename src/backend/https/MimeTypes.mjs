@@ -10,10 +10,11 @@ import fs from 'fs';
 import path from 'path';
 import { paths } from '../settings/index.mjs';
 
+const __dirname = path.dirname(import.meta.url.substr(7));
 const EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/
 const TEXT_TYPE_REGEXP = /^text\//i
 const EXTNAME_REGEXP = /(?:\.\w*)$/
-const dbJSON = path.join(paths.SRC, 'data', 'mime-types.json')
+const dbJSON = path.join(__dirname, 'mime-types.json');
 const db = JSON.parse(fs.readFileSync(dbJSON, 'utf8'));
 
 export default class MimeTypes {

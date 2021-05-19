@@ -4,9 +4,7 @@
  *
  */
 
-export const global = getGlobal();
-
-export function getGlobal () {
+export function global () {
   if (typeof globalThis !== 'undefined') return globalThis;
   if (typeof window !== 'undefined') return window;
   if (typeof self !== 'undefined') return self;
