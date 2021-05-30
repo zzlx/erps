@@ -11,26 +11,38 @@
  */
 
 import { byteToHex } from '../byteToHex.mjs';
+import { Buffer } from '../Buffer.mjs';
 import { rotateLeft as ROTL } from './rotateLeft.mjs';
 
-const H = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0];
+const H = [
+  0x67452301, 
+  0xefcdab89, 
+  0x98badcfe, 
+  0x10325476, 
+  0xc3d2e1f0
+];
+
 const K = [0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6];
 
-export class SHA1 extends Uint8Array {
+const DATA = Symbol('DATA');
+
+export class SHA1 extends Buffer {
   constructor () {
     super(20);
   }
 
-  digest () {
-    return [...this].map(byteToHex).join('');
+  update (data, encode) {
+    this[DATA] = data;
+    return this;
   }
 
-  toString () {
-    return this.digest();
+  toString(format = 'hex') {
+    return super.toString(format);
   }
 }
 
-SHA1.prototype.update = function (content) {
+SHA1.prototype.digest = function () {
+  const content = this[DATA];
   let bytes = null; 
 
   if (typeof(content) === 'string') {
@@ -97,9 +109,9 @@ SHA1.prototype.update = function (content) {
 
   const view = new DataView(this.buffer);
   // Initialize hash value
-  view.setUint32(0, H[0]);
-  view.setUint32(4, H[1]);
-  view.setUint32(8, H[2]);
+  view.setUint32(0,  H[0]);
+  view.setUint32(4,  H[1]);
+  view.setUint32(8,  H[2]);
   view.setUint32(12, H[3]);
   view.setUint32(16, H[4]);
 

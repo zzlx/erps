@@ -15,6 +15,7 @@ import crypto from 'crypto';
 import EventEmitter from 'events'; 
 import http2 from 'http2';
 import debuglog from './debuglog.mjs';
+import { bitMask } from './utils.lib.mjs';
 
 const debug = debuglog('debug:websocket');
 
@@ -290,7 +291,9 @@ function decodeFrame (buffer) {
 
   if (MASK) {
     const maskingKey = buffer.slice(idx, idx+=4);
-    payload = unmask(maskingKey, buffer.slice(idx, idx + length));
+
+    // unmask
+    payload = bitMask(buffer.slice(idx, idx + length), maskingKey);
   }
 
   return { FIN, RSV1, RSV2, RSV3, opcode, payload } 
@@ -350,29 +353,6 @@ function generateMaskingKey () {
   const view = new DataView(maskingKey);
   view.setUint32(0, Number('0b' + Math.random().toString(2).substr(2, 32)));
   return maskingKey;
-}
-
-/**
- * unmask data
- *
- * @param {} maskBytes
- * @param {Uint8Array} 
- * @return {Uint8Array} 
- */
-
-function unmask (maskingKey, data) {
-
-  if (!(maskingKey instanceof Uint8Array)) {
-  }
-  if (!(data instanceof Uint8Array)) {
-    throw new TypeError('');
-  }
-
-  const payload = Buffer.alloc(data.length);
-  const keyLength = maskingKey.byteLength; 
-
-  for (let i = 0; i < data.byteLength; i++) payload[i] = maskingKey[i % keyLength] ^ data[i];
-  return payload;
 }
 
 /**

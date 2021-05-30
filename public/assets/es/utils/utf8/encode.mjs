@@ -13,13 +13,11 @@ import { assert } from '../assert.mjs';
 import { Buffer } from '../Buffer.mjs';
 
 export function encode (unicode) {
+  const isString = typeof unicode === 'string';
   const u8a = [];
 
   for (const c of unicode) {
-    const u = typeof c === 'string' 
-      ? c.charCodeAt(0)
-      : typeof c === 'number' ? c : null;
-
+    const u = isString ? c.charCodeAt(0) : typeof c === 'number' ? c : null;
     assert(u != null, `${u} is invalid.`);
 
     if (u <= 0x7F) {

@@ -13,13 +13,13 @@ import { Context } from "./Context.mjs";
 import { Countdown } from './Countdown.mjs';
 
 import { generatePath } from "../utils/generatePath.mjs";
-import { path } from '../utils/path.mjs';
+import { createLocation } from '../utils/path/createLocation.mjs';
 
 export class Redirect extends React.PureComponent {
   render () {
     const { match, to, push  } = this.props;
 
-    const location = path.createLocation( 
+    const location = createLocation( 
       match 
         ? typeof to === "string"
           ? generatePath(to, match.params)

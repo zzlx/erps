@@ -174,39 +174,6 @@ export function parse (path) {
 } // end of parse
 
 /**
- * 解析url路径
- */
-
-function urlParser(path) {
-
-  let pathname = path || '/';
-  let search = '';
-  let hash = '';
-
-  // 哈希索引号
-  const hashIndex = pathname.indexOf('#');
-
-  if (hashIndex !== -1) {
-    hash = pathname.substr(hashIndex);
-    pathname = pathname.substr(0, hashIndex);
-  }
-
-  // 查询字符串索引号
-  const searchIndex = pathname.indexOf('?');
-
-  if (searchIndex !== -1) {
-    search = pathname.substr(searchIndex);
-    pathname = pathname.substr(0, searchIndex);
-  }
-
-  return {
-    pathname: pathname,
-    search: search === '?' ? '' : search,
-    hash: hash === '#' ? '' : hash
-  };
-}
-
-/**
  * 从loccation创建path url
  *
  */
@@ -309,87 +276,11 @@ function isValidName(value) {
 }
 
 
-function createLocation(path, state, key, currentLocation) {
-  let location = void 0;
-
-  if (typeof path === 'string') {
-    // Two-arg form: push(path, state)
-    location = urlParser(path);
-    location.state = state;
-  } else {
-    // One-arg form: push(location)
-    location = Object.assign({}, path);
-
-    // set pathname
-    if (location.pathname === undefined) location.pathname = '';
-
-    // set search
-    if (location.search) {
-      if (location.search.charAt(0) !== '?') location.search = '?' + location.search;
-    } else {
-      location.search = '';
-    }
-
-    // set hash
-    if (location.hash) {
-      if (location.hash.charAt(0) !== '#') location.hash = '#' + location.hash;
-    } else {
-      location.hash = '';
-    }
-
-    if (state !== undefined && location.state === undefined) location.state = state;
-  }
-
-  try {
-    location.pathname = decodeURI(location.pathname);
-  } catch (e) {
-    if (e instanceof URIError) {
-      throw new URIError(
-        'pathname "' + location.pathname + '" could not be decoded. ' + 
-        'This is likely caused by an invalid percent-encoding.'
-      );
-    } else {
-      throw e;
-    }
-  }
-
-  if (key) location.key = key;
-
-  // 
-  if (currentLocation) {
-    // Resolve incomplete/relative pathname relative to current location.
-    if (!location.pathname) {
-      location.pathname = currentLocation.pathname;
-    } else if (location.pathname.charAt(0) !== '/') {
-      // 获取相对pathname
-      location.pathname = Path.resolvePathname(
-        location.pathname, 
-        currentLocation.pathname
-      );
-    }
-  } else {
-    // When there is no prior location and pathname is empty, set it to /
-    if (!location.pathname) {
-      location.pathname = '/';
-    }
-  }
-
-  return location;
-}
-
-/**
- * 判断是否为Posix目录分隔符 
- */
-
-function isPosixPathSeparator (code) {
-  return code === CHAR_FORWARD_SLASH;
-}
-
 /**
  * 判断是否为URL根路径
  */
 
-function isURLPath(path) {
+export function isURLPath(path) {
   return path.length > 8 && 
     (path.substr(0, 7) === 'http://' || path.substr(0, 8) === 'https://');
 }

@@ -8,6 +8,7 @@
  */
 
 import { assert } from '../assert.mjs';
+import { encode } from '../utf8/encode.mjs';
 import { Buffer } from '../Buffer.mjs';
 
 /*
@@ -52,165 +53,23 @@ const K = Uint32Array.from([
   0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 ]);
 
-export class SHA256 extends Uint8Array {
+const DATA = Symbol('DATA');
+
+export class SHA256 extends Buffer {
   constructor() {
     super(32);
-    this.state = H;
-    this.msg = new Uint32Array(64);
-    this.block = new Uint8Array(64);
-    this.size = FINALIZED;
   }
 
-  toString() {
-    return [...this].map(byteToHex).join('');
-  }
-
-  init() {
-    this.size = 0;
+  update (data, encoding) {
+    this[DATA] = encode(data);
     return this;
   }
 
-  update(data) {
-    //assert(Buffer.isBuffer(data), 'data must be a buffer.');
-    this._update(data, data.length);
-    return this;
+  static hmac(data, key) {
   }
 
-  _update(data, len) {
-    assert(this.size !== FINALIZED, 'Context is not initialized.');
-
-    let pos = this.size & 63;
-    let off = 0;
-
-    this.size += len;
-
-    if (pos > 0) {
-      let want = 64 - pos;
-
-      if (want > len)
-        want = len;
-
-      data.copy(this.block, pos, off, off + want);
-
-      pos += want;
-      len -= want;
-      off += want;
-
-      if (pos < 64)
-        return;
-
-      this._transform(this.block, 0);
-    }
-
-    while (len >= 64) {
-      this._transform(data, off);
-      off += 64;
-      len -= 64;
-    }
-
-    if (len > 0)
-      data.copy(this.block, 0, off, off + len);
-  }
-
-  _final(out) {
-    assert(this.size !== FINALIZED, 'Context is not initialized.');
-
-    const pos = this.size & 63;
-    const len = this.size * 8;
-
-    writeU32(DESC, (len * (1 / 0x100000000)) >>> 0, 0);
-    writeU32(DESC, len >>> 0, 4);
-
-    this._update(PADDING, 1 + ((119 - pos) & 63));
-    this._update(DESC, 8);
-
-    for (let i = 0; i < 8; i++) {
-      writeU32(out, this.state[i], i * 4);
-      this.state[i] = 0;
-    }
-
-    for (let i = 0; i < 64; i++)
-      this.msg[i] = 0;
-
-    for (let i = 0; i < 64; i++)
-      this.block[i] = 0;
-
-    this.size = FINALIZED;
-
-    return out;
-  }
-
-  _transform(chunk, pos) {
-    const W = this.msg;
-
-    let a = this.state[0];
-    let b = this.state[1];
-    let c = this.state[2];
-    let d = this.state[3];
-    let e = this.state[4];
-    let f = this.state[5];
-    let g = this.state[6];
-    let h = this.state[7];
-    let i = 0;
-
-    for (; i < 16; i++)
-      W[i] = readU32(chunk, pos + i * 4);
-
-    for (; i < 64; i++)
-      W[i] = sigma1(W[i - 2]) + W[i - 7] + sigma0(W[i - 15]) + W[i - 16];
-
-    for (i = 0; i < 64; i++) {
-      const t1 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i];
-      const t2 = Sigma0(a) + Maj(a, b, c);
-
-      h = g;
-      g = f;
-      f = e;
-
-      e = (d + t1) >>> 0;
-
-      d = c;
-      c = b;
-      b = a;
-
-      a = (t1 + t2) >>> 0;
-    }
-
-    this.state[0] += a;
-    this.state[1] += b;
-    this.state[2] += c;
-    this.state[3] += d;
-    this.state[4] += e;
-    this.state[5] += f;
-    this.state[6] += g;
-    this.state[7] += h;
-  }
-
-  static digest(data) {
-    return SHA256.ctx.init().update(data).final();
-  }
-
-  static root(left, right) {
-    assert(isBuffer(left) && left.length === 32);
-    assert(isBuffer(right) && right.length === 32);
-    return SHA256.ctx.init().update(left).update(right).final();
-  }
-
-  static multi(x, y, z) {
-    const {ctx} = SHA256;
-
-    ctx.init();
-    ctx.update(x);
-    ctx.update(y);
-
-    if (z)
-      ctx.update(z);
-
-    return ctx.final();
-  }
-
-  static mac(data, key) {
-    return SHA256.hmac().init(key).update(data).final();
+  toString (format = 'hex') {
+    return super.toString(format);
   }
 }
 
@@ -230,13 +89,7 @@ function sigma1(x) {
   return (x >>> 17 | x << 15) ^ (x >>> 19 | x << 13) ^ (x >>> 10);
 }
 
-function Ch(x, y, z) {
-  return z ^ (x & (y ^ z));
-}
-
-function Maj(x, y, z) {
-  return (x & y) | (z & (x | y));
-}
+function Maj(x, y, z) { return ((x & y) ^ (x & z) ^ (y & z)); }
 
 function readU32(data, off) {
   return (data[off++] * 0x1000000
@@ -253,6 +106,104 @@ function writeU32(data, num, off) {
   return off;
 }
 
-function choice(x, y, z) {
-	return (x & y) ^ (~x & z);
+function safe_add (x, y) {
+  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+  return (msw << 16) | (lsw & 0xFFFF);
+}
+
+// Choice
+function Ch(x, y, z) {
+	return (x & y) ^ ((~x) & z);
+}
+
+function S (X, n) { return ( X >>> n ) | (X << (32 - n)); }
+function R (X, n) { return ( X >>> n ); }
+function Sigma0256(x) { return (S(x, 2) ^ S(x, 13) ^ S(x, 22)); }
+function Sigma1256(x) { return (S(x, 6) ^ S(x, 11) ^ S(x, 25)); }
+function Gamma0256(x) { return (S(x, 7) ^ S(x, 18) ^ R(x, 3)); }
+function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
+
+function str2binb (str) {
+  const bin = Array();
+  const chrsz = 8;
+  const mask = 0xFF;
+
+  for(let i = 0; i < str.length * chrsz; i += chrsz) {
+    bin[i>>5] |= (str.charCodeAt(i / chrsz) & mask) << (24 - i%32);
+  }
+  console.log(bin[0].toString(2));
+  return bin;
+}
+
+SHA256.prototype.digest = function () {
+  let length = this[DATA].byteLength; 
+  if (length % 4 != 0) length += (4 - (length % 4));
+
+  const m = new Uint32Array(length/4);
+
+  const dv = new DataView(m.buffer);
+
+  for (let i = 0; i < m.length; i++) {
+    m[i] = this[DATA][i*4]   << 24 | 
+           this[DATA][i*4+1] << 16 | 
+           this[DATA][i*4+2] << 8  |
+           this[DATA][i*4+3] << 0; 
+  }
+
+  const l = m.byteLength*8;
+
+  var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
+
+  var W = new Array(64);
+  var a, b, c, d, e, f, g, h, i, j;
+  var T1, T2;
+  m[l >> 5] |= 0x80 << (24 - l % 32);
+  m[((l + 64 >> 9) << 4) + 15] = l;
+  for ( var i = 0; i<m.length; i+=16 ) {
+    a = HASH[0];
+    b = HASH[1];
+    c = HASH[2];
+    d = HASH[3];
+    e = HASH[4];
+    f = HASH[5];
+    g = HASH[6];
+    h = HASH[7];
+
+    for ( var j = 0; j<64; j++) {
+      if (j < 16) W[j] = m[j + i];
+      else W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
+      T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1256(e)), Ch(e, f, g)), K[j]), W[j]);
+      T2 = safe_add(Sigma0256(a), Maj(a, b, c));
+      h = g;
+      g = f;
+      f = e;
+      e = safe_add(d, T1);
+      d = c;
+      c = b;
+      b = a;
+      a = safe_add(T1, T2);
+    }
+    HASH[0] = safe_add(a, HASH[0]);
+    HASH[1] = safe_add(b, HASH[1]);
+    HASH[2] = safe_add(c, HASH[2]);
+    HASH[3] = safe_add(d, HASH[3]);
+    HASH[4] = safe_add(e, HASH[4]);
+    HASH[5] = safe_add(f, HASH[5]);
+    HASH[6] = safe_add(g, HASH[6]);
+    HASH[7] = safe_add(h, HASH[7]);
+  }
+
+  const view = new DataView(this.buffer);
+
+  view.setUint32(0,  HASH[0]);
+  view.setUint32(4,  HASH[1]);
+  view.setUint32(8,  HASH[2]);
+  view.setUint32(12, HASH[3]);
+  view.setUint32(16, HASH[4]);
+  view.setUint32(20, HASH[5]);
+  view.setUint32(24, HASH[6]);
+  view.setUint32(28, HASH[7]);
+
+  return this;
 }

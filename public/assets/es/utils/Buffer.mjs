@@ -3,6 +3,8 @@
  *
  * Buffer
  *
+ * Buffer Object
+ *
  * *****************************************************************************
  */
 
@@ -15,10 +17,16 @@ export class Buffer extends Uint8Array {
     super(...arguments);
   }
 
-  toString(format) {
+  toJSON () {
+    return {
+      type: 'Buffer',
+      data: `[${[...this].join(',')}]`, 
+    }
+  }
+
+  toString (format) {
     if (format === 'hex') return [...this].map(byteToHex).join('');
     if (format === 'utf8') return decode(this);
-
     return String.fromCharCode(...this);
   }
 }
@@ -35,5 +43,12 @@ Buffer.of = function () {
   return new Buffer(Uint8Array.of(...arguments)); 
 }
 
-Buffer.alloc = function () {
+/**
+ *
+ * @param {string|buffer|integer} fill value to pre-fill the new buffer, default 0
+ *
+ */
+
+Buffer.alloc = function alloc (size, fill, encoding = 'utf8') {
+  return new Buffer(...arguments);
 }

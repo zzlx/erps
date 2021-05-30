@@ -7,6 +7,13 @@
 
 import { SHA256 } from './SHA256.mjs';
 
-export const sha256 = msg => new SHA256().update(msg); 
+export function sha256 () {
+  const msg = [...arguments].join('');
+  return new SHA256().update(msg).digest(); 
+}
 
-console.log(sha256('w'));
+console.time('test');
+console.log('%s', sha256('w'));
+console.timeEnd('test');
+/*
+*/

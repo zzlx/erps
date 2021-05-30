@@ -14,5 +14,5 @@ import { SHA1 } from './SHA1.mjs';
 
 export function sha1 () {
   const msg = [...arguments].join('');
-  return new SHA1().update(msg);
+  return new SHA1().update(msg).digest();
 }

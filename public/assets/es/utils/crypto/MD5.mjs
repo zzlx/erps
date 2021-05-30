@@ -20,13 +20,7 @@
 import { encode } from '../utf8/index.mjs';
 import { byteToHex } from '../byteToHex.mjs';
 import { rotateLeft } from './rotateLeft.mjs';
-
-const R = [
-  0x01234567,
-  0x89abcdef,
-  0xfedcba98,
-  0x76543210,
-];
+import { Buffer } from '../Buffer.mjs';
 
 const S = [
   7, 12, 17, 22,
@@ -91,22 +85,30 @@ const II = (a, b, c, d, x, s, ac) => {
   return addUnsigned(rotateLeft(a, s), b);
 }
 
-export class MD5 extends Uint8Array {
+const DATA = Symbol('DATA');
+
+export class MD5 extends Buffer {
   constructor () {
-    super(16);
+    super([
+      0x67, 0x45, 0x23, 0x01, 
+      0xef, 0xcd, 0xab, 0x89, 
+      0x98, 0xba, 0xdc, 0xfe, 
+      0x10, 0x32, 0x54, 0x76, 
+    ]);
   }
 
-  toString() {
-    return this.digest();
+  update (data, encode) {
+    this[DATA] = data;
+    return this;
   }
 
-  digest () {
-    return [...this].map(byteToHex).join('');
+  toString(format = 'hex') {
+    return super.toString(format);
   }
 }
 
-
-MD5.prototype.update = function (data) {
+MD5.prototype.digest = function () {
+  const data = this[DATA];
 
   // step_1: 数据补位
   /*
@@ -132,18 +134,18 @@ MD5.prototype.update = function (data) {
 
   // step_3: 初始化MD缓存器
   // 用来保存中间变量和结果
+  /*
   let a = 0b01100111010001010010001100000001,
       b = 0b11101111110011011010101110001001,
       c = 0b10011000101110101101110011111110,
       d = 0b00010000001100100101010001110110;
+      */
 
   const v = new DataView(this.buffer, 0);
-
-  v.setUint32(0, a);
-  v.setUint32(4, b);
-  v.setUint32(8, c);
-  v.setUint32(12, d);
-
+  let a = v.getUint32(0),
+      b = v.getUint32(4),
+      c = v.getUint32(8),
+      d = v.getUint32(12);
 
   // step_4: 处理数据
   for (let k = 0; k < x.length; k += 16) {
@@ -238,9 +240,9 @@ MD5.prototype.update = function (data) {
   }
 
   // little endian value
-  v.setUint32(0, a, true);
-  v.setUint32(4, b, true);
-  v.setUint32(8, c, true);
+  v.setUint32(0,  a, true);
+  v.setUint32(4,  b, true);
+  v.setUint32(8,  c, true);
   v.setUint32(12, d, true);
 
   return this;

@@ -9,5 +9,5 @@ import { MD5 } from './MD5.mjs';
 
 export function md5 () {
   const msg = [...arguments].join('');
-  return new MD5().update(msg);
+  return new MD5().update(msg).digest();
 }

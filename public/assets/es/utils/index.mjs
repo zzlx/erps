@@ -3,9 +3,9 @@
  *
  * utils modules
  *
- * 模块计数: 86
+ * 模块计数: 87
  * 模块说明: 此模块由工具自动生成
- * 生成时间: 2021/5/14 下午3:58:00
+ * 生成时间: 2021/5/24 下午2:08:21
  * *****************************************************************************
  */
 
@@ -19,14 +19,15 @@ import * as csv from './csv/index.mjs';
 import * as crypto from './crypto/index.mjs';
 import * as base64 from './base64/index.mjs';
 import * as barcode from './barcode/index.mjs';
+export { Buffer } from './Buffer.mjs';
 export { argvParser } from './argvParser.mjs';
 export { arrayFlatten } from './arrayFlatten.mjs';
 export { arrayUtils } from './arrayUtils.mjs';
 export { assert } from './assert.mjs';
 export { barcode };
 export { base64 };
+export { bitMask } from './bitMask.mjs';
 export { blockStringValue } from './blockStringValue.mjs';
-export { buffer } from './buffer.mjs';
 export { buildExecutionContext } from './buildExecutionContext.mjs';
 export { byteToHex } from './byteToHex.mjs';
 export { camelCase } from './camelCase.mjs';
@@ -44,13 +45,13 @@ export { defineToJSON } from './defineToJSON.mjs';
 export { defineToStringTag } from './defineToStringTag.mjs';
 export { deviceDetect } from './deviceDetect.mjs';
 export { domUtils } from './domUtils.mjs';
+export { endianness } from './endianness.mjs';
 export { escapeHtml } from './escapeHtml.mjs';
 export { events } from './events.mjs';
 export { fetch } from './fetch.mjs';
 export { find } from './find.mjs';
 export { formatDate } from './formatDate.mjs';
 export { generatePath } from './generatePath.mjs';
-export { getPlatformEndianness } from './getPlatformEndianness.mjs';
 export { global } from './global.mjs';
 export { idParser } from './idParser.mjs';
 export { inspect } from './inspect.mjs';
