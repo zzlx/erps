@@ -124,17 +124,6 @@ function Sigma1256(x) { return (S(x, 6) ^ S(x, 11) ^ S(x, 25)); }
 function Gamma0256(x) { return (S(x, 7) ^ S(x, 18) ^ R(x, 3)); }
 function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
 
-function str2binb (str) {
-  const bin = Array();
-  const chrsz = 8;
-  const mask = 0xFF;
-
-  for(let i = 0; i < str.length * chrsz; i += chrsz) {
-    bin[i>>5] |= (str.charCodeAt(i / chrsz) & mask) << (24 - i%32);
-  }
-  console.log(bin[0].toString(2));
-  return bin;
-}
 
 SHA256.prototype.digest = function () {
   let length = this[DATA].byteLength; 
@@ -151,7 +140,7 @@ SHA256.prototype.digest = function () {
            this[DATA][i*4+3] << 0; 
   }
 
-  const l = m.byteLength*8;
+  const l = this[DATA].byteLength*8;
 
   var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
 
