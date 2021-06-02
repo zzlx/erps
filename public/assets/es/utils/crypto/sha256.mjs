@@ -14,6 +14,7 @@ export function sha256 () {
 
 console.time('test');
 console.log('%s', sha256('w'));
+console.log('%s', sha256('w'));
 console.timeEnd('test');
 /*
 */

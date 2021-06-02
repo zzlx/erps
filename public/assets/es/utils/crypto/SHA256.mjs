@@ -4,12 +4,17 @@
  * SHA256 Algorithm 
  * ================
  *
+ * 对消息进行补位处理，是的最终的长度是512位的倍数，
+ * 然后以512位为单位对消息进行分块
+ *
+ *
  * *****************************************************************************
  */
 
 import { assert } from '../assert.mjs';
 import { encode } from '../utf8/encode.mjs';
 import { Buffer } from '../Buffer.mjs';
+import { rotateRight } from './rotateRight.mjs';
 
 /*
  * Constants
@@ -53,6 +58,10 @@ const K = Uint32Array.from([
   0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 ]);
 
+// 逻辑函数
+const Ch  = (x, y, z) => (x & y) ^ ((~x) & z);
+const Maj = (x, y, z) => (x & y) ^ (x & z) ^ (y & z);
+
 const DATA = Symbol('DATA');
 
 export class SHA256 extends Buffer {
@@ -73,23 +82,13 @@ export class SHA256 extends Buffer {
   }
 }
 
-function Sigma0(x) {
-  return (x >>> 2 | x << 30) ^ (x >>> 13 | x << 19) ^ (x >>> 22 | x << 10);
-}
+const S = rotateRight;
+const R = (X, n) => X >>> n;
 
-function Sigma1(x) {
-  return (x >>> 6 | x << 26) ^ (x >>> 11 | x << 21) ^ (x >>> 25 | x << 7);
-}
-
-function sigma0(x) {
-  return (x >>> 7 | x << 25) ^ (x >>> 18 | x << 14) ^ (x >>> 3);
-}
-
-function sigma1(x) {
-  return (x >>> 17 | x << 15) ^ (x >>> 19 | x << 13) ^ (x >>> 10);
-}
-
-function Maj(x, y, z) { return ((x & y) ^ (x & z) ^ (y & z)); }
+function Sigma0(x) { return (S(x, 2) ^ S(x, 13) ^ S(x, 22)); }
+function Sigma1(x) { return (S(x, 6) ^ S(x, 11) ^ S(x, 25)); }
+function Gamma0256(x) { return (S(x, 7) ^ S(x, 18) ^ R(x, 3)); }
+function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
 
 function readU32(data, off) {
   return (data[off++] * 0x1000000
@@ -112,44 +111,45 @@ function safe_add (x, y) {
   return (msw << 16) | (lsw & 0xFFFF);
 }
 
-// Choice
-function Ch(x, y, z) {
-	return (x & y) ^ ((~x) & z);
-}
-
-function S (X, n) { return ( X >>> n ) | (X << (32 - n)); }
-function R (X, n) { return ( X >>> n ); }
-function Sigma0256(x) { return (S(x, 2) ^ S(x, 13) ^ S(x, 22)); }
-function Sigma1256(x) { return (S(x, 6) ^ S(x, 11) ^ S(x, 25)); }
-function Gamma0256(x) { return (S(x, 7) ^ S(x, 18) ^ R(x, 3)); }
-function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
-
-
 SHA256.prototype.digest = function () {
-  let length = this[DATA].byteLength; 
-  if (length % 4 != 0) length += (4 - (length % 4));
 
-  const m = new Uint32Array(length/4);
+  /*
+  // Step1: 消息预处理
+  //
+  const l = this[DATA].byteLength * 8;
+  const k = 448 - l - 1;
+
+  */
+
+
+  let length = this[DATA].byteLength; 
+  if (length % 4 != 0) length = length + (4 - (length % 4));
+
+  let m = new Uint32Array(length/4);
 
   const dv = new DataView(m.buffer);
 
   for (let i = 0; i < m.length; i++) {
-    m[i] = this[DATA][i*4]   << 24 | 
+    m[i] = this[DATA][i*4]  << 24 | 
            this[DATA][i*4+1] << 16 | 
            this[DATA][i*4+2] << 8  |
            this[DATA][i*4+3] << 0; 
   }
 
-  const l = this[DATA].byteLength*8;
+  const l = m.length*8;
+
+  m[l >> 5] |= 0x80 << (24 - l % 32);
+  m[((l + 64 >> 9) << 4) + 15] = l;
+  m[20] = 8;
+
 
   var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
 
   var W = new Array(64);
-  var a, b, c, d, e, f, g, h, i, j;
-  var T1, T2;
-  m[l >> 5] |= 0x80 << (24 - l % 32);
-  m[((l + 64 >> 9) << 4) + 15] = l;
-  for ( var i = 0; i<m.length; i+=16 ) {
+  let a, b, c, d, e, f, g, h;
+  let i, j, T1, T2;
+
+  for (let i = 0; i < m.length; i+=16 ) {
     a = HASH[0];
     b = HASH[1];
     c = HASH[2];
@@ -159,11 +159,11 @@ SHA256.prototype.digest = function () {
     g = HASH[6];
     h = HASH[7];
 
-    for ( var j = 0; j<64; j++) {
+    for ( let j = 0; j<64; j++) {
       if (j < 16) W[j] = m[j + i];
       else W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
-      T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1256(e)), Ch(e, f, g)), K[j]), W[j]);
-      T2 = safe_add(Sigma0256(a), Maj(a, b, c));
+      T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1(e)), Ch(e, f, g)), K[j]), W[j]);
+      T2 = safe_add(Sigma0(a), Maj(a, b, c));
       h = g;
       g = f;
       f = e;
@@ -173,6 +173,7 @@ SHA256.prototype.digest = function () {
       b = a;
       a = safe_add(T1, T2);
     }
+
     HASH[0] = safe_add(a, HASH[0]);
     HASH[1] = safe_add(b, HASH[1]);
     HASH[2] = safe_add(c, HASH[2]);
