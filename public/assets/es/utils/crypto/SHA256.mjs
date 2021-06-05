@@ -20,23 +20,7 @@ import { rotateRight } from './rotateRight.mjs';
  * Constants
  */
 
-const FINALIZED = -1;
-const DESC = new Uint8Array(8);
-const PADDING = new Uint8Array(64);
-
-PADDING[0] = 0x80;
-
-// 初始哈希值[公式]取自自然数中前面8个素数(2,3,5,7,11,13,17,19)的平方根的前32位小数部分
-const H = Uint32Array.from([
-  0x6a09e667,
-  0xbb67ae85,
-  0x3c6ef372,
-  0xa54ff53a,
-  0x510e527f,
-  0x9b05688c,
-  0x1f83d9ab,
-  0x5be0cd19,
-]); 
+const DATA = Symbol('DATA');
 
 // 自然数前64个素数的立方根的前32位小数部分
 const K = Uint32Array.from([
@@ -61,8 +45,14 @@ const K = Uint32Array.from([
 // 逻辑函数
 const Ch  = (x, y, z) => (x & y) ^ ((~x) & z);
 const Maj = (x, y, z) => (x & y) ^ (x & z) ^ (y & z);
+const S = rotateRight;
+const R = (X, n) => X >>> n;
 
-const DATA = Symbol('DATA');
+function Sigma0(x) { return (S(x, 2) ^ S(x, 13) ^ S(x, 22)); }
+function Sigma1(x) { return (S(x, 6) ^ S(x, 11) ^ S(x, 25)); }
+function Gamma0256(x) { return (S(x, 7) ^ S(x, 18) ^ R(x, 3)); }
+function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
+
 
 export class SHA256 extends Buffer {
   constructor() {
@@ -82,74 +72,49 @@ export class SHA256 extends Buffer {
   }
 }
 
-const S = rotateRight;
-const R = (X, n) => X >>> n;
-
-function Sigma0(x) { return (S(x, 2) ^ S(x, 13) ^ S(x, 22)); }
-function Sigma1(x) { return (S(x, 6) ^ S(x, 11) ^ S(x, 25)); }
-function Gamma0256(x) { return (S(x, 7) ^ S(x, 18) ^ R(x, 3)); }
-function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
-
-function readU32(data, off) {
-  return (data[off++] * 0x1000000
-        + data[off++] * 0x10000
-        + data[off++] * 0x100
-        + data[off]);
-}
-
-function writeU32(data, num, off) {
-  data[off++] = num >>> 24;
-  data[off++] = num >>> 16;
-  data[off++] = num >>> 8;
-  data[off++] = num;
-  return off;
-}
+/**
+ * Add integers, wrapping at 2^32. 
+ * This uses 16-bit operations internally to work around bugs in some JS interpreters.
+ *
+ */
 
 function safe_add (x, y) {
-  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+  const lsw = (x & 0xFFFF) + (y & 0xFFFF);
+  const msw = (x >> 16) + (y >> 16) + (lsw >> 16);
   return (msw << 16) | (lsw & 0xFFFF);
 }
 
 SHA256.prototype.digest = function () {
 
-  /*
   // Step1: 消息预处理
-  //
   const l = this[DATA].byteLength * 8;
-  const k = 448 - l - 1;
+  // calc k value
+  let k = 0;
+  while ((l + 1 + k)%512 !== 448) { k++; }
 
-  */
-
-
-  let length = this[DATA].byteLength; 
-  if (length % 4 != 0) length = length + (4 - (length % 4));
-
-  let m = new Uint32Array(length/4);
-
+  const m = new Uint8Array((l+k+1)/8 + 8);
   const dv = new DataView(m.buffer);
 
-  for (let i = 0; i < m.length; i++) {
-    m[i] = this[DATA][i*4]  << 24 | 
-           this[DATA][i*4+1] << 16 | 
-           this[DATA][i*4+2] << 8  |
-           this[DATA][i*4+3] << 0; 
+  for (let i = 0; i < this[DATA].byteLength; i++) {
+    const byte = this[DATA][i];
+    dv.setUint8(i, byte);
   }
 
-  const l = m.length*8;
+  dv.setUint8(this[DATA].byteLength, 0x80); // setting padding bit
+  dv.setUint32(m.byteLength - 4, l >>> 0);  // setting length bits
+  //dv.setUint32(m.byteLength - 8, l);      // setting length bits
 
-  m[l >> 5] |= 0x80 << (24 - l % 32);
-  m[((l + 64 >> 9) << 4) + 15] = l;
-  m[20] = 8;
-
-
-  var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
+  // 初始哈希值[公式]取自自然数中前面8个素数(2,3,5,7,11,13,17,19)的平方根的前32位小数部分
+  const HASH = new Uint32Array([
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
+  ]);
 
   var W = new Array(64);
   let a, b, c, d, e, f, g, h;
   let i, j, T1, T2;
 
-  for (let i = 0; i < m.length; i+=16 ) {
+  for (let i = 0; i < m.byteLength; i+=16 ) {
     a = HASH[0];
     b = HASH[1];
     c = HASH[2];
@@ -159,9 +124,22 @@ SHA256.prototype.digest = function () {
     g = HASH[6];
     h = HASH[7];
 
-    for ( let j = 0; j<64; j++) {
-      if (j < 16) W[j] = m[j + i];
-      else W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
+    for ( let j = 0; j < 64; j++) {
+      if (j < 16) {
+        W[j] = m[j + i];
+      } else {
+        W[j] = safe_add(
+          safe_add(
+            safe_add(
+              Gamma1256(W[j - 2]), 
+              W[j - 7]
+            ), 
+            Gamma0256(W[j - 15])
+          ), 
+          W[j - 16]
+        );
+      }
+
       T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1(e)), Ch(e, f, g)), K[j]), W[j]);
       T2 = safe_add(Sigma0(a), Maj(a, b, c));
       h = g;
