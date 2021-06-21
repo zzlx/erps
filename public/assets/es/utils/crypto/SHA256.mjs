@@ -7,6 +7,7 @@
  * 对消息进行补位处理，是的最终的长度是512位的倍数，
  * 然后以512位为单位对消息进行分块
  *
+ * [RFC 4634](https://datatracker.ietf.org/doc/html/rfc4634)
  *
  * *****************************************************************************
  */
@@ -34,13 +35,13 @@ export class SHA256 extends Buffer {
   }
 }
 
-
-
 SHA256.prototype.digest = function () {
-  // Step1: 消息预处理
+
+  // Step1: 对消息进行预处理
   // 对消息进行补码处理: 假设消息的二进制编码长度为l位. 
   // 首先在消息末尾补上一位"1", 然后再补上k个"0", 其中k为下列方程的最小非负整数
   const l = this[DATA].byteLength * 8;
+
   let k = 0; // padding bits
   while ((l + 1 + k)%512 !== 448) { k++; } // 计算k值
 
@@ -54,18 +55,17 @@ SHA256.prototype.digest = function () {
   dv.setUint32(m.byteLength - 4, l >>> 0);  
 
   const HASH = new Uint32Array(this.buffer);
-  H.map((v, i) => HASH[i] = v); // 设置初始哈希值
+  // 初始化哈希值
+  H.map((v, i) => HASH[i] = v); 
 
   // Step2: 摘要计算主循环
-  // 分组压缩
-  // 16字长=512bits
-  let a, b, c, d, e, f, g, h;
-
-  // 扩展消息块
-  const W = new Uint32Array(64);
-
   // 16字为一组消息分块,遍历所有消息块
   for (let i = 0; i < m.byteLength; i+=64) {
+
+    let a, b, c, d, e, f, g, h;
+    // 扩展消息块
+    const W = new Uint32Array(64);
+
     a = HASH[0];
     b = HASH[1];
     c = HASH[2];
@@ -75,13 +75,13 @@ SHA256.prototype.digest = function () {
     g = HASH[6];
     h = HASH[7];
 
-    // 处理消息块,应用压缩函数
+    // 遍历消息块,对消息块应用压缩函数
     for ( let j = 0; j < 64; j++) {
 
       if (j < 16) {
         W[j] = m[i + j];
       } else {
-        W[j] = safe_add(Gamma1(W[j - 2]), W[j - 7], Gamma0(W[j - 15]), W[j - 16]);
+        W[j] = safe_add(sigma1(W[j - 2]), W[j - 7], sigma0(W[j - 15]), W[j - 16]);
       }
 
       // temp
@@ -150,8 +150,8 @@ const S = rotateRight;
 const R = (X, n) => X >>> n;
 const Sigma0 = x => S(x, 2) ^ S(x, 13) ^ S(x, 22);
 const Sigma1 = x => S(x, 6) ^ S(x, 11) ^ S(x, 25);
-const Gamma0 = x => S(x, 7) ^ S(x, 18) ^ R(x, 3);
-const Gamma1 = x => S(x,17) ^ S(x, 19) ^ R(x, 10);
+const sigma0 = x => S(x, 7) ^ S(x, 18) ^ R(x, 3);
+const sigma1 = x => S(x,17) ^ S(x, 19) ^ R(x, 10);
 
 /**
  * Add integers, wrapping at 2^32. 
