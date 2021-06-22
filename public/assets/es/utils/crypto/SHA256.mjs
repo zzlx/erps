@@ -15,7 +15,9 @@
 import { assert } from '../assert.mjs';
 import { encode } from '../utf8/encode.mjs';
 import { Buffer } from '../Buffer.mjs';
-import { rotateRight } from './rotateRight.mjs';
+import { rotateRight as S } from './rotateRight.mjs';
+
+const DATA = Symbol('DATA');
 
 export class SHA256 extends Buffer {
   constructor() {
@@ -55,16 +57,18 @@ SHA256.prototype.digest = function () {
   dv.setUint32(m.byteLength - 4, l >>> 0);  
 
   const HASH = new Uint32Array(this.buffer);
+  const HV = new DataView(this.buffer);
+
   // 初始化哈希值
   H.map((v, i) => HASH[i] = v); 
 
   // Step2: 摘要计算主循环
-  // 16字为一组消息分块,遍历所有消息块
+  // 遍历消息块, 512位为一组，64字节
+  // m 为uint32数组, 16个为512位
   for (let i = 0; i < m.byteLength; i+=64) {
 
     let a, b, c, d, e, f, g, h;
-    // 扩展消息块
-    const W = new Uint32Array(64);
+    const W = new Uint32Array(64); // 扩展消息块
 
     a = HASH[0];
     b = HASH[1];
@@ -77,17 +81,15 @@ SHA256.prototype.digest = function () {
 
     // 遍历消息块,对消息块应用压缩函数
     for ( let j = 0; j < 64; j++) {
-
       if (j < 16) {
-        W[j] = m[i + j];
+        W[j] = dv.getUint32(i + j*4);
       } else {
         W[j] = safe_add(sigma1(W[j - 2]), W[j - 7], sigma0(W[j - 15]), W[j - 16]);
       }
 
       // temp
       let T1 = safe_add(h, Sigma1(e), Ch(e, f, g), K[j], W[j]);
-      let T2 = add(Sigma0(a), Maj(a, b, c));
-
+      let T2 = safe_add(Sigma0(a), Maj(a, b, c));
       h = g;
       g = f;
       f = e;
@@ -98,29 +100,30 @@ SHA256.prototype.digest = function () {
       a = add(T1, T2);
     }
 
-    HASH[0] = add(a, HASH[0]);
-    HASH[1] = add(b, HASH[1]);
-    HASH[2] = add(c, HASH[2]);
-    HASH[3] = add(d, HASH[3]);
-    HASH[4] = add(e, HASH[4]);
-    HASH[5] = add(f, HASH[5]);
-    HASH[6] = add(g, HASH[6]);
-    HASH[7] = add(h, HASH[7]);
+    HV.setUint32(0, add(a, HASH[0]));
+    HV.setUint32(4, add(b, HASH[1]));
+    HV.setUint32(8, add(c, HASH[2]));
+    HV.setUint32(12, add(d, HASH[3]));
+    HV.setUint32(16, add(e, HASH[4]));
+    HV.setUint32(20, add(f, HASH[5]));
+    HV.setUint32(24, add(g, HASH[6]));
+    HV.setUint32(28, add(h, HASH[7]));
   }
 
   return this;
 }
-/*
- * Constants
- */
-
-const DATA = Symbol('DATA');
 
 // 初始哈希值
 // 取自自然数中前面8个素数(2,3,5,7,11,13,17,19)的平方根的前32位小数部分
 const H = [ 
-  0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-  0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
+  0x6a09e667, 
+  0xbb67ae85, 
+  0x3c6ef372, 
+  0xa54ff53a,
+  0x510e527f, 
+  0x9b05688c, 
+  0x1f83d9ab, 
+  0x5be0cd19,
 ];
 
 // 自然数前64个素数的立方根的前32位小数部分
@@ -144,14 +147,13 @@ const K = Uint32Array.from([
 ]);
 
 // 逻辑函数
-const Ch  = (x, y, z) => (x & y) ^ ((~x) & z); // choice 
-const Maj = (x, y, z) => (x & y) ^ (x & z) ^ (y & z); // majority
-const S = rotateRight;
-const R = (X, n) => X >>> n;
+const Ch  = (x, y, z) => (x & y) ^ (~x & z);
+const Maj = (x, y, z) => (x & y) ^ (x & z) ^ (y & z);
 const Sigma0 = x => S(x, 2) ^ S(x, 13) ^ S(x, 22);
 const Sigma1 = x => S(x, 6) ^ S(x, 11) ^ S(x, 25);
-const sigma0 = x => S(x, 7) ^ S(x, 18) ^ R(x, 3);
-const sigma1 = x => S(x,17) ^ S(x, 19) ^ R(x, 10);
+const sigma0 = x => S(x, 7) ^ S(x, 18) ^ (x >>> 3);
+const sigma1 = x => S(x,17) ^ S(x, 19) ^ (x >>> 10);
+const expand = (W, j) => W[j&0xF] += sigma0(W[(j+14)&0xF]) + W[(j+9)&0xF] + sigma0(W[(j+1)&0xF]);
 
 /**
  * Add integers, wrapping at 2^32. 
@@ -166,8 +168,7 @@ function add (x, y) {
 }
 
 function safe_add () {
-  const it = arguments[Symbol.iterator]();
-  let retval = 0, v;
-  while ((v = it.next()).done === false) retval = add(retval, v.value);
+  let retval; // 初始化返回值
+  for (const v of arguments) { retval = add(retval, v); }
   return retval;
 }
