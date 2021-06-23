@@ -46,6 +46,7 @@ SHA256.prototype.digest = function () {
 
   let k = 0; // padding bits
   while ((l + 1 + k)%512 !== 448) { k++; } // 计算k值
+  const length = 1+k+1;
 
   const m = new Uint32Array(((l+k+1)/8 + 8)/4);
   const dv = new DataView(m.buffer);
@@ -100,9 +101,9 @@ SHA256.prototype.digest = function () {
       a = add(T1, T2);
     }
 
-    HV.setUint32(0, add(a, HASH[0]));
-    HV.setUint32(4, add(b, HASH[1]));
-    HV.setUint32(8, add(c, HASH[2]));
+    HV.setUint32(0,  add(a, HASH[0]));
+    HV.setUint32(4,  add(b, HASH[1]));
+    HV.setUint32(8,  add(c, HASH[2]));
     HV.setUint32(12, add(d, HASH[3]));
     HV.setUint32(16, add(e, HASH[4]));
     HV.setUint32(20, add(f, HASH[5]));
