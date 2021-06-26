@@ -9,7 +9,7 @@
  * *****************************************************************************
  */
 
-export { HMAC } from './HMAC.mjs';
+export { hmac } from './hmac.mjs';
 export { MD5 } from './MD5.mjs';
 export { SHA256 } from './SHA256.mjs';
 export { aes } from './aes.mjs';

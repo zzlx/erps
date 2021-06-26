@@ -1,7 +1,9 @@
 /**
  * *****************************************************************************
  *
- * Binary to Assii algorithm
+ * btoa algorithm
+ *
+ * Convert Binary to Assii 
  *
  * @param {string|buffer} data support buffer or string data
  * @return {buffer}
@@ -16,12 +18,15 @@ import { Buffer } from '../Buffer.mjs';
 const b64a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 const b64code  = [...b64a].map(v => v.charCodeAt(0));
 
-export function btoa (data) {
+export const btoa = globalThis.btoa ? globalThis.btoa : btoaFn;
+
+export function btoaFn (data) {
 
   const isBuffer = data instanceof Uint8Array; // test param is a buffer
   const pad = data.length % 3;
   const length = pad === 0 ? data.length : data.length + 3 - pad;
   const buffer = new Buffer(length / 3 * 4);
+
   const a = [];
   let   b = 0; // 
 

@@ -44,9 +44,7 @@ Buffer.of = function () {
 }
 
 /**
- *
  * @param {string|buffer|integer} fill value to pre-fill the new buffer, default 0
- *
  */
 
 Buffer.alloc = function alloc (size, fill, encoding = 'utf8') {

@@ -21,7 +21,9 @@ const b64map  = (() => {
   return map;
 })();
 
-export function atob (data) {
+export const atob = globalThis.atob ? globalThis.atob : atobFn;
+
+export function atobFn (data) {
   assert(data.length % 4 === 0, `The data param is invalid.`);
   const isBuffer = data instanceof Uint8Array; // test param is a buffer
   let extraByte = 0;
