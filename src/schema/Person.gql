@@ -1,0 +1,10 @@
+# 自然人
+type Person {
+  _id: ID!
+  name: String
+  realName: String
+  IDNumber: String
+  phoneNumber: String
+  address: [Address]
+  email: String
+}

@@ -1,0 +1,24 @@
+//grid-template: auto 1fr / auto 1fr auto;
+// 等同与
+//其中1fr，fr是fraction（读音：[ˈfrækʃn] n:小部分; 少量; 一点儿; 分数; 小数;）的缩写，提供的一个单位，和我们在使用flex布局时，子元素设置flex:1 | 2一个性质，是一个比例值。
+//grid-template-rows: auto 1fr;
+//grid-template-columns: auto 1fr auto;
+//grid-template-areas: none;
+
+
+.flex-wrapper {
+   display: flex;
+   flex-wrap: wrap;
+}
+
+
+.flex-wrapper > div {
+   flex: 1 1 200px;
+}
+
+.grid-wrapper {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+}
+
+

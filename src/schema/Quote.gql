@@ -1,0 +1,5 @@
+type Quote {
+  _id: ID!
+  text: String
+  author: String
+}

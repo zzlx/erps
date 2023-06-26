@@ -1,0 +1,5 @@
+type Database {
+  name: String
+  sizeOnDisk: Int
+  empty: Boolean
+}

@@ -1,0 +1,50 @@
+{
+  "name": "erps",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "ERP services.",
+  "private": true,
+  "scripts": {
+    "build": "node-gyp build",
+    "clean": "make clean_ds",
+    "edit": "vim -u .vimrc",
+    "erps:devel": "NODE_DEBUG=debug* ./bin/erpd --start --devel --watch",
+    "erps:prod": "./bin/erpd --start",
+    "start": "npm run erps:prod",
+    "tags": "ctags $(find ./server -name '*.mjs')"
+  },
+  "dependencies": {
+    "@alicloud/dingtalk": "^1.3.99",
+    "bootstrap": "^5.3.0-alpha1",
+    "bootstrap-icons": "^1.8.3",
+    "mongodb": "^4.7.0",
+    "pg": "^8.7.1",
+    "pg-cursor": "^2.7.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remarkable": "^2.0.1"
+  },
+  "devDependencies": {
+    "@koa/router": "^12.0.0",
+    "chart": "^0.1.2",
+    "d3": "^5.9.7",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "express": "^4.18.1",
+    "graphql": "^16.6.0",
+    "koa": "^2.14.2",
+    "koa-router": "^12.0.0",
+    "mount-koa-routes": "^2.0.3",
+    "react-router": "^6.3.0",
+    "redux": "^4.2.0",
+    "sass": "^1.52.3",
+    "typescript": "^4.7.4",
+    "wget": "^0.0.1",
+    "whatwg-fetch": "^3.5.0"
+  }
+}

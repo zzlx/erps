@@ -1,0 +1,56 @@
+// 中文排版
+//writing-mode: horizontal-tb | vertical-rl | vertical-lr | sideways-rl | sideways-lr
+//text-combine-upright: none | all | digits | unset
+
+// 竹简排版样式
+.bambooSlip {
+  writing-mode: vertical-rl; // 垂直方向由右到左
+  letter-spacing: 1px;
+}
+
+.bambooSlip b {
+  text-combine-upright: all;
+  margin: 5px 0;
+}
+
+// markdown
+.markdown {
+
+}
+
+.custom-class {
+  display: none;
+}
+
+@include media-breakpoint-up(sm) {
+  .custom-class {
+    display: block;
+  }
+}
+
+@include media-breakpoint-down(md) {
+  .custom-class {
+    display: block;
+  }
+}
+
+@include media-breakpoint-between(md, xl) { 
+}
+
+@include media-breakpoint-only(xs) {
+}
+
+// A4张
+
+.A4 {
+  width: 96ex;
+}
+
+.page {
+  width: clamp(320px, 50%, 640px);
+
+  page-break-before: always;
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: 0;
+}

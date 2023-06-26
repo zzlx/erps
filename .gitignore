@@ -1,0 +1,51 @@
+# ##############################################################################
+#
+# 参考文档
+# http://help.github.com/ignore-files/
+#
+# ##############################################################################
+#
+
+# 忽略的目录
+assets
+build
+cache
+examples
+node_modules
+public_html
+
+# vim临时文件
+.vim
+NetrwTreeListing*
+*.sw[mnop]
+*.un
+*.*.un
+*.un~
+*.*.un~
+*.~
+tags
+
+# Compiled files
+*.o
+*.so
+*.out
+
+# Packages
+*.7z
+*.gz
+*.iso
+*.rar
+*.tar
+*.zip
+
+# Logs
+*.log
+*_log
+
+# OS generated files
+.DS_Store*
+Icon?
+Thumbs.db
+
+# Node.js
+node_modules

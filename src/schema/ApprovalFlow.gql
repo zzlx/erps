@@ -1,0 +1,6 @@
+"""
+审批流程
+"""
+type ApprovalFlow {
+  prev: ApprovalFlow
+}

@@ -1,0 +1,31 @@
+"""
+The schema allows the following query
+"""
+type Query {
+  hello: String
+  help: String
+  author(id: Int!): Author
+  comment(_id: String): Comment
+  docs(fileName: String): String
+  dbs: [Database]
+  databases: [Database]
+  feed: [Link!]
+  getDie(numSides: Int): RandomDie
+  info: String!
+  me: User
+  navs: [Nav]!
+  person: String
+  post(_id: String): Post
+  posts: [Post]
+  profiles: Profile
+  quotes(_id: String, text: String, author: String): [Quote]
+  quoteOfTheDay: String
+  random: Float!
+  rollThreeDice: [Int]
+  rollDice(numDice: Int!, numSides: Int): [Int]
+  sessionID: String
+  todos: [Todo]!
+  token: String!
+  user(id: ID!): User
+  welcome: String
+}

@@ -1,0 +1,8 @@
+/**
+ *
+ *
+ */
+
+export default (parent, { url, description }, ctx, info) => {
+  return ctx.db.mutation.createLink({ data: { url, description } }, info);
+}

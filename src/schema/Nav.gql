@@ -1,0 +1,20 @@
+# 导航栏项目
+type Nav {
+  _id: ID!
+  title: String
+  item: String
+  href: String
+  src: String
+  parentId: ID
+  desc: String
+}
+
+# 输入类型
+
+input NavInput {
+  title: String!
+  href: String
+  src: String
+  parentId: ID
+  desc: String
+}

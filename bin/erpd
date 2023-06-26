@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+/**
+ * *****************************************************************************
+ * 
+ * The Entry Point of ERP Daemon
+ *
+ * A background process that hold the erp services.
+ *
+ * *****************************************************************************
+ */
+
+const path = require('path');
+
+// Setting process title
+// process.title = 'org.zzlx.erpd';
+// process.title = path.basename(import.meta.url.substr(7), ".mjs");
+process.title = path.basename(__filename, path.extname(__filename));
+
+// Setting environment variables
+const argvs = Array.prototype.slice.call(process.argv, 2); 
+
+for (const item of argvs) {
+
+  if (/devel/.test(item)) {
+    process.env.NODE_ENV = "development";
+    continue;
+  }
+
+  if (/prod/.test(item)) {
+    process.env.NODE_ENV = "production";
+    continue;
+  }
+}
+
+
+process.on("uncaughtException", (error, origin) => {
+  console.log("The uncaughted exception: ", error)
+  console.log("The origin uncaught exception: ", origin)
+});
+
+//
+process.on("unhandledRejection", (reason, promise) => {
+  console.log(
+    "The unhandled rejection is come from ", 
+    promise, 
+    " because of: ", 
+    reason
+  );
+});
+
+// Print uptime in development env
+process.on("exit", code => {
+  if (process.env.NODE_ENV === "development") {
+    console.log('---程序结束前已经运行了%sms---', Math.ceil(process.uptime()*1000));
+  }
+});
+
+// Load main program and execute it
+import('../server/main.mjs').catch(console.error);

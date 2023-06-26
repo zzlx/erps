@@ -1,0 +1,8 @@
+# 对象
+type Subject {
+    _id: ID!
+    name: String!
+    parent: String
+    children: [Subject]
+    attachment: String
+}

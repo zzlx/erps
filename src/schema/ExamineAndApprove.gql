@@ -1,0 +1,8 @@
+type ExamineAndApprove {
+    _id: ID!
+    name: String!
+    parent: String
+    children: String
+    audit: String
+    initiator: User
+}

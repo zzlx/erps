@@ -1,0 +1,50 @@
+// 引用区块
+blockquote, .blockquote {
+	border-style: solid;
+	border-width: $border-width;
+  border-left-width: $spacer * 0.25;
+  border-radius: $border-radius;
+  padding: $spacer * 0.75;
+  padding-left: $spacer * 1.25;
+
+  margin-bottom: $blockquote-margin-y;
+
+	border-color: $border-color;
+	border-left-color: var(--bs-primary);
+	background-color: shift-color($primary, -85%);
+
+	color: $primary;
+  font-style: italic;
+  @include font-size($blockquote-font-size);
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+
+}
+
+blockquote > footer, .blockquote-footer {
+  margin-top: -$blockquote-margin-y;
+  margin-bottom: $blockquote-margin-y;
+  color: $blockquote-footer-color;
+  &::before {
+    content: "\2014\00A0";
+  }
+}
+
+@each $theme, $value in $theme-colors {
+  $background: shift-color($value, -99%);
+  $border: $value;
+  $color: shift-color($value, 50%);
+
+  @if (contrast-ratio($background, $color) < $min-contrast-ratio) {
+    $color: mix($value, color-contrast($background), abs(-80%));
+  }
+
+	.blockquote-#{$theme} {
+		background-color: $background;
+		border-color: shift-color($border, -90%);
+		border-left-color: $border;
+		color: $color;
+  }
+}

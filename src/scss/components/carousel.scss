@@ -1,0 +1,33 @@
+// 轮播图CSS样式
+
+.carousel_wrap {
+  @include color-scheme(dark) {
+    // Insert dark mode styles here
+  }
+
+  margin: 0 auto;
+  background:rgb(37, 36, 36);
+  width:640px;
+  height:354px;
+  display: grid;
+  grid-template-columns: 1fr 5fr;
+}
+
+.carousel_wrap img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+}
+
+.carousel_wrap section {
+  height: 100%;
+  overflow: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.carousel_wrap section img {
+  object-fit: cover;
+  height: 100%;
+  scroll-snap-align: start;
+}

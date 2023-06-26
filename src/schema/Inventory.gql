@@ -1,0 +1,5 @@
+# 库存
+type Iventory {
+  _id: ID!
+}
+

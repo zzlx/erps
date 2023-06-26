@@ -1,0 +1,4 @@
+type Confirmation {
+  _id: ID!
+  confirmed: Boolean
+}

@@ -1,0 +1,6 @@
+# AuthPayload
+type AuthPayload {
+  _id: ID!
+  token: String
+  user: User
+}

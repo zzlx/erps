@@ -1,0 +1,4 @@
+# Stocks
+type Stock {
+  _id: ID!
+}

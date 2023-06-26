@@ -1,0 +1,12 @@
+"""
+Address
+"""
+type Address {
+  _id: ID!
+  Country: String # 国家
+  province: String
+  city: String
+  street: String
+  postcode: String
+  location: GeoLocations
+}

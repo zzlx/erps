@@ -1,0 +1,15 @@
+# this schema allows the following mutation
+type Mutation {
+  addTodo(text: String, completed: Boolean): [Todo]
+  createMessage(input: MessageInput): Message
+  updateMessage(id: ID!, input: MessageInput): Message
+  createComment(postId: String, content: String): Comment
+  createPost(title: String, content: String): Post 
+  insertQuotes(text: String, author: String): Quote 
+  login(email: String!, password: String!): AuthPayload
+  removeTodo(id: String): Result
+  signup(email: String!, password: String!, name: String!): AuthPayload
+  toggleTodo(id: String): Todo
+  updatePost(postId: Int!): Post
+  updateProfile(_id: String, profile: ProfileInput): Profile
+}

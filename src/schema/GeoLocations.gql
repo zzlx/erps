@@ -1,0 +1,11 @@
+# coordinates
+type GeoLocations {
+  _id: ID!
+  latitude: Float!
+  longitude: Float!
+  altitude: Float
+  accuracy: Float
+  altitudeAccuracy: Float
+  heading: String
+  speed: String
+}

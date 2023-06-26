@@ -1,0 +1,9 @@
+type Human implements Character {
+  _id: ID!
+  name: String!
+  friends: [Character]
+  appearsIn: [Episode]
+  starships: [Starship]
+  totalCredits: Int
+  homePlanet: String
+}

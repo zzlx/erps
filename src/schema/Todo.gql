@@ -1,0 +1,12 @@
+# Todos 待办事项
+type Todo {
+  _id: ID!
+  text: String
+  completed: Boolean
+}
+
+# 输入类型
+input TodoInput {
+  text: String!
+  completed: String!
+}
