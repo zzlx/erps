@@ -31,7 +31,7 @@ app.use(error());                 // 记录中间件错误
 app.use(logger());                // 日志中间件
 app.use(xResponse());             // 响应时间记录
 app.use(router.routes());         // 服务端路由
-app.use((ctx, next) => {          // 最内层中间件
-  ctx.state.innerest_middleware = true;
-  debug('context:', ctx);
+app.use((ctx, next) => {
+  ctx.state.innerest_middleware = true; // 最内层中间件
+  //debug('context:', ctx);
 });
