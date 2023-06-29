@@ -13,7 +13,8 @@
  * *****************************************************************************
  */
 
-import util from 'util';
+import path from 'node:path';
+import util from 'node:util';
 import { Application } from './koa/Application.mjs';
 import { error, logger, xResponse } from './middlewares/index.mjs';
 import { objectID } from './utils/objectID.mjs';
@@ -34,4 +35,9 @@ app.use(router.routes());         // 服务端路由
 app.use((ctx, next) => {
   ctx.state.innerest_middleware = true; // 最内层中间件
   //debug('context:', ctx);
+  // for test
+  if (path.basename(ctx.pathname) === 'index.mjs') {
+    debug(ctx);
+    //ctx.type = 'js'
+  }
 });

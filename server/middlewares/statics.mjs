@@ -35,7 +35,7 @@ export function statics (root = 'public_html', options = {}) {
   fs.promises.stat(opts.root).then(stats => {
     assert(stats.isDirectory(), `${root} is not a valid directory.`)
   }).catch(err => {
-    if (err.code === 'ENOENT') console.error(`Error in statics: ${rootPath} is not exists.`); 
+    if (err.code === 'ENOENT') console.error(`Error in statics: ${opts.root} is not exists.`); 
   });;
 
   return async function staticMiddleware (ctx, next) {

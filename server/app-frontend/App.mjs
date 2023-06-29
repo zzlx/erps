@@ -29,9 +29,9 @@ import * as layout from './components/layout/index.mjs';
 import { assert } from './utils/assert.mjs';
 import { debuglog } from './utils/debuglog.mjs';
 
-import HomePage from './pages/HomePage.mjs';
-import Test from './pages/Test1.mjs';
-import NoMatch from './pages/NoMatch.mjs';
+import HomePage from './apps/HomePage.mjs';
+import Test from './apps/Test1.mjs';
+import NoMatch from './apps/NoMatch.mjs';
 
 const debug = debuglog('debug:App');
 
@@ -49,7 +49,9 @@ export default function App (props = { }) {
   const routes = React.createElement(Switcher, null, 
     React.createElement(Route, { 
       path: ["/", '/homepage', '/home'], 
-      exact: true, component: HomePage }),
+      exact: true, 
+      component: Test 
+    }),
     React.createElement(Route, { path: "/games", component: Test }),
     React.createElement(Route, { path: "*", component: NoMatch }),
   );

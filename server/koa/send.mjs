@@ -30,14 +30,27 @@ export async function send (ctx, pathname, options = {}) {
 
   const root = opts.root ? path.normalize(path.resolve(opts.root)) : ''
 
-
   if (typeof opts.index === 'string') opts.index = String.prototype.split.call(opts.index, ',');
+
+  let hasQueryString = false;
+  let i = 0;
+
+  for (const c of pathname) {
+    if (c === '?') {
+      hasQueryString = true;
+      break;
+    }
+
+    i++;
+  }
 
   // get uri from pathname
   let uri = stripTrailingSlash(stripLeadingSlash(pathname));
 
-
   try {
+    // 去掉查询字符串
+    
+
     uri = decodeURIComponent(uri)
   } catch (err) {
     return ctx.throw(HTTP_STATUS.BAD_REQUEST, `${pathname} failed to decode.`);
