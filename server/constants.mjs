@@ -9,7 +9,7 @@
 import http2 from 'http2';
 
 // System canstants
-export * from './app-frontend/constants.mjs';
+//export * from './app-frontend/constants.mjs';
 
 // Http constants
 export const HTTP2_METHOD = [];

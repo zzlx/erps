@@ -26,10 +26,6 @@ const debug = util.debuglog('debug:server-router');
 export const router = new Router({ }); // server router
 
 router.get('Statics', '/*', statics(paths.PUBLIC_HTML, { index: 'index.html' }));
-router.get('UI', '/statics/es/', statics(path.join(paths.SERVER, 'app-frontend'), {
-  index: 'index.mjs',
-  prefix: '/statics/es',
-}));
 
 // APIs
 const apis = await import('./api/index.mjs').then(m => m.default);
@@ -43,7 +39,7 @@ router.use('/docs', docsRouter.routes());
 
 // ssr
 const appPath = path.join(paths.SERVER, 'app-frontend', 'App.mjs');
-router.get('UI', ['/', '/*'], ssr({appPath: appPath}));
+//router.get('UI', ['/', '/*'], ssr({appPath: appPath}));
 
 // Redirect /test to /
 //router.redirect('/test', '/');
