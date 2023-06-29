@@ -23,10 +23,14 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
+import util from 'node:util';
 import { send } from '../koa/send.mjs';
 
-export function statics (root = 'public_html', options = {}) {
-  assert('string' === typeof root, 'the root paramater must be a string value.');
+const debug = util.debuglog('debug:statics');
+
+export function statics (root, options = {}) {
+  assert('string' === typeof root, 'the root directory is needed to serve files.');
+  debug('serve statics:', root);
 
   const opts = Object.assign({
     root: path.isAbsolute(root) ? root : path.resolve(root),
@@ -35,7 +39,8 @@ export function statics (root = 'public_html', options = {}) {
   fs.promises.stat(opts.root).then(stats => {
     assert(stats.isDirectory(), `${root} is not a valid directory.`)
   }).catch(err => {
-    if (err.code === 'ENOENT') console.error(`Error in statics: ${opts.root} is not exists.`); 
+    if (err.code === 'ENOENT') console.log(`Error in statics: ${opts.root} is not exists.`); 
+    else console.log(err);
   });;
 
   return async function staticMiddleware (ctx, next) {
@@ -44,7 +49,7 @@ export function statics (root = 'public_html', options = {}) {
 
     // 旁路规则:
     // 1. 静态资源仅接受GET、HEAD请求方法
-    if (!/GET|HEAD/.test(ctx.method)) return; 
+    if (ctx.method !== 'GET' && ctx.method !== 'HEAD') return;
     // 2. body非空时
     if (ctx.body != null || (ctx.status && ctx.status != 404)) return; 
     // 3. 前缀不匹配时的情况
@@ -52,20 +57,10 @@ export function statics (root = 'public_html', options = {}) {
     // 4. 无后缀不匹配
     //if (path.extname(ctx.pathname) === '') return next();
     
-    const prefix = path.join(
-      ctx.router && ctx.router.opts.prefix ? ctx.router.opts.prefix : '',  
-      opts.prefix ? opts.prefix : ''
-    );
-
-    const pathname = prefix && ctx.pathname.substr(0, prefix.length) === prefix
-      ? ctx.pathname.length === prefix.length ? '/' : ctx.pathname.slice(prefix.length)
-      : ctx.pathname;
-
     try {
-      await send(ctx, pathname, opts);
+      await send(ctx, ctx.pathname, opts);
     } catch (err) {
       ctx.throw(err);
     }
-
   }
 }

@@ -30,6 +30,16 @@ export async function send (ctx, pathname, options = {}) {
 
   const root = opts.root ? path.normalize(path.resolve(opts.root)) : ''
 
+  const prefix = path.join(
+    ctx.router && ctx.router.opts.prefix ? ctx.router.opts.prefix : '',  
+    opts.prefix ? opts.prefix : ''
+  );
+
+  const pathName = prefix && ctx.pathname.substr(0, prefix.length) === prefix
+    ? ctx.pathname.length === prefix.length ? '/' : ctx.pathname.slice(prefix.length)
+    : ctx.pathname;
+
+
   if (typeof opts.index === 'string') opts.index = String.prototype.split.call(opts.index, ',');
 
   let hasQueryString = false;
@@ -40,17 +50,16 @@ export async function send (ctx, pathname, options = {}) {
       hasQueryString = true;
       break;
     }
-
     i++;
   }
 
   // get uri from pathname
-  let uri = stripTrailingSlash(stripLeadingSlash(pathname));
+  let uri = i == 0 
+    ? stripTrailingSlash(stripLeadingSlash(pathname))
+    : stripTrailingSlash(stripLeadingSlash(pathname.substr(0, i)));
 
   try {
     // 去掉查询字符串
-    
-
     uri = decodeURIComponent(uri)
   } catch (err) {
     return ctx.throw(HTTP_STATUS.BAD_REQUEST, `${pathname} failed to decode.`);

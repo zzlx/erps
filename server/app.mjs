@@ -34,10 +34,7 @@ app.use(xResponse());             // 响应时间记录
 app.use(router.routes());         // 服务端路由
 app.use((ctx, next) => {
   ctx.state.innerest_middleware = true; // 最内层中间件
-  //debug('context:', ctx);
+
   // for test
-  if (path.basename(ctx.pathname) === 'index.mjs') {
-    debug(ctx);
-    //ctx.type = 'js'
-  }
+  //debug('context:', ctx);
 });
