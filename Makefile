@@ -26,6 +26,7 @@ OBJS      = $(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(SOURCES)))
 mjs_files = $(shell find ./src -name '*.mjs')
 gql_files = $(shell find ./src/schema -name '*.gql')
 ds_files  = $(shell find ./ -name ".DS_Store")
+dt_files  = $(shell find ./ -name "*.d.mts")
 
 myprog : $(OBJS)gcc -o myprog $(OBJS)
 
@@ -54,6 +55,9 @@ clean_diff:
 	rm -f *.diff
 
 clean_ds: $(ds_files)
+	rm $?
+
+clean_dt: $(dt_files)
 	rm $?
 
 clean:

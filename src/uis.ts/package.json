@@ -1,9 +1,10 @@
 {
   "name": "uis",
   "version": "1.0.0",
-  "description": "frontend ui system",
-  "main": "index.js",
+  "description": "frontend ui system.",
+  "main": "index.mts",
   "devDependencies": {},
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

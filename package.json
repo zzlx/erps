@@ -4,6 +4,7 @@
   "license": "MIT",
   "description": "ERP services.",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "node-gyp build",
     "clean": "make clean_ds",
@@ -48,6 +49,6 @@
     "whatwg-fetch": "^3.5.0"
   },
   "workspaces": [
-    "packages/uis"
+    "src/uis.ts"
   ]
 }
