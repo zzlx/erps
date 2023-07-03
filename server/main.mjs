@@ -26,6 +26,7 @@ const paramMap = argvParser(argvs);
 
 process.nextTick(() => { main(); });
 
+
 // Process container
 const proc = {
   httpd: null,
@@ -64,7 +65,7 @@ function main () {
         isExec = true;
         delete paramMap[param];
         startHttpd();
-        scssRender();
+        scssRender(); // 监测无css文件时再生成文件
         if (paramMap.watch) { watchPath(); }
         break;
       case "renderCSS":
@@ -137,9 +138,8 @@ async function watchPath () {
 
   watcher.on("change", (f) => {
     debug(`File change:${f}`);
-
     if (/\.mjs/.test(f)) {
-
+      debug('重启https服务');
       // @todo: 不重启服务热更新前端代码
       /*
       if (/src\/uis/.test(f)) {
@@ -148,11 +148,29 @@ async function watchPath () {
       */
 
       restartHttps();
+    } else if (/\.ts$/.test(f)) {
+      //tsc();
     } else if (/\.scss/.test(f)) {
       scssRender();
     } 
+
   });
 }
+
+/**
+ *
+ *
+ */
+
+function tsc () {
+  debug('执行tsc');
+  cp.exec('tsc', (err, stdout, stderr) => {
+    if (err) debug('err:', err);
+    debug('stdout:', stdout);
+    if (stderr) debug('stderr:', stderr);
+  });
+}
+
 
 /**
  * start http daemon

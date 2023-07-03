@@ -8,11 +8,12 @@
  * *****************************************************************************
  */
 
-import App from './App';
-import { deviceDetect } from './utils/deviceDetect';
+import App from './App.mjs';
+import { deviceDetect } from './utils/deviceDetect.mjs';
 
 // 配置环境变量: 从模块文件url中获取env,未获取到时默认为production
 globalThis.env = new URL(import.meta.url).searchParams.get('env') || 'production';
+
 
 const isBrowserEnv = globalThis.window && globalThis.location;
 const isNodeEnv = globalThis.process && globalThis.process.version;

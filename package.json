@@ -4,14 +4,13 @@
   "license": "MIT",
   "description": "ERP services.",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "node-gyp build",
     "clean": "make clean_ds",
     "edit": "vim -u .vimrc",
-    "erps:devel": "NODE_DEBUG=debug* ./bin/erpd --start --devel --watch",
-    "erps:prod": "./bin/erpd --start",
-    "start": "npm run erps:prod",
+    "start:devel": "NODE_DEBUG=debug* ./bin/erpd --start --devel --watch",
+    "start:prod": "./bin/erpd --start",
+    "start": "npm run start:prod",
     "tags": "ctags $(find ./server -name '*.mjs')"
   },
   "dependencies": {
@@ -47,8 +46,5 @@
     "typescript": "^4.7.4",
     "wget": "^0.0.1",
     "whatwg-fetch": "^3.5.0"
-  },
-  "workspaces": [
-    "src/uis.ts"
-  ]
+  }
 }
