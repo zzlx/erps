@@ -25,8 +25,11 @@ const debug = util.debuglog('debug:server-router');
 
 export const router = new Router({ }); // server router
 
-router.get('Statics', '/*', statics(paths.PUBLIC_HTML, { index: 'index.html' }));
-//router.get('Statics', '/statics/es/*', statics(paths.UIS));
+router.get('Statics', '/*', statics(paths.PUBLIC_HTML, {}));
+router.get('Statics', '/statics/es/*', statics(paths.UIS, {
+  index: "index.mjs",
+  prefix: "/statics/es"
+} ));
 
 // APIs
 const apis = await import('./api/index.mjs').then(m => m.default);

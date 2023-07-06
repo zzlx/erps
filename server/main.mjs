@@ -11,11 +11,11 @@
 
 import cp from 'child_process';
 import path from 'path';
-import tls from 'tls';
 import util from 'util';
 import { argvParser, debounceAlgorithm } from './utils/index.mjs';
 import { configs, paths } from "./settings/index.mjs";
 import { scssRender } from './utils/scssRender.mjs';
+import { sendCommand } from './sendCommand.mjs';
 //import readJSON from './readJSON.cjs';
 
 const __filename = import.meta.url.substr(7);
@@ -87,7 +87,7 @@ function main () {
       case "stop":
         isExec = true;
         delete paramMap[param];
-
+        stopHttpd();
         break;
       case "restart":
         isExec = true;
@@ -96,15 +96,6 @@ function main () {
         break;
     } // end of switch
   } // end of for loop
-
- /*
- if (isExec === false) {
-    getChar("请输入执行环境").then(data => {
-      debug(data);
-    });
- }
- */
-
 }
 
 /**
@@ -203,99 +194,14 @@ function stopHttpd () {
 }
 
 function restartHttpd () {
-
   if (proc.httpd && proc.httpd.killed == false) {
     //debug('发送SIGTSTP信号给http服务');
-    debug('Send SIGTERM to HTTPD');
+    debug('Send SIGTERM to HTTPD.');
     proc.httpd.kill('SIGTERM');
   } else {
-    debug('Send RESTART to HTTPD');
+    debug('Send RESTART to HTTPD.');
     sendCommand('RESTART');
   }
 
   startHttpd();
-}
-
-/**
- * 发送命令给服务进程
- */
-
-function sendCommand (command) {
-  const options = {
-    host: "localhost",
-    port: "8888", // the port should connect to
-    ca: configs.cert,
-    rejectUnauthorized: false,
-    checkServerIdentity: (hostname, cert) => {
-      return null;
-    },
-  };
-
-  return new Promise((resolve, reject) => {
-    const socket = tls.connect(options, () => {
-
-      debug('client connected', 
-        socket.authorized ? 'authorized' : 'unauthorized'
-      );
-
-      process.stdin.pipe(socket);
-      process.stdin.resume();
-    });
-
-    socket.on('end', () => {
-      debug('server ends connection');
-    });
-
-    socket.on('secureConnect', () => {
-      // byte1: token
-      const byte1 = new Uint8Array(1);
-      byte1.set([0b11111111], 0);
-
-      const data = Buffer.from(JSON.stringify({
-        token: configs.passphrase,
-        authorized: socket.authorized,
-        command: command
-      }));
-
-      debug('send command: %s', command);
-      socket.end(Buffer.concat([byte1, data]));
-
-      resolve();
-    });
-
-    socket.on("error", e => { 
-      if (e.code === "ECONNREFUSED") {
-        debug('主控程序发送控制信号被拒绝:', e.code);
-      } else if (e.code === "ECONNRESET") {
-        debug('服务器端主动断开连接:', e.code);
-      } else {
-        debug('主控程序客户端错误:', e.code) 
-      }
-    }); // error event
-  //
-  });
-}
-
-/**
- * 命令行交互式工具
- *
- * @param: {string} question
- * @param: {bool} password 是否显示*号代替输入字符
- */
-
-function getChar () {
-  const question = arguments[0];
-
-  process.stdout.write(String(question));
-
-  return new Promise((resolve, reject) => {
-    if (process.stdin.isPaused()) process.stdin.resume();
-    process.stdin.setEncoding("utf8");
-
-    process.stdin.on("data", (chunk) => {
-      const input = String(chunk).trim();
-      resolve(input);
-      process.stdin.pause();
-    });
-  });
 }

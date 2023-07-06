@@ -8,9 +8,7 @@
     "build": "node-gyp build",
     "clean": "make clean_ds",
     "edit": "vim -u .vimrc",
-    "start:devel": "NODE_DEBUG=debug* ./bin/erpd --start --devel --watch",
-    "start:prod": "./bin/erpd --start",
-    "start": "npm run start:prod",
+    "start": "NODE_DEBUG=debug* ./bin/erpd --start --devel --watch",
     "tags": "ctags $(find ./server -name '*.mjs')"
   },
   "dependencies": {
