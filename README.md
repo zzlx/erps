@@ -1,18 +1,26 @@
 ERPs
-=====
+====
 
-ERPs is a suite of services for a ERP system.
-It provides OA\CRM\Accounting\Store... services,
+ERPs,一套ERP服务解决方案,提供OA、CRM、财务会计、成本核算、仓储、生产等管理服务.
 
-# Usage
+> [软件许可协议-MIT](./LICENSE)
 
-启动ERPs服务
+# 使用帮助
+
+## 启动服务
+
+* 启动开发模式
 
 ```
 npm start
 ```
 
-# About
+* 启动生产模式
 
-* [帮助文档](./docs/README.md)
-* [软件许可协议](./LICENSE)
+```
+bin/erpd --start
+```
+
+## 帮助文档  
+
+[帮助文档](./docs/README.md)
