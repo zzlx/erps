@@ -22,7 +22,13 @@
 				"indent": ["warn", 2],
 			  "semi": ["warn", "always"],
 				"linebreak-style": ["error", "unix"],
-				"comma-dangle": ["warn", "always"],
+				"comma-dangle": ["warn", {
+          "arrays": "never",
+          "objects": "always-multiline",
+          "imports": "always-multiline",
+          "exports": "never",
+          "functions": "never"
+        }],
 				"no-unused-vars": ["warn"],
         "quotes": ["warn", "double"]
     }

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-
 /**
  * *****************************************************************************
  *
  * 生成目录index模块
+ *
  *
  * *****************************************************************************
  */
@@ -16,7 +16,7 @@ const dir = argvs[0];
 const target = argvs[1];
 
 if (dir == null) {
-  console.error('Error: 请提供一个目录作为参数');
+  console.error('⚠️ 请提供一个目录作为参数');
   process.exit(); }
 
 fs.promises.readdir(dir, { encoding: 'utf8', withFileTypes: true }).then(files => {
