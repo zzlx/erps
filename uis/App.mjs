@@ -35,6 +35,12 @@ import NoMatch from './apps/NoMatch.mjs';
 
 const debug = debuglog('debug:App');
 
+/*
+ 
+
+ 
+ */
+
 export default function App (props = { }) {
 
   const store = createStore(props.data);
