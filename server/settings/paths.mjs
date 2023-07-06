@@ -38,6 +38,7 @@ if (paths.PUBLIC_HTML == null) {
 }
 
 /*
+ 
 // make sure pulic-html path is exists
 if (paths.PUBLIC_HTML == null) {
   paths.PUBLIC_HTML = path.join(os.homedir(), 'public_html'); 

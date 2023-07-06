@@ -119,6 +119,7 @@ async function watchPath () {
   const { PathWatcher } = await import('./utils/PathWatcher.mjs');
 
   const restartHttps = debounceAlgorithm(() => {
+    debug('Restart httpd....');
     //debug("Restart service.");
     //sendCommand("RESTART");
     restartHttpd();
@@ -134,12 +135,12 @@ async function watchPath () {
     // the paths need to be watched
     paths.SERVER, 
     paths.SRC, 
+    paths.UIS, 
   ]);
 
   watcher.on("change", (f) => {
     debug(`File change:${f}`);
     if (/\.mjs/.test(f)) {
-      debug('重启https服务');
       // @todo: 不重启服务热更新前端代码
       /*
       if (/src\/uis/.test(f)) {

@@ -26,6 +26,7 @@ const debug = util.debuglog('debug:server-router');
 export const router = new Router({ }); // server router
 
 router.get('Statics', '/*', statics(paths.PUBLIC_HTML, { index: 'index.html' }));
+//router.get('Statics', '/statics/es/*', statics(paths.UIS));
 
 // APIs
 const apis = await import('./api/index.mjs').then(m => m.default);
@@ -34,8 +35,8 @@ router.use('/api', cors(), apis.routes()); // API跨域访问
 // Docs
 const docsRouter = new Router({ });
 
-docsRouter.get('Docs', '/*', statics(paths.DOCS, { index: 'README.md'})); 
-router.use('/docs', docsRouter.routes());
+//docsRouter.get('Docs', '/*', statics(paths.DOCS, { index: 'README.md'})); 
+//router.use('/docs', docsRouter.routes());
 
 // ssr
 const appPath = path.join(paths.SERVER, 'app-frontend', 'App.mjs');
@@ -48,3 +49,5 @@ router.get('user', '/users/:id', (ctx, next) => {
   ctx.body = ctx.router.url('user', { id: 180 }, { query: 'test=abc'});
   return next();
 });
+
+
