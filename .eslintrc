@@ -19,11 +19,13 @@
         "react"
     ],
     "rules": {
-				"indent": ["warn", 2],
+				"indent": ["warn", 2, {
+          "SwitchCase": 1
+        }],
 			  "semi": ["warn", "always"],
 				"linebreak-style": ["error", "unix"],
 				"comma-dangle": ["warn", {
-          "arrays": "never",
+          "arrays": "always-multiline",
           "objects": "always-multiline",
           "imports": "always-multiline",
           "exports": "never",
