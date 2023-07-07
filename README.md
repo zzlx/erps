@@ -5,6 +5,7 @@ ERPs
 各模块可以单独使用,也可以通过系统配置，形成一整套ERP管理解决方案.
 
 > 开发目标: 一个标准化、数字化、智能化的管理工具.
+> 软件许可：[MIT-LICENSE](./LICENSE)
 
 # 快速开始使用
 
@@ -28,12 +29,10 @@ cd erps & npm install
 npm start
 ```
 
-# 目录文件介绍
+# 代码库目录介绍
 
 * bin: 可执行文件目录
 * [docs](./docs/README.md): 项目文档
 * server: 服务端程序代码库
 * src: 源代码库
 * uis: 前端程序代码库
-* [LICENSE](./LICENSE): MIT LICENSE
-* [package.json](./package.json): 项目包配置信息
