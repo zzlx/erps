@@ -5,27 +5,22 @@
  *
  * 基于KOA框架搭建的服务端后台程序,用于响应客户端请求.  
  *
- * Features
+ * Features:
  *
  * * 内容协商
  * * 压缩传输
  *
- *
  * *****************************************************************************
  */
 
-import path from 'node:path';
-import util from 'node:util';
-import { Application } from './koa/Application.mjs';
-import { error, logger, xResponse } from './middlewares/index.mjs';
-import { objectID } from './utils/objectID.mjs';
-import { router } from './router.mjs'; 
-
-const debug = util.debuglog('debug:server-side-app');
+import { Application } from "./koa/Application.mjs";
+import { error, logger, xResponse } from "./middlewares/index.mjs";
+import { objectID } from "./utils/objectID.mjs";
+import { router } from "./router.mjs"; 
 
 export const app = new Application({
-  env: process.env.NODE_ENV || 'production', // default value is production
-  keys: [String(objectID()), String(objectID())],
+  env: process.env.NODE_ENV || "production",      // default value is production
+  keys: [String(objectID()), String(objectID())], // keys for encryept
   // ...
 });
 
@@ -35,7 +30,5 @@ app.use(xResponse());             // 响应时间记录
 app.use(router.routes());         // 服务端路由
 app.use((ctx, next) => {
   ctx.state.innerest_middleware = true; // 最内层中间件
-
-  // for test
-  //debug('context:', ctx);
+  return next();
 });

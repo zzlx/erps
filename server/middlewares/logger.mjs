@@ -17,7 +17,7 @@ import util from 'util';
 
 export function logger (format) {
   return async function loggerMiddleware (ctx, next) {
-    const log = {
+    ctx.state.log = {
       "atimeMs": Date.now(), //  access time in mill sec
       "c-address": ctx.socket.remoteAddress,
       "c-port": ctx.socket.remotePort,
@@ -34,7 +34,7 @@ export function logger (format) {
     await next(); // 执行中间件栈
 
     // set responsed status
-    log["status"] = ctx.status;
+    ctx.state.log.status = ctx.status;
 
     // print request log in production environment
     // @todo: 增加格式化输出
