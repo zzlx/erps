@@ -1,26 +1,39 @@
 ERPs
 ====
 
-ERPs,一套ERP服务解决方案,提供OA、CRM、财务会计、成本核算、仓储、生产等管理服务.
+一套用于ERP管理的系统平台，提供包括OA\CRM\会计\仓储...等管理模块, 
+各模块可以单独使用,也可以通过系统配置，形成一整套ERP管理解决方案.
 
-> [软件许可协议-MIT](./LICENSE)
+> 开发目标: 一个标准化、数字化、智能化的管理工具.
 
-# 使用帮助
+# 快速开始使用
 
-## 启动服务
+## 下载代码库
 
-* 启动开发模式
+```
+git clone https://github.com/zzlx/erps.git
+```
+
+## 安装系统依赖
+
+进入代码库目录并安装系统依赖库
+
+```
+cd erps & npm install
+```
+
+## 启动开发环境
 
 ```
 npm start
 ```
 
-* 启动生产模式
+# 目录文件介绍
 
-```
-bin/erpd --start
-```
-
-## 帮助文档  
-
-[帮助文档](./docs/README.md)
+* bin: 可执行文件目录
+* [docs](./docs/README.md): 项目文档
+* server: 服务端程序代码库
+* src: 源代码库
+* uis: 前端程序代码库
+* [LICENSE](./LICENSE): MIT LICENSE
+* [package.json](./package.json): 项目包配置信息
