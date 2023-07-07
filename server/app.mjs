@@ -1,13 +1,13 @@
 /**
  * *****************************************************************************
  *
- * 服务端处理程序
+ * Server-side application
  *
  * 基于KOA框架搭建的服务端后台程序,用于响应客户端请求.  
  *
  * Features:
  *
- * * 内容协商
+ * * Content-nogotiation
  * * 压缩传输
  *
  * *****************************************************************************
@@ -28,7 +28,7 @@ app.use(error());                 // 记录中间件错误
 app.use(logger());                // 日志中间件
 app.use(xResponse());             // 响应时间记录
 app.use(router.routes());         // 服务端路由
-app.use((ctx, next) => {
-  ctx.state.innerest_middleware = true; // 最内层中间件
+app.use((ctx, next) => {          // 最内层中间件,用于判断中间件栈是否执行:w
+  ctx.state.innerest_middleware = true;
   return next();
 });

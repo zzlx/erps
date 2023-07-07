@@ -186,7 +186,7 @@ function eslint (file) {
   cp.exec(`npx eslint ${file}`, (error, stdout, stderr) => {
     if (error)  console.error(error);
     if (stderr) console.error(stderr);
-    if (stdout) console.warn(CLEAR_PAGE, '\n', stdout); // eslint-disable-line
+    if (stdout) console.log(CLEAR_PAGE, stdout); // eslint-disable-line
   });
 }
 
