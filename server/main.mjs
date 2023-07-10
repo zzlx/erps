@@ -1,13 +1,13 @@
 /**
  * *****************************************************************************
  *
- * Main programe
- *
- * [Server Documents](../src/doc/Server.md)
- *
+ * Backend-server main programe.
  *
  * 支持特性:
  *
+ * * 开发模式下自动重启服务
+ * *
+ * * ...
  *
  * *****************************************************************************
  */
@@ -27,10 +27,45 @@ const debug = util.debuglog("debug:main");
 const argvs = Array.prototype.slice.call(process.argv, 2);
 const paramMap = argvParser(argvs);
 
+// Setting process title
+process.title = 'org.zzlx.erpd';
+
+for (const item of argvs) {
+  if (/devel/.test(item)) {
+    process.env.NODE_ENV = "development";
+    continue;
+  }
+
+  if (/prod/.test(item)) {
+    process.env.NODE_ENV = "production";
+    continue;
+  }
+}
+
+process.on("uncaughtException", (error, origin) => {
+  debug("The uncaughted exception: ", error)
+  debug("The origin uncaught exception: ", origin)
+});
+
+//
+process.on("unhandledRejection", (reason, promise) => {
+  debug(
+    "The unhandled rejection is come from ", 
+    promise, 
+    " because of: ", 
+    reason
+  );
+});
+
+// Print uptime in development env
+process.on("exit", code => {
+  debug("---程序结束前已经运行了%sms---", Math.ceil(process.uptime()*1000));
+});
+
 process.nextTick(() => { main(); });
 
 // Set a process container
-const proc = {
+const proc = { 
   httpd: null,
 };
 
@@ -114,7 +149,6 @@ async function watchPath () {
   const { PathWatcher } = await import("./utils/PathWatcher.mjs");
 
   const restartHttps = debounceAlgorithm(() => {
-    debug("Restart httpd....");
     // debug("Restart service.");
     // sendCommand("RESTART");
     restartHttpd();
@@ -184,9 +218,15 @@ function startHttpd () {
 
 function eslint (file) {
   cp.exec(`npx eslint ${file}`, (error, stdout, stderr) => {
-    if (error)  console.error(error);
-    if (stderr) console.error(stderr);
-    if (stdout) console.log(CLEAR_PAGE, stdout); // eslint-disable-line
+    if (error) { 
+      console.error(error);
+    } else if (stderr) {
+      console.error(stderr);
+    } else if (stdout) {
+      console.log(CLEAR_PAGE, stdout); // eslint-disable-line
+    } else {
+      console.log(CLEAR_PAGE); // eslint-disable-line
+    }
   });
 }
 

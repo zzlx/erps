@@ -4,9 +4,9 @@ Favorites
 # 开发技术栈
 
 * [Node.js](https://nodejs.org/): Node.js® is an open-source, cross-platform JavaScript runtime environment.
-* [MDN](https://developer.mozilla.org/zh-CN/docs/MDN/Writing_guidelines)
-* [Node.js v18](https://nodejs.org/dist/latest-v18.x/docs/api/)
-* [Express](https://www.expressjs.com.cn)
+* [MDN](https://developer.mozilla.org/zh-CN/docs/MDN/Writing_guidelines):Mozilla开发者
+* [Node.js](https://nodejs.org/dist/latest/docs/api/):Node.js 网站
+* [Express](https://www.expressjs.com.cn):Express网站
 * [Koa](https://koajs.com):
 * [React.js](https://react.dev):
 * [PostgreSQL](https://www.postgresql.org):
@@ -22,6 +22,7 @@ Favorites
 * [GraphQL](https://graphql.org)
 * [GraphQL.js](https://graphql.org/graphql-js)
 * [ACME Protocol](https://tools.ietf.org/html/rfc8555)
+* [Eslint Rules Reference](https://eslint.org/docs/latest/rules/)
 
 # 协议 
 

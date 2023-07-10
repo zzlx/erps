@@ -34,11 +34,12 @@
           "objects": "always-multiline",
           "imports": "always-multiline",
           "exports": "never",
-          "functions": "never"
+          "functions": "always-multiline"
         }],
         "no-console": ["warn", { "allow": ["warn", "error"] }],
 				"no-unused-vars": ["warn"],
-        "quotes": ["warn", "double"]
+        "quotes": ["warn", "double"],
+        "react/prop-types": "off"
     },
     "settings": {
       "react": {
