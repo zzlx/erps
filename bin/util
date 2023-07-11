@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 #
 # Shell程序
-# 用于服务部署配置
+#
 #
 # ------------------------------------------------------------------------------
 
@@ -25,6 +25,7 @@ declare -r _FILE=${0##*/}                                 # 获取文件名称
 declare -r _S_FILE=$(ls -l $0 |awk '{print $NF}')         # 获取文件物理地址
 declare -r _ROOT=$(dirname $(cd $(dirname $_S_FILE) || exit; pwd -P)) # 获取目录路径
 declare -r _BIN="${_ROOT}/bin"                            # 获取脚本根目录路径
+declare -r _UNIT_DIR=/usr/lib/systemd/system
 
 declare +r _DEBUG=false        # 默认关闭调试
 declare -r _RENEW_ALLOW=30
@@ -1072,6 +1073,10 @@ _parse_argv() {
       --restart )
         $_BIN/starter.mjs --restart
         ;;
+      --backup )
+        tar -a -cf ${2}_backup_$(date "+%Y%m%d%H%M%S").tar.gz $2
+        ;;
+
       --setup )
 				_setup
         ;;
@@ -1177,6 +1182,9 @@ EOF
 
 }
 
+_set_target () {
+  ln -sf "$unitdir/erps.service" "$earlydir/default.target"
+}
 
 _readDotEnv() {
 	# 读入.env环境变量
@@ -1197,6 +1205,10 @@ _curl_request () {
 	curl --http2 -X POST -k --data '{test}' https://macair2013:3000/homePage
 }
 
+_send_mail () {
+  echo $(systemctl status erps) | mail -Ssendwait -s ${1-TEST} wangxuemin@zzlx.org
+}
+
 _test () {
   for ((COUNT = 1; COUNT <= 10; COUNT++)); do
     echo $COUNT
@@ -1212,7 +1224,7 @@ _gencsr() {
   openssl req -new -sha256 -key localhost-key.pem -out localhost-csr.pem
 }
 
--genpublic() {
+_genpublic() {
   openssl x509 -req -in localhost-csr.pem -signkey localhost-key.pem -out localhost-cert.pem
 }
 
