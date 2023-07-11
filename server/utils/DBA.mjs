@@ -15,11 +15,4 @@ export class DBA extends EventEmitter {
     super();
   }
 
-  /**
-   * 执行一次查询
-   */
-
-  query () {
-
-  }
 }

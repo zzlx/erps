@@ -217,13 +217,14 @@ function startHttpd () {
  */
 
 function eslint (file) {
+  debug("当前目录%s", process.cwd());
   cp.exec(`npx eslint ${file}`, (error, stdout, stderr) => {
-    if (error) { 
-      console.error(error);
+    if (stdout) { 
+      console.log(CLEAR_PAGE, stdout); // eslint-disable-line
     } else if (stderr) {
       console.error(stderr);
-    } else if (stdout) {
-      console.log(CLEAR_PAGE, stdout); // eslint-disable-line
+    } else if (error) {
+      console.error(error);
     } else {
       console.log(CLEAR_PAGE); // eslint-disable-line
     }

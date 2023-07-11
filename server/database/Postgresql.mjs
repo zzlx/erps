@@ -5,14 +5,25 @@
  * *****************************************************************************
  */
 
-import pg from 'pg';
-import { DBA } from './DBA.mjs';
+import pg from "pg";
+import { DBA } from "./DBA.mjs";
+
+export const CLIENT = Symbol('context#accept');
 
 export class Postgresql extends DBA {
   constructor(opts = {}) {
     super();
+    this.name = 'PostgresqlDBA';
   }
 
+  query () {
+    // 执行一次查询
+
+  }
+
+  get client () {
+
+  }
 }
 
 
