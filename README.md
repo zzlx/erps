@@ -36,3 +36,7 @@ npm start
 * server: 服务端程序代码库
 * src: 源代码库
 * uis: 前端程序代码库
+
+# 开发文档
+
+* [常用站点](./docs/Favorites.md)

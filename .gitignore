@@ -49,3 +49,6 @@ Thumbs.db
 
 # Node.js
 node_modules
+
+# Other
+package-lock.json

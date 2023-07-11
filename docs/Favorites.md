@@ -7,13 +7,11 @@ Favorites
 * [MDN](https://developer.mozilla.org/zh-CN/docs/MDN/Writing_guidelines):Mozilla开发者
 * [Node.js](https://nodejs.org/dist/latest/docs/api/):Node.js 网站
 * [Express](https://www.expressjs.com.cn):Express网站
-* [Koa](https://koajs.com):
-* [React.js](https://react.dev):
-* [PostgreSQL](https://www.postgresql.org):
-* [pg](https://node-postgres.com)
+* [Koa](https://koajs.com):KOA后端框架
+* [React.js](https://react.dev):React前端框架
+* [PostgreSQL](https://www.postgresql.org):后端数据库
+* [pg](https://node-postgres.com):node客户端
 * [Markdown](https://www.markdown.xyz):
-* [RFC](https://www.rfc-editor.org)
-* [RFC4634:SHA](https://www.rfc-editor.org/info/rfc4634)
 * [Bootstrap@v5.2](https://getbootstrap.com/docs/5.2/layout/breakpoints/)
 * [Bootstrap Icons](https://icons.getbootstrap.com)
 * [OpenAI](https://openai.com)
@@ -24,8 +22,10 @@ Favorites
 * [ACME Protocol](https://tools.ietf.org/html/rfc8555)
 * [Eslint Rules Reference](https://eslint.org/docs/latest/rules/)
 
-# 协议 
+# RFC标准 
 
+* [RFC](https://www.rfc-editor.org)
+* [RFC4634:SHA](https://www.rfc-editor.org/info/rfc4634)
 * [URI RFC3986](https://www.ietf.org/rfc/rfc3986.txt)
 
 # 云服务平台 
