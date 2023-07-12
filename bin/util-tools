@@ -1142,45 +1142,6 @@ _getPID() {
   echo $(lsof -i:${port} | grep 'LISTEN' \ | awk \'NR==1{print $2}\');
 }
 
-_setupTimer () {
-cat <<- EOF
-[Unit]
-[Timer]
-[Timer]
-EOF
-
-}
-
-_setupSystemdService () {
-
-  cat <<- EOF
-[Unit]
-Description=ERP Service daemon
-Wants=network.target
-After=network.target
-
-[Service]
-Type=simple
-#Type=forking
-User=zzlx
-Group=zzlx
-Environment=NODE_ENV=production
-ExecReload=$(which node) $(_BIN/erpd) --restart
-ExecStart=$(which node) $(_BIN/erpd) --start
-ExecStop=$(which node) $(_BIN/erpd) --stop
-#ExecStop=/bin/kill -s QUIT $MAINPID
-#Restart=always
-
-[Install]
-# Install开机启动
-WantedBy=multi-user.target
-#Alias
-#Also
-
-EOF
-
-}
-
 _set_target () {
   ln -sf "$unitdir/erps.service" "$earlydir/default.target"
 }

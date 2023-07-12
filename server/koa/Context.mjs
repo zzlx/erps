@@ -7,42 +7,40 @@
  *
  * * http2 stream support
  *
- *
  * *****************************************************************************
  */
 
-import net from 'node:net';
-import util from 'node:util';
-import accepts from 'accepts';
-// import contentType from 'content-type';
+import net from "node:net";
+import util from "node:util";
+import accepts from "accepts";
+// import contentType from "content-type";
 
-import { HttpError } from './HttpError.mjs';
-import { MimeTypes } from '../utils/MimeTypes.mjs';
-import { memCache } from '../utils/index.mjs';
+import { HttpError } from "./HttpError.mjs";
+import { MimeTypes } from "../utils/MimeTypes.mjs";
+import { memCache } from "../utils/index.mjs";
 
 import { 
-  HTTP2_METHOD, 
   HTTP2_HEADER, 
   HTTP_STATUS, 
   HTTP_STATUS_CODES, 
   HTTP_STATUS_EMPTY_CODES, 
   HTTP_STATUS_REDIRECT_CODES, 
-} from '../constants.mjs'
+} from "../constants.mjs";
 
 // define symbol constants
-export const ACCEPT      = Symbol('context#accept');
-export const REQ_BODY    = Symbol('context#request-body');
-export const REQ_HEADERS = Symbol('context#request-headers');
-export const REQ_URL     = Symbol('context#request-URL');
-export const REQ_IP      = Symbol('context#request-ip');
-export const RES_BODY    = Symbol('context#response-body');
-export const RES_HEADERS = Symbol('context#response-headers');
+export const ACCEPT      = Symbol("context#accept");
+export const REQ_BODY    = Symbol("context#request-body");
+export const REQ_HEADERS = Symbol("context#request-headers");
+export const REQ_URL     = Symbol("context#request-URL");
+export const REQ_IP      = Symbol("context#request-ip");
+export const RES_BODY    = Symbol("context#response-body");
+export const RES_HEADERS = Symbol("context#response-headers");
 
 // define constants
 const mimeTypes = new MimeTypes();
 const typeCache = memCache(100);
 const MSG = Symbol("context#message"); 
-const debug = util.debug('debug:context');
+const debug = util.debug("debug:context");
 
 export class Context {
   constructor () {
@@ -58,12 +56,12 @@ export class Context {
   get rawBody () {
     if (this[REQ_BODY] != null) return this[REQ_BODY];
 
-    return new Promise(async (resolve, reject) => {
-      if (!this.stream.readable) return null;
-      this.stream.setEncoding('utf8');
-      let data = '';
+    return new Promise((resolve, reject) => {
+      if (!this.stream.readable) reject("noReadable stream.");
+      this.stream.setEncoding("utf8");
+      let data = "";
 
-      for await (const chunk of this.stream) {
+      for (const chunk of this.stream) {
         data += chunk;
       }
 
@@ -82,7 +80,7 @@ export class Context {
       headers: this.headers,
       method: this.method,
       body: this.requestBody,
-    }
+    };
   }
 
   /**
@@ -93,7 +91,7 @@ export class Context {
     return {
       headers: this[RES_HEADERS],
       body: this[RES_BODY],
-    }
+    };
   }
 
   /**
@@ -280,7 +278,7 @@ export class Context {
     const proxy = this.app.proxy;
     let host = proxy && this.get(HTTP2_HEADER.X_FORWARDED_FOR);
     if (!host) host = this.URL.host;
-    if (!host) return '';
+    if (!host) return "";
     return host.split(/\s*,\s*/, 1)[0];
   }
 
@@ -330,7 +328,7 @@ export class Context {
   /**
    * searchParams
    *
-   * Usage: ctx.searchParams.get('param') => value
+   * Usage: ctx.searchParams.get("param") => value
    */
 
   get searchParams() {
@@ -348,14 +346,14 @@ export class Context {
   /**
    * Short-hand for:
    *
-   *    this.protocol == 'https'
+   *    this.protocol == "https"
    *
    * @return {Boolean}
    * @api public
    */
 
   get secure() {
-    return 'https:' === this.protocol;
+    return "https:" === this.protocol;
   }
 
   /**
@@ -378,7 +376,7 @@ export class Context {
 
   get length() {
     const len = this[RES_HEADERS][HTTP2_HEADER.CONTENT_LENGTH];
-    return ~~len; // ~~'' => 0
+    return ~~len; // ~~"" => 0
   }
 
   /**
@@ -394,11 +392,12 @@ export class Context {
    */
 
   get ips() {
-    const val = this.headers('X-Forwarded-For');
+    const val = this.headers("X-Forwarded-For");
 
     // 服务器前可以有多个代理
     // 服务器前只有1个代理
     if (this.app.maxIpsCount) {
+      // 
 
     }
 
@@ -408,7 +407,7 @@ export class Context {
   }
 
   /**
-   * Return request's remote address
+   * Return request"s remote address
    * When `app.proxy` is `true`, 
    * parse the "X-Forwarded-For" ip address list and return the first one
    *
@@ -418,7 +417,7 @@ export class Context {
 
   get ip() {
     if (!this[REQ_IP]) {
-      this[REQ_IP] = this.socket.remoteAddress || '';
+      this[REQ_IP] = this.socket.remoteAddress || "";
     }
     return this[REQ_IP];
   }
@@ -441,19 +440,19 @@ export class Context {
 
   get subdomains() {
     if (net.isIP(this.hostname)) return [];
-    return this.hostname.split('.').reverse().slice(this.app.subdomainOffset);
+    return this.hostname.split(".").reverse().slice(this.app.subdomainOffset);
   }
 
   /**
    * redirect url
    */
 
-  redirect(url, alt = '/') {
+  redirect(url, alt = "/") {
     let dest = url;
 
-    if ('back' === url) dest = this.ctx.get('Referrer') || alt;
+    if ("back" === url) dest = this.ctx.get("Referrer") || alt;
 
-    this.set('Location', encodeURI(dest));
+    this.set("Location", encodeURI(dest));
 
     if (!HTTP_STATUS_REDIRECT_CODES[this.status]) {
       this.status = HTTP_STATUS.FOUND;
@@ -484,8 +483,8 @@ export class Context {
 
   get type() {
     const type = this[RES_HEADERS][HTTP2_HEADER.CONTENT_TYPE];
-    if (!type) return '';
-    return type.split(';')[0];
+    if (!type) return "";
+    return type.split(";")[0];
   }
 
   /**
@@ -494,11 +493,11 @@ export class Context {
    *
    * Examples:
    *
-   *     this.type = '.html';
-   *     this.type = 'html';
-   *     this.type = 'json';
-   *     this.type = 'application/json';
-   *     this.type = 'png';
+   *     this.type = ".html";
+   *     this.type = "html";
+   *     this.type = "json";
+   *     this.type = "application/json";
+   *     this.type = "png";
    *
    * @param {String} type
    * @api public
@@ -522,9 +521,9 @@ export class Context {
    * Examples:
    *
    * ```
-   * this.append('Link', ['<http://localhost/>', '<http://localhost:3000/>']);
-   * this.append('Set-Cookie', 'foo=bar; Path=/; HttpOnly');
-   * this.append('Warning', '199 Miscellaneous warning');
+   * this.append("Link", ["<http://localhost/>", "<http://localhost:3000/>"]);
+   * this.append("Set-Cookie", "foo=bar; Path=/; HttpOnly");
+   * this.append("Warning", "199 Miscellaneous warning");
    * ```
    *
    * @param {String} field
@@ -564,14 +563,14 @@ export class Context {
    *
    * Examples:
    *
-   *     this.get('Content-Type');
+   *     this.get("Content-Type");
    *     // => "text/plain"
    *
-   *     this.get('content-type');
+   *     this.get("content-type");
    *     // => "text/plain"
    *
-   *     this.get('Something');
-   *     // => ''
+   *     this.get("Something");
+   *     // => ""
    *
    * @param {String} field
    * @return {String}
@@ -580,12 +579,12 @@ export class Context {
 
   get (field) {
     switch (field = field.toLowerCase()) {
-      case 'referer':
-      case 'referrer':
-        return this.headers[HTTP2_HEADER.REFERER] || '';
+      case "referer":
+      case "referrer":
+        return this.headers[HTTP2_HEADER.REFERER] || "";
       default:
         // 从request、response中返回头字段设置
-        return this.headers[field] || this[RES_HEADERS][field] || '';
+        return this.headers[field] || this[RES_HEADERS][field] || "";
     }
   }
 
@@ -603,27 +602,27 @@ export class Context {
    * Examples:
    *
    *     // Accept: text/html
-   *     this.accepts('html');
+   *     this.accepts("html");
    *     // => "html"
    *
    *     // Accept: text/*, application/json
-   *     this.accepts('html');
+   *     this.accepts("html");
    *     // => "html"
-   *     this.accepts('text/html');
+   *     this.accepts("text/html");
    *     // => "text/html"
-   *     this.accepts('json', 'text');
+   *     this.accepts("json", "text");
    *     // => "json"
-   *     this.accepts('application/json');
+   *     this.accepts("application/json");
    *     // => "application/json"
    *
    *     // Accept: text/*, application/json
-   *     this.accepts('image/png');
-   *     this.accepts('png');
+   *     this.accepts("image/png");
+   *     this.accepts("png");
    *     // => false
    *
    *     // Accept: text/*;q=.5, application/json
-   *     this.accepts(['html', 'json']);
-   *     this.accepts('html', 'json');
+   *     this.accepts(["html", "json"]);
+   *     this.accepts("html", "json");
    *     // => "json"
    *
    * @param {String|Array} type(s)...
@@ -641,7 +640,7 @@ export class Context {
    * Given `Accept-Encoding: gzip, deflate`
    * an array sorted by quality is returned:
    *
-   *     ['gzip', 'deflate']
+   *     ["gzip", "deflate"]
    *
    * @param {String|Array} encoding(s)...
    * @return {String|Array}
@@ -658,7 +657,7 @@ export class Context {
    * Given `Accept-Charset: utf-8, iso-8859-1;q=0.2, utf-7;q=0.5`
    * an array sorted by quality is returned:
    *
-   *     ['utf-8', 'utf-7', 'iso-8859-1']
+   *     ["utf-8", "utf-7", "iso-8859-1"]
    *
    * @param {String|Array} charset(s)...
    * @return {String|Array}
@@ -690,15 +689,15 @@ export class Context {
    */
 
   get fresh () {
-    const CACHE_CONTROL_NO_CACHE_REGEXP = /(?:^|,)\s*?no-cache\s*?(?:,|$)/
+    const CACHE_CONTROL_NO_CACHE_REGEXP = /(?:^|,)\s*?no-cache\s*?(?:,|$)/;
 
     const cache_control = this.headers[HTTP2_HEADER.CACHE_CONTROL];
     const modifiedSince = this.headers[HTTP2_HEADER.IF_MODIFIED_SINCE];
     const noneMatch     = this.headers[HTTP2_HEADER.IF_NONE_MATCH];
 
     const method = this.method;
-     // GET or HEAD for weak freshness validation only
-    if ('GET' != method && 'HEAD' != method) return false;
+    // GET or HEAD for weak freshness validation only
+    if ("GET" != method && "HEAD" != method) return false;
 
     const s = this.status;
 
@@ -709,15 +708,15 @@ export class Context {
         return false;
       }
 
-      if (noneMatch && noneMatch !== '*') {
-        const etag = this[RES_HEADERS]['etag']
+      if (noneMatch && noneMatch !== "*") {
+        const etag = this[RES_HEADERS]["etag"];
         if (!etag) return false;
       }
 
       if (modifiedSince) {
-        const lastModified = this[RES_HEADERS]['last-modified'];
-        const modifiedStale = !lastModified || !(lastModified <= modifiedSince)
-        if (modifiedStale) return false
+        const lastModified = this[RES_HEADERS]["last-modified"];
+        const modifiedStale = !lastModified || !(lastModified <= modifiedSince);
+        if (modifiedStale) return false;
       }
 
       return true;
@@ -748,6 +747,7 @@ export class Context {
    */
 
   set body(val) {
+    debug("set body:", val);
     const original = this[RES_BODY]; // original body
 
     // no content
@@ -757,9 +757,9 @@ export class Context {
         this.status = HTTP_STATUS.NO_CONTENT; // 204
       }
 
-      this.remove('Content-Type');
-      this.remove('Content-Length');
-      this.remove('Transfer-Encoding');
+      this.remove("Content-Type");
+      this.remove("Content-Length");
+      this.remove("Transfer-Encoding");
       return;
     }
 
@@ -767,13 +767,13 @@ export class Context {
     if (!this.status) this.status = HTTP_STATUS.OK; // 200
 
     // string
-    if ('string' === typeof val) {
-      if (!this.has('content-type')) {
+    if ("string" === typeof val) {
+      if (!this.has("content-type")) {
         this.type = /^\s*<xml/.test(val) 
-          ? 'xml' 
+          ? "xml" 
           : /^\s*<(:?html)?/.test(val) 
-            ? 'html' 
-            : 'text';
+            ? "html" 
+            : "text";
       }
 
       this.length = Buffer.byteLength(val);
@@ -783,17 +783,17 @@ export class Context {
 
     // buffer
     if (Buffer.isBuffer(val)) {
-      if (!this.has('content-type')) this.type = 'bin';
+      if (!this.has("content-type")) this.type = "bin";
       this.length = val.length;
       this[RES_BODY] = val;
       return;
     }
 
     // stream body
-    if (val && typeof val.pipe === 'function') {
+    if (val && typeof val.pipe === "function") {
 
-      if (null !== original && original != val) this.remove('Content-Length');
-      if (!this.has('content-type')) this.type = 'bin';
+      if (null !== original && original != val) this.remove("Content-Length");
+      if (!this.has("content-type")) this.type = "bin";
       this[RES_BODY] = val;
       return;
 
@@ -801,14 +801,14 @@ export class Context {
 
     // object body
     // convert obj to string
-    if (typeof val === 'object') {
+    if (typeof val === "object") {
       this[RES_BODY] = JSON.stringify(val);
-      if (!this.has('content-type')) { this.type = 'json'; }
+      if (!this.has("content-type")) { this.type = "json"; }
       this.length = Buffer.byteLength(this[RES_BODY]);
       return;
     }
 
-    this.throw(500, 'Setting body error.')
+    this.throw(500, "Setting body error.");
   }
 }
 
@@ -818,9 +818,9 @@ export class Context {
  *
  * Examples:
  *
- *    this.set('Foo', ['bar', 'baz']);
- *    this.set('Accept', 'application/json');
- *    this.set({ Accept: 'text/plain', 'X-API-Key': 'tobi' });
+ *    this.set("Foo", ["bar", "baz"]);
+ *    this.set("Accept", "application/json");
+ *    this.set({ Accept: "text/plain", "X-API-Key": "tobi" });
  *
  * @param {String|Object|Array} field
  * @param {String} val
@@ -833,19 +833,19 @@ Context.prototype.set = function (field, val) {
   if (this[RES_HEADERS] == null) this[RES_HEADERS] = Object.create(null);
 
   if (arguments.length === 2) {
-    if (Array.isArray(val)) val = val.map(v => typeof v === 'string' ? v : String(v));
-    else if (typeof val !== 'string') val = String(val);
+    if (Array.isArray(val)) val = val.map(v => typeof v === "string" ? v : String(v));
+    else if (typeof val !== "string") val = String(val);
     this[RES_HEADERS][field.toLowerCase()] = val;
   }
 
-  if (typeof field === 'object') {
+  if (typeof field === "object") {
     for (const key of Object.keys(field)) {
       this.set(key, field[key]);
     }
   }
 
   return true; // set header success
-}
+};
 
 /**
  *
@@ -856,10 +856,10 @@ Context.prototype.set = function (field, val) {
  * and the message may be exposed to the client.
  *
  *    this.throw(403)
- *    this.throw(400, 'name required')
- *    this.throw('something exploded')
- *    this.throw(new Error('invalid'))
- *    this.throw(400, new Error('invalid'))
+ *    this.throw(400, "name required")
+ *    this.throw("something exploded")
+ *    this.throw(new Error("invalid"))
+ *    this.throw(400, new Error("invalid"))
  *
  * See: https://github.com/jshttp/http-errors
  *
@@ -873,7 +873,7 @@ Context.prototype.set = function (field, val) {
 
 Context.prototype.throw = function (...args) {
   throw new HttpError(...args);
-}
+};
 
 /**
  * push stream
@@ -881,28 +881,31 @@ Context.prototype.throw = function (...args) {
  */
 
 Context.prototype.push = function (pathname) {
-  this.stream.pushStream({':path': pathname }, (err, pushStream, headers) => {
+  this.stream.pushStream({":path": pathname }, (err, pushStream, headers) => {
     if (err) this.throw(err);
-    pushStream.respond({ ':status': 200 });
-    pushStream.end('some pushed data');
+    debug(headers);
+    pushStream.respond({ ":status": 200 });
+    pushStream.end("some pushed data");
   });
-}
+};
 
 /**
  *
  */
 
 Context.prototype.send = function (filename) {
-
-}
+  // 
+  debug(filename);
+};
 
 /**
  * 将 Content-Disposition 设置为 “附件” 以指示客户端提示下载
  */
 
 Context.prototype.attachment = function (filename, options) {
-
-}
+  // 
+  debug(filename, options);
+};
 
 /**
  * error handler
@@ -911,11 +914,11 @@ Context.prototype.attachment = function (filename, options) {
 Context.prototype.onerror = function (err) {
   if (err == null) return;
 
-  if ('ENOENT' === err.code) this.status = 404;
+  if ("ENOENT" === err.code) this.status = 404;
   else this.status = 500;
 
-  this.type = 'text';
-  this.body = err.expose && this.app.env === 'development' 
+  this.type = "text";
+  this.body = err.expose && this.app.env === "development" 
     ? err.message 
     : HTTP_STATUS_CODES[this.status];
-}
+};

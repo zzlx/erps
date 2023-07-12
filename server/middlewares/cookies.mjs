@@ -5,24 +5,22 @@
  *
  * support cookie
  *
- * @file cookies.mjs
  * *****************************************************************************
  */
 
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
-const COOKIES = Symbol('middleware#cookies');
+const COOKIES = Symbol("middleware#cookies");
 
-export function cookies (opts = {}) {
+export function cookies () {
   return function cookieMiddleware (ctx, next) {
-
-    Object.defineProperty(ctx, 'cookies', {
+    Object.defineProperty(ctx, "cookies", {
       get: function () {
         if (null == this[COOKIES]) {
           this[COOKIES] = new Cookies(this, { 
             keys: this.app.keys,
             secure: this.secure,
-          })
+          });
         }
 
         return  this[COOKIES];
@@ -32,16 +30,16 @@ export function cookies (opts = {}) {
     });
 
     return next();
-  }
+  };
 }
 
 export class Cookies {
   constructor (ctx, options) {
-    this.ctx = ctx
+    this.ctx = ctx;
     this.secure = options && options.secure ? options.secure : false;
 
     this.keys = options && options.keys
-      ? 'string' === typeof options.keys
+      ? "string" === typeof options.keys
         ? new Keygrip([options.keys])
         : Array.isArray(options.keys)
           ? new Keygrip(options.keys)
@@ -66,7 +64,7 @@ export class Cookies {
       : this.cache[name] = new RegExp(
         "(?:^|;) *" +
         name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") +
-        "=([^;]*)"
+        "=([^;]*)",
       );
     let match = header.match(getPattern(name));
     if (!match) return; // 未匹配 
@@ -78,23 +76,23 @@ export class Cookies {
 
     // step_4: 获取签名项
     const sigName = name + ".sig"; // 签名项
-    const sigValue = this.get(sigName)
-    if (!sigValue) return // 未匹配到签名项目，返回空值
+    const sigValue = this.get(sigName);
+    if (!sigValue) return; // 未匹配到签名项目，返回空值
 
     // step_5: 开始签名验证
-    const data = name + "=" + value
-    const index = this.keys.index(data, sigValue)
+    const data = name + "=" + value;
+    const index = this.keys.index(data, sigValue);
 
     if (index < 0) {
       // 未验证通过时，重置签名项为控空
-      this.set(sigName, null, {path: "/", signed: false })
+      this.set(sigName, null, {path: "/", signed: false });
       return;
     } else {
       // 验证通过时,
-      index && this.set(sigName, this.keys.sign(data), { signed: false })
+      index && this.set(sigName, this.keys.sign(data), { signed: false });
     }
 
-    return value
+    return value;
   }
 
   /**
@@ -112,7 +110,7 @@ export class Cookies {
     // 配置secure选项
     cookie.secure = opts && opts.secure 
       ? opts.secure
-      : this.secure || this.protocol === 'https:';
+      : this.secure || this.protocol === "https:";
 
     // 设置cookie项
     headers.push(cookie.toHeader());
@@ -126,7 +124,7 @@ export class Cookies {
     }
 
     // 设置header
-    this.ctx.set('Set-Cookie', headers); 
+    this.ctx.set("Set-Cookie", headers); 
   }
 }
 
@@ -152,17 +150,16 @@ class Cookie{
 
     /**
      * RegExp to match Same-Site cookie attribute value.
+     *
      */
-
-    const sameSiteRegExp = /^(?:lax|strict)$/i
-
+    const sameSiteRegExp = /^(?:lax|strict)$/i;
 
     if (!fieldContentRegExp.test(name)) {
-      throw new TypeError('argument name is invalid');
+      throw new TypeError("argument name is invalid");
     }
 
     if (value && !fieldContentRegExp.test(value)) {
-      throw new TypeError('argument value is invalid');
+      throw new TypeError("argument value is invalid");
     }
 
     value || (this.expires = new Date(0));
@@ -171,19 +168,19 @@ class Cookie{
     this.value = value || "";
 
     for (let name in attrs) {
-      this[name] = attrs[name]
+      this[name] = attrs[name];
     }
 
     if (this.path && !fieldContentRegExp.test(this.path)) {
-      throw new TypeError('option path is invalid');
+      throw new TypeError("option path is invalid");
     }
 
     if (this.domain && !fieldContentRegExp.test(this.domain)) {
-      throw new TypeError('option domain is invalid');
+      throw new TypeError("option domain is invalid");
     }
 
     if (this.sameSite && this.sameSite !== true && !sameSiteRegExp.test(this.sameSite)) {
-      throw new TypeError('option sameSite is invalid')
+      throw new TypeError("option sameSite is invalid");
     }
   }
 
@@ -200,23 +197,23 @@ class Cookie{
    */
 
   toHeader() {
-    let header = this.toString()
+    let header = this.toString();
     if (this.maxAge) this.expires = new Date(Date.now() + this.maxAge);
 
     if (this.path     ) header += "; path=" + this.path;
     if (this.expires  ) header += "; expires=" + this.expires.toUTCString();
     if (this.domain   ) header += "; domain=" + this.domain;
-    if (this.sameSite ) header += "; samesite=" + (this.sameSite === true ? 'strict' : this.sameSite.toLowerCase());
+    if (this.sameSite ) header += "; samesite=" + (this.sameSite === true ? "strict" : this.sameSite.toLowerCase());
     if (this.secure   ) header += "; secure";
     if (this.httpOnly ) header += "; httponly";
 
-    return header
+    return header;
   }
 }
 
 // keygrip算法
 class Keygrip {
-  constructor (keys, algorithm = 'sha256', encoding = 'base64') {
+  constructor (keys, algorithm = "sha256", encoding = "base64") {
     if (!keys || !(0 in keys)) throw new Error("Keys must be provided.");
     this.keys = keys;
     this.algorithm = algorithm;
@@ -232,38 +229,38 @@ class Keygrip {
   }
 
   verify (data, digest) {
-    return this.index(data, digest) > -1
+    return this.index(data, digest) > -1;
   }
 
   index (data, digest) {
     for (let i = 0; i < this.keys.length; i++) {
-      if (constantTimeCompare(digest, sign(data, this.keys[i]))) return i
+      if (constantTimeCompare(digest, this.sign(data, this.keys[i]))) return i;
     }
 
-    return -1
+    return -1;
   }
 
 }
 
 //http://codahale.com/a-lesson-in-timing-attacks/
 function constantTimeCompare (val1, val2) {
-    if(val1 == null && val2 != null){
-        return false;
-    } else if(val2 == null && val1 != null){
-        return false;
-    } else if(val1 == null && val2 == null){
-        return true;
-    }
+  if(val1 == null && val2 != null){
+    return false;
+  } else if(val2 == null && val1 != null){
+    return false;
+  } else if(val1 == null && val2 == null){
+    return true;
+  }
 
-    if(val1.length !== val2.length){
-        return false;
-    }
+  if(val1.length !== val2.length){
+    return false;
+  }
 
-    let result = 0;
+  let result = 0;
 
-    for(let i = 0; i < val1.length; i++){
-        result |= val1.charCodeAt(i) ^ val2.charCodeAt(i); //Don't short circuit
-    }
+  for(let i = 0; i < val1.length; i++){
+    result |= val1.charCodeAt(i) ^ val2.charCodeAt(i); //Don"t short circuit
+  }
 
-    return result === 0;
+  return result === 0;
 }
