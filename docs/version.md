@@ -15,3 +15,12 @@ Version
 * GA(General Availability)：正式发布的版本；在国外都是用GA来说明release版本的。
 * RTM(Release to Manufacturing)：给生产商的release版本；RTM版本并不一定意味着创作者解决了软件所有问题；仍有可能向公众发布前更新版本。
 * RTL(Retail)：零售版；是真正的正式版，正式上架零售版。
+
+## 版本号命名规则
+
+## 关于产品开发周期
+
+## 产品更新节奏与规则
+
+原有功能持续优化升级
+新功能每年1月初发布一次
