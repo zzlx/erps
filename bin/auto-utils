@@ -3,6 +3,8 @@
 #
 # Shell程序
 #
+# 自动化服务
+#
 #	Usage: $(_print_red ${_FILE%.*}) [options...]
 #
 #	Options:
