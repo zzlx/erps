@@ -6,6 +6,7 @@ ERPs
 
 > 系统目标: 一个标准化、数字化、程序化、智能化、系统化的管理工具.
 > 软件许可：[MIT-LICENSE](./LICENSE)
+> 项目文档: [docs](./docs/README.md)
 
 # 快速开始
 
@@ -28,11 +29,3 @@ cd erps & npm install
 ```
 npm start
 ```
-
-# 目录介绍
-
-* bin: 可执行文件目录
-* [docs](./docs/README.md): 项目文档
-* server: 服务端程序代码库
-* src: 源代码库
-* uis: 前端程序代码库
