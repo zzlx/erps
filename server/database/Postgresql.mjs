@@ -1,37 +1,35 @@
 /**
  * *****************************************************************************
  *
+ * PostgreSQL 客户端程序
+ *
+ * [node-postgres](https://node-postgres.com)项目提供的pg是用于在node环境下接口模块
  *
  * *****************************************************************************
  */
 
+import util from "node:util";
 import pg from "pg";
-import { DBA } from "./DBA.mjs";
 
-export const CLIENT = Symbol('context#accept');
+const debug = util.debuglog("debug:PostgreSQL-DBA");
+const CLIENT = Symbol("context#accept");
 
-export class Postgresql extends DBA {
-  constructor(opts = {}) {
-    super();
-    this.name = 'PostgresqlDBA';
-  }
+export function postgresql (options) {
+  const opts = Object.assign({}, {
+      ssl: false,
+      port: 5432,
+  }, options);
 
-  query () {
-    // 执行一次查询
-
-  }
-
-  get client () {
-
-  }
+  return new pg.Client(opts);
 }
 
-
 // test
-const { Client } = pg;
-const client = new Client();
-await client.connect();
-
-const res = await client.query("SELECT $1::text as message", ["Hello world!"])
-console.log(res.rows[0].message) // Hello world!
-await client.end();
+//
+// const c = postgresql();
+// const res = await c.query("SELECT $1::text as message", ["Hello world!"]);
+// console.log(res);
+// if (res) console.log(res.rows[0].message);
+// await c.client.end();
+const pool = new pg.Pool();
+const result = await pool.query('SELECT $1::text as name', ['brianc']);
+console.log(result.rows[0].name)

@@ -24,14 +24,13 @@ import mongodb from 'mongodb';
 const MongoDBA = mongodb.MongoDBA;
 const MongoClient = Symbol('mongoClient');
 
-export function dba (opts = null) {
+export function mongodb (opts = null) {
 
 	let mongodbURL = opts && opts.mongodb
     ? new URL(opts.mongodb)
     : new URL('mongodb://localhost:27017/test');
 
-  return async function dbaMiddleware (ctx, next) {
-
+  return async function mongodbMiddleware (ctx, next) {
     Object.defineProperty(ctx, 'mongodb', {
       get: function() {
         if (this[MongoClient] == null) {

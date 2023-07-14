@@ -233,6 +233,10 @@ export class Context {
     return this.URL.href;
   }
 
+  get url () {
+    return this.URL.href;
+  }
+
   /**
    * Get origin of URL.
    *
@@ -316,12 +320,14 @@ export class Context {
 
   /**
    * search
-   *
    * strings with?
-   *
    */
 
   get search() {
+    return this.URL.search;
+  }
+
+  get queryString () {
     return this.URL.search;
   }
 
@@ -332,6 +338,10 @@ export class Context {
    */
 
   get searchParams() {
+    return this.URL.searchParams;
+  }
+
+  get query () {
     return this.URL.searchParams;
   }
 
@@ -747,7 +757,6 @@ export class Context {
    */
 
   set body(val) {
-    debug("set body:", val);
     const original = this[RES_BODY]; // original body
 
     // no content
