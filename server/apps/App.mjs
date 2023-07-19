@@ -25,8 +25,8 @@ import { createStore } from "./store/createStore.mjs";
 // import lazy from "./components/lazy.mjs";
 // import * as layout from "./components/layout/index.mjs";
 //import HomePage from "./apps/HomePage.mjs";
-import Test from "./apps/Test1.mjs";
-import NoMatch from "./apps/NoMatch.mjs";
+import Test from "./pages/Test1.mjs";
+import NoMatch from "./pages/NoMatch.mjs";
 
 export default function App (props) {
   const data = props.data;

@@ -27,14 +27,13 @@ router.get("Test", "/", (ctx, next) => {
   return next();
 });
 router.get("Statics", "/*", statics(paths.PUBLIC_HTML, {}));
-router.get("Statics", "/statics/es/*", statics(paths.UIS, {
+router.get("Statics", "/statics/es/*", statics(path.join(paths.SERVER, "apps"),{
   index: "index.mjs",
   prefix: "/statics/es",
 } ));
 
 // APIs
-const apis = await import("./api/index.mjs").then(m => m.default);
-router.use("/api", cors(), apis.routes()); // API跨域访问
+//router.use("/api", cors(), apis.routes()); // API跨域访问
 
 // Docs
 const docsRouter = new Router({ });
@@ -43,7 +42,7 @@ docsRouter.get("Docs", "/*", statics(paths.DOCS, { index: "README.md"}));
 // router.use("/docs", docsRouter.routes());
 
 // ssr
-const appPath = path.join(paths.UIS, "App.mjs");
+const appPath = path.join(paths.SERVER, "apps", "App.mjs");
 router.get("UI", ["/", "/*"], ssr({appPath: appPath}));
 
 // Redirect /test to /

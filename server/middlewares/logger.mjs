@@ -12,12 +12,9 @@
  * *****************************************************************************
  */
 
-import path from "path";
-import util from 'util';
-
 export function logger (format) {
   return async function loggerMiddleware (ctx, next) {
-    ctx.state.log = {
+    const log = {
       "atimeMs": Date.now(), //  access time in mill sec
       "c-address": ctx.socket.remoteAddress,
       "c-port": ctx.socket.remotePort,
@@ -34,10 +31,13 @@ export function logger (format) {
     await next(); // 执行中间件栈
 
     // set responsed status
-    ctx.state.log.status = ctx.status;
+    log.status = ctx.status;
+    ctx.state.log = log; 
 
     // print request log in production environment
-    // @todo: 增加格式化输出
-    ctx.app.env !== 'development' && console.log(JSON.stringify(log));
-  }
+    // @todos: 
+    // 增加格式化输出
+    // 日志文件写入文件
+    console.log(JSON.stringify(log));
+  };
 }

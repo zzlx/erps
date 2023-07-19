@@ -8,11 +8,10 @@
  * *****************************************************************************
  */
 
-import crypto from "crypto";
-import EventEmitter from "events";
-import fs from 'fs';
-
-import { readDir } from './readDir.mjs';
+import crypto from "node:crypto";
+import EventEmitter from "node:events";
+import fs from "node:fs";
+import { readdir } from "./readdir.mjs";
 
 export class PathWatcher extends EventEmitter {
   constructor (props) {
@@ -35,8 +34,8 @@ export class PathWatcher extends EventEmitter {
    * have a detect
    */
 
-  detect () {
-    for (const file of readDir(this.paths)) {
+  async detect () {
+    for (const file of await readdir(this.paths)) {
       try {
         const content = fs.readFileSync(file, "utf8");
         const sha1 = crypto.createHash("sha1").update(content).digest("hex");

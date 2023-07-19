@@ -1,32 +1,30 @@
 /**
  * *****************************************************************************
  *
- * readDir
+ * readdir
  *
  * 算法:循环读取目录,返回路径列表
  *
  * *****************************************************************************
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from "node:fs";
+import path from "node:path";
+import { arrayFlatten } from "../utils/index.mjs";
 
-export function readDir (dir) {
-  let files = [];
-  
-  if (Array.isArray(dir)) { 
-    for (let d of dir) {
-      files.push(...readDir(d)); 
+export function readdir (_root) {
+  return fs.promises.readdir(_root, { withFileTypes: true }).then(paths => {
+    const newPaths = [];
+
+    for (const p of paths) {
+      if (p.isFile()) { newPaths.push(p); continue; } 
+
+      if (p.isDirectory()) {
+        const pathURI = path.join(p.path, p.name);
+        newPaths.push(readdir(pathURI));
+      }
     }
-  }
 
-  if (typeof dir === 'string' && fs.existsSync(dir)) {
-    for (const file of fs.readdirSync(dir, { withFileTypes: true })) {
-      const filePath = path.join(dir, file.name);
-      if (file.isFile()) files.push(filePath);
-      if (file.isDirectory()) files = files.concat(readDir(filePath));
-    }
-  }
-
-  return files;
+    return Promise.all(newPaths);
+  }).then(paths => arrayFlatten(paths));
 }

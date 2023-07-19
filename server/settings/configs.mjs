@@ -16,6 +16,12 @@ import { paths } from './paths.mjs';
 
 paths.CONFIG = path.join(os.homedir(), '.config', appinfo.name);
 const configFile = path.join(paths.CONFIG, 'config.json');
+// 写入配置文件
+const writeJsonFile = (file, obj) => fs.promises.writeFile(
+  file, 
+  JSON.stringify(obj, null, 2), 
+  'utf8'
+);
 
 const defaults = {
   description: '系统配置',
@@ -42,11 +48,3 @@ export const configs = new Proxy(defaults, {
     return true;
   }
 });
-
-/**
- * 写入配置文件
- */
-
-function writeJsonFile (file, obj) {
-  return fs.promises.writeFile(file, JSON.stringify(obj, null, 2), 'utf8');
-}

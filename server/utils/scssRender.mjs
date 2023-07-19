@@ -15,7 +15,7 @@ import zlib from "zlib";
 import util from "util";
 
 import { paths, } from "../settings/index.mjs";
-import { readDir } from "../utils/readDir.mjs";
+import { readdir } from "../utils/readdir.mjs";
 
 const debug = util.debuglog(`debug:${import.meta.url.substr(7)}`);
 
@@ -27,7 +27,7 @@ export async function scssRender () {
   // 决定是否需要执行CSS文件渲染程序
  
   const cssStat = await fs.promises.stat(cssFile).catch(() => {});
-  const files = readDir(path.dirname(scssFile));
+  const files = await readdir(path.dirname(scssFile));
   let reRender = !cssStat;
 
   if (reRender === false) {
