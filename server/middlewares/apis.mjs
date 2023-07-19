@@ -11,7 +11,7 @@
 
 import assert from "node:assert";
 import util from "node:util";
-import { readDir } form "../utils/readDir.mjs";
+import { readdir } form "../utils/readdir.mjs";
 
 const debug = util.debuglog("debug:apis"); // debug message
 

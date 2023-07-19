@@ -11,6 +11,7 @@
 import crypto from "node:crypto";
 import EventEmitter from "node:events";
 import fs from "node:fs";
+import path from "node:path";
 import { readdir } from "./readdir.mjs";
 
 export class PathWatcher extends EventEmitter {

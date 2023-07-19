@@ -26,5 +26,5 @@ export function readdir (_root) {
     }
 
     return Promise.all(newPaths);
-  }).then(paths => arrayFlatten(paths));
+  }).then(paths => arrayFlatten(paths).map(p => path.join(p.path, p.name)));
 }
