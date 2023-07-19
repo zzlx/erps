@@ -159,7 +159,6 @@ async function watchPath () {
   const watcher = new PathWatcher([
     paths.SERVER,
     paths.SRC,
-    paths.UIS,
   ]);
 
   watcher.on("change", (f) => {

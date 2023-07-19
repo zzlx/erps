@@ -13,6 +13,10 @@ import path from "node:path";
 import { arrayFlatten } from "../utils/index.mjs";
 
 export function readdir (_root) {
+  if (Array.isArray(_root)) {
+    return Promise.all(_root.map(readdir)).then(arrayFlatten);
+  }
+
   return fs.promises.readdir(_root, { withFileTypes: true }).then(paths => {
     const newPaths = [];
 
@@ -26,5 +30,8 @@ export function readdir (_root) {
     }
 
     return Promise.all(newPaths);
-  }).then(paths => arrayFlatten(paths).map(p => path.join(p.path, p.name)));
+  }).then(arrayFlatten).then(p => {
+    console.log(p);
+    path.join(p.path, p.name);
+  });
 }
