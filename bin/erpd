@@ -9,5 +9,9 @@
  * *****************************************************************************
  */
 
+const argvs = Array.prototype.slice.call(process.argv, 2);
+
+
+
 // Load main program and execute it
 import('../server/main.mjs').catch(console.error);

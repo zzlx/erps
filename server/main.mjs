@@ -3,7 +3,7 @@
  *
  * ERPD
  *
- * The backend-server programe for ERP daemon.
+ * The backend-server daemon for ERP system.
  *
  * Usage: [options]
  *
@@ -23,11 +23,13 @@ import path from "node:path";
 import util from "node:util";
 import { argvParser, debounceAlgorithm } from "./utils/index.mjs";
 import { paths } from "./settings/index.mjs";
+import { appinfo } from "./settings/index.mjs";
 import { scssRender } from "./utils/scssRender.mjs";
 import { sendCommand } from "./sendCommand.mjs";
 import { CLEAR_PAGE } from "./constants.mjs";
 
 const debug = util.debuglog("debug:main");
+const __file = String.prototype.substr.call(import.meta.url, 7);
 const argvs = Array.prototype.slice.call(process.argv, 2);
 const paramMap = argvParser(argvs);
 debug(paramMap);
@@ -69,6 +71,7 @@ const proc = {
 function main () {
   let isExec = false; // 是否执行
 
+  // 配置环境变量
   for (const param of Object.keys(paramMap)) {
     switch (param) {
       case "devel":
@@ -76,17 +79,24 @@ function main () {
         process.env.NODE_ENV = "development";
         delete paramMap[param];
         break;
+      default:
+        break;
+  }
+
+  // 执行任务
+  for (const param of Object.keys(paramMap)) {
+    switch (param) {
       case "h":
       case "help":
         isExec = true;
         delete paramMap[param];
-        import("./help.mjs").then(m => m.help());
+        showHelp();
         break;
       case "v":
       case "version":
         isExec = true;
         delete paramMap[param];
-        import("./version.mjs").then(m => m.version());
+        showVersion();
         break;
       case "start":
         isExec = true;
@@ -109,7 +119,6 @@ function main () {
           path.join(paths.NODE_MODULES, "react-dom", "umd", "react-dom.development.js"),
           path.join(paths.NODE_MODULES, "react-dom", "umd", "react-dom.production.min.js"),
         ]));
-
         break;
       case "stop":
         isExec = true;
@@ -251,7 +260,30 @@ function eslint (file) {
  * 显示帮助信息
  */
 
-function showHelp () {
+async function showHelp () {
   const divideLine = new Array(process.stdout.columns).join("-");
+  const content = await fs.promises.readFile(__file, { encoding: 'utf8' });
+  const lines = content.split("\n");
 
+  for (const line of lines) {
+    if (line === "/**") {
+      process.stdout.write(divideLine + "\n");
+      continue;
+    }
+    if (line === " */") break;
+    process.stdout.write(line.substr(3) + "\n");
+  }
+
+  process.stdout.write(divideLine + "\n");
+}
+
+/**
+ * Show version infomations
+ */
+
+function showVersion () {
+  process.stdout.write(
+`ERPs Version: ${appinfo.version}
+Current Node.js Version: ${process.version}
+`);
 }
