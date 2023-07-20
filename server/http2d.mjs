@@ -22,10 +22,10 @@ import os from 'os';
 import path from 'path';
 import process from 'node:process';
 import util from 'util';
-import { app } from '../app.mjs';
-import { paths, system, configs } from '../settings/index.mjs';
-import { Websocket } from './Websocket.mjs';
-import { capitalize, isMac } from './index.mjs';
+import { app } from './app.mjs';
+import { paths, system, configs } from './settings/index.mjs';
+import { Websocket } from './utils/Websocket.mjs';
+import { capitalize, isMac } from './utils/index.mjs';
 
 const debug = util.debuglog(`debug:http2d`);
 const url = import.meta.url;

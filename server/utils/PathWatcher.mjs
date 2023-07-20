@@ -11,7 +11,6 @@
 import crypto from "node:crypto";
 import EventEmitter from "node:events";
 import fs from "node:fs";
-import path from "node:path";
 import { readdir } from "./readdir.mjs";
 
 export class PathWatcher extends EventEmitter {
@@ -25,7 +24,7 @@ export class PathWatcher extends EventEmitter {
       //debug("完成一次目录变动检测");
       setTimeout(() => {
         this.detect();
-      }, 800);
+      }, 1000);
     });
 
     this.detect();
@@ -36,7 +35,8 @@ export class PathWatcher extends EventEmitter {
    */
 
   async detect () {
-    for (const file of await readdir(this.paths)) {
+    const files = await readdir(this.paths);
+    for (const file of files) {
       try {
         const content = fs.readFileSync(file, "utf8");
         const sha1 = crypto.createHash("sha1").update(content).digest("hex");

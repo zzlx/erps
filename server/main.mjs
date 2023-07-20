@@ -1,18 +1,24 @@
 /**
  * *****************************************************************************
  *
- * Backend-server main programe.
+ * ERPD
  *
- * 支持特性:
+ * The backend-server programe for ERP daemon.
  *
- * * 开发模式下自动重启服务
- * *
- * * ...
+ * Usage: [options]
+ *
+ * Options:
+ * -h, --help                  显示帮助信息
+ * -v, --version               显示版本信息
+ * --start                     启动服务
+ * --stop                      关闭服务
+ * --restart                   重启服务
  *
  * *****************************************************************************
  */
 
 import cp from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import util from "node:util";
 import { argvParser, debounceAlgorithm } from "./utils/index.mjs";
@@ -21,45 +27,32 @@ import { scssRender } from "./utils/scssRender.mjs";
 import { sendCommand } from "./sendCommand.mjs";
 import { CLEAR_PAGE } from "./constants.mjs";
 
-const __filename = import.meta.url.substr(7);
-const __dirname = path.dirname(__filename);
 const debug = util.debuglog("debug:main");
 const argvs = Array.prototype.slice.call(process.argv, 2);
 const paramMap = argvParser(argvs);
+debug(paramMap);
 
-// Setting process title
-process.title = 'org.zzlx.erpd';
+process.title = "org.zzlx.erpd"; // Setting the main process title
 
-for (const item of argvs) {
-  if (/devel/.test(item)) {
-    process.env.NODE_ENV = "development";
-    continue;
-  }
-
-  if (/prod/.test(item)) {
-    process.env.NODE_ENV = "production";
-    continue;
-  }
-}
-
+// handle uncaught exception
 process.on("uncaughtException", (error, origin) => {
-  debug("The uncaughted exception: ", error)
-  debug("The origin uncaught exception: ", origin)
+  debug("The uncaughted exception: ", error);
+  debug("The origin uncaught exception: ", origin);
 });
 
-//
+// handle unhandled rejection 
 process.on("unhandledRejection", (reason, promise) => {
   debug(
-    "The unhandled rejection is come from ", 
+    "Rejection is come from ", 
     promise, 
     " because of: ", 
-    reason
+    reason,
   );
 });
 
 // Print uptime in development env
 process.on("exit", code => {
-  debug("---程序结束前已经运行了%sms---", Math.ceil(process.uptime()*1000));
+  debug("%d---程序结束前已经运行了%sms---", code, Math.ceil(process.uptime()*1000));
 });
 
 process.nextTick(() => { main(); });
@@ -80,6 +73,7 @@ function main () {
     switch (param) {
       case "devel":
       case "development":
+        process.env.NODE_ENV = "development";
         delete paramMap[param];
         break;
       case "h":
@@ -152,13 +146,11 @@ async function watchPath () {
     // debug("Restart service.");
     // sendCommand("RESTART");
     restartHttpd();
-
     // startHttpd(); // 由httpd进程自主控制重启
-  }, 1000); // 每1000ms内仅重启1次
+  }, 1500); // 每1500ms内仅重启1次
 
   const watcher = new PathWatcher([
     paths.SERVER,
-    paths.SRC,
   ]);
 
   watcher.on("change", (f) => {
@@ -181,8 +173,7 @@ async function watchPath () {
 }
 
 /**
- *
- *
+ * 执行tsc
  */
 
 function tsc () {
@@ -200,34 +191,17 @@ function tsc () {
 
 function startHttpd () {
   const args = [
-    path.join(__dirname, "utils", "http2d.mjs"),
+    path.join(paths.SERVER, "http2d.mjs"),
   ];
 
-  proc.httpd = cp.spawn(process.argv[0], args, {
+  const options = {
     // keep running when the main process is exit
     // 若设置为true，后台服务无法重启
     detached: false,
     stdio: [0, 1, 2, null],
-  });
-}
+  };
 
-/**
- * Eslint 
- */
-
-function eslint (file) {
-  debug("当前目录%s", process.cwd());
-  cp.exec(`npx eslint ${file}`, (error, stdout, stderr) => {
-    if (stdout) { 
-      console.log(CLEAR_PAGE, stdout); // eslint-disable-line
-    } else if (stderr) {
-      console.error(stderr);
-    } else if (error) {
-      console.error(error);
-    } else {
-      console.log(CLEAR_PAGE); // eslint-disable-line
-    }
-  });
+  proc.httpd = cp.spawn(process.argv[0], args, options);
 }
 
 function stopHttpd () {
@@ -250,4 +224,34 @@ function restartHttpd () {
   }
 
   startHttpd();
+}
+
+/**
+ * Eslint 
+ */
+
+function eslint (file) {
+  cp.exec(`npx eslint ${file}`, (error, stdout, stderr) => {
+    if (stdout) { 
+      console.log(CLEAR_PAGE); // eslint-disable-line
+      console.log(stdout); // eslint-disable-line
+    } else if (stderr) {
+      console.log(CLEAR_PAGE); // eslint-disable-line
+      console.log(stderr); // eslint-disable-line
+    } else if (error) {
+      console.log(CLEAR_PAGE); // eslint-disable-line
+      console.log(error); // eslint-disable-line
+    } else {
+      console.log(CLEAR_PAGE); // eslint-disable-line
+    }
+  });
+}
+
+/**
+ * 显示帮助信息
+ */
+
+function showHelp () {
+  const divideLine = new Array(process.stdout.columns).join("-");
+
 }

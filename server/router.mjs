@@ -30,7 +30,7 @@ router.get("Statics", "/*", statics(paths.PUBLIC_HTML, {}));
 router.get("Statics", "/statics/es/*", statics(path.join(paths.SERVER, "apps"),{
   index: "index.mjs",
   prefix: "/statics/es",
-} ));
+}));
 
 // APIs
 //router.use("/api", cors(), apis.routes()); // API跨域访问

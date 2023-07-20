@@ -22,7 +22,6 @@ export function readdir (_root) {
 
     for (const p of paths) {
       if (p.isFile()) { newPaths.push(p); continue; } 
-
       if (p.isDirectory()) {
         const pathURI = path.join(p.path, p.name);
         newPaths.push(readdir(pathURI));
@@ -30,8 +29,6 @@ export function readdir (_root) {
     }
 
     return Promise.all(newPaths);
-  }).then(arrayFlatten).then(p => {
-    console.log(p);
-    path.join(p.path, p.name);
-  });
+  }).then(arrayFlatten)
+    .then(paths => paths.map(p => p.name ? path.join(p.path, p.name) : p));
 }

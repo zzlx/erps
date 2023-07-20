@@ -1,18 +1,12 @@
 /**
  * *****************************************************************************
  *
- * # 日志记录
- *
- * 构造日志对象,为服务器提供日志记录
- *
- * @param {function} callback 将日志对象交给callback处理
- * @return {function} middleware
- * @api public
+ * 记录单次访问请求的状态
  *
  * *****************************************************************************
  */
 
-export function logger (format) {
+export function logger () {
   return async function loggerMiddleware (ctx, next) {
     const log = {
       "atimeMs": Date.now(), //  access time in mill sec
@@ -38,6 +32,6 @@ export function logger (format) {
     // @todos: 
     // 增加格式化输出
     // 日志文件写入文件
-    console.log(JSON.stringify(log));
+    // if (ctx.app.env !== "development") console.log(JSON.stringify(log));
   };
 }
