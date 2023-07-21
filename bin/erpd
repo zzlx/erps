@@ -11,7 +11,18 @@
 
 const argvs = Array.prototype.slice.call(process.argv, 2);
 
+// 配置环境变量
+for (const item of argvs) {
+  if (/devel/.test(item)) {
+    process.env.NODE_ENV = "development";
+    continue;
+  }
 
+  if (/prod/.test(item)) {
+    process.env.NODE_ENV = "production";
+    continue;
+  }
+}
 
 // Load main program and execute it
 import('../server/main.mjs').catch(console.error);

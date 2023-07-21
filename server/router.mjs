@@ -38,12 +38,15 @@ router.get("Statics", "/statics/es/*", statics(path.join(paths.SERVER, "apps"),{
 // Docs
 const docsRouter = new Router({ });
 
-docsRouter.get("Docs", "/*", statics(paths.DOCS, { index: "README.md"})); 
+docsRouter.get("Docs", "/docs/*", statics(paths.DOCS, { 
+  index: "README.md",
+  prefix: "/docs",
+})); 
 // router.use("/docs", docsRouter.routes());
 
 // ssr
 const appPath = path.join(paths.SERVER, "apps", "App.mjs");
-router.get("UI", ["/", "/*"], ssr({appPath: appPath}));
+// router.get("UI", ["/", "/*"], ssr({appPath: appPath}));
 
 // Redirect /test to /
 // router.redirect("/test", "/");

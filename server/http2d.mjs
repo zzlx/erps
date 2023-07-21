@@ -2,9 +2,6 @@
  * *****************************************************************************
  * 
  * HTTP Daemon
- * ===========
- *
- * HTTP2 Daemon.
  *
  * ## Features:
  * * http2
@@ -14,46 +11,48 @@
  * *****************************************************************************
  */
 
-import cp from 'child_process';
-import cluster from 'cluster';
-import fs from 'fs';
-import http2 from 'node:http2';
-import os from 'os';
-import path from 'path';
-import process from 'node:process';
-import util from 'util';
-import { app } from './app.mjs';
-import { paths, system, configs } from './settings/index.mjs';
-import { Websocket } from './utils/Websocket.mjs';
-import { capitalize, isMac } from './utils/index.mjs';
+import cluster from "cluster";
+import fs from "fs";
+import http2 from "node:http2";
+import os from "os";
+import path from "path";
+import process from "node:process";
+import util from "util";
+import { app } from "./app.mjs";
+import { system, configs } from "./settings/index.mjs";
+import { Websocket } from "./utils/Websocket.mjs";
+import { capitalize, isMac } from "./utils/index.mjs";
 
-const debug = util.debuglog(`debug:http2d`);
+const debug = util.debuglog("debug:http2d");
 const url = import.meta.url;
 
 let server;
 
-process.title = 'org.zzlx.' + path.basename(url, path.extname(url));
+process.title = "org.zzlx." + path.basename(url, path.extname(url));
 
-process.on('exit', (code) => {
+process.on("exit", (code) => {
   debug(`${process.title} is exit with exitCode: ${code}`);
 });
 
-process.on('uncaughtException', (err) => {
-  debug('Uncaught exception:', err);
+process.on("uncaughtException", (error, origin) => {
+  debug("The uncaughted exception: ", error);
+  debug("The origin uncaught exception: ", origin);
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-  debug('Unhandled rejection:', reason);
+  debug(
+    "Rejection is come from ", 
+    promise, 
+    " because of: ", 
+    reason,
+  );
 });
 
 
 // 配置进程名称
 
 // 启用cluster
-if (cluster.isPrimary && process.env.NODE_ENV !== 'development') {
-
-  debug(`(pid:${process.pid})${process.title} is running with cluster mode.`);
-
+if (cluster.isPrimary && process.env.NODE_ENV !== "development") {
   // Keep track of requests
   let numReqs = 0;
 
@@ -70,27 +69,27 @@ if (cluster.isPrimary && process.env.NODE_ENV !== 'development') {
 
     const worker = cluster.workers[id];
 
-    worker.on('message', msg => {
-      if (msg.cmd && msg.cmd === 'notifyRequest') {
+    worker.on("message", msg => {
+      if (msg.cmd && msg.cmd === "notifyRequest") {
         numReqs += 1;
-        debug('requests', numReqs);
+        debug("requests", numReqs);
       }
     });
 
-    worker.on('exit', (code, signal) => {
+    worker.on("exit", (code, signal) => {
       if (signal) {
         debug(`worker was killed by signal: ${signal}`);
       } else if (code !== 0) {
         debug(`worker exited with error code: ${code}`);
       } else {
-        debug('worker success!');
+        debug("worker success!");
       }
     });
   }
 
-  cluster.on('exit', (worker, code, signal) => {
+  cluster.on("exit", (worker, code, signal) => {
     if (worker.exitedAfterDisconnect === true) {
-      debug('Oh, it was just voluntary – no need to worry');
+      debug("Oh, it was just voluntary – no need to worry");
     }
 
     debug(`(pid:${worker.process.pid})Worker process died`);
@@ -101,7 +100,7 @@ if (cluster.isPrimary && process.env.NODE_ENV !== 'development') {
   // 初始化服务器:
   server = http2.createSecureServer({
     allowHTTP1: true,
-    //ca: [fs.readFileSync('client-cert.pem')],
+    //ca: [fs.readFileSync("client-cert.pem")],
     key: fs.readFileSync(configs.privateKey),
     cert: fs.readFileSync(configs.cert), // use fullchain as cert
     passphrase: configs.passphrase,
@@ -114,23 +113,23 @@ if (cluster.isPrimary && process.env.NODE_ENV !== 'development') {
     //ecdhCurve
     //origins: [],
     //privateKeyEngine
-    //pfx: fs.readFileSync('etc/ssl/localhost_cert.pfx'),
+    //pfx: fs.readFileSync("etc/ssl/localhost_cert.pfx"),
     //ticketKeys: crypto.randomBytes(48), 
     handshakeTimeout: 120 * 1000, // milliseconds
     sessionTimeout: 300, // seconds
   });
 
-  server.on('error', e => {
+  server.on("error", e => {
 
-    if (e.code === 'EADDRINUSE') { 
+    if (e.code === "EADDRINUSE") { 
       if (process.send) {
         process.send(e);
       } else {
         // debug(`${process.title} is already runing on ${e.address}:${e.port}, try again later`);
         debug(
-          '%s is already running on port %s, try again later.',
+          "%s is already running on port %s, try again later.",
           capitalize(process.title),
-          e.port
+          e.port,
         );
       }
 
@@ -139,7 +138,7 @@ if (cluster.isPrimary && process.env.NODE_ENV !== 'development') {
       }
 
     } else {
-      debug(error); // 打印错误信息
+      debug(e); // 打印错误信息
     }
 
   });
@@ -147,17 +146,17 @@ if (cluster.isPrimary && process.env.NODE_ENV !== 'development') {
   // stream handler
   // (stream, headers) => {}
   //
-  server.on('stream', app.callback());
+  server.on("stream", app.callback());
 
   // Websocket support
   const ws = new Websocket({ server: server, });
 
-  // he 'secureConnection' event is emitted after the handshaking process 
+  // he "secureConnection" event is emitted after the handshaking process 
   // for a new connection has successfully completed. 
   // 管理服务器
   // 服务器运行中,接收socket特定信号,执行操作命令
-  server.on('secureConnection', socket => {
-    socket.on('data', buffer => {
+  server.on("secureConnection", socket => {
+    socket.on("data", buffer => {
       try {
         // 过滤数据帧
         if (buffer.readUInt8(0) !== 0b11111111) return; // 根据第一个字节判断
@@ -170,24 +169,25 @@ if (cluster.isPrimary && process.env.NODE_ENV !== 'development') {
         debug(`received command: ${message.command}`);
 
         switch(message.command) {
-          case 'STOP': 
-            debug('Received STOP command, service is closing...');
+          case "STOP": 
+            debug("Received STOP command, service is closing...");
             server.close();
             break;
 
 
-          case 'RESTART': 
-            debug('Received RESTART command, service is restarting...');
+          case "RESTART": 
+            debug("Received RESTART command, service is restarting...");
             //debug(server);
 
             server.close(() => {
+              // 
             });
             break;
           default:
-            debug('Unknown Server Action.');
+            debug("Unknown Server Action.");
         }
       } catch (e) {
-        debug('frame filter', e); //不做处理
+        debug("frame filter", e); //不做处理
       }
     });
   });
@@ -196,22 +196,22 @@ if (cluster.isPrimary && process.env.NODE_ENV !== 'development') {
   server.listen({ 
     ipv6Only: false, 
     exclusive: true,
-    host: system.isSupportIPv6 ? "::" : '0.0.0.0',
-    port: '8443',
+    host: system.isSupportIPv6 ? "::" : "0.0.0.0",
+    port: "8443",
   }, function () {
 
     if (process.channel && process.send) {
       process.send({ 
-        message: '服务器已启动',
+        message: "服务器已启动",
         pid: process.pid,
         address: this.address(),
       });
     } else {
 
-      // if (app.env === 'development') console.clear();
+      // if (app.env === "development") console.clear();
       // 打印服务器启动后信息
       // print backend server running message
-      debug('%s is running on: %o', process.title, this.address());
+      debug("%s is running on: %o", process.title, this.address());
 
       const port = this.address().port;
 
@@ -226,21 +226,23 @@ if (cluster.isPrimary && process.env.NODE_ENV !== 'development') {
   // workder process settings
   //
 
-  process.on('message', (msg) => {
-    if (msg === 'shutdown') {
+  process.on("message", (msg) => {
+    if (msg === "shutdown") {
       // Initiate graceful close of any connections to server
     }
   });
 
   // event to request it to stop.
-  process.on('SIGTSTP', () => {
-    debug('Receive SIGTSTP signal.');
-    server.close(() => { });
+  process.on("SIGTSTP", () => {
+    debug("Receive SIGTSTP signal.");
+    server.close(() => { 
+      // 
+    });
   });
 
   // event to request termination.
-  process.on('SIGTERM', () => {
-    debug('Receive SIGTERM signal.');
+  process.on("SIGTERM", () => {
+    debug("Receive SIGTERM signal.");
     process.exit();
   });
 

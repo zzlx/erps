@@ -71,21 +71,19 @@ const proc = {
 function main () {
   let isExec = false; // 是否执行
 
-  // 配置环境变量
+  // 执行任务
   for (const param of Object.keys(paramMap)) {
     switch (param) {
       case "devel":
       case "development":
-        process.env.NODE_ENV = "development";
+        // process.env.NODE_ENV = "development";
         delete paramMap[param];
         break;
-      default:
+      case "prod":
+      case "production":
+        // process.env.NODE_ENV = "production";
+        delete paramMap[param];
         break;
-  }
-
-  // 执行任务
-  for (const param of Object.keys(paramMap)) {
-    switch (param) {
       case "h":
       case "help":
         isExec = true;

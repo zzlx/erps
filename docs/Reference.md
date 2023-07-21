@@ -15,7 +15,7 @@
 * [electron](https://github.com/electron/electron)
 * [awesome-nodejs](https://github.com/sindresorhus/awesome-nodejs)
 * [JS-OCR](https://github.com/kdzwinel/JS-OCR-demo)
-* [d3](https://github.com/d3/d3)
+* [d3](https://github.com/d3/d3):Data-Driven Documents,a free, open-source JavaScript library for visualizing data.
 * [handsontable](https://github.com/handsontable/handsontable)
 * [downshift](https://github.com/downshift-js/downshift)
 * [passport](https://github.com/jaredhanson/passport)

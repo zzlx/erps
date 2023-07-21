@@ -43,7 +43,6 @@ export function statics (root, options = {}) {
   });
 
   return async function staticMiddleware (ctx, next) {
-
     await next(); //
 
     // 旁路规则:
