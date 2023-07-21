@@ -158,6 +158,7 @@ async function watchPath () {
 
   const watcher = new PathWatcher([
     paths.SERVER,
+    paths.SRC,
   ]);
 
   watcher.on("change", (f) => {
@@ -171,7 +172,7 @@ async function watchPath () {
       */
       eslint(f);
       restartHttps();
-    } else if (/\.ts$/.test(f)) {
+    } else if (/\.mts$/.test(f)) {
       tsc();
     } else if (/\.scss/.test(f)) {
       scssRender();
@@ -184,11 +185,31 @@ async function watchPath () {
  */
 
 function tsc () {
-  debug("执行tsc");
   cp.exec("tsc", (err, stdout, stderr) => {
     if (err) debug("err:", err);
-    debug("stdout:", stdout);
+    if (stdout) debug("stdout:", stdout);
     if (stderr) debug("stderr:", stderr);
+  });
+}
+
+/**
+ * Eslint 
+ */
+
+function eslint (file) {
+  cp.exec(`npx eslint ${file}`, (error, stdout, stderr) => {
+    if (stdout) { 
+      console.log(CLEAR_PAGE); // eslint-disable-line
+      console.log(stdout); // eslint-disable-line
+    } else if (stderr) {
+      console.log(CLEAR_PAGE); // eslint-disable-line
+      console.log(stderr); // eslint-disable-line
+    } else if (error) {
+      console.log(CLEAR_PAGE); // eslint-disable-line
+      console.log(error); // eslint-disable-line
+    } else {
+      console.log(CLEAR_PAGE); // eslint-disable-line
+    }
   });
 }
 
@@ -231,27 +252,6 @@ function restartHttpd () {
   }
 
   startHttpd();
-}
-
-/**
- * Eslint 
- */
-
-function eslint (file) {
-  cp.exec(`npx eslint ${file}`, (error, stdout, stderr) => {
-    if (stdout) { 
-      console.log(CLEAR_PAGE); // eslint-disable-line
-      console.log(stdout); // eslint-disable-line
-    } else if (stderr) {
-      console.log(CLEAR_PAGE); // eslint-disable-line
-      console.log(stderr); // eslint-disable-line
-    } else if (error) {
-      console.log(CLEAR_PAGE); // eslint-disable-line
-      console.log(error); // eslint-disable-line
-    } else {
-      console.log(CLEAR_PAGE); // eslint-disable-line
-    }
-  });
 }
 
 /**

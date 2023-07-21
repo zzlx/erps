@@ -2,11 +2,10 @@
  * *****************************************************************************
  *
  *
+ *
  * *****************************************************************************
  */
 
-function greet(person: string) {
-  return 'Hello, ' + person;
-}
+import { greet } from "./greet.mjs";
 
 console.log(greet("TypeScript"));

@@ -10,9 +10,11 @@
 assets
 build
 cache
+dist
 examples
 node_modules
 public_html
+test
 
 # vim临时文件
 .vim

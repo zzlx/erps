@@ -1,6 +1,0 @@
-{
-  "extends": "../tsconfig",
-  "references": [
-		{ "path": "../src/uis" } // 表示引用了工具库项目
-	]
-}

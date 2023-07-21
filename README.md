@@ -18,7 +18,7 @@ git clone https://github.com/zzlx/erps.git
 
 ## 安装系统依赖
 
-进入代码库目录并安装系统依赖库
+进入项目根目录,安装系统依赖库
 
 ```
 cd erps & npm install
