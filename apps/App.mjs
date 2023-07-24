@@ -5,12 +5,7 @@
  *
  * 前端程序,用于提供用户操作界面
  *
- * @todos:
- *
- * pv统计
- * API调用量统计
- *
- *
+ * @todos: pv统计/API调用量统计
  * *****************************************************************************
  */
 
@@ -43,7 +38,7 @@ export default function App (props) {
     React.createElement(Route, { 
       path: ["/", "/homepage", "/home"], 
       exact: true, 
-      component: Test 
+      component: Test, 
     }),
     React.createElement(Route, { path: "/games", component: Test }),
     React.createElement(Route, { path: "*", component: NoMatch }),

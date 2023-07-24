@@ -6,18 +6,18 @@
  * *****************************************************************************
  */ 
 
-import assert from 'node:assert';
-import fs from 'node:fs';
-import path from 'node:path';
-import util from 'node:util';
-import { HTTP_STATUS } from '../constants.mjs';
-import { etag, stripLeadingSlash, stripTrailingSlash } from '../utils/index.mjs';
+import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
+import util from "node:util";
+import { HTTP_STATUS } from "../constants.mjs";
+import { etag, stripLeadingSlash, stripTrailingSlash } from "../utils/index.mjs";
 
-const debug = util.debuglog('debug:send-middleware');
+const debug = util.debuglog("debug:send-middleware");
 
 export async function send (ctx, pathname, options = {}) {
-  assert(ctx, 'context is required by send middleware.'); 
-  assert(pathname, `pathname is required by send middleware.`);
+  assert(ctx, "context is required by send middleware."); 
+  assert(pathname, "pathname is required by send middleware.");
 
   const opts = Object.assign({}, {
     index: false, 
@@ -28,25 +28,32 @@ export async function send (ctx, pathname, options = {}) {
     extensions: false,
   }, options);
 
-  const root = opts.root ? path.normalize(path.resolve(opts.root)) : ''
+  const root = opts.root ? path.normalize(path.resolve(opts.root)) : "";
 
   const prefix = path.join(
-    ctx.router && ctx.router.opts.prefix ? ctx.router.opts.prefix : '',  
-    opts.prefix ? opts.prefix : ''
+    ctx.router && ctx.router.opts.prefix ? ctx.router.opts.prefix : "",  
+    opts.prefix ? opts.prefix : "",
   );
 
+  // debug("prefix:", prefix);
+
   const pathName = prefix && ctx.pathname.substr(0, prefix.length) === prefix
-    ? ctx.pathname.length === prefix.length ? '/' : ctx.pathname.slice(prefix.length)
+    ? ctx.pathname.length === prefix.length ? "/" : ctx.pathname.slice(prefix.length)
     : ctx.pathname;
 
+  if (ctx.app.env === "development") {
+    if (pathname === "/docs/README.md") {
+      debug(opts);
+    }
+  }
 
-  if (typeof opts.index === 'string') opts.index = String.prototype.split.call(opts.index, ',');
+  if (typeof opts.index === "string") opts.index = String.prototype.split.call(opts.index, ",");
 
   let hasQueryString = false;
   let i = 0;
 
-  for (const c of pathname) {
-    if (c === '?') {
+  for (const c of pathName) {
+    if (c === "?") {
       hasQueryString = true;
       break;
     }
@@ -55,14 +62,14 @@ export async function send (ctx, pathname, options = {}) {
 
   // get uri from pathname
   let uri = i == 0 
-    ? stripTrailingSlash(stripLeadingSlash(pathname))
-    : stripTrailingSlash(stripLeadingSlash(pathname.substr(0, i)));
+    ? stripTrailingSlash(stripLeadingSlash(pathName))
+    : stripTrailingSlash(stripLeadingSlash(pathName.substr(0, i)));
 
   try {
     // 去掉查询字符串
-    uri = decodeURIComponent(uri)
+    uri = decodeURIComponent(uri);
   } catch (err) {
-    return ctx.throw(HTTP_STATUS.BAD_REQUEST, `${pathname} failed to decode.`);
+    return ctx.throw(HTTP_STATUS.BAD_REQUEST, `${pathName} failed to decode.`);
   }
 
   // 
@@ -71,25 +78,25 @@ export async function send (ctx, pathname, options = {}) {
   if (!exists(uri)) return;
   if (!opts.hidden && isHidden(uri)) return; // hiddenfile support or not
 
-  let encodingExt = ''
+  let encodingExt = "";
 
-  const encodings = ctx.get('accept-encoding').split(/\b,\s?/);
+  // const encodings = ctx.get("accept-encoding").split(/\b,\s?/);
 
-  if (ctx.acceptsEncodings('br', 'identity') === 'br' && exists(uri + '.br')) {
-    uri += '.br';
-    ctx.set('Content-Encoding', 'br');
-    ctx.remove('Content-Length');
-    encodingExt = '.br';
-  } else if (ctx.acceptsEncodings('gzip', 'identity') === 'gzip' && exists(uri + '.gz')) {
-    uri += '.gz';
-    ctx.set('Content-Encoding', 'gzip');
-    ctx.remove('Content-Length');
-    encodingExt = '.gz';
-  } else if (ctx.acceptsEncodings('deflate', 'identity') === 'deflate' && exists(uri + '.deflate')) {
-    uri += '.deflate';
-    ctx.set('Content-Encoding', 'deflate');
-    ctx.remove('Content-Length');
-    encodingExt = '.deflate';
+  if (ctx.acceptsEncodings("br", "identity") === "br" && exists(uri + ".br")) {
+    uri += ".br";
+    ctx.set("Content-Encoding", "br");
+    ctx.remove("Content-Length");
+    encodingExt = ".br";
+  } else if (ctx.acceptsEncodings("gzip", "identity") === "gzip" && exists(uri + ".gz")) {
+    uri += ".gz";
+    ctx.set("Content-Encoding", "gzip");
+    ctx.remove("Content-Length");
+    encodingExt = ".gz";
+  } else if (ctx.acceptsEncodings("deflate", "identity") === "deflate" && exists(uri + ".deflate")) {
+    uri += ".deflate";
+    ctx.set("Content-Encoding", "deflate");
+    ctx.remove("Content-Length");
+    encodingExt = ".deflate";
   }
 
   let stats = await fs.promises.stat(uri);
@@ -111,13 +118,13 @@ export async function send (ctx, pathname, options = {}) {
     if (!matched) return;
   }
 
-  if (!ctx.get('Last-Modified')) ctx.set('Last-Modified', stats.mtime.toUTCString())
-  if (!ctx.get('Cache-Control')) {
-    const directives = [`max-age=${(opts.maxage / 1000 | 0)}`]
+  if (!ctx.get("Last-Modified")) ctx.set("Last-Modified", stats.mtime.toUTCString());
+  if (!ctx.get("Cache-Control")) {
+    const directives = [`max-age=${(opts.maxage / 1000 | 0)}`];
     if (opts.immutable) {
-      directives.push('immutable')
+      directives.push("immutable");
     }
-    ctx.set('Cache-Control', directives.join(','))
+    ctx.set("Cache-Control", directives.join(","));
   }
 
   // 内容协商算法:
@@ -126,25 +133,25 @@ export async function send (ctx, pathname, options = {}) {
   // 应该用一个缓存的回复(response)还是向源服务器请求一个新的回复。
   // 在响应状态码为 304 Not Modified  的响应中，
   // 也要设置 Vary 首部，而且要与相应的 200 OK 响应设置得一模一样。
-  ctx.set('vary', 'User-Agent');
+  ctx.set("vary", "User-Agent");
 
   const ETag = etag(stats); 
 
-  if (ctx.get('if-none-match') === ETag) { 
+  if (ctx.get("if-none-match") === ETag) { 
     ctx.status = 304; 
     return; 
   }
 
-  ctx.set('Content-Length', stats.size)
-  ctx.set('etag', ETag);
+  ctx.set("Content-Length", stats.size);
+  ctx.set("etag", ETag);
 
   if (!ctx.type) {
-    ctx.type = encodingExt === '' 
+    ctx.type = encodingExt === "" 
       ? path.extname(uri) 
       : path.extname(path.basename(uri, encodingExt));
   }
 
-  ctx.body = fs.createReadStream(uri, { emitClose: true, autoClose: true,});
+  ctx.body = fs.createReadStream(uri, { emitClose: true, autoClose: true});
 
   return;
 }
@@ -166,15 +173,15 @@ function exists (path) {
 }
 
 /**
- * Check if it's hidden.
+ * Check if it"s hidden.
  */
 
 function isHidden (uri) {
-  const paths = uri.split(path.sep)
+  const paths = uri.split(path.sep);
 
   for (const path of paths) {
-    if (path[0] === '.') return true
+    if (path[0] === ".") return true;
   }
 
-  return false
+  return false;
 }

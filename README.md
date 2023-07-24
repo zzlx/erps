@@ -5,7 +5,6 @@ ERPs
 各模块可以单独使用,也可以通过系统配置，形成一整套ERP管理解决方案.
 
 > * 系统目标: 一个标准化、数字化、程序化、智能化、系统化的管理工具.
-> * 软件许可：[MIT-LICENSE](./LICENSE)
 > * 项目文档: [docs](./docs/README.md)
 
 # 快速开始
@@ -30,3 +29,8 @@ cd erps & npm install
 npm start
 ```
 
+# About
+
+## License
+
+软件许可：[MIT-LICENSE](./LICENSE)

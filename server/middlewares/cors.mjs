@@ -23,6 +23,7 @@ export function cors (options) {
   options.credentials = options.credentials || true;
   options.origin = options.origin || '*';
 
+  // expose header
   if (Array.isArray(options.exposeHeaders)) {
     options.exposeHeaders = options.exposeHeaders.join(',');
   }
@@ -39,8 +40,10 @@ export function cors (options) {
     options.maxAge = String(options.maxAge);
   }
 
+  // credentials
   options.credentials = !!options.credentials;
 
+  // 
   options.keepHeadersOnError = options.keepHeadersOnError === undefined || !!options.keepHeadersOnError;
 
   return function corsMiddleware(ctx, next) {

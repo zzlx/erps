@@ -2,20 +2,20 @@
  * *****************************************************************************
  *
  * Server-side application
+ * =======================
  *
  * 基于KOA框架搭建的服务端后台程序,用于响应客户端请求.  
  *
- * Features:
+ * # Features:
  *
- * * Content-nogotiation
- * * 压缩传输
+ * * 支持内容协商
  * * ...
  *
  * *****************************************************************************
  */
 
 import { Application } from "./koa/Application.mjs";
-import { error, logger, xResponse } from "./middlewares/index.mjs";
+import { cors, error, logger, xResponse } from "./middlewares/index.mjs";
 import { objectID } from "./utils/objectID.mjs";
 import { router } from "./router.mjs"; 
 
@@ -25,13 +25,12 @@ export const app = new Application({
   // ...
 });
 
-app.use(error());                 // 记录中间件错误
-app.use(logger());                // 日志中间件
-app.use(xResponse());             // 响应时间记录
-app.use(router.routes());         // 服务端路由
-
-// 最内一层中间件
-app.use((ctx, next) => {
+app.use(error()); // 记录中间件错误
+app.use(logger()); // 日志中间件
+app.use(xResponse()); // 响应时间记录
+app.use(cors()); // 跨域访问 
+app.use(router.routes()); // 服务端路由
+app.use((ctx, next) => { // 最内层中间件
   ctx.state.innerest_middleware = true; // 最内层中间件执行状态
   return next();
 });

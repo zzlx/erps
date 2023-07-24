@@ -32,7 +32,6 @@ const debug = util.debuglog("debug:main");
 const __file = String.prototype.substr.call(import.meta.url, 7);
 const argvs = Array.prototype.slice.call(process.argv, 2);
 const paramMap = argvParser(argvs);
-debug(paramMap);
 
 process.title = "org.zzlx.erpd"; // Setting the main process title
 
@@ -157,6 +156,7 @@ async function watchPath () {
   }, 1500); // 每1500ms内仅重启1次
 
   const watcher = new PathWatcher([
+    paths.APPS,
     paths.SERVER,
     paths.SRC,
   ]);
@@ -243,11 +243,8 @@ function stopHttpd () {
 
 function restartHttpd () {
   if (proc.httpd && proc.httpd.killed === false) {
-    // debug("发送SIGTSTP信号给http服务");
-    debug("Send SIGTERM to HTTPD.");
     proc.httpd.kill("SIGTERM");
   } else {
-    debug("Send RESTART to HTTPD.");
     sendCommand("RESTART");
   }
 

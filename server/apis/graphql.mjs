@@ -6,9 +6,16 @@
  * *****************************************************************************
  */
 
+import {
+  graphql,
+  GraphQLSchema,
+  GraphQLObjectType,
+  GraphQLString,
+} from 'graphql';
 import { Router } from '../koa/Router.mjs'; 
 //import * as _graphql from '../../apps/graphql/index.mjs';
 //
+
 const router = new Router();
 
 router.get('GraphQL', '/', (ctx, next) => {

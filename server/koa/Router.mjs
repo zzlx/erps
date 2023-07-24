@@ -246,7 +246,7 @@ Router.prototype.use = function use () {
   }
 
   const hasPath = typeof middleware[0] === "string";
-  if (hasPath) pathname = middleware.shift();
+  if (hasPath) pathname = middleware.shift(); // 目录配置
 
   for (const m of middleware) {
     if (m.router) {
