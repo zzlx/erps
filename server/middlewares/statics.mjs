@@ -13,10 +13,6 @@
  * * 支持服务缓存策略: ETag响应等
  * * 仅支持GET、HEAD两种请求方法
  *
- * @param {string} root, The root directory from which to serve static assets.
- * @param {object} options
- * @return {function} middleware
- *
  * *****************************************************************************
  */ 
 
@@ -26,6 +22,13 @@ import util from "node:util";
 import { send } from "../koa/send.mjs";
 
 const debug = util.debuglog("debug:statics");
+
+/**
+ *
+ * @param {string} root, The root directory from which to serve static assets.
+ * @param {object} options
+ * @return {function} middleware
+ */
 
 export function statics (root, options = {}) {
   assert(root && "string" === typeof root, "The root directory is not setting.");

@@ -232,6 +232,7 @@ Router.prototype.prefix = function (prefix = "") {
  */
 
 Router.prototype.use = function use () {
+
   const router = this;
 
   const middleware = Array.prototype.slice.call(arguments);

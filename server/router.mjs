@@ -36,7 +36,7 @@ const docsRouter = new Router({ });
 
 docsRouter.get("Docs", "/*", statics(paths.DOCS, { 
   index: "README.md",
-  //prefix: "/docs",
+  prefix: "/docs", // 设置prefix后生效
 })); 
 
 router.use("/docs", docsRouter.routes());
