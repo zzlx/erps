@@ -256,20 +256,20 @@ function restartHttpd () {
  */
 
 async function showHelp () {
-  const divideLine = new Array(process.stdout.columns).join("-");
-  const content = await fs.promises.readFile(__file, { encoding: 'utf8' });
+  const content = await fs.promises.readFile(__file, { encoding: "utf8" });
+  // const divideLine = new Array(process.stdout.columns).join("-");
   const lines = content.split("\n");
 
   for (const line of lines) {
     if (line === "/**") {
-      process.stdout.write(divideLine + "\n");
+      // process.stdout.write(divideLine + "\n");
       continue;
     }
     if (line === " */") break;
     process.stdout.write(line.substr(3) + "\n");
   }
 
-  process.stdout.write(divideLine + "\n");
+  // process.stdout.write(divideLine + "\n");
 }
 
 /**
@@ -277,8 +277,7 @@ async function showHelp () {
  */
 
 function showVersion () {
-  process.stdout.write(
-`ERPs Version: ${appinfo.version}
-Current Node.js Version: ${process.version}
-`);
+  const version = `ERPs Version: ${appinfo.version}
+Current Node.js Version: ${process.version}`;
+  process.stdout.write(version);
 }

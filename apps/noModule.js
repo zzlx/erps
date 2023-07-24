@@ -15,8 +15,8 @@ const message = /MSIE/.test(ua)
 if (console.warn) console.warn(message);
 
 // 页面显示提示信息
-if (document && 'function' === typeof document.createElement) {
-  const preContainer = document.createElement('pre');
+if (document && "function" === typeof document.createElement) {
+  const preContainer = document.createElement("pre");
   preContainer.innerHTML = message;
   document.body.prepend(preContainer);
 }
