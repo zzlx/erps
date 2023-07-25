@@ -10,6 +10,8 @@
 
 import App from "./App.mjs";
 import { deviceDetect } from "./utils/deviceDetect.mjs";
+import { debuglog } from "./utils/debuglog.mjs";
+const debug = debuglog("debug:index");
 
 // 配置环境变量: 从模块文件url中获取env,未获取到时默认为production
 globalThis.env = new URL(import.meta.url).searchParams.get("env") || "production";
@@ -20,7 +22,7 @@ const isBrowserEnv = globalThis.window && globalThis.location;
 
 // Render in browser client environment
 if (isBrowserEnv) {
-  const ReactDOM = global.ReactDOM;
+  const ReactDOM = globalThis.ReactDOM;
   const ua = navigator.userAgent;
   const d = deviceDetect(ua);
 
@@ -36,7 +38,7 @@ if (isBrowserEnv) {
 
   // const html = document.getElementsByTagName("html")[0];
 
-  if (location.protocol !== "https:") {  
+  if (location.protocol !== "https:") {
     // window.location.href = `
   }
 
@@ -46,8 +48,6 @@ if (isBrowserEnv) {
       pathname: location.pathname,
     },
   }, window.__PRELOADED_STATE__);
-
-  delete window.__PRELOADED_STATE__;
 
   // 存在服务端渲染等页面使用hydrate方法渲
   // 空的容器对象上使用render方法渲染
@@ -65,8 +65,10 @@ if (isBrowserEnv) {
   const el = App({ data: initialState });
 
   if (container.innerHTML) {
+    debug("Use hydrate function.");
     ReactDOM.hydrateRoot(container, el);
   } else {
+    debug("Use render function.");
     const root = ReactDOM.createRoot(container);
     root.render(el);
   }

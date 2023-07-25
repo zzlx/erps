@@ -41,12 +41,6 @@ export async function send (ctx, pathname, options = {}) {
     ? ctx.pathname.length === prefix.length ? "/" : ctx.pathname.slice(prefix.length)
     : ctx.pathname;
 
-  if (ctx.app.env === "development") {
-    if (pathname === "/docs/README.md") {
-      debug(opts);
-    }
-  }
-
   if (typeof opts.index === "string") opts.index = String.prototype.split.call(opts.index, ",");
 
   let hasQueryString = false;

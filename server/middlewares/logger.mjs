@@ -32,7 +32,8 @@ export function logger () {
     // @todos: 
     // 增加格式化输出
     // 日志文件写入文件
-    // if (ctx.app.env !== "development") console.log(JSON.stringify(log));
-    console.log(JSON.stringify(ctx.state.log));
+    if (ctx.app.env !== "development") {
+      console.log(JSON.stringify(ctx.state.log)); // eslint-disable-line
+    }
   };
 }

@@ -42,9 +42,8 @@ docsRouter.get("Docs", "/*", statics(paths.DOCS, {
 router.use("/docs", docsRouter.routes());
 
 // ssr
-const ssrRouter = new Router();
 const appPath = path.join(paths.APPS, "App.mjs");
-ssrRouter.get("UI", ["/", "/*"], ssr({appPath: appPath}));
+router.get("UI", "/*", ssr({appPath: appPath}));
 
 // User
 const testRouter = new Router();

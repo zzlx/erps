@@ -7,13 +7,11 @@
  * *****************************************************************************
  */ 
 
-import fs from 'node:fs';
-import path from 'node:path';
-import util from 'node:util';
-import ReactDOMServer from 'react-dom/server';
-import { HTTP_STATUS } from '../constants.mjs';
+import path from "node:path";
+import util from "node:util";
+import ReactDOMServer from "react-dom/server";
 
-const debug = util.debuglog('debug:ssr-middleware');
+const debug = util.debuglog("debug:ssr-middleware");
 
 export function ssr (opts = {}) {
   let appPath = opts.appPath;
@@ -23,41 +21,36 @@ export function ssr (opts = {}) {
   });
 
   return async function ssrMiddleware (ctx, next) {
+    await next(); // 
 
-    await next();
+    // 旁路规则
+    // 1. with body content
+    if (ctx.body != null) return;
 
-    // 服务器端渲染旁路条件:
-    // 1. 静态资源一般均有扩展名
+    // 2. with extension 
+    // if (/\.\w+$/.test(ctx.pathname)) return;
     if (path.extname(ctx.pathname) != "") return;
 
-    // @TODO:前端代码热加载支持
-
-    const appM = await appModule;
+    // 进入服务端渲染逻辑
+    const appM = appModule.then ? await appModule : appModule;
     const app = appM && appM.default ? appM.default : appM; 
 
-    // bypass conditions:
-    // 1. with extension 
-    if (/\.\w+$/.test(ctx.pathname)) return;
 
-    // 2. with body content
-    if (ctx.body != null) return;
-    
-    let didError = false;
-    let timer = () => {};
+    // let didError = false;
+    // let timer = () => {};
 
     const initialState = {
       isSSR: true,
       head: {
-        keywords: 'erps',
-        description: 'ERP system.',
-        title: 'HOME',
+        keywords: "erps",
+        description: "ERP system.",
+        title: "HOME",
       },
-      location: { pathname: ctx.pathname } // set path location
+      location: { pathname: ctx.pathname }, // set path location
     };
 
-    const appstr = ReactDOMServer.renderToString(app(initialState));
-    const html = renderHTML(appstr, initialState);
-    ctx.body = html;
+    const appstring = ReactDOMServer.renderToString(app(initialState));
+    ctx.body = renderHTML(appstring, initialState);
 
     /* 
     await new Promise((resolve, reject) => {
@@ -67,23 +60,23 @@ export function ssr (opts = {}) {
           // if something errored before stream start, 
           // set the error code appropriately.
           ctx.status = didError ? 500 : 200;
-          ctx.type = 'html';
+          ctx.type = "html";
           ctx.body = stream;
-          debug('onShellReady');
+          debug("onShellReady");
           resolve();
         },
         onShellError: error => {
-          debug('onShellError');
+          debug("onShellError");
           // something errored before the shell complete,
           // emit an alternative shell
           ctx.status = 500;
         },
         onAllReady: () => {
 
-          // if don't want use streaming
+          // if don"t want use streaming
           // use this instead of onShellReady.
           debug(stream);
-          ctx.type = 'html';
+          ctx.type = "html";
           resolve();
         },
         onError: error => {
@@ -100,12 +93,11 @@ export function ssr (opts = {}) {
 
     }); // end of promise
     */
-    
-  }
+  }; // end of ssrMiddleware
 }
 
 export function renderHTML (appString, initialState = {}) {
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = process.env.NODE_ENV === "development";
   const react = isDev 
     ? "/statics/js/react.development.js" 
     : "/statics/js/react.production.min.js"; 
@@ -117,8 +109,8 @@ export function renderHTML (appString, initialState = {}) {
     : "/statics/es/index.mjs";
 
   const head = Object.assign({}, {
-    keywords: '',
-    title: 'Homepage',
+    keywords: "",
+    title: "Homepage",
   }, initialState.head);
 
   return `<!DOCTYPE html>
@@ -148,7 +140,7 @@ export function renderHTML (appString, initialState = {}) {
       </div>
     </noscript>
     <script>
-      window.__PRELOADED_STATE__ = ${JSON.stringify(initialState).replace(/</g, '\\x3c')}
+      window.__PRELOADED_STATE__ = ${JSON.stringify(initialState).replace(/</g, "\\x3c")}
     </script>
   </body>
 </html>`;
