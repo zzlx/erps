@@ -25,74 +25,29 @@ export function ssr (opts = {}) {
 
     // 旁路规则
     // 1. with body content
-    if (ctx.body != null) return;
+    if (ctx.body !== undefined) return;
 
     // 2. with extension 
-    // if (/\.\w+$/.test(ctx.pathname)) return;
+    // if (/\.\w+$/.test(ctx.pathname)) return; // 正则匹配
     if (path.extname(ctx.pathname) != "") return;
 
     // 进入服务端渲染逻辑
     const appM = appModule.then ? await appModule : appModule;
     const app = appM && appM.default ? appM.default : appM; 
 
-
-    // let didError = false;
-    // let timer = () => {};
-
     const initialState = {
-      isSSR: true,
+      // isSSR: true,
       head: {
         keywords: "erps",
         description: "ERP system.",
         title: "HOME",
       },
-      location: { pathname: ctx.pathname }, // set path location
+      location: { pathname: ctx.pathname },
     };
 
     const appstring = ReactDOMServer.renderToString(app(initialState));
     ctx.body = renderHTML(appstring, initialState);
 
-    /* 
-    await new Promise((resolve, reject) => {
-      const stream = ReactDOMServer.renderToPipeableStream(App, { 
-        onShellReady: () => {
-          // The content above all Suspense boundaries is ready
-          // if something errored before stream start, 
-          // set the error code appropriately.
-          ctx.status = didError ? 500 : 200;
-          ctx.type = "html";
-          ctx.body = stream;
-          debug("onShellReady");
-          resolve();
-        },
-        onShellError: error => {
-          debug("onShellError");
-          // something errored before the shell complete,
-          // emit an alternative shell
-          ctx.status = 500;
-        },
-        onAllReady: () => {
-
-          // if don"t want use streaming
-          // use this instead of onShellReady.
-          debug(stream);
-          ctx.type = "html";
-          resolve();
-        },
-        onError: error => {
-          didError = true;
-          ctx.throw(error);
-          reject();
-        }
-      }); 
-
-
-      // abort ssr
-      timer = setTimeout(stream.abort, 200);
-
-
-    }); // end of promise
-    */
   }; // end of ssrMiddleware
 }
 
