@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import { isPromise } from '../../utils/is/isPromise.mjs';
+import { isPromise } from "../../utils/is/isPromise.mjs";
 
 export const promise = store => next => action => {
   // promise action

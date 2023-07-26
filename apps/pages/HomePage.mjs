@@ -12,8 +12,8 @@ import React from "../components/React.mjs";
 import Nav from "../components/Nav.mjs";
 import TabContent from "../components/TabContent.mjs";
 
-import { debuglog } from "../utils/debuglog.mjs";
-const debug = debuglog("debug:HomePage");
+// import { debuglog } from "../utils/debuglog.mjs";
+// const debug = debuglog("debug:HomePage");
 
 export default class HomePage extends React.Component {
   render (props) {
@@ -31,10 +31,10 @@ export default class HomePage extends React.Component {
       //pills: true,
       //fill: true,
       data: [
-        { text: "Home", href: "/#Home", active: true },
-        { text: "Admin", href: "/#admin" },
-        { text: "About", href: "/about" },
-        { text: "Test", href: "/#test", disabled: true },
+        { text: "Home", href: "/homepage", active: true },
+        { text: "Admin", href: "/homepage/admin" },
+        { text: "About", href: "/homepage/about" },
+        { text: "Test", href: "/homepage/test", disabled: true },
       ],
     });
     const tabc = React.createElement(TabContent, null, 
@@ -47,7 +47,7 @@ export default class HomePage extends React.Component {
   }
 
   componentDidMount () {
-    debug(`${location.pathname} 已就绪，开始使用吧!`);
+    // debug(`${location.pathname} 已就绪，开始使用吧!`);
   }
 }
 

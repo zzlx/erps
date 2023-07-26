@@ -10,8 +10,8 @@
 
 import App from "./App.mjs";
 import { deviceDetect } from "./utils/deviceDetect.mjs";
-import { debuglog } from "./utils/debuglog.mjs";
-const debug = debuglog("debug:index");
+// import { debuglog } from "./utils/debuglog.mjs";
+// const debug = debuglog("debug:index");
 
 // 配置环境变量: 从模块文件url中获取env,未获取到时默认为production
 globalThis.env = new URL(import.meta.url).searchParams.get("env") || "production";
@@ -65,16 +65,16 @@ if (isBrowserEnv) {
   const el = App({ data: initialState });
 
   if (container.innerHTML) {
-    debug("Use hydrate function.");
+    // debug("Use hydrate function.");
     ReactDOM.hydrateRoot(container, el);
   } else {
-    debug("Use render function.");
+    // debug("Use render function.");
     const root = ReactDOM.createRoot(container);
     root.render(el);
   }
 
   printHelloWorld("欢迎使用前端UI系统!🎉💐", `
-帮助文档: ${location.origin}/doc/manual
+帮助文档: ${location.origin}/docs
 浏览器: ${d.browser}
 操作系统: ${d.device}
   `);

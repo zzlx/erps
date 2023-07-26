@@ -3,6 +3,7 @@
  *
  * 路由配置
  *
+ *
  * *****************************************************************************
  */
 
@@ -19,31 +20,31 @@ const defaults = [
     "app": "HomePage",
     "title": "设置",
     "keywords": "",
-    "exact": false
+    "exact": false,
   },
   {
     "path": "/login",
     "app": "Login",
     "title": "登陆|Login",
-    "exact": false
+    "exact": false,
   },
   {
     "path": "/databases/:tables(\\w+)?",
     "app": "HomePage",
     "title": "数据库",
-    "exact": true
+    "exact": true,
   },
   { 
     "path": "*", 
     "app": "NotFound",
     "title": "Error:404|NotFound",
-    "exact": false
-  }
+    "exact": false,
+  },
 ];
 
 export function routes (state = defaults, action) {
   switch(action.type){
     default: 
-    return state;
+      return state;
   }
 }

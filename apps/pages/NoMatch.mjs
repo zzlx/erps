@@ -12,6 +12,6 @@ export default class NoMatch extends React.Component {
   render (props) {
     return React.createElement('div', {
       className: "test",
-    }, '404: NotFound');
+    }, '404: Not Found Error');
   }
 }

@@ -6,16 +6,12 @@
  * *****************************************************************************
  */
 
-import { assert } from '../utils/assert.mjs';
-import { isDevel } from '../utils/is/isDevel.mjs';
-import { isPlainObject } from '../utils/is/isPlainObject.mjs';
-
-import * as reducers from '../reducers/index.mjs';
-import { actionTypes as types } from './actionTypes.mjs';
-import * as M from './middlewares/index.mjs'
-
-
-export const createStore = state => new Store(state);
+import { assert } from "../utils/assert.mjs";
+import { isDevel } from "../utils/is/isDevel.mjs";
+import { isPlainObject } from "../utils/is/isPlainObject.mjs";
+import * as reducers from "../reducers/index.mjs";
+// import { actionTypes as types } from "./actionTypes.mjs";
+import * as M from "./middlewares/index.mjs";
 
 /**
  * Redux Store
@@ -44,7 +40,7 @@ export default class Store {
     this.dispatch = this.dispatch.bind(this);
     this._dispatch = this._dispatch.bind(this);
 
-    this._dispatch({ type: 'INIT' });
+    this._dispatch({ type: "INIT" });
   }
 
   dispatch (action) {
@@ -57,16 +53,16 @@ export default class Store {
 
   _dispatch (action) {
     assert(isPlainObject(action), 
-      'Actions must be plain objects. Use custom middleware for async actions.');
+      "Actions must be plain objects. Use custom middleware for async actions.");
 
     assert(!this.isDispatching, 
-      'Reducers may not dispatch actions while another one.');
+      "Reducers may not dispatch actions while another one.");
 
     try {
       this.isDispatching = true;
       this.currentState = this.currentReducer(this.currentState, action); 
     } catch (e) { 
-      console.error(e) 
+      console.error(e);
     } finally {
       this.isDispatching = false;
     } 
@@ -86,9 +82,9 @@ export default class Store {
 
   getState() {
     assert(!this.isDispatching,
-      'You may not call store.getState() while the reducer is executing. ' + 
-      'The reducer has already received the state as an argument. ' + 
-      'Pass it down from the top reducer instead of reading it from the store.'
+      "You may not call store.getState() while the reducer is executing. " + 
+      "The reducer has already received the state as an argument. " + 
+      "Pass it down from the top reducer instead of reading it from the store.",
     );
 
     let retval = this.currentState;
@@ -105,12 +101,12 @@ export default class Store {
   }
 
   subscribe(listener) {
-    assert(typeof listener === 'function', 
-      'Expected the listener to be a function.');
+    assert(typeof listener === "function", 
+      "Expected the listener to be a function.");
     assert(!this.isDispatching, 
-      'Can not call store.subscribe() while the reducer is executing.');
+      "Can not call store.subscribe() while the reducer is executing.");
 
-    let isSubscribed = true;
+    this.isSubscribed = true;
 
     this.ensureCanMutateNextListeners();
 
@@ -119,8 +115,7 @@ export default class Store {
     // unsubscribe
     return () => {
       if (!this.isSubscribed) { return; }
-      assert(!this.isDispatching, 
-          'You may not unsubscribe a listener while the reducer is executing.');
+      assert(!this.isDispatching, "You may not unsubscribe a listener while the reducer is executing.");
       this.isSubscribed = false;
       this.ensureCanMutateNextListeners();
       const index = this.nextListeners.indexOf(listener);
@@ -140,12 +135,12 @@ export default class Store {
    */
 
   replaceReducer(nextReducer) {
-    if (typeof nextReducer !== 'function') {
-      throw new Error('Expected the nextReducer to be a function.');
+    if (typeof nextReducer !== "function") {
+      throw new Error("Expected the nextReducer to be a function.");
     }
 
     this.currentReducer = nextReducer;
-    this.dispatch({ type: 'REPLACE_REDUCER' });
+    this.dispatch({ type: "REPLACE_REDUCER" });
   }
 
   ensureCanMutateNextListeners() {
@@ -180,7 +175,7 @@ export function compose() {
   const functions = Array.prototype.slice.call(arguments);
 
   for (const fn of functions) {
-    assert('function' === typeof fn, 'Must be compose of functions.');
+    assert("function" === typeof fn, "Must be compose of functions.");
   }
 
   return functions.reduce((a, b) => (...args) => a(b(...args)));
@@ -199,7 +194,7 @@ export function combineReducers (reducers) {
 
     for (const key of Object.keys(reducers)) {
       const reducer = reducers[key];
-      assert(typeof reducer === 'function', `${key} is not a function!`);
+      assert(typeof reducer === "function", `${key} is not a function!`);
       const previousStateForKey = state[key];
       const newStateForKey = reducer(previousStateForKey, action);
       newState[key] = newStateForKey;
@@ -207,41 +202,7 @@ export function combineReducers (reducers) {
     }
 
     return hasChanged ? newState : state;
-  }
+  };
 }
 
-function dataProxy (data) {
-  return new Proxy(data, {
-    get: function (target, property, receiver) {
-      if ('findOne' === property) {
-        return findOneFromArray.bind(target);
-      }
-
-      return null;
-    },
-    enumerate: function (target, sKey) {
-      return target.keys();
-    },
-  });
-}
-
-function findOneFromArray (query = {}) {
-  const data = this; 
-
-  let retval = null;
-
-  for (const doc of data) {
-    for (const key of Object.keys(query)) {
-      if ('string' === typeof query[key]) {
-        if (doc[key] === query[key]) {
-          retval = doc;
-          break;
-        }
-      }
-    }
-
-    if (retval) break;
-  }
-
-  return retval;
-}
+export const createStore = state => new Store(state);
