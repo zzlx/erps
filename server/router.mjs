@@ -34,7 +34,7 @@ router.get("Statics", "/statics/es/*", statics("apps", {
 // Docs
 const docsRouter = new Router({ });
 
-docsRouter.get("Docs", "/*", statics(paths.DOCS, { 
+docsRouter.get("Docs", "/*", statics("docs", { 
   index: "README.md",
   prefix: "/docs", // 设置prefix后生效
 })); 

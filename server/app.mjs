@@ -27,18 +27,18 @@ export const app = new Application({
   // ...
 });
 
-app.use(error()); // 记录中间件错误
-app.use(logger()); // 日志中间件
-app.use(xResponse()); // 响应时间记录
-app.use(cors()); // 跨域访问 
-app.use(router.routes()); // 服务端路由
-app.use(async (ctx, next) => { // 最内层中间件
-  ctx.state.innerest_middleware = true; // 最内层中间件执行状态
+app.use(error());                                 // 记录中间件错误
+app.use(logger());                                // 日志中间件
+app.use(xResponse());                             // 响应时间记录
+app.use(cors());                                  // 跨域访问 
+app.use(router.routes());                         // 服务端路由
 
-  await next();
+app.use((ctx, next) => {                    // 最内层中间件,用于记录执行状态
+  // 如果此中间件未被阻断,则设置状态为true
+  ctx.state.innerest_middleware = true; 
 
   if (ctx.app.env === "development") {
-    debug(ctx.state);
+    // debug(ctx.state);
   }
   // debug("ctx.body:", ctx.body);
 });
