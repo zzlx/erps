@@ -43,7 +43,7 @@ router.use("/docs", docsRouter.routes());
 
 // ssr
 const appPath = path.join(paths.APPS, "App.mjs");
-router.all("UI", "/*", ssr({appPath: appPath}));
+router.all("UI", [ "/homepage/*", "/homepage" ], ssr({appPath: appPath}));
 
 // User
 const testRouter = new Router();

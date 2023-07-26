@@ -8,15 +8,15 @@
 		<string>/usr/local/bin/node</string>
 		<key>ProgramArguments</key>
 		<array>
-			<string>/Users/xueminwang/Documents/erps/bin/erpd</string>
+      <string>~/erps/bin/erpd</string>
 		</array>
 		<key>KeepAlive</key>
 		<true/>
 		<key>RunAtLoad</key>
 		<true/>
 		<key>StandardOutPath</key>
-		<string>/Users/xueminwang/Documents/erps/test/log</string>
+    <string>~/erps/log</string>
 		<key>StandardErrorPath</key>
-		<string>/Users/xueminwang/Documents/erps/test/error</string>
+    <string>~/erps/log/error</string>
 	</dict>
 </plist>

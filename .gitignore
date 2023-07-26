@@ -1,7 +1,9 @@
 # ##############################################################################
 #
 # 参考文档
-# http://help.github.com/ignore-files/
+#
+# https://help.github.com/ignore-files/
+# https://git-scm.com/docs/gitignore
 #
 # ##############################################################################
 #
@@ -15,6 +17,7 @@ examples
 node_modules
 public_html
 test
+log
 
 # vim临时文件
 .vim
