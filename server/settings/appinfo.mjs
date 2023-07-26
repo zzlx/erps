@@ -3,13 +3,15 @@
  *
  * package.json 配置管理器
  *
+ * 用于读取或编辑package.json配置信息
+ *
  * *****************************************************************************
  */
 
-import fs from 'fs';
-import { paths } from './paths.mjs';
+import fs from "node:fs";
+import { paths } from "./paths.mjs";
 
-const packageJSON = readJSON(paths.PACKAGE);
+const packageJSON = JSON.parse(await fs.promises.readFile(paths.PACKAGE));
 
 export const appinfo = new Proxy(packageJSON, {
   get: function (target, property, receiver) {
@@ -17,25 +19,10 @@ export const appinfo = new Proxy(packageJSON, {
   },
   set: function (target, property, value) {
     if (target[property] === undefined) return false;
-    if (property === 'dependencies') {
-    }
 
+    // modify target property and write to package.json file
     target[property] = value;
-    writeJSON(paths.PACKAGE, target);
+    fs.promises.writeFile(paths.PACKAGE, JSON.stringify(target, null, 2));
     return true;
   }
 });
-
-function readJSON (path) {
-  const json = JSON.parse(fs.readFileSync(path));
-  return json;
-}
-
-function writeJSON (path, json) {
-  return fs.promises.writeFile(
-    path, 
-    typeof json === "string" 
-      ? json 
-      : typeof json === 'object' ? JSON.stringify(target, null, 2) : null
-  );
-}

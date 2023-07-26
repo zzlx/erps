@@ -91,10 +91,11 @@ export const pageNotFoundTemplate = ctx => `<!DOCTYPE html>
   </head>
   <body>
     <div class="alert">
-      <h4 class="alert-heading">404:Page Not Found</h4>
+      <h4 class="alert-heading">Not Found Error</h4>
       <hr>
-      <p>您访问的页面: <u><b>${ctx.pathname}</b></u>未被配置或已丢失</p>
-      <p>如有必要请通知系统管理员进行解决!</p>
+      <p class="mb-0">404 Error: <u><b>${ctx.pathname}</b></u> is not found.</p>
+      <p class="mb-0">Please contact administrator if necessary!</p>
+      <p>如果有必要请联系管理员</p>
     </div>
   </body>
 </html>`;

@@ -11,4 +11,3 @@ export { configs } from './configs.mjs';
 export { env } from './env.mjs';
 export { gitinfo } from './gitinfo.mjs';
 export { paths } from './paths.mjs';
-export { system } from './system.mjs';

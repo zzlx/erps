@@ -19,8 +19,8 @@ import path from "path";
 import process from "node:process";
 import util from "util";
 import { app } from "./app.mjs";
-import { system, configs } from "./settings/index.mjs";
-import { Websocket } from "./utils/Websocket.mjs";
+import { configs } from "./settings/index.mjs";
+// import { Websocket } from "./utils/Websocket.mjs";
 import { capitalize, isMac } from "./utils/index.mjs";
 
 const debug = util.debuglog("debug:http2d");
@@ -28,6 +28,7 @@ const url = import.meta.url;
 
 let server;
 
+// process settings
 process.title = "org.zzlx." + path.basename(url, path.extname(url));
 
 process.on("exit", (code) => {
@@ -48,6 +49,27 @@ process.on("unhandledRejection", (reason, promise) => {
   );
 });
 
+process.on("message", (msg) => {
+  if (msg === "shutdown") {
+    // Initiate graceful close of any connections to server
+  }
+});
+
+// event to request it to stop.
+process.on("SIGTSTP", () => {
+  debug("Receive SIGTSTP signal.");
+
+  // server在cluster中的状态
+  server.close(() => { 
+    // 
+  });
+});
+
+// event to request termination.
+process.on("SIGTERM", () => {
+  debug("Receive SIGTERM signal.");
+  process.exit();
+});
 
 // 配置进程名称
 
@@ -92,7 +114,8 @@ if (cluster.isPrimary && process.env.NODE_ENV !== "development") {
       debug("Oh, it was just voluntary – no need to worry");
     }
 
-    debug(`(pid:${worker.process.pid})Worker process died`);
+    debug(`Receive signal: ${signal} 
+      (pid:${worker.process.pid})Worker process died with code:${code}`);
   });
 
 } else {
@@ -149,7 +172,7 @@ if (cluster.isPrimary && process.env.NODE_ENV !== "development") {
   server.on("stream", app.callback());
 
   // Websocket support
-  const ws = new Websocket({ server: server, });
+  // const ws = new Websocket({ server: server, });
 
   // he "secureConnection" event is emitted after the handshaking process 
   // for a new connection has successfully completed. 
@@ -196,24 +219,22 @@ if (cluster.isPrimary && process.env.NODE_ENV !== "development") {
   server.listen({ 
     ipv6Only: false, 
     exclusive: true,
-    host: system.isSupportIPv6 ? "::" : "0.0.0.0",
-    port: "8443",
-  }, function () {
+    host: configs.isSupportIPv6 ? "::" : "0.0.0.0",
+    port: configs.port,
+  }, () => {
 
     if (process.channel && process.send) {
       process.send({ 
         message: "服务器已启动",
         pid: process.pid,
-        address: this.address(),
+        // address: this.address(),
       });
     } else {
 
       // if (app.env === "development") console.clear();
       // 打印服务器启动后信息
       // print backend server running message
-      debug("%s is running on: %o", process.title, this.address());
-
-      const port = this.address().port;
+      debug("%s is running on port: %s", process.title, configs.port);
 
       // open service url
       // @TODO: 采用服务端推送更新，给在线客户端推送更新
@@ -222,28 +243,4 @@ if (cluster.isPrimary && process.env.NODE_ENV !== "development") {
       }
     }
   });
-
-  // workder process settings
-  //
-
-  process.on("message", (msg) => {
-    if (msg === "shutdown") {
-      // Initiate graceful close of any connections to server
-    }
-  });
-
-  // event to request it to stop.
-  process.on("SIGTSTP", () => {
-    debug("Receive SIGTSTP signal.");
-    server.close(() => { 
-      // 
-    });
-  });
-
-  // event to request termination.
-  process.on("SIGTERM", () => {
-    debug("Receive SIGTERM signal.");
-    process.exit();
-  });
-
 }

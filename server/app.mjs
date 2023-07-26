@@ -34,7 +34,11 @@ app.use(cors()); // 跨域访问
 app.use(router.routes()); // 服务端路由
 app.use(async (ctx, next) => { // 最内层中间件
   ctx.state.innerest_middleware = true; // 最内层中间件执行状态
+
   await next();
-  if (ctx.app.env === "development") debug(ctx.state);
+
+  if (ctx.app.env === "development") {
+    debug(ctx.state);
+  }
   // debug("ctx.body:", ctx.body);
 });
