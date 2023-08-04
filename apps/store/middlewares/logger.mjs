@@ -6,14 +6,17 @@
  * *****************************************************************************
  */
 
+import { debuglog } from "../../utils/debuglog.mjs";
+const debug = debuglog("debug:log");
+
 export const logger = store => next => action => {
-  console.group(`${action.type}: ${action.payload ? action.payload : ""}`);
-  console.log("prevState:", store.getState());
+  if (!globalThis.window) return next(action); // 仅在客户端渲染时打印调试日志
 
+  const prevState = store.getState();
   const result = next(action);
+  const newState = store.getState();
 
-  console.log("newState:", store.getState());
-  console.groupEnd();
+  debug("Action: %s \n new state: %o", action.type, newState);
 
   return result;
 };
