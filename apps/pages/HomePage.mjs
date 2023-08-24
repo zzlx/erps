@@ -17,7 +17,6 @@ import TabContent from "../components/TabContent.mjs";
 
 export default class HomePage extends React.Component {
   render (props) {
-
     const t = (props) => React.createElement("div", { 
       className: "g-col-6 g-col-md-4",
       id: props.id,
@@ -48,6 +47,7 @@ export default class HomePage extends React.Component {
 
   componentDidMount () {
     // debug(`${location.pathname} 已就绪，开始使用吧!`);
+    this.context.store.dispatch({type: "TEST", payload: "前端程序已渲染"});
   }
 }
 

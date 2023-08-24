@@ -19,9 +19,9 @@
 import assert from "node:assert";
 import path from "node:path";
 import util from "node:util";
-import { send } from "../koa/send.mjs";
+import { send } from "../send.mjs";
 
-const debug = util.debuglog("debug:statics");
+const debug = util.debuglog("debug:kernel-statics");
 
 /**
  *
@@ -30,15 +30,15 @@ const debug = util.debuglog("debug:statics");
  * @return {function} middleware
  */
 
-export function statics (root, options = {}) {
-  assert(root && "string" === typeof root, "The root directory is not setting.");
+export function statics (dir, options = {}) {
+  assert(dir && "string" === typeof dir, "The root directory is not setting.");
 
   const opts = Object.assign({
-    root: path.resolve(root),
+    dir: path.resolve(dir),
     prefix: "",
   }, options);
 
-  debug("serve static path:", root);
+  debug("静态资源服务 path:%s", opts.dir);
 
   return async function staticMiddleware (ctx, next) {
     // debug("正在尝试访问静态服务:", opts);

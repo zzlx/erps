@@ -25,7 +25,7 @@ export class Application extends EventEmitter {
     super();
     assert(typeof opts === 'object', 'The opts you provided must be an object.');
 
-    this.env = opts.env || "production";
+    this.env = opts.env ? opts.env : "production";
     this.protocol = opts.protocol || 'https';
 
     // Proxy setting 
@@ -63,9 +63,7 @@ export class Application extends EventEmitter {
       });
 
       stream.on('close', () => {
-        if (didError) {
-          debug('stream未正常关闭!');
-        }
+        if (didError) debug('stream未正常关闭!');
       });
 
       stream.on('error', err => {

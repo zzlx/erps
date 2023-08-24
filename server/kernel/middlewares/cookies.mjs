@@ -123,11 +123,25 @@ export class Cookies {
       headers.push(cookie.toHeader()); // 添加cookie项签名
     }
 
-    // 设置header
-    this.ctx.set("Set-Cookie", headers); 
+    this.ctx.set("Set-Cookie", headers); // set cookie header
   }
 }
 
+/**
+ *
+ *
+ * maxAge: a number representing the milliseconds from Date.now() for expiry.
+ * expires: a Date object indicating the cookie's expiration date (expires at the end of session by default).
+ * path: a string indicating the path of the cookie (/ by default).
+ * domain: a string indicating the domain of the cookie (no default).
+ * secure: a boolean indicating whether the cookie is only to be sent over HTTPS (false by default for HTTP, true by default for HTTPS). Read more about this option.
+ * httpOnly: a boolean indicating whether the cookie is only to be sent over HTTP(S), and not made available to client JavaScript (true by default).
+ * sameSite: a boolean or string indicating whether the cookie is a "same site" cookie (false by default). This can be set to 'strict', 'lax', 'none', or true (which maps to 'strict').
+ * signed: a boolean indicating whether the cookie is to be signed (false by default). If this is true, another cookie of the same name with the .sig suffix appended will also be sent, with a 27-byte url-safe base64 SHA1 value representing the hash of cookie-name=cookie-value against the first Keygrip key. This signature key is used to detect tampering the next time a cookie is received.
+ * overwrite: a boolean indicating whether to overwrite previously set cookies of the same name (false by default). If this is true, all cookies set during the same request with the same name (regardless of path or domain) are filtered out of the Set-Cookie header when setting this cookie.
+ *
+ *
+ */
 
 class Cookie{
   constructor (name, value, attrs) {
@@ -167,9 +181,7 @@ class Cookie{
     this.name = name;
     this.value = value || "";
 
-    for (let name in attrs) {
-      this[name] = attrs[name];
-    }
+    for (const name in attrs) { this[name] = attrs[name]; }
 
     if (this.path && !fieldContentRegExp.test(this.path)) {
       throw new TypeError("option path is invalid");
@@ -186,8 +198,8 @@ class Cookie{
 
   /**
    * 拼接cookie字符串
-   *
    */
+
   toString() {
     return this.name + "=" + this.value;
   }
@@ -200,19 +212,19 @@ class Cookie{
     let header = this.toString();
     if (this.maxAge) this.expires = new Date(Date.now() + this.maxAge);
 
-    if (this.path     ) header += "; path=" + this.path;
-    if (this.expires  ) header += "; expires=" + this.expires.toUTCString();
-    if (this.domain   ) header += "; domain=" + this.domain;
-    if (this.sameSite ) header += "; samesite=" + (this.sameSite === true ? "strict" : this.sameSite.toLowerCase());
-    if (this.secure   ) header += "; secure";
-    if (this.httpOnly ) header += "; httponly";
+    if (this.path) header += "; path=" + this.path;
+    if (this.expires) header += "; expires=" + this.expires.toUTCString();
+    if (this.domain) header += "; domain=" + this.domain;
+    if (this.sameSite) header += "; samesite=" + (this.sameSite === true ? "strict" : this.sameSite.toLowerCase());
+    if (this.secure) header += "; secure";
+    if (this.httpOnly) header += "; httponly";
 
     return header;
   }
 }
 
 // keygrip算法
-class Keygrip {
+export class Keygrip {
   constructor (keys, algorithm = "sha256", encoding = "base64") {
     if (!keys || !(0 in keys)) throw new Error("Keys must be provided.");
     this.keys = keys;
@@ -242,24 +254,23 @@ class Keygrip {
 
 }
 
-//http://codahale.com/a-lesson-in-timing-attacks/
 function constantTimeCompare (val1, val2) {
-  if(val1 == null && val2 != null){
+  if(val1 == null && val2 != null) {
     return false;
-  } else if(val2 == null && val1 != null){
+  } else if(val2 == null && val1 != null) {
     return false;
-  } else if(val1 == null && val2 == null){
+  } else if(val1 == null && val2 == null) {
     return true;
   }
 
-  if(val1.length !== val2.length){
+  if (val1.length !== val2.length) {
     return false;
   }
 
   let result = 0;
 
-  for(let i = 0; i < val1.length; i++){
-    result |= val1.charCodeAt(i) ^ val2.charCodeAt(i); //Don"t short circuit
+  for(let i = 0; i < val1.length; i++) {
+    result |= val1.charCodeAt(i) ^ val2.charCodeAt(i); // Don"t short circuit
   }
 
   return result === 0;

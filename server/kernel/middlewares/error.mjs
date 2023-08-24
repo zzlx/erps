@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import { HttpError } from '../koa/HttpError.mjs';
+import { HttpError } from '../HttpError.mjs';
 
 export const error = () => async function errorMiddleware (ctx, next) {
   try {

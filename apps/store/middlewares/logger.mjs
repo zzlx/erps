@@ -7,7 +7,7 @@
  */
 
 import { debuglog } from "../../utils/debuglog.mjs";
-const debug = debuglog("debug:log");
+const debug = debuglog("debug:logger");
 
 export const logger = store => next => action => {
   if (!globalThis.window) return next(action); // 仅在客户端渲染时打印调试日志
@@ -16,7 +16,8 @@ export const logger = store => next => action => {
   const result = next(action);
   const newState = store.getState();
 
-  debug("Action: %s \n new state: %o", action.type, newState);
+  // print debug message
+  debug(prevState, "Action: " + action.type + action.payload, newState); 
 
   return result;
 };

@@ -3,6 +3,8 @@
  *
  * debuglog
  *
+ * 用于打印调试信息
+ *
  * *****************************************************************************
  */
 
@@ -10,52 +12,59 @@ const debugs = {};
 let debugEnvRegex = null;
 
 export function debuglog(set, cb) {
+  // const debug = debuglogImpl(set);
+  // return (...args) => debug(...args);
+
   let debug = (...args) => {
-
-    // Only invokes debuglogImpl() when the debug function is
-    // called for the first time.
     debug = debuglogImpl(set);
-
     if (typeof cb === "function") cb(debug);
-
     debug(...args);
   };
 
-  return (...args) => debug(...args);
+  return debug;
 }
 
 function initializeDebugEnv(debugEnv) {
   if (debugEnv) {
-    debugEnv = debugEnv.replace(/[|\\{}()[\]^$+?.]/g, "\\$&")
-      .replace(/\*/g, ".*")
+    const debugImpl = debugEnv.replace(/[|\\{}()[\]^$+?.]/g, "\\$&")
+      .replace(/\*/g, ".*") // 
       .replace(/,/g, "$|^")
       .toUpperCase();
-    debugEnvRegex = new RegExp(`^${debugEnv}$`, "i");
+    debugEnvRegex = new RegExp(`^${debugImpl}$`, "i");
   }
 }
 
-function debuglogImpl(set) {
-  const isDev = globalThis.env === "development" ? true : false;
+function debuglogImpl(setString) {
 
   const debugImpl = globalThis.process && globalThis.process.env.NODE_DEBUG 
     ? globalThis.process.env.NODE_DEBUG
-    : "debug:*";
+    : "debug:*"; //
 
   if (debugEnvRegex == null) initializeDebugEnv(debugImpl);
 
-  set = set.toUpperCase();
+  const set = setString.toUpperCase();
+
+  const isDev = globalThis.process && globalThis.process.env.NODE_ENV === "development"
+    ? true
+    : globalThis.env === "development" ? true : false;
 
   if (debugs[set] === undefined) {
-
     if (debugEnvRegex && debugEnvRegex.test(set) && isDev) {
       debugs[set] = function debug () {
-        console.log("%s:", set, ...arguments);
+        const args = Array.prototype.slice.call(arguments); 
+
+        if (typeof arguments[0] === "string") {
+          args[0] = set + " " + args[0];
+        } else {
+          args.unshift(set + " ");
+        }
+        
+        console.log.apply(null, args); // eslint-disable-line
       };
     } else {
-      debugs[set] = () => {};
+      debugs[set] = () => { /* empty function  */ };
     }
-
   }
 
-  return debugs[set];
+  return debugs[set]; // return the set function
 }

@@ -20,26 +20,27 @@
  * *****************************************************************************
  */
 
-import pg from "pg";
-const CLIENT = Symbol('postgresqlClient');
+// import util from "node:util";
+import { PostgresDBA } from "../../database/PostgresDBA.mjs";
 
-export function postgresql (opts = null) {
-  return async function postgresqlMiddleware (ctx, next) {
-    Object.defineProperty(ctx, 'pg', {
-      get: function() {
-        if (this[CLIENT] == null) {
-          this[CLIENT] = new pg.Pool();
+// const debug = util.debuglog("debug:postgresql-middleware");
+const DBA = Symbol("postgresqlClient");
+
+export function postgresql (options = {}) {
+  const dba = {};
+
+  return function postgresqlMiddleware (ctx, next) {
+    Object.defineProperty(ctx, "dba", {
+      get: () => {
+        if (dba[DBA] == null) {
+          dba[DBA] = new PostgresDBA(options);
         }
-
-        return this[CLIENT];
+        return dba[DBA];
       },
       enumerable : true,
       configurable : true,
     });
 
-    await next();
-
-    // close mongoClient
-    // if (ctx._mongoClient && ctx._mongoClient.topology) ctx._mongoClient.close();
-  }
+    return next();
+  };
 }

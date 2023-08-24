@@ -46,7 +46,7 @@ export class Context {
   constructor () {
     this[RES_HEADERS] = Object.create(null);
     this.errors = []; // 错误存储器
-    this.state = Object.create(null); // state存储器
+    this.state = new Map(); // state存储器 使用map替代Object.create(null); 
   }
   
   /**
@@ -690,6 +690,14 @@ export class Context {
     return this.accept.language(...args);
   }
 
+  get stale () {
+
+  }
+
+  set etag (val) {
+    this[RES_HEADERS]["etag"];
+  }
+
   /**
    * Check if the request is fresh, 
    * Last-Modified and/or the ETag still match.
@@ -886,7 +894,6 @@ Context.prototype.throw = function (...args) {
 
 /**
  * push stream
- *
  */
 
 Context.prototype.push = function (pathname) {
@@ -896,24 +903,6 @@ Context.prototype.push = function (pathname) {
     pushStream.respond({ ":status": 200 });
     pushStream.end("some pushed data");
   });
-};
-
-/**
- *
- */
-
-Context.prototype.send = function (filename) {
-  // 
-  debug(filename);
-};
-
-/**
- * 将 Content-Disposition 设置为 “附件” 以指示客户端提示下载
- */
-
-Context.prototype.attachment = function (filename, options) {
-  // 
-  debug(filename, options);
 };
 
 /**
@@ -930,4 +919,16 @@ Context.prototype.onerror = function (err) {
   this.body = err.expose && this.app.env === "development" 
     ? err.message 
     : HTTP_STATUS_CODES[this.status];
+};
+
+/**
+ *
+ * Content-Disposition 响应标头指示回复的内容该以何种形式展示，
+ * 是以内联inline的形式（即网页或者页面的一部分），还是以附件attchment的形式下载并保存到本地。
+ *
+ * Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Disposition
+ */
+
+Context.prototype.attachment = function (filename = "", options) {
+  this.set(HTTP2_HEADER.CONTENT_DISPOSITION, `attachment;fileName=${filename}`);
 };

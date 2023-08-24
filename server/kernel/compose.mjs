@@ -11,6 +11,7 @@
  */
 
 export function compose(middleware) {
+  // test middlewares
   if (!Array.isArray(middleware)) {
     throw new TypeError('Middleware must be an array!');
   }
@@ -26,7 +27,7 @@ export function compose(middleware) {
       }
 
       index = i;
-      let fn = i === middleware.length ? next : middleware[i];
+      const fn = i === middleware.length ? next : middleware[i];
       if (!fn) return Promise.resolve();
 
       try {

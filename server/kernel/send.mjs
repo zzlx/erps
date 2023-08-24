@@ -28,7 +28,7 @@ export async function send (ctx, pathname, options = {}) {
     extensions: false,
   }, options);
 
-  const root = opts.root ? path.normalize(path.resolve(opts.root)) : "";
+  const root = opts.dir ? path.normalize(path.resolve(opts.dir)) : "";
 
   const prefix = path.join(
     ctx.router && ctx.router.opts.prefix ? ctx.router.opts.prefix : "",  

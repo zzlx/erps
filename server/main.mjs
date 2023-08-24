@@ -219,7 +219,7 @@ function eslint (file) {
 
 function startHttpd () {
   const args = [
-    path.join(paths.SERVER, "http2d.mjs"),
+    path.join(paths.SERVER, "cluster.mjs"),
   ];
 
   const options = {

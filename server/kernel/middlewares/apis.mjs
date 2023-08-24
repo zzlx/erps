@@ -11,9 +11,9 @@
 
 import assert from "node:assert";
 import util from "node:util";
-import { readdir } form "../utils/readdir.mjs";
+import { readdir } form "../../utils/readdir.mjs";
 
-const debug = util.debuglog("debug:apis"); // debug message
+const debug = util.debuglog("debug:kernel-apis");
 
 export function apis (_root) {
   assert(_root != null, "_root must be set for apis.");

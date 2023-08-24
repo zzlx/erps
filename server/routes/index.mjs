@@ -13,9 +13,9 @@
 
 import path from "node:path";
 import util from "node:util";
-import { Router } from "./koa/Router.mjs";
-import { ssr, statics } from "./middlewares/index.mjs";
-import { paths } from "./settings/paths.mjs"; 
+import { Router } from "../kernel/Router.mjs";
+import { ssr, statics } from "../kernel/middlewares/index.mjs";
+import { paths } from "../settings/paths.mjs"; 
 
 const debug = util.debuglog("debug:server-router");
 
@@ -43,7 +43,7 @@ router.use("/docs", docsRouter.routes());
 
 // ssr
 const appPath = path.join(paths.APPS, "App.mjs");
-router.all("UI", [ "/homepage/*", "/homepage" ], ssr({appPath: appPath}));
+router.all("UI", [ "/", "/*" ], ssr({appPath: appPath}));
 
 // User
 const testRouter = new Router();

@@ -12,7 +12,7 @@
  * *****************************************************************************
  */
 
-import os from 'os';
+import os from "os";
 
 export function xResponse(opts = {}) {
   //const gitINFO = opts.getGitInfo();

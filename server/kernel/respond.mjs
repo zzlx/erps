@@ -14,7 +14,7 @@ const debug = util.debuglog("debug:respond");
 
 export function respond (ctx) {
   if (ctx.respond === false) return ctx.stream.end(); // allow bypassing respond
-  if (!ctx.state.innerest_middleware) { 
+  if (!ctx.state.get("innerest_middleware")) { 
     debug("The innerest middleware was not arrived."); 
   }
 
@@ -79,6 +79,7 @@ export function respond (ctx) {
 
 /**
  * Page not found template 
+ *
  */
 
 export const pageNotFoundTemplate = ctx => `<!DOCTYPE html>
@@ -91,12 +92,10 @@ export const pageNotFoundTemplate = ctx => `<!DOCTYPE html>
   </head>
   <body>
     <div class="alert">
-      <h4 class="alert-heading">Not Found Error</h4>
+      <h4 class="alert-heading">Page Not Found</h4>
       <hr>
       <p class="mb-0">您访问的页面:${ctx.pathname}未找到或未被正确配置.</p>
       <p>如果有必要请联系本站点管理员!</p>
-      <p class="mb-0">Page: <u><b>${ctx.pathname}</b></u> is not found.</p>
-      <p>Please contact administrator if necessary!</p>
     </div>
   </body>
 </html>`;

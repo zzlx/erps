@@ -12,7 +12,7 @@ import path from "node:path";
 import util from "node:util";
 import ReactDOMServer from "react-dom/server";
 
-const debug = util.debuglog("debug:ssr-middleware");
+const debug = util.debuglog("debug:kernel-ssr");
 
 export function ssr (opts = {}) {
   let appPath = opts.appPath;
