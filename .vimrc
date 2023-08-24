@@ -230,8 +230,8 @@ autocmd FileType shell noremap <buffer> <F5> :!/bin/bash % <CR>
 "autocmd BufWinEnter *.mjs,*.cjs silent loadview
 autocmd BufRead,BufNewFile *.cjs,*.mjs,*.js set filetype=javascript
 autocmd BufRead,BufNewFile *.ts,*.tsx set filetype=typescript
-"autocmd FileType javascript noremap <buffer> <F5> :!NODE_ENV=test NODE_DEBUG=debug:* node --trace-warnings % <CR>
-autocmd FileType javascript noremap <buffer> <F5> :!node --trace-warnings % <CR>
+autocmd FileType javascript noremap <buffer> <F5> :!NODE_ENV=test NODE_DEBUG=debug:* node --trace-warnings % <CR>
+"autocmd FileType javascript noremap <buffer> <F5> :!node --trace-warnings % <CR>
 
 " python脚本配置
 autocmd Filetype python set fileformat=unix
