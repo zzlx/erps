@@ -33,6 +33,17 @@
 				"indent": ["warn", 2, {
           "SwitchCase": 1
         }],
+        "spaced-comment": ["warn", "always", {
+          "block": {
+            "markers": ["/"],
+            "exceptions": ["-", "+"],
+            "balanced": true
+          },
+          "line": {
+            "markers": ["!"],
+            "exceptions": ["*"]
+          }
+        }],
 				"linebreak-style": ["error", "unix"],
         "no-console": ["warn", { "allow": ["warn", "error"] }],
         "no-control-regex": 0, 
