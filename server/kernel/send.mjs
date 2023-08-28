@@ -13,7 +13,7 @@ import util from "node:util";
 import { HTTP_STATUS } from "../constants.mjs";
 import { etag, stripLeadingSlash, stripTrailingSlash } from "../utils/index.mjs";
 
-const debug = util.debuglog("debug:send-middleware");
+const debug = util.debuglog("debug:kernel-send");
 
 export async function send (ctx, pathname, options = {}) {
   assert(ctx, "context is required by send middleware."); 
@@ -43,7 +43,7 @@ export async function send (ctx, pathname, options = {}) {
 
   if (typeof opts.index === "string") opts.index = String.prototype.split.call(opts.index, ",");
 
-  let hasQueryString = false;
+  let hasQueryString = false; // 是否有查询字符串
   let i = 0;
 
   for (const c of pathName) {
@@ -69,8 +69,15 @@ export async function send (ctx, pathname, options = {}) {
   // 
   uri = path.join(root, uri);
 
-  if (!exists(uri)) return;
-  if (!opts.hidden && isHidden(uri)) return; // hiddenfile support or not
+  if (!exists(uri)) {
+    debug("%s is not exists.", pathname);
+    return;
+  }
+
+  if (!opts.hidden && isHidden(uri)) {
+    debug("%s is a hidden file and .", pathname);
+    return; // hiddenfile support or not
+  }
 
   let encodingExt = "";
 
@@ -140,14 +147,18 @@ export async function send (ctx, pathname, options = {}) {
   ctx.set("etag", ETag);
 
   if (!ctx.type) {
-    ctx.type = encodingExt === "" 
+    const type = encodingExt === "" 
       ? path.extname(uri) 
       : path.extname(path.basename(uri, encodingExt));
+
+    ctx.type = type;
+
+    if (type === ".md") {
+      // 
+    }
   }
 
   ctx.body = fs.createReadStream(uri, { emitClose: true, autoClose: true});
-
-  return;
 }
 
 /**
@@ -162,18 +173,18 @@ function exists (path) {
     return false;
   }
 
-  //const R_OK = fs.constants.R_OK;
-  //return fs.promises.access(path, R_OK).then(() => true).catch(err => false);
+  // const R_OK = fs.constants.R_OK;
+  // return fs.promises.access(path, R_OK).then(() => true).catch(err => false);
 }
 
 /**
- * Check if it"s hidden.
+ * Check if it is hidden.
  */
 
 function isHidden (uri) {
   const paths = uri.split(path.sep);
 
-  for (const path of paths) {
+  for (const path of paths) { 
     if (path[0] === ".") return true;
   }
 

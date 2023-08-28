@@ -19,7 +19,7 @@ import { configs } from "./settings/index.mjs";
 // import { Websocket } from "./utils/Websocket.mjs";
 import { capitalize, isMac } from "./utils/index.mjs";
 
-const debug = util.debuglog("debug:backend-http2d");
+const debug = util.debuglog("debug:http2d");
 const url = import.meta.url;
 
 // process settings
@@ -36,10 +36,7 @@ process.on("uncaughtException", (error, origin) => {
 
 process.on("unhandledRejection", (reason, promise) => {
   debug(
-    "Rejection is come from ", 
-    promise, 
-    " because of: ", 
-    reason,
+    "Rejection is come from ", promise, " because of: ", reason,
   );
 });
 
@@ -65,26 +62,25 @@ process.on("SIGTERM", () => {
   process.exit();
 });
 
-debug("创建服务进程:%s", process.title);
+debug("HTTPD inatializing...");
 
-// 初始化服务器:
 const server = http2.createSecureServer({
   allowHTTP1: true,
-  //ca: [fs.readFileSync("client-cert.pem")],
+  // ca: [fs.readFileSync("client-cert.pem")],
   key: fs.readFileSync(configs.privateKey),
   cert: fs.readFileSync(configs.cert), // use fullchain as cert
   passphrase: configs.passphrase,
   requestCert: false, // 客户端证书支持
   rejectUnauthorized: false,
-  //sigalgs: 
-  //ciphers: 
-  //clientCertEngine: 
-  //dhparam
-  //ecdhCurve
-  //origins: [],
-  //privateKeyEngine
-  //pfx: fs.readFileSync("etc/ssl/localhost_cert.pfx"),
-  //ticketKeys: crypto.randomBytes(48), 
+  // sigalgs: 
+  // ciphers: 
+  // clientCertEngine: 
+  // dhparam
+  // ecdhCurve
+  // origins: [],
+  // privateKeyEngine
+  // pfx: fs.readFileSync("etc/ssl/localhost_cert.pfx"),
+  // ticketKeys: crypto.randomBytes(48), 
   handshakeTimeout: 120 * 1000, // milliseconds
   sessionTimeout: 300, // seconds
 });
@@ -104,7 +100,7 @@ server.on("error", e => {
     }
 
     if (isMac()) {
-      //cp.exec(`lsof -i:${e.port} |xargs killall`);
+      // cp.exec(`lsof -i:${e.port} |xargs killall`);
     }
 
   } else {
@@ -147,7 +143,7 @@ server.on("secureConnection", socket => {
 
         case "RESTART": 
           debug("Received RESTART command, service is restarting...");
-          //debug(server);
+          // debug(server);
 
           server.close(() => {
             // 
@@ -157,7 +153,7 @@ server.on("secureConnection", socket => {
           debug("Unknown Server Action.");
       }
     } catch (e) {
-      debug("frame filter", e); //不做处理
+      debug("frame filter", e); // 不做处理
     }
   });
 });
@@ -186,7 +182,7 @@ server.listen({
     // open service url
     // @TODO: 采用服务端推送更新，给在线客户端推送更新
     if (isMac()) {
-      //cp.exec(`open -u "https://localhost:${port}"`);
+      // cp.exec(`open -u "https://localhost:${port}"`);
     }
   }
 });

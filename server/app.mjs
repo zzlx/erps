@@ -23,33 +23,40 @@ import { objectID } from "./utils/objectID.mjs";
 
 const debug = util.debuglog("debug:backend-app");
 
-debug("开始初始化服务程序...");
+debug("Inatialize Service Application...");
 
 export const app = new Application({
-  env: process.env.NODE_ENV || "production",      // default value is production
+  env: process.env.NODE_ENV || "production", // default value is production
   keys: [String(objectID()), String(objectID())], // keys for encryept
+
   // ...
 });
 
 app.use(error()); // 记录中间件错误
 app.use(logger()); // 日志中间件
 app.use(xResponse()); // 响应时间记录
-app.use(cors()); // 跨域访问 
+app.use(cors()); // 跨域访问
 app.use(postgresql()); // 应用数据库
 
 const router = await import("./routes/index.mjs").then(m => m.router);
 app.use(router.routes()); // 配置服务端路由
 
-app.use(async function (ctx, next) { // 最内层中间件,用于记录执行状态
-  ctx.state.set("innerest_middleware", true); // 如果此中间件未被阻断,则设置状态为true
+// The last one of the middleware stack
+app.use(async function (ctx) { 
+  // 用于标记中间件栈是否被完整的执行
+  // 如果此中间件未被阻断,则设置状态为true
+  ctx.state.set("innerest_middleware", true); 
 
-  if (ctx.app.env === "development") {
-    // const result = await ctx.dba.query("SELECT now()");
-    // debug(result);
-    // debug("totalcount:", ctx.dba.totalCount);
-    // debug("idlecount:", ctx.dba.idleCount);
-    //debug(typeof ctx.state.get("log"));
-  }
+  if (ctx.app.env !== "development") return;
 
-  await next();
+  // Test: 用于开发环境下测试请求被处理的情况
+  // debug("当前访问页面地址:", ctx.pathname);
+  // const result = await ctx.dba.query("SELECT now()");
+  // debug(result);
+  // debug("totalcount:", ctx.dba.totalCount);
+  // debug("idlecount:", ctx.dba.idleCount);
+  // debug(typeof ctx.state.get("log"));
+  // debug(typeof ctx.status);
+  debug(ctx.pathname);
+  debug(ctx.state);
 });

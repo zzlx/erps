@@ -144,7 +144,7 @@ export class Context {
    */
 
   get status() {
-    return this[RES_HEADERS][HTTP2_HEADER.STATUS];
+    return Number.parseInt(this[RES_HEADERS][HTTP2_HEADER.STATUS]);
   }
 
   /**
@@ -159,6 +159,7 @@ export class Context {
 
     if (HTTP_STATUS_CODES[sCode] == null) {
       this.throw(500, `Settings status ${code} is invalid.`);
+      return;
     }
 
     this._setStatus = true;
@@ -690,10 +691,6 @@ export class Context {
     return this.accept.language(...args);
   }
 
-  get stale () {
-
-  }
-
   set etag (val) {
     this[RES_HEADERS]["etag"];
   }
@@ -713,9 +710,8 @@ export class Context {
     const modifiedSince = this.headers[HTTP2_HEADER.IF_MODIFIED_SINCE];
     const noneMatch     = this.headers[HTTP2_HEADER.IF_NONE_MATCH];
 
-    const method = this.method;
     // GET or HEAD for weak freshness validation only
-    if ("GET" != method && "HEAD" != method) return false;
+    if ("GET" != this.method && "HEAD" != this.method) return false;
 
     const s = this.status;
 
@@ -852,6 +848,7 @@ Context.prototype.set = function (field, val) {
   if (arguments.length === 2) {
     if (Array.isArray(val)) val = val.map(v => typeof v === "string" ? v : String(v));
     else if (typeof val !== "string") val = String(val);
+
     this[RES_HEADERS][field.toLowerCase()] = val;
   }
 
@@ -929,6 +926,10 @@ Context.prototype.onerror = function (err) {
  * Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Disposition
  */
 
-Context.prototype.attachment = function (filename = "", options) {
+Context.prototype.attachment = function (filename = "", options = {}) {
+  if (options) {
+    // 
+  }
+
   this.set(HTTP2_HEADER.CONTENT_DISPOSITION, `attachment;fileName=${filename}`);
 };

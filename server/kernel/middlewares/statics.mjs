@@ -1,11 +1,9 @@
 /**
  * *****************************************************************************
  *
- * statics
+ * statics:静态资源服务
  *
- * SRS(Static resource service,静态资源服务)
- *
- * 用于托管静态文件
+ * SRS(Static resource service), 用于托管静态文件.
  *
  * ## 功能特性 
  *
@@ -38,7 +36,7 @@ export function statics (dir, options = {}) {
     prefix: "",
   }, options);
 
-  debug("静态资源服务 path:%s", opts.dir);
+  debug("Serve path:%s", opts.dir);
 
   return async function staticMiddleware (ctx, next) {
     // debug("正在尝试访问静态服务:", opts);
@@ -51,7 +49,7 @@ export function statics (dir, options = {}) {
     if (ctx.body != null || (ctx.status && ctx.status != 404)) return; 
     // 3. 前缀不匹配时
     if (ctx.pathname.substr(0, opts.prefix.length) !== opts.prefix) return next();
-    // 4. 无后配时
+    // 4. 无后缀时
     if (path.extname(ctx.pathname) === "") return next();
     
     try {

@@ -54,6 +54,7 @@ export function ssr (opts = {}) {
 
 export function renderHTML (appString, initialState = {}) {
   const isDev = process.env.NODE_ENV === "development";
+  const isDebug = process.env.NODE_DEBUG != null;
   const react = isDev 
     ? "/statics/js/react.development.js" 
     : "/statics/js/react.production.min.js"; 
@@ -61,7 +62,7 @@ export function renderHTML (appString, initialState = {}) {
     ? "/statics/js/react-dom.development.js" 
     : "/statics/js/react-dom.production.min.js";
   const app = isDev
-    ? "/statics/es/index.mjs?env=development"
+    ? `/statics/es/index.mjs?env=development${isDebug ? "&debug=true" : ""}`
     : "/statics/es/index.mjs";
 
   const head = Object.assign({}, {

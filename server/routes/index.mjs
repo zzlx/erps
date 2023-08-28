@@ -23,15 +23,15 @@ export const router = new Router({ }); // server router
 
 router.redirect("/home", "/"); // Redirect /test to /
 
-router.get("Statics", "/*", statics("public_html")); // 路由已生效
 router.get("Statics", "/statics/es/*", statics("apps", {
   prefix: "/statics/es",
 }));
+router.get("Statics", "/*", statics("public_html"));
 
 // APIs
-//router.use("/api", cors(), apis.routes()); // API跨域访问
+// router.use("/api", cors(), apis.routes()); // API跨域访问
 
-// Docs
+// Doc router
 const docsRouter = new Router({ });
 
 docsRouter.get("Docs", "/*", statics("docs", { 
@@ -47,6 +47,7 @@ router.all("UI", [ "/", "/*" ], ssr({appPath: appPath}));
 
 // User
 const testRouter = new Router();
+
 testRouter.get("user", "/users/:uid", (ctx, next) => {
   debug("params", ctx.params);
   debug("captures", ctx.captures);
