@@ -17,3 +17,25 @@ npm config set registry https://registry.npm.taobao.org
 # 开发记录
 
 
+# 快速开始
+
+## 下载代码库
+
+```
+git clone https://github.com/zzlx/erps.git
+```
+
+## 安装系统依赖
+
+进入项目根目录,安装系统依赖库
+
+```
+cd erps & npm install
+```
+
+## 启动开发环境
+
+```
+npm start
+```
+
