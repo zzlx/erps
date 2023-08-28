@@ -8,6 +8,7 @@
  * *****************************************************************************
  */
 
+import ReactDOM from "./components/ReactDOM.mjs";
 import App from "./App.mjs";
 import { deviceDetect } from "./utils/deviceDetect.mjs";
 // import { debuglog } from "./utils/debuglog.mjs";
@@ -15,6 +16,9 @@ import { deviceDetect } from "./utils/deviceDetect.mjs";
 
 // 配置环境变量: 从模块文件url中获取env,未获取到时默认为production
 globalThis.env = new URL(import.meta.url).searchParams.get("env") || "production";
+globalThis.debug = new URL(import.meta.url).searchParams.get("debug") === "true"
+  ? true
+  : false;
 
 const isBrowserEnv = globalThis.window && globalThis.location;
 // const isNodeEnv = globalThis.process && globalThis.process.version;
@@ -22,25 +26,13 @@ const isBrowserEnv = globalThis.window && globalThis.location;
 
 // Render in browser client environment
 if (isBrowserEnv) {
-  const ReactDOM = globalThis.ReactDOM;
   const ua = navigator.userAgent;
   const d = deviceDetect(ua);
-
-  if (globalThis.env === "production") {
-    // 
-
-  } else {
-    // 
-  }
 
   // Fix the client render warnings 
   ReactDOM.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.usingClientEntryPoint = true;
 
   // const html = document.getElementsByTagName("html")[0];
-
-  if (location.protocol !== "https:") {
-    // window.location.href = `
-  }
 
   // 初始化状态数据
   const initialState = Object.assign({}, {
@@ -53,7 +45,6 @@ if (isBrowserEnv) {
   // 空的容器对象上使用render方法渲染
   // 判断container是否存在服务端渲染内容
   // 判断方法需要补充完善一下,要能识别到服务端渲染的标记
-  //
   let container = document.getElementById("app");
 
   if (null == container) {
@@ -73,11 +64,13 @@ if (isBrowserEnv) {
     root.render(el);
   }
 
-  printHelloWorld("欢迎使用前端UI系统!🎉💐", `
-帮助文档: ${location.origin}/docs
-浏览器: ${d.browser}
-操作系统: ${d.device}
-  `);
+  printHelloWorld(
+    "欢迎使用前端UI系统!🎉💐", 
+    `帮助文档: ${location.origin}/docs
+当前系统处于持续开发中,如遇使用问题可直接联系开发者.
+当前浏览器: ${d.browser}
+当前操作系统: ${d.device}`,
+  );
 }
 
 /**
@@ -89,6 +82,6 @@ export function printHelloWorld () {
   const hw = args.shift(); // 第1个参数为 hello word
 
   console.groupCollapsed(hw); // eslint-disable-line
-  console.log(...args); // eslint-disable-line
+  console.log.apply(null, args); // eslint-disable-line
   console.groupEnd(); // eslint-disable-line
 }

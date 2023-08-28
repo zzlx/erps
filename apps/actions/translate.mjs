@@ -3,7 +3,6 @@
  *
  * 百度翻译API
  *
- *
  * [Documents](https://fanyi-api.baidu.com/doc/11)
  *
  * 请求方式： 可使用GET或POST方式，如使用POST方式，Content-Type请指定为：application/x-www-form-urlencoded

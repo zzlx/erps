@@ -9,9 +9,12 @@
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-import Context from './Context.mjs';
-import { isShallowEqual } from '../utils/is/isShallowEqual.mjs';
+import React from "./React.mjs";
+import Context from "./Context.mjs";
+import { isShallowEqual } from "../utils/is/isShallowEqual.mjs";
+import { debuglog } from "../utils/debuglog.mjs";
+
+const debug = debuglog("debug:Provider");
 
 export default class Provider extends React.Component {
   constructor (props) {
@@ -19,33 +22,36 @@ export default class Provider extends React.Component {
 
     this.state = {
       store: props.store,
-      storeState: props.store.getState()
+      storeState: props.store.getState(),
     };
-
   }
 
   /**
    *
-  static getDerivedStateFromError (error) {
-  }
    */
+
+  // static getDerivedStateFromError () {
+  // 
+  // }
 
   /**
    * Error boundaries
+   *
+   * @todo: build a JS error reporting service
    */
 
   componentDidCatch (error, errorInfo) {
-    // error 
-    // @todo: build a JS error reporting service
+    debug(errorInfo);
+
     return this.state.store.dispatch({
-      type: 'COMPONENT_ERROR',
-      payload: error
+      type: "COMPONENT_ERROR",
+      payload: error,
     });
   }
 
   render () {
     return React.createElement(Context.Provider, {
-      value: this.state
+      value: this.state,
     }, this.props.children);
   }
 
@@ -55,11 +61,16 @@ export default class Provider extends React.Component {
   }
 
   shouldComponentUpdate (nextProps, nextState) {
-    // 
+    if (nextProps && nextState) {
+      // 
+    }
+
     return true; 
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
+    debug(prevState, snapshot);
+
     if (this.props.store !== prevProps.store) {
       if (this.unsubscribe) this.unsubscribe();
       this.subscribe();

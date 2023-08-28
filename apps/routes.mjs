@@ -8,6 +8,7 @@
  * *****************************************************************************
  */
 
+import React from "./components/React.mjs";
 // import lazy from "./components/lazy.mjs";
 // import * as layout from "./components/layout/index.mjs";
 import HomePage from "./pages/HomePage.mjs";

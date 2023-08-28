@@ -5,6 +5,9 @@
  * 管理前端UI组件的用户操作与响应
  *
  * click event handler
+ * document.execCommand('copy')
+ * document.execCommand('cut')
+ * document.execCommand('paste')
  *
  * *****************************************************************************
  */

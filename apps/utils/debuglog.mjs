@@ -1,9 +1,9 @@
 /**
  * *****************************************************************************
  *
- * debuglog
+ * debuglog: 打印调试信息
  *
- * 用于打印调试信息
+ * @todos: 增加按模块调试
  *
  * *****************************************************************************
  */
@@ -38,18 +38,14 @@ function debuglogImpl(setString) {
 
   const debugImpl = globalThis.process && globalThis.process.env.NODE_DEBUG 
     ? globalThis.process.env.NODE_DEBUG
-    : "debug:*"; //
+    : globalThis.debug ? "debug:*" : ""; //
 
   if (debugEnvRegex == null) initializeDebugEnv(debugImpl);
 
   const set = setString.toUpperCase();
 
-  const isDev = globalThis.process && globalThis.process.env.NODE_ENV === "development"
-    ? true
-    : globalThis.env === "development" ? true : false;
-
   if (debugs[set] === undefined) {
-    if (debugEnvRegex && debugEnvRegex.test(set) && isDev) {
+    if (debugEnvRegex && debugEnvRegex.test(set)) {
       debugs[set] = function debug () {
         const args = Array.prototype.slice.call(arguments); 
 
