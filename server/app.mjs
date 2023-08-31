@@ -60,3 +60,8 @@ app.use(async function (ctx) {
   debug(ctx.pathname);
   debug(ctx.state);
 });
+
+// Error handler
+app.on("error", (err, ctx) => {
+  debug(err);
+});

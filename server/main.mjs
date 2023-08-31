@@ -36,25 +36,13 @@ const paramMap = argvParser(argvs);
 process.title = "org.zzlx.erpd"; // Setting the main process title
 
 // handle uncaught exception
-process.on("uncaughtException", (error, origin) => {
-  debug("The uncaughted exception: ", error);
-  debug("The origin uncaught exception: ", origin);
-});
-
 // handle unhandled rejection 
-process.on("unhandledRejection", (reason, promise) => {
-  debug(
-    "Rejection is come from ", 
-    promise, 
-    " because of: ", 
-    reason,
-  );
-});
-
 // Print uptime in development env
 process.on("exit", code => {
   debug("%d---程序结束前已经运行了%sms---", code, Math.ceil(process.uptime()*1000));
 });
+
+
 
 process.nextTick(() => { main(); });
 

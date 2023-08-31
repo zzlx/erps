@@ -14,7 +14,6 @@ import { paths } from "./paths.mjs";
 
 paths.CONFIG = path.join(os.homedir(), ".config", appinfo.name);
 const configFile = path.join(paths.CONFIG, "config.json");
-// 写入配置文件
 
 const defaultConfigs = {
   port: 8443,
@@ -38,6 +37,8 @@ export const configs = new Proxy(defaultConfigs, {
     if (property === "key") return fs.readFileSync(target.key);
     if (property === "ca") return fs.readFileSync(target.ca);
     if (property === "chain") return fs.readFileSync(target.chain);
+    if (property === "cert") return fs.readFileSync(target.cert);
+    if (property === "privateKey") return fs.readFileSync(target.privateKey);
 
     return Reflect.get(target, property, receiver);
   },

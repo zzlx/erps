@@ -1,2 +1,6 @@
 **/*.js
+bin/
+build/
+docs/
 node_modules/
+public_html/

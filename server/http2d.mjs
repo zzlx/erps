@@ -3,6 +3,8 @@
  * 
  * HTTP Daemon
  *
+ * Server-side http2 application
+ *
  * ## Features:
  * * http2
  * * 支持websocket socket
@@ -10,65 +12,25 @@
  * *****************************************************************************
  */
 
-import fs from "fs";
 import http2 from "node:http2";
-import path from "path";
 import process from "node:process";
-import util from "util";
-import { configs } from "./settings/index.mjs";
+import util from "node:util";
+
 // import { Websocket } from "./utils/Websocket.mjs";
 import { capitalize, isMac } from "./utils/index.mjs";
+import { configs } from "./settings/index.mjs";
+import { app } from "./app.mjs";
 
 const debug = util.debuglog("debug:http2d");
-const url = import.meta.url;
-
-// process settings
-process.title = "org.zzlx." + path.basename(url, path.extname(url));
-
-process.on("exit", (code) => {
-  debug(`${process.title}(pid:${process.pid}) is exit with exitCode: ${code}`);
-});
-
-process.on("uncaughtException", (error, origin) => {
-  debug("The uncaughted exception: ", error);
-  debug("The origin uncaught exception: ", origin);
-});
-
-process.on("unhandledRejection", (reason, promise) => {
-  debug(
-    "Rejection is come from ", promise, " because of: ", reason,
-  );
-});
-
-process.on("message", (msg) => {
-  if (msg === "shutdown") {
-    // Initiate graceful close of any connections to server
-  }
-});
-
-// event to request it to stop.
-process.on("SIGTSTP", () => {
-  debug("Receive SIGTSTP signal.");
-
-  // server在cluster中的状态
-  server.close(() => { 
-    // 
-  });
-});
-
-// event to request termination.
-process.on("SIGTERM", () => {
-  debug("Receive SIGTERM signal.");
-  process.exit();
-});
+// const url = import.meta.url;
 
 debug("HTTPD inatializing...");
 
 const server = http2.createSecureServer({
   allowHTTP1: true,
   // ca: [fs.readFileSync("client-cert.pem")],
-  key: fs.readFileSync(configs.privateKey),
-  cert: fs.readFileSync(configs.cert), // use fullchain as cert
+  key: configs.privateKey,
+  cert: configs.cert, // use fullchain as cert
   passphrase: configs.passphrase,
   requestCert: false, // 客户端证书支持
   rejectUnauthorized: false,
@@ -111,7 +73,6 @@ server.on("error", e => {
 
 // stream handler
 // (stream, headers) => {}
-const app = await import("./app.mjs").then(m => m.app);
 server.on("stream", app.callback());
 
 // Websocket support
@@ -186,3 +147,39 @@ server.listen({
     }
   }
 });
+
+// Process settings
+
+process.on("uncaughtException", (error, origin) => {
+  debug("The uncaughted exception: ", error);
+  debug("The origin uncaught exception: ", origin);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  debug(
+    "Rejection is come from ", promise, " because of: ", reason,
+  );
+});
+
+process.on("message", (msg) => {
+  if (msg === "shutdown") {
+    // Initiate graceful close of any connections to server
+  }
+});
+
+// event to request it to stop.
+process.on("SIGTSTP", () => {
+  debug("Receive SIGTSTP signal.");
+
+  // server在cluster中的状态
+  server.close(() => { 
+    // 
+  });
+});
+
+// event to request termination.
+process.on("SIGTERM", () => {
+  debug("Receive SIGTERM signal.");
+  process.exit();
+});
+

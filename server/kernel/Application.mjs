@@ -48,7 +48,9 @@ export class Application extends EventEmitter {
   callback () {
     const fn = compose(this.middlewares);
 
-    if (!this.listenerCount('error')) this.on('error', this.onerror);
+    if (!this.listenerCount('error')) {
+      this.on('error', (err, ctx) => { debug(err); });
+    }
 
     return (stream, headers, flags) => {
 
@@ -110,13 +112,5 @@ export class Application extends EventEmitter {
     assert(typeof fn === 'function', 'Middleware must be a function!');
     this.middlewares.push(fn);
     return this;
-  }
-
-  /**
-   *
-   */
-
-  onerror (err) {
-    debug(err);
   }
 }
