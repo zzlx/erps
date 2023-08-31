@@ -1,6 +1,8 @@
 术语表 
 ======
 
+> Glossary,a list of technical or special words.
+
 ---
 
 * ACME(Automatic Certificate Management Environment) [RFC8555](https://tools.ietf.org/html/rfc8555)
