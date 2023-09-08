@@ -219,7 +219,7 @@ function startHttpd () {
 
   proc.httpd = cp.spawn(process.argv[0], args, options);
 
-  debug("The main process is running");
+  // debug("Main process is running");
 }
 
 function stopHttpd () {

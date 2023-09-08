@@ -1,7 +1,9 @@
 /**
  * *****************************************************************************
  *
- * 配置项容器
+ * 配置管理器
+ *
+ *
  *
  * *****************************************************************************
  */
@@ -16,7 +18,7 @@ paths.CONFIG = path.join(os.homedir(), ".config", appinfo.name);
 const configFile = path.join(paths.CONFIG, "config.json");
 
 const defaultConfigs = {
-  port: 8443,
+  port: 8443, // 端口可以web后台进行修改
   description: "系统配置",
   keys: null,
   passphrase: Math.random().toString(16).substr(2,8),
@@ -35,7 +37,7 @@ export const configs = new Proxy(defaultConfigs, {
   get: function (target, property, receiver) {
     if (property === "IPv6") return isSupportIPv6();
     if (property === "key") return fs.readFileSync(target.key);
-    if (property === "ca") return fs.readFileSync(target.ca);
+    if (property === "ca") return target.ca ? fs.readFileSync(target.ca) : null;
     if (property === "chain") return fs.readFileSync(target.chain);
     if (property === "cert") return fs.readFileSync(target.cert);
     if (property === "privateKey") return fs.readFileSync(target.privateKey);
@@ -59,7 +61,7 @@ function isSupportIPv6 () {
 
   for (const networkInterface of Object.values(os.networkInterfaces())) {
     for (const network of networkInterface) {
-      if (network.family === 6) { hasIPv6 = true; break; }
+      if (network.family === "IPv6") { hasIPv6 = true; break; }
     }
 
     if (hasIPv6) break;

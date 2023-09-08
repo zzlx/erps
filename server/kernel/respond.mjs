@@ -10,16 +10,18 @@ import path from "node:path";
 import util from "node:util";
 import { HTTP_STATUS_EMPTY_CODES, HTTP_STATUS } from "../constants.mjs";
 
-const debug = util.debuglog("debug:respond");
+const debug = util.debuglog("debug:kernel-respond");
 
 export function respond (ctx) {
   if (ctx.respond === false) return ctx.stream.end(); // allow bypassing respond
+
   if (!ctx.state.get("innerest_middleware")) { 
-    debug("The innerest middleware was not arrived."); 
+    debug("The innerest middleware was not arrived, with request path:%s.", ctx.pathname); 
   }
 
   if (!ctx.status || ctx.status == HTTP_STATUS.NOT_FOUND) {
-    const allowed = {};
+
+    const allowed = {}; // 
 
     if (ctx.matched) {
       for (const route of ctx.matched) {
@@ -35,7 +37,7 @@ export function respond (ctx) {
       ctx.set("Allow", ctx.router.methods.join(", "));
     } else if (ctx.method === "OPTIONS") {
       if (allowedArr.length) {
-        ctx.status = HTTP_STATUS.OK;  
+        ctx.status = HTTP_STATUS.OK;
         ctx.set("Allow", allowedArr.join(", "));
       } else {
         ctx.status = HTTP_STATUS.NOT_IMPLEMENTED;

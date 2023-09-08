@@ -18,21 +18,17 @@ import util from "node:util";
 
 // import { Websocket } from "./utils/Websocket.mjs";
 import { capitalize, isMac } from "./utils/index.mjs";
-import { configs } from "./settings/index.mjs";
+import { configs } from "./settings/configs.mjs";
 import { app } from "./app.mjs";
 
 const debug = util.debuglog("debug:http2d");
-// const url = import.meta.url;
-
-debug("HTTPD inatializing...");
-
 const server = http2.createSecureServer({
   allowHTTP1: true,
-  // ca: [fs.readFileSync("client-cert.pem")],
+  ca: configs.ca,
   key: configs.privateKey,
   cert: configs.cert, // use fullchain as cert
   passphrase: configs.passphrase,
-  requestCert: false, // 客户端证书支持
+  requestCert: false, // 客户端证书支持,特殊应用支持
   rejectUnauthorized: false,
   // sigalgs: 
   // ciphers: 
@@ -48,8 +44,8 @@ const server = http2.createSecureServer({
 });
 
 server.on("error", e => {
-
   if (e.code === "EADDRINUSE") { 
+
     if (process.send) {
       process.send(e);
     } else {
@@ -72,7 +68,7 @@ server.on("error", e => {
 });
 
 // stream handler
-// (stream, headers) => {}
+// stream is a Duplex
 server.on("stream", app.callback());
 
 // Websocket support
@@ -129,7 +125,7 @@ server.listen({
 
   if (process.channel && process.send) {
     process.send({ 
-      message: "服务器已启动",
+      message: "服务器端口已被占用,请确认服务是否已启动",
       pid: process.pid,
       // address: this.address(),
     });
@@ -149,7 +145,6 @@ server.listen({
 });
 
 // Process settings
-
 process.on("uncaughtException", (error, origin) => {
   debug("The uncaughted exception: ", error);
   debug("The origin uncaught exception: ", origin);
