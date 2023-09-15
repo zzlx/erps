@@ -23,7 +23,7 @@ export const router = new Router({ }); // server router
 
 router.redirect("/home", "/"); // Redirect /test to /
 
-router.get("Statics", "/statics/es/*.*", statics("server/apps", {
+router.get("Statics", "/statics/es/*.*", statics("apps", {
   prefix: "/statics/es",
 }));
 
@@ -43,7 +43,7 @@ docsRouter.get("Docs", "*", statics("docs", {
 router.use("/docs(/*.*)", docsRouter.routes());
 
 // ssr
-const appPath = path.join(paths.SERVER, "apps", "App.mjs");
+const appPath = path.join(paths.APPS,"App.mjs");
 router.all("UI", [ "/", "/*" ], ssr({appPath: appPath}));
 
 // User
