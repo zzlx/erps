@@ -14,24 +14,23 @@
  * *****************************************************************************
  */
 
-import Context from './Context.mjs';
-import React from './React.mjs';
-import Suspense from './Suspense.mjs';
-
-import { isPromise } from '../utils/is/isPromise.mjs';
-import { matchPath } from '../utils/matchPath.mjs';
+import Context from "./Context.mjs";
+import React from "./React.mjs";
+// import Suspense from "./Suspense.mjs";
+// import { isPromise } from "../utils/is/isPromise.mjs";
+import { matchPath } from "../utils/matchPath.mjs";
 
 export default class Route extends React.Component {
   render() {
     // get location
-    const location = this.props.location 
+    const location = this.props.location
       ? this.props.location
-      : this.context.store.getState('location');
+      : this.context.store.getState("location");
 
     // 判断路由是否匹配
     const match = this.props.match
       ? this.props.match
-      : this.props.path 
+      : this.props.path
         ? matchPath(location.pathname, this.props)
         : false;
 
@@ -48,26 +47,35 @@ export default class Route extends React.Component {
       }
 
       // class component
-      if (typeof component.constructor === 'function') {
+      if (typeof component.constructor === "function") {
         return React.createElement(component, props);
       }
 
-      if (typeof component === 'function') return component(props);
+      if (typeof component === "function") return component(props);
     }
 
     return null;
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    if (nextState) {
+      // ...
+    }
+
     if (this.props == nextProps) return false;
     else return true;
+
   }
 
   componentDidMount () {
-    const isEmptyChildren = (children) => React.Children.count(children) === 0;
+    // const isEmptyChildren = (children) => React.Children.count(children) === 0;
+    // ... 
   }
 
   componentDidUpdate (prevProps) {
+    if (prevProps) {
+      // ... 
+    }
   }
 }
 

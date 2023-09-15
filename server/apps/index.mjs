@@ -5,6 +5,11 @@
  *
  * The enter point in frontend, used for render user interface.
  *
+ *
+ * ReactDOM APIs:
+ * * createRoot
+ * * hydrateRoot
+ *
  * *****************************************************************************
  */
 
@@ -53,7 +58,7 @@ if (isBrowserEnv) {
     document.body.appendChild(container);
   }
 
-  const el = App({ data: initialState });
+  const el = App(initialState);
 
   if (container.innerHTML) {
     // debug("Use hydrate function.");

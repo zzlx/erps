@@ -6,12 +6,20 @@
  * *****************************************************************************
  */
 
+import { compose } from "./compose.mjs";
+import { combineReducers } from "./combineReducers.mjs";
 import { assert } from "../utils/assert.mjs";
 import { isDevel } from "../utils/is/isDevel.mjs";
 import { isPlainObject } from "../utils/is/isPlainObject.mjs";
 import * as reducers from "../reducers/index.mjs";
 // import { actionTypes as types } from "./actionTypes.mjs";
 import * as M from "./middlewares/index.mjs";
+
+export const store = state => new Proxy({}, {
+  get: function (target, property, receiver) {
+    return Reflect.get(target, property, receiver);
+  },
+});
 
 /**
  * Redux Store
@@ -20,7 +28,7 @@ import * as M from "./middlewares/index.mjs";
  * @return {object} store
  */
 
-export default class Store {
+export class Store {
   constructor (state) {
     this.currentState = state;
     this.currentReducer = combineReducers(reducers);
@@ -100,9 +108,13 @@ export default class Store {
     return retval;
   }
 
+  /**
+   * subscribe listener
+   *
+   */
+
   subscribe(listener) {
-    assert(typeof listener === "function", 
-      "Expected the listener to be a function.");
+    assert(typeof listener === "function", "Listener is expected a function.");
     assert(!this.isDispatching, 
       "Can not call store.subscribe() while the reducer is executing.");
 
@@ -143,66 +155,14 @@ export default class Store {
     this.dispatch({ type: "REPLACE_REDUCER" });
   }
 
+  /**
+   *
+   *
+   */
+
   ensureCanMutateNextListeners() {
     if (this.nextListeners === this.currentListeners) {
       this.nextListeners = this.currentListeners.slice();
     }
   }
 }
-
-/**
- * *****************************************************************************
- *
- * Utilities
- *
- * *****************************************************************************
- */
-
-/**
- * Composes single-argument functions from right to left. 
- *
- * The rightmost function can take multiple arguments 
- * as it provides the signature for the resulting composite function.
- *
- * For example:
- * compose(f, g, h) is identical to doing (...args) => f(g(h(...args))).
- *
- * @param {array} funcs The functions to compose.
- * @returns {Function} A function obtained by composing the argument functions from right to left. 
- */
-
-export function compose() {
-  const functions = Array.prototype.slice.call(arguments);
-
-  for (const fn of functions) {
-    assert("function" === typeof fn, "Must be compose of functions.");
-  }
-
-  return functions.reduce((a, b) => (...args) => a(b(...args)));
-}
-
-/**
- * combine reduces
- *
- */
-
-export function combineReducers (reducers) {
-
-  return function combined (state = Object.create(null), action) {
-    let hasChanged = false;
-    const newState = {};
-
-    for (const key of Object.keys(reducers)) {
-      const reducer = reducers[key];
-      assert(typeof reducer === "function", `${key} is not a function!`);
-      const previousStateForKey = state[key];
-      const newStateForKey = reducer(previousStateForKey, action);
-      newState[key] = newStateForKey;
-      hasChanged = hasChanged || newStateForKey !== previousStateForKey;
-    }
-
-    return hasChanged ? newState : state;
-  };
-}
-
-export const createStore = state => new Store(state);

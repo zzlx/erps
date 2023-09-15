@@ -1,23 +1,23 @@
 /**
  * *****************************************************************************
  *
- * 路由组件
+ * Switcher组件
  *
- * Route switcher
+ * 用于选择路由
  *
  * *****************************************************************************
  */
 
-import React from './React.mjs';
-import Context from './Context.mjs';
-import { matchPath } from '../utils/matchPath.mjs';
+import React from "./React.mjs";
+import Context from "./Context.mjs";
+import { matchPath } from "../utils/matchPath.mjs";
 
 export default class Router extends React.PureComponent {
   render () {
-    const location = this.props.location 
-      ? this.props.location 
-      : this.context.store 
-        ? this.context.store.getState('location')
+    const location = this.props.location
+      ? this.props.location
+      : this.context.store
+        ? this.context.store.getState("location")
         : { pathname: "/" };
 
     let match, matchedRoute;
@@ -36,7 +36,7 @@ export default class Router extends React.PureComponent {
 
     return match == null ? null : React.cloneElement(matchedRoute, {
       location, 
-      match 
+      match,
     });
   }
 }
