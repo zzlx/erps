@@ -38,7 +38,7 @@ function debuglogImpl(setString) {
 
   const debugImpl = globalThis.process && globalThis.process.env.NODE_DEBUG 
     ? globalThis.process.env.NODE_DEBUG
-    : globalThis.debug ? "debug:*" : ""; //
+    : globalThis.env && globalThis.env === "development" ? "debug:*" : "";
 
   if (debugEnvRegex == null) initializeDebugEnv(debugImpl);
 

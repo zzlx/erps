@@ -1,14 +1,7 @@
 /**
  * *****************************************************************************
  *
- * 前端入口程序
- *
- * The enter point in frontend, used for render user interface.
- *
- *
- * ReactDOM APIs:
- * * createRoot
- * * hydrateRoot
+ * 前端入口程序:用于在客户端渲染用户程序
  *
  * *****************************************************************************
  */
@@ -16,26 +9,33 @@
 import ReactDOM from "./components/ReactDOM.mjs";
 import App from "./App.mjs";
 import { deviceDetect } from "./utils/deviceDetect.mjs";
-// import { debuglog } from "./utils/debuglog.mjs";
-// const debug = debuglog("debug:index");
+import { debuglog } from "./utils/debuglog.mjs";
 
 // 配置环境变量: 从模块文件url中获取env,未获取到时默认为production
 globalThis.env = new URL(import.meta.url).searchParams.get("env") || "production";
-globalThis.debug = new URL(import.meta.url).searchParams.get("debug") === "true"
-  ? true
-  : false;
-
+const isNativeEnv = false;
 const isBrowserEnv = globalThis.window && globalThis.location;
-// const isNodeEnv = globalThis.process && globalThis.process.version;
-// const isNativeEnv = false;
+const debug = debuglog("debug:index");
 
-// Render in browser client environment
-if (isBrowserEnv) {
+// Fix the client render warnings 
+ReactDOM.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.usingClientEntryPoint = true;
+
+if (isNativeEnv) {
+  // Render in native environment.
+  debug("注意:Native环境中渲染前端程序.");
+  
+} else if (isBrowserEnv) {
+  // Render in browser client environment.
   const ua = navigator.userAgent;
   const d = deviceDetect(ua);
 
-  // Fix the client render warnings 
-  ReactDOM.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.usingClientEntryPoint = true;
+  printHelloWorld(
+    "欢迎使用前端UI系统!🎉💐", 
+    `帮助文档: ${location.origin}/docs
+当前系统处于持续开发中,如遇使用问题可直接联系开发者.
+当前浏览器: ${d.browser}
+当前操作系统: ${d.device}`,
+  );
 
   // const html = document.getElementsByTagName("html")[0];
 
@@ -61,21 +61,13 @@ if (isBrowserEnv) {
   const el = App(initialState);
 
   if (container.innerHTML) {
-    // debug("Use hydrate function.");
     ReactDOM.hydrateRoot(container, el);
   } else {
-    // debug("Use render function.");
     const root = ReactDOM.createRoot(container);
     root.render(el);
   }
-
-  printHelloWorld(
-    "欢迎使用前端UI系统!🎉💐", 
-    `帮助文档: ${location.origin}/docs
-当前系统处于持续开发中,如遇使用问题可直接联系开发者.
-当前浏览器: ${d.browser}
-当前操作系统: ${d.device}`,
-  );
+} else {
+  debug("未知环境,无法渲染前端程序...");
 }
 
 /**

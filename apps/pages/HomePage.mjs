@@ -50,8 +50,8 @@ export default class HomePage extends React.Component {
   }
 
   componentDidMount () {
-    debug(this.context);
-    // debug(`${location.pathname} 已就绪，开始使用吧!`);
+    // debug(this.context);
+    debug(`${location.pathname} 已就绪，开始使用吧!`);
     this.context.store.dispatch({type: "TEST", payload: "前端程序已渲染"});
   }
 }

@@ -26,6 +26,5 @@ export function createStore (state) {
     isDevel() && M.logger,
   ].filter(Boolean).map(fn => fn(store));
 
-
   return store.init();
 }
