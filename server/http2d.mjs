@@ -51,7 +51,7 @@ server.on("error", e => {
     } else {
       // debug(`${process.title} is already runing on ${e.address}:${e.port}, try again later`);
       debug(
-        "%s is already running on port %s, try again later.",
+        "Process: %s is already running on port %s, try again later.",
         capitalize(process.title),
         e.port,
       );
@@ -134,7 +134,7 @@ server.listen({
     // if (app.env === "development") console.clear();
     // 打印服务器启动后信息
     // print backend server running message
-    debug("%s is running on port: %s", process.title, configs.port);
+    debug("Service is running on port: %s", configs.port);
 
     // open service url
     // @TODO: 采用服务端推送更新，给在线客户端推送更新

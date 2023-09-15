@@ -36,12 +36,9 @@ export function statics (dir, options = {}) {
     prefix: "",
   }, options);
 
-  debug("Serve path:%s", opts.dir);
+  debug("Serve static path with opts %j", opts);
 
   return async function staticMiddleware (ctx, next) {
-    // debug("正在尝试访问静态服务:", opts);
-    // debug("ctx.state:", ctx.state);
-
     // 旁路规则:
     // 1. 静态资源仅接受GET、HEAD请求方法
     if (ctx.method !== "GET" && ctx.method !== "HEAD") return;
@@ -50,7 +47,7 @@ export function statics (dir, options = {}) {
     // 3. 前缀不匹配时
     if (ctx.pathname.substr(0, opts.prefix.length) !== opts.prefix) return next();
     // 4. 无后缀时
-    if (path.extname(ctx.pathname) === "") return next();
+    // if (path.extname(ctx.pathname) === "") return next();
     
     try {
       await send(ctx, ctx.pathname, opts);

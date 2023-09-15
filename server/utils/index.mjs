@@ -6,6 +6,6 @@
  * *****************************************************************************
  */
 
-export * from '../../apps/utils/index.mjs';  // 前后端通用工具函数
+export * from '../apps/utils/index.mjs';  // 前后端通用工具函数
 export { Websocket } from './Websocket.mjs';
 export { etag } from './etag.mjs';

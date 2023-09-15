@@ -23,13 +23,13 @@ import { objectID } from "./utils/objectID.mjs";
 
 const debug = util.debuglog("debug:backend-app");
 
-debug("Inatialize Service Application...");
+// debug("Inatialize Service Application...");
 
 export const app = new Application({
   env: process.env.NODE_ENV || "production", // default value is production
   keys: [String(objectID()), String(objectID())], // keys for encryept
-
   // ...
+
 });
 
 app.use(error()); // 记录中间件错误
@@ -64,4 +64,6 @@ app.use(async function (ctx) {
 // Error handler
 app.on("error", (err, ctx) => {
   debug(err);
+  debug("pathname:", ctx.pathname);
+
 });

@@ -23,9 +23,10 @@ export const router = new Router({ }); // server router
 
 router.redirect("/home", "/"); // Redirect /test to /
 
-router.get("Statics", "/statics/es/*", statics("apps", {
+router.get("Statics", "/statics/es/*.*", statics("server/apps", {
   prefix: "/statics/es",
 }));
+
 router.get("Statics", "/*", statics("public_html"));
 
 // APIs
@@ -34,15 +35,15 @@ router.get("Statics", "/*", statics("public_html"));
 // Doc router
 const docsRouter = new Router({ });
 
-docsRouter.get("Docs", "/*", statics("docs", { 
+docsRouter.get("Docs", "*", statics("docs", { 
   index: "README.md",
-  prefix: "/docs", // 设置prefix后生效
+  prefix: "/docs(/*.*)", // 设置prefix后生效
 })); 
 
-router.use("/docs", docsRouter.routes());
+router.use("/docs(/*.*)", docsRouter.routes());
 
 // ssr
-const appPath = path.join(paths.APPS, "App.mjs");
+const appPath = path.join(paths.SERVER, "apps", "App.mjs");
 router.all("UI", [ "/", "/*" ], ssr({appPath: appPath}));
 
 // User

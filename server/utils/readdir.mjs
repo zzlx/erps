@@ -10,7 +10,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { arrayFlatten } from "../utils/index.mjs";
+import { arrayFlatten } from "./index.mjs";
 
 export function readdir (_root) {
   if (Array.isArray(_root)) {

@@ -30,6 +30,7 @@ export function logger () {
 
     // @todos: 
     // 格式化输出日志或写入文件
-    // console.log(ctx.state.get("log"));
+    // eslint-disable-next-line
+    if (ctx.app.env !== "development") console.log("%j", ctx.state.get("log"));
   };
 }

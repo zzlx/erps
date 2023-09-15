@@ -144,7 +144,6 @@ async function watchPath () {
   }, 1500); // 每1500ms内仅重启1次
 
   const watcher = new PathWatcher([
-    paths.APPS,
     paths.SERVER,
     paths.SRC,
   ]);
