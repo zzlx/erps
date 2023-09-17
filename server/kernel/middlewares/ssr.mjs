@@ -21,6 +21,8 @@ export function ssr (opts = {}) {
     debug(e);
   });
 
+  debug("Server side render: %s", appPath);
+
   return async function ssrMiddleware (ctx, next) {
     await next(); // 
 

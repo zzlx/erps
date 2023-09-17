@@ -23,11 +23,17 @@ export const router = new Router({ }); // server router
 
 router.redirect("/home", "/"); // Redirect /test to /
 
-router.get("Statics", "/statics/es/*.*", statics("apps", {
+router.get("apps", "/statics/es/*.*", statics("apps", {
   prefix: "/statics/es",
 }));
 
-router.get("Statics", "/*", statics("public_html"));
+router.get("public_html", "/*", statics("public_html"));
+
+if (process.env.NODE_ENV === "development") {
+  router.get("root", "/coding(/*.*)", statics(paths.ROOT, {
+    prefix: "/coding"
+  }));
+}
 
 // APIs
 // router.use("/api", cors(), apis.routes()); // API跨域访问

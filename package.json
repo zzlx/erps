@@ -7,9 +7,8 @@
   "scripts": {
     "build": "node-gyp build",
     "clean": "make clean_ds",
-    "devel": "vim -u .vimrc",
-    "tags": "ctags $(find ./server -name '*.mjs')",
     "devel": "NODE_DEBUG=debug* ./bin/erpd --start --devel --watch",
+    "tags": "ctags $(find ./server -name '*.mjs')",
     "start": "npm run devel"
   },
   "dependencies": {
@@ -38,6 +37,7 @@
     "@typescript-eslint/parser": "^5.61.0",
     "eslint": "^8.44.0",
     "eslint-plugin-react": "^7.32.2",
+    "js-xlsx": "^0.8.22",
     "koa-cookie": "^1.0.0",
     "koa-mongo": "^1.9.3",
     "koa-view": "^2.1.4",
