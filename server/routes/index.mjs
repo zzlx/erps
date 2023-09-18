@@ -13,8 +13,8 @@
 
 import path from "node:path";
 import util from "node:util";
-import { Router } from "../kernel/Router.mjs";
-import { ssr, statics } from "../kernel/middlewares/index.mjs";
+import { Router } from "../koa/Router.mjs";
+import { ssr, statics } from "../koa/middlewares/index.mjs";
 import { paths } from "../settings/paths.mjs"; 
 
 const debug = util.debuglog("debug:server-router");

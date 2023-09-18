@@ -31,6 +31,8 @@ import { CLEAR_PAGE } from "./constants.mjs";
 const debug = util.debuglog("debug:main");
 const __file = String.prototype.substr.call(import.meta.url, 7);
 const argvs = Array.prototype.slice.call(process.argv, 2);
+
+debug(argvs);
 const paramMap = argvParser(argvs);
 
 process.title = "org.zzlx.erpd"; // Setting the main process title

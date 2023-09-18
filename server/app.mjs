@@ -15,10 +15,10 @@
  */
 
 import util from "node:util";
-import { Application } from "./kernel/Application.mjs";
+import { Application } from "./koa/Application.mjs";
 import { 
   cors, error, logger, postgresql, xResponse,
-} from "./kernel/middlewares/index.mjs";
+} from "./koa/middlewares/index.mjs";
 import { objectID } from "./utils/objectID.mjs";
 
 const debug = util.debuglog("debug:backend-app");

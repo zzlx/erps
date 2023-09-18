@@ -12,7 +12,7 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql';
-import { Router } from '../server/kernel/Router.mjs'; 
+import { Router } from '../koa/Router.mjs'; 
 //import * as _graphql from '../../apps/graphql/index.mjs';
 //
 

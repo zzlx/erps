@@ -13,8 +13,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import util from "node:util";
-import { Router } from "../server/kernel/Router.mjs"; 
-import { readDir } from "../server/utils/readDir.mjs";
+import { Router } from "../koa/Router.mjs"; 
+import { readDir } from "../utils/readDir.mjs";
 
 const debug = util.debuglog("debug:apis");
 const router = new Router({});

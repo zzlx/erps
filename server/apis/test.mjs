@@ -6,7 +6,7 @@
  * *****************************************************************************
  */
 
-import { Router } from '../server/kernel/Router.mjs'; 
+import { Router } from '../koa/Router.mjs'; 
 
 
 const router = new Router({ });

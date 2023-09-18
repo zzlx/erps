@@ -25,4 +25,6 @@ for (const item of argvs) {
 }
 
 // Load main program and execute it
-import('../server/main.mjs').catch(console.error);
+import("../server/main.mjs").catch(e => {
+  process.stdout.write();
+});
