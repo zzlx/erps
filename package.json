@@ -8,6 +8,7 @@
     "build": "node-gyp build",
     "clean": "make clean_ds",
     "devel": "NODE_DEBUG=debug* ./bin/erpd --start --devel --watch",
+    "git-log": "git log --graph -6",
     "tags": "ctags $(find ./server -name '*.mjs')",
     "start": "npm run devel"
   },
@@ -37,6 +38,7 @@
     "@typescript-eslint/parser": "^5.61.0",
     "eslint": "^8.44.0",
     "eslint-plugin-react": "^7.32.2",
+    "http-proxy": "^1.18.1",
     "js-xlsx": "^0.8.22",
     "koa-cookie": "^1.0.0",
     "koa-mongo": "^1.9.3",
