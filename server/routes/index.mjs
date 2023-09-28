@@ -14,7 +14,7 @@
 import path from "node:path";
 import util from "node:util";
 import { Router } from "../koa/Router.mjs";
-import { ssr, statics } from "../koa/middlewares/index.mjs";
+import { ssr, statics } from "../middlewares/index.mjs";
 import { paths } from "../settings/paths.mjs"; 
 
 const debug = util.debuglog("debug:server-router");
@@ -31,7 +31,7 @@ router.get("public_html", "/*", statics("public_html"));
 
 if (process.env.NODE_ENV === "development") {
   router.get("root", "/coding(/*.*)", statics(paths.ROOT, {
-    prefix: "/coding"
+    prefix: "/coding",
   }));
 }
 
@@ -48,9 +48,9 @@ docsRouter.get("Docs", "*", statics("docs", {
 
 router.use("/docs(/*.*)", docsRouter.routes());
 
-// ssr
-const appPath = path.join(paths.APPS,"App.mjs");
-router.all("UI", [ "/", "/*" ], ssr({appPath: appPath}));
+// 服务器端渲染
+const appPath = path.join(paths.APPS, "App.mjs");
+router.all("UI", [ "/homepage", "/homepage/*" ], ssr(appPath));
 
 // User
 const testRouter = new Router();
@@ -61,3 +61,5 @@ testRouter.get("user", "/users/:uid", (ctx, next) => {
   ctx.body = ctx.router.url("user", { id: 180 }, { query: "test=abc"});
   return next();
 });
+
+router.use(testRouter.routes());

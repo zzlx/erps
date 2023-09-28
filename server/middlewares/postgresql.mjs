@@ -21,7 +21,7 @@
  */
 
 // import util from "node:util";
-import { PostgresDBA } from "../../database/PostgresDBA.mjs";
+import { PostgresDBA } from "../database/PostgresDBA.mjs";
 
 // const debug = util.debuglog("debug:postgresql-middleware");
 const DBA = Symbol("postgresqlClient");

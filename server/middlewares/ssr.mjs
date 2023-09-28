@@ -12,20 +12,22 @@ import path from "node:path";
 import util from "node:util";
 import ReactDOMServer from "react-dom/server";
 
-const debug = util.debuglog("debug:kernel-ssr");
+const debug = util.debuglog("debug:server-ssr");
 
-export function ssr (opts = {}) {
-  let appPath = opts.appPath;
+export function ssr (appPath, options = {}) {
+  const opts = Object.assign({}, {
+    appPath: appPath,
+  }, options);
 
-  let appModule = import(appPath).catch(e => {
+  debug("SSR options: %j", opts);
+
+  let hasError = false;
+  let appModule = import(opts.appPath).catch(e => {
+    hasError = true;
     debug(e);
   });
 
-  debug("Server side render: %s", appPath);
-
   return async function ssrMiddleware (ctx, next) {
-    await next(); // 
-
     // 旁路规则
     // 1. with body content
     if (ctx.body !== undefined) return;
@@ -51,6 +53,7 @@ export function ssr (opts = {}) {
     const appstring = ReactDOMServer.renderToString(app(initialState));
     ctx.body = renderHTML(appstring, initialState);
 
+    await next();
   }; // end of ssrMiddleware
 }
 

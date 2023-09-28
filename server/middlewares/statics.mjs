@@ -11,32 +11,26 @@
  * * 支持服务缓存策略: ETag响应等
  * * 仅支持GET、HEAD两种请求方法
  *
- * *****************************************************************************
- */ 
-
-import assert from "node:assert";
-import path from "node:path";
-import util from "node:util";
-import { send } from "../send.mjs";
-
-const debug = util.debuglog("debug:kernel-statics");
-
-/**
- *
  * @param {string} root, The root directory from which to serve static assets.
  * @param {object} options
  * @return {function} middleware
- */
+ *
+ * *****************************************************************************
+ */ 
 
-export function statics (dir, options = {}) {
-  assert(dir && "string" === typeof dir, "The root directory is not setting.");
+import path from "node:path";
+import util from "node:util";
+import { send } from "../koa/send.mjs";
 
+const debug = util.debuglog("debug:server-statics");
+
+export function statics (dir = "public_html", options = {}) {
   const opts = Object.assign({
     dir: path.resolve(dir),
     prefix: "",
   }, options);
 
-  debug("Serve static path with opts %j", opts);
+  debug("Statics options: %j", opts);
 
   return async function staticMiddleware (ctx, next) {
     // 旁路规则:

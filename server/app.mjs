@@ -18,10 +18,10 @@ import util from "node:util";
 import { Application } from "./koa/Application.mjs";
 import { 
   cors, error, logger, postgresql, xResponse,
-} from "./koa/middlewares/index.mjs";
+} from "./middlewares/index.mjs";
 import { objectID } from "./utils/objectID.mjs";
 
-const debug = util.debuglog("debug:backend-app");
+const debug = util.debuglog("debug:server-app");
 
 // debug("Inatialize Service Application...");
 
@@ -30,6 +30,12 @@ export const app = new Application({
   keys: [String(objectID()), String(objectID())], // keys for encryept
   // ...
 
+});
+
+// Error handler
+app.on("error", (err, ctx) => {
+  debug(err);
+  debug("pathname:", ctx.pathname);
 });
 
 app.use(error()); // 记录中间件错误
@@ -58,12 +64,6 @@ app.use(async function (ctx) {
   // debug(typeof ctx.state.get("log"));
   // debug(typeof ctx.status);
   debug(ctx.pathname);
-  debug(ctx.state);
-});
-
-// Error handler
-app.on("error", (err, ctx) => {
-  debug(err);
-  debug("pathname:", ctx.pathname);
-
+  //debug(ctx.state);
+  //debug(ctx.request);
 });
