@@ -14,7 +14,9 @@ const users =  {
   4: 'zhao'
 };
 
-export const test = function (ctx, next) {
+const test = function (ctx, next) {
   ctx.type = 'html';
   ctx.body = '<h1>hello world!</h1>';
 };
+
+export default test;

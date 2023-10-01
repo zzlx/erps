@@ -16,7 +16,7 @@ import { Router } from '../koa/Router.mjs';
 //import * as _graphql from '../../apps/graphql/index.mjs';
 //
 
-export function graphql (ctx, next) {
+export default function (ctx, next) {
   ctx.body = `<html>
   <h1>GraphQL API</h2>
   <ul>

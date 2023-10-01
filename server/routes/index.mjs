@@ -17,6 +17,7 @@ import { Router } from "../koa/Router.mjs";
 import { cors, ssr, statics } from "../middlewares/index.mjs";
 import { paths } from "../settings/paths.mjs"; 
 import { readdir } from "../utils/readdir.mjs";
+import { renderHTML } from "../utils/renderHTML.mjs";
 
 const debug = util.debuglog("debug:server-router");
 
@@ -38,24 +39,23 @@ if (process.env.NODE_ENV === "development") {
 
 // APIs
 const apis = new Router();
-const apiPaths = await readdir(path.join(paths.SERVER, "apis")); 
+const apiPath = path.join(paths.SERVER, "apis"); 
+const apiPaths = await readdir(apiPath);
 const sitemap = [];
 
 apis.get("/", (ctx, next) => {
   const list = sitemap.sort().map(url => 
-    `<li><a target="_blank" href="${ctx.pathname}${url}">${url}</a></li>`
+    `<li class="list-group-item"><a target="_blank" href="${ctx.pathname}${url}">${url}</a></li>`
   ).join("");
+  const api = `<h1>API列表</h2><ul class="list-group">${list}</ul>`;
 
-  ctx.body = `<html>
-  <h1>API列表</h2>
-  <ul>${list}</ul>
-</html>`;
+  ctx.body = renderHTML(api);
 
   return next();
 });
 
-for (const r of apipaths) {
-  const route = r.substr(pwd.length);
+for (const r of apiPaths) {
+  const route = r.substr(apiPath.length);
   let url = route.substr(0, route.length -4); 
   if (path.basename(url) === "index") continue;
   if (path.basename(url) === "") continue;
@@ -108,9 +108,9 @@ function readNote (file) {
 }
 
 function apiRouter (root) {
-  assert(
-    "string" === typeof root, 
-    "The root paramater for autoRouting  must be a string value.");
+  if ("string" !== typeof root) {
+    throw new Error ("The root paramater for autoRouting  must be a string value.");
+  }
 
   // routing path
   const rPath = path.isAbsolute(root) ? root : path.join(process.cwd(), root);

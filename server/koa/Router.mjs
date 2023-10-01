@@ -24,7 +24,6 @@
  * *****************************************************************************
  */
 
-import assert from "node:assert";
 import path from "node:path";
 import util from "node:util";
 import { Route } from "./Route.mjs";
@@ -437,14 +436,12 @@ Router.prototype.register = function (path, methods, middleware, opts = {}) {
  */
 
 Router.prototype.match = function (path, method) {
-  assert(typeof path === "string", "path must be string");
-  assert(typeof method === "string", "method must be string");
-
   const matched = {
     path: [], // match path
     pathAndMethod: [], // match path and method
     route: false,
   };
+
 
   for (const route of this.stack) {
     if (route.match(path)) {

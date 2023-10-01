@@ -177,4 +177,3 @@ process.on("SIGTERM", () => {
   debug("Receive SIGTERM signal.");
   process.exit();
 });
-

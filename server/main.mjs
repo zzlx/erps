@@ -146,7 +146,6 @@ async function watchPath () {
   }, 1500); // 每1500ms内仅重启1次
 
   const watcher = new PathWatcher([
-    paths.APPS,
     paths.SERVER,
     paths.SRC,
   ]);
@@ -209,7 +208,7 @@ function eslint (file) {
 
 function startHttpd () {
   const args = [
-    path.join(paths.SERVER, "cluster.mjs"),
+    path.join(paths.SERVER, "http2d.mjs"),
   ];
 
   const options = {
