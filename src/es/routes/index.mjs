@@ -39,8 +39,7 @@ if (process.env.NODE_ENV === "development") {
 
 // APIs
 const apis = new Router();
-const apiPath = path.join(paths.SERVER, "apis"); 
-const apiPaths = await readdir(apiPath);
+const apiPaths = await readdir(paths.APIS);
 const sitemap = [];
 
 apis.get("/", (ctx, next) => {
@@ -55,7 +54,7 @@ apis.get("/", (ctx, next) => {
 });
 
 for (const r of apiPaths) {
-  const route = r.substr(apiPath.length);
+  const route = r.substr(paths.APIS.length);
   let url = route.substr(0, route.length -4); 
   if (path.basename(url) === "index") continue;
   if (path.basename(url) === "") continue;
@@ -79,7 +78,7 @@ docsRouter.get("Docs", "*", statics("docs", {
 router.use("/docs(/*.*)", docsRouter.routes());
 
 // 服务器端渲染
-const appPath = path.join(paths.SERVER, "apps", "App.mjs");
+const appPath = path.join(paths.APPS, "App.mjs");
 router.all("UI", [ "/homepage", "/homepage/*" ], ssr(appPath));
 
 // User

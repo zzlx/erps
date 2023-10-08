@@ -1,9 +1,7 @@
 /**
  * *****************************************************************************
  *
- * ERPD
- *
- * The backend-server daemon for ERP system.
+ * The main program for backend-server.
  *
  * Usage: [options]
  *
@@ -13,6 +11,7 @@
  * --start                     启动服务
  * --stop                      关闭服务
  * --restart                   重启服务
+ * --watch                     开发模式下观察源码变动情况
  *
  * *****************************************************************************
  */
@@ -29,100 +28,82 @@ import { sendCommand } from "./sendCommand.mjs";
 import { CLEAR_PAGE } from "./constants.mjs";
 
 const debug = util.debuglog("debug:main");
-const __file = String.prototype.substr.call(import.meta.url, 7);
-const argvs = Array.prototype.slice.call(process.argv, 2);
+const proc = { httpd: null };
 
-debug(argvs);
-const paramMap = argvParser(argvs);
+export default function main (argvs) {
+  const paramMap = argvParser(argvs);
 
-process.title = "org.zzlx.erpd"; // Setting the main process title
-
-// handle uncaught exception
-// handle unhandled rejection 
-// Print uptime in development env
-process.on("exit", code => {
-  debug("%d---程序结束前已经运行了%sms---", code, Math.ceil(process.uptime()*1000));
-});
-
-
-
-process.nextTick(() => { main(); });
-
-// Set a process container
-const proc = { 
-  httpd: null,
-};
-
-/**
- * The main programe
- */
-
-function main () {
-  let isExec = false; // 是否执行
-
-  // 执行任务
-  for (const param of Object.keys(paramMap)) {
+  // 配置环境变量
+  for (const param of paramMap.keys()) {
     switch (param) {
       case "devel":
       case "development":
-        // process.env.NODE_ENV = "development";
-        delete paramMap[param];
+        process.env.NODE_ENV = "development";
+        paramMap.delete(param); 
         break;
       case "prod":
       case "production":
-        // process.env.NODE_ENV = "production";
-        delete paramMap[param];
+        process.env.NODE_ENV = "production";
+        paramMap.delete(param); 
         break;
+    }
+  }
+
+  // 执行任务
+  let isExec = false; // 是否已执行
+
+  for (const param of paramMap.keys()) {
+    switch (param) {
       case "h":
       case "help":
         isExec = true;
-        delete paramMap[param];
         showHelp();
+        paramMap.delete(param);
         break;
       case "v":
       case "version":
         isExec = true;
-        delete paramMap[param];
         showVersion();
+        paramMap.delete(param);
         break;
       case "start":
         isExec = true;
-        delete paramMap[param];
         startHttpd();
         scssRender(); // 监测无css文件时再生成文件
-        if (paramMap.watch) { watchPath(); }
+        if (process.env.NODE_ENV === "development") { watchPath(); }
+        paramMap.delete(param);
         break;
       case "renderCSS":
         isExec = true;
-        delete paramMap[param];
         scssRender(); // 渲染生成CSS文件
+        paramMap.delete(param);
         break;
       case "copyJS":
         isExec = true;
-        delete paramMap[param];
         import("./utils/copyJS.mjs").then(m => m.copyJS).then(fn => fn([
           path.join(paths.NODE_MODULES, "react", "umd", "react.development.js"),
           path.join(paths.NODE_MODULES, "react", "umd", "react.production.min.js"),
           path.join(paths.NODE_MODULES, "react-dom", "umd", "react-dom.development.js"),
           path.join(paths.NODE_MODULES, "react-dom", "umd", "react-dom.production.min.js"),
         ]));
+        paramMap.delete(param);
         break;
       case "stop":
         isExec = true;
-        delete paramMap[param];
         stopHttpd();
+        paramMap.delete(param);
         break;
       case "restart":
         isExec = true;
-        delete paramMap[param];
         restartHttpd();
+        paramMap.delete(param);
         break;
     } // end of switch
   } // end of for loop
 
   if (isExec === false) {
-    Object.keys(paramMap).forEach((p) => {
-      console.warn("param %s is not supported by erpd.", p);
+    paramMap.forEach(p => {
+      console.warn("param %s is not supported.", p);
     });
   }
 }
@@ -146,7 +127,8 @@ async function watchPath () {
   }, 1500); // 每1500ms内仅重启1次
 
   const watcher = new PathWatcher([
-    paths.SERVER,
+    paths.APIS,
+    paths.APPS,
     paths.SRC,
   ]);
 
@@ -208,7 +190,7 @@ function eslint (file) {
 
 function startHttpd () {
   const args = [
-    path.join(paths.SERVER, "http2d.mjs"),
+    path.join(paths.SRC, "es", "http2d.mjs"),
   ];
 
   const options = {
@@ -247,6 +229,7 @@ function restartHttpd () {
  */
 
 async function showHelp () {
+  const __file = String.prototype.substr.call(import.meta.url, 7);
   const content = await fs.promises.readFile(__file, { encoding: "utf8" });
   // const divideLine = new Array(process.stdout.columns).join("-");
   const lines = content.split("\n");

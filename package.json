@@ -3,13 +3,14 @@
   "version": "1.0.1",
   "license": "MIT",
   "description": "ERP services.",
+  "homepage": "https://erps.zzlx.org/",
   "private": true,
   "scripts": {
     "build": "node-gyp build",
     "clean": "make clean_ds",
-    "devel": "NODE_DEBUG=debug* ./bin/erpd --start --devel --watch",
+    "devel": "NODE_DEBUG=debug* ./erpd --start --devel",
     "git-log": "git log --graph -6",
-    "tags": "ctags $(find ./server -name '*.mjs')",
+    "tags": "ctags $(find ./src -name '*.mjs')",
     "start": "npm run devel"
   },
   "dependencies": {
@@ -18,7 +19,6 @@
     "chart": "^0.1.2",
     "d3": "^5.9.7",
     "ejs": "^3.1.9",
-    "express": "^4.18.1",
     "graphql": "^16.7.1",
     "koa": "^2.14.2",
     "koa-router": "^12.0.0",
@@ -38,6 +38,7 @@
     "@typescript-eslint/parser": "^5.61.0",
     "eslint": "^8.44.0",
     "eslint-plugin-react": "^7.32.2",
+    "express": "^4.18.2",
     "http-proxy": "^1.18.1",
     "js-xlsx": "^0.8.22",
     "koa-cookie": "^1.0.0",

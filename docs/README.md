@@ -43,3 +43,21 @@ cd erps & npm install
 npm start
 ```
 
+## 其他
+
+```
+npm docs [module_name]
+```
+
+```
+npm bugs [module_name]
+```
+
+阅读源码
+
+> 必须在项目源码根目录执行才正确显示源码
+
+```
+npm edit [module_name]
+```
+

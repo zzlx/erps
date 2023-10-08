@@ -11,7 +11,7 @@ import util from "node:util";
 import { HTTP_STATUS_EMPTY_CODES, HTTP_STATUS } from "../constants.mjs";
 import { renderHTML } from "../utils/renderHTML.mjs";
 
-const debug = util.debuglog("debug:kernel-respond");
+const debug = util.debuglog("debug:server-respond");
 
 export function respond (ctx) {
   if (ctx.respond === false) return ctx.stream.end(); // allow bypassing respond
@@ -55,7 +55,7 @@ export function respond (ctx) {
     ctx.status = HTTP_STATUS.NOT_FOUND; 
     if (path.extname(ctx.pathname) == "") {
       ctx.body = renderHTML(pageNotFoundTemplate(ctx), {
-        title: "PageNotFound"
+        title: "PageNotFound",
       }); 
     }
   }
@@ -93,7 +93,7 @@ export const pageNotFoundTemplate = ctx => `
     <div class="alert">
       <h4 class="alert-heading">Page Not Found</h4>
       <hr>
-      <p class="mb-0">您访问的页面:${ctx.pathname}未找到或未被正确配置.</p>
-      <p>如果有必要请联系本站点管理员!</p>
+      <p class="mb-0">当前页面:${ctx.pathname}未找到或未被正确配置.</p>
+      <p>如果需要,请联系管理员!</p>
     </div>
 `;

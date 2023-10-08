@@ -12,6 +12,11 @@
 * JWE(JSON Web Encryption) [RFC7516](https://www.rfc-editor.org/rfc/rfc7516.html)
 * JWS(JSON Web Signature) [RFC7515](https://tools.ietf.org/html/rfc7515)
 * JWT(JSON Web Token) [RFC7519](https://www.rfc-editor.org/rfc/rfc7519.html)
+* BaasS(Backend as a Service):后端即服务
+* FaasS(Function as a Service):函数即服务
+* Serverless:一种FaaS计算服务,提供操作系统、运行环境、网关等一系列基础环境.
+
+
 
 ---
 

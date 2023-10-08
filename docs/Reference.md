@@ -36,6 +36,7 @@
 # 开发技术栈
 
 * [Node.js](https://nodejs.org/): Node.js® is an open-source, cross-platform JavaScript runtime environment.
+* [npm](https://www.npmjs.com): Node package manager
 * [MDN](https://developer.mozilla.org/zh-CN/docs/MDN/Writing_guidelines):Mozilla开发者
 * [Node.js](https://nodejs.org/dist/latest/docs/api/):Node.js 网站
 * [Express](https://www.expressjs.com.cn):Express网站

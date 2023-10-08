@@ -18,7 +18,7 @@ paths.CONFIG = path.join(os.homedir(), ".config", appinfo.name);
 const configFile = path.join(paths.CONFIG, "config.json");
 
 const defaultConfigs = {
-  port: 8443, // 端口可以web后台进行修改
+  port: 8888, // 端口可以web后台进行修改
   description: "系统配置",
   keys: null,
   passphrase: Math.random().toString(16).substr(2,8),
@@ -30,7 +30,7 @@ if (fs.existsSync(configFile)) {
   const json = JSON.parse(fs.readFileSync(configFile, "utf8"));
   Object.assign(defaultConfigs, json);
 } else {
-  fs.writeFileSync(configFile, JSON.stringify(defaults));
+  fs.writeFileSync(configFile, JSON.stringify(defaultConfigs));
 }
 
 export const configs = new Proxy(defaultConfigs, {
@@ -49,7 +49,7 @@ export const configs = new Proxy(defaultConfigs, {
     // 将更新写入配置文件
     fs.promises.writeFile(configFile, JSON.stringify(target, null, 2));
     return true;
-  }
+  },
 });
 
 /**
@@ -74,9 +74,9 @@ function isSupportIPv6 () {
  * 检测是否配置systemd service
  */
 
-async function isSupportSystemd (service) {
+export async function isSupportSystemd (service) {
   const fs = await import("fs"); 
-  const test = [
+  [
     "/usr/lib/systemd/system",
     "/etc/systemd/system/multi-user.target.wants",
   ].map(loc => fs.existsSync(path.join(loc, service)));

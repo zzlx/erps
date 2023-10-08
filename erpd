@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+/**
+ * *****************************************************************************
+ * 
+ * The Entry Point of ERP Daemon
+ *
+ * A background process that hold the erp services.
+ *
+ * *****************************************************************************
+ */
+
+const util = require("util");
+const debug = util.debuglog("debug:erpd");
+const argvs = Array.prototype.slice.call(process.argv, 2);
+
+// Setting the main process title
+process.title = "org.zzlx.erpd"; 
+
+process.on("exit", code => {
+  // Print uptime in development env
+  debug("%d---程序结束前经运行了%sms---", code, Math.ceil(process.uptime()*1000));
+});
+
+// 加载主程序并执行
+import("./src/es/main.mjs").then(m => {
+  const main = m.default;
+
+  if (main) {
+    main(argvs); // 执行主控程序
+  }
+}).catch(console.log);

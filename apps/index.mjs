@@ -1,7 +1,9 @@
 /**
  * *****************************************************************************
  *
- * 前端入口程序:用于在客户端渲染用户程序
+ * 前端入口程序
+ *
+ * 用于在客户端渲染用户程序
  *
  * *****************************************************************************
  */
@@ -19,6 +21,8 @@ const debug = debuglog("debug:index");
 
 // Fix the client render warnings 
 ReactDOM.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.usingClientEntryPoint = true;
+
+export default App;
 
 if (isNativeEnv) {
   // Render in native environment.

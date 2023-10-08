@@ -15,7 +15,7 @@
 export function argvParser (argvs) {
   if ('string' === typeof argvs) argvs = argvStr.split(/\s+/);
 
-  const params = Object.create(null);
+  const params = new Map();
 	const it = argvs[Symbol.iterator]();
 
 	let argv = null;
@@ -35,23 +35,23 @@ export function argvParser (argvs) {
     const command = match[4];
 		
     if (key) {
-      params[key] = value == null ? true : value;
+      params.set(key, value == null ? true : value);
       
-      if (params[key] === true && argvs[i+1] && null == matcher(argvs[i+1])) {
-        params[key] = argvs[i+1];
+      if (params.get(key) === true && argvs[i+1] && null == matcher(argvs[i+1])) {
+        params.set(key, argvs[i+1]);
       }
     }
 
 		if (commands) {
       // 单参数情况时, eg. -o /home/test.txt
 			if (commands.length === 1 && argvs[i+1] && null == matcher(argvs[i+1])) {
-				params[commands] = argvs[i+1];
+				params.set(commands, argvs[i+1]);
 			} else {
-        for (let v of commands ) params[v] = true; // multi params, eg. -abc
+        for (let v of commands ) params.set(v, true); // multi params, eg. -abc
       }
 		}
 
-    if (command) params[command] = true;
+    if (command) params.set(command, true);
   }
 
   return params;

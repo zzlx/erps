@@ -16,7 +16,7 @@ const debug = util.debuglog("debug:paths");
 const dirname = path.dirname;
 const __filename = import.meta.url.substr(7);
 const __dirname = dirname(__filename);
-const __root = dirname(dirname(__dirname));
+const __root = dirname(dirname(dirname(__dirname)));
 
 export const paths = new Proxy(getPaths(__root), {
   get: function (target, property, receiver) {
