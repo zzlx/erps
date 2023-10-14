@@ -6,11 +6,10 @@
  * *****************************************************************************
  */
 
-import cluster from "cluster";
-import os from "os";
-import process from "node:process";
-import util from "util";
-
+const cluster = require("cluster");
+const os = require("os");
+const process = require("node:process");
+const util = require("util");
 const debug = util.debuglog("debug:cluster");
 
 // 启用cluster

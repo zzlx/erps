@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+/**
+ * *****************************************************************************
+ * 
+ * The Entry Point of ERP Daemon
+ *
+ * A background process that hold the erp services.
+ *
+ * *****************************************************************************
+ */
+
+// 加载主程序并执行
+import("./src/es/main.mjs").then(m => {
+  if (m && typeof m.default === "function") {
+    const main = m.default;
+    main(Array.prototype.slice.call(process.argv, 2)); // 执行主控程序
+  }
+}).catch(console.log);
