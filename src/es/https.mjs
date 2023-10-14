@@ -12,6 +12,7 @@
  * *****************************************************************************
  */
 
+import cp from "node:child_process";
 import http2 from "node:http2";
 import process from "node:process";
 import util from "node:util";
@@ -21,7 +22,8 @@ import { capitalize, isMac } from "./utils/index.mjs";
 import { configs } from "./settings/configs.mjs";
 import { app } from "./app.mjs";
 
-const debug = util.debuglog("debug:http2d");
+const debug = util.debuglog("debug:https");
+
 const server = http2.createSecureServer({
   allowHTTP1: true,
   ca: configs.ca,
@@ -140,6 +142,11 @@ server.listen({
     // @TODO: 采用服务端推送更新，给在线客户端推送更新
     if (isMac()) {
       // cp.exec(`open -u "https://localhost:${port}"`);
+      cp.exec(`open -a Safari https://localhost:${configs.port}`, (err, stdout, stderr) => {
+        if (err) debug(err);
+        if (stdout) debug(stdout);
+        if (stderr) debug(stderr);
+      });
     }
   }
 });

@@ -44,8 +44,9 @@ app.use(xResponse()); // 响应时间记录
 app.use(cors()); // 跨域访问
 app.use(postgresql()); // 应用数据库
 
+// 配置服务端路由
 const router = await import("./routes/index.mjs").then(m => m.router);
-app.use(router.routes()); // 配置服务端路由
+app.use(router.routes()); 
 
 // The last one of the middleware stack
 app.use(async function (ctx) { 
@@ -63,7 +64,7 @@ app.use(async function (ctx) {
   // debug("idlecount:", ctx.dba.idleCount);
   // debug(typeof ctx.state.get("log"));
   // debug(typeof ctx.status);
-  debug(ctx.pathname);
-  //debug(ctx.state);
-  //debug(ctx.request);
+  // debug(ctx.pathname);
+  // debug(ctx.state);
+  // debug(ctx.request);
 });

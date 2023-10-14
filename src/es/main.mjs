@@ -23,12 +23,18 @@ import util from "node:util";
 import { argvParser, debounceAlgorithm } from "./utils/index.mjs";
 import { paths } from "./settings/index.mjs";
 import { appinfo } from "./settings/index.mjs";
+import { configs } from "./settings/configs.mjs";
 import { scssRender } from "./utils/scssRender.mjs";
 import { sendCommand } from "./sendCommand.mjs";
 import { CLEAR_PAGE } from "./constants.mjs";
 
 const debug = util.debuglog("debug:main");
 const proc = { httpd: null };
+process.title = configs.processTitle;
+
+process.on("exit", code => {
+  debug("%d---程序结束前经运行了%sms---", code, Math.ceil(process.uptime()*1000));
+});
 
 export default function main (argvs) {
   const paramMap = argvParser(argvs);
@@ -102,9 +108,9 @@ export default function main (argvs) {
   } // end of for loop
 
   if (isExec === false) {
-    paramMap.forEach(p => {
+    for (const p of paramMap.keys()) {
       console.warn("param %s is not supported.", p);
-    });
+    }
   }
 }
 
@@ -190,7 +196,7 @@ function eslint (file) {
 
 function startHttpd () {
   const args = [
-    path.join(paths.SRC, "es", "http2d.mjs"),
+    path.join(paths.SRC, "es", "https.mjs"),
   ];
 
   const options = {
@@ -253,5 +259,6 @@ async function showHelp () {
 function showVersion () {
   const version = `ERPs Version: ${appinfo.version}
 Current Node.js Version: ${process.version}`;
-  process.stdout.write(version);
+  console.log(version);
+  // process.stdout.write(version);
 }

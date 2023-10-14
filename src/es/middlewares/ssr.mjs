@@ -20,7 +20,7 @@ export function ssr (appPath, options = {}) {
     appPath: appPath,
   }, options);
 
-  debug("SSR options: %j", opts);
+  debug("Server-side render: %j", opts);
 
   let hasError = false;
   let appModule = import(opts.appPath).catch(e => {

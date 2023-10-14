@@ -41,6 +41,9 @@ export const configs = new Proxy(defaultConfigs, {
     if (property === "chain") return fs.readFileSync(target.chain);
     if (property === "cert") return fs.readFileSync(target.cert);
     if (property === "privateKey") return fs.readFileSync(target.privateKey);
+    if (property === "processTitle") {
+      return new URL(appinfo.homepage).hostname.split(".").reverse().join(".");
+    }
 
     return Reflect.get(target, property, receiver);
   },
