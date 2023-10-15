@@ -11,10 +11,9 @@ import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
-} from 'graphql';
-import { Router } from '../src/es/koa/Router.mjs'; 
-//import * as _graphql from '../../apps/graphql/index.mjs';
-//
+} from "graphql";
+import { Router } from "../src/backend/koa/Router.mjs"; 
+// import * as _graphql from '../../apps/graphql/index.mjs';
 
 export default function (ctx, next) {
   ctx.body = `<html>
