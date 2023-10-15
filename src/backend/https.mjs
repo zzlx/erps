@@ -24,7 +24,7 @@ import { app } from "./app.mjs";
 
 const debug = util.debuglog("debug:https");
 
-const server = http2.createSecureServer({
+const https = http2.createSecureServer({
   allowHTTP1: true,
   ca: configs.ca,
   key: configs.privateKey,
@@ -45,7 +45,7 @@ const server = http2.createSecureServer({
   sessionTimeout: 300, // seconds
 });
 
-server.on("error", e => {
+https.on("error", e => {
   if (e.code === "EADDRINUSE") { 
 
     if (process.send) {
@@ -71,7 +71,7 @@ server.on("error", e => {
 
 // stream handler
 // stream is a Duplex
-server.on("stream", app.callback());
+https.on("stream", app.callback());
 
 // Websocket support
 // const ws = new Websocket({ server: server, });
@@ -80,7 +80,7 @@ server.on("stream", app.callback());
 // for a new connection has successfully completed. 
 // 管理服务器
 // 服务器运行中,接收socket特定信号,执行操作命令
-server.on("secureConnection", socket => {
+https.on("secureConnection", socket => {
   socket.on("data", buffer => {
     try {
       // 过滤数据帧
@@ -96,7 +96,7 @@ server.on("secureConnection", socket => {
       switch(message.command) {
         case "STOP": 
           debug("Received STOP command, service is closing...");
-          server.close();
+          https.close();
           break;
 
 
@@ -104,7 +104,7 @@ server.on("secureConnection", socket => {
           debug("Received RESTART command, service is restarting...");
           // debug(server);
 
-          server.close(() => {
+          https.close(() => {
             // 
           });
           break;
@@ -118,7 +118,7 @@ server.on("secureConnection", socket => {
 });
 
 // 启用监听
-server.listen({ 
+https.listen({ 
   ipv6Only: false, 
   exclusive: true,
   host: configs.isSupportIPv6 ? "::" : "0.0.0.0",
@@ -136,7 +136,7 @@ server.listen({
     // if (app.env === "development") console.clear();
     // 打印服务器启动后信息
     // print backend server running message
-    debug("Service is running on port: %s", configs.port);
+    debug("https is running on port: %s", configs.port);
 
     // open service url
     // @TODO: 采用服务端推送更新，给在线客户端推送更新
@@ -174,7 +174,7 @@ process.on("SIGTSTP", () => {
   debug("Receive SIGTSTP signal.");
 
   // server在cluster中的状态
-  server.close(() => { 
+  https.close(() => { 
     // 
   });
 });

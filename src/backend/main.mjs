@@ -196,7 +196,7 @@ function eslint (file) {
 
 function startHttpd () {
   const args = [
-    path.join(paths.SRC, "es", "https.mjs"),
+    path.join(paths.SRC, "backend", "https.mjs"),
   ];
 
   const options = {

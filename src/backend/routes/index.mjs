@@ -25,7 +25,7 @@ export const router = new Router({ }); // server router
 
 router.redirect("/home", "/"); // Redirect /test to /
 
-router.get("apps", "/statics/es/*.*", statics("server/apps", {
+router.get("apps", "/statics/es/*.*", statics("apps", {
   prefix: "/statics/es",
 }));
 
@@ -60,7 +60,15 @@ for (const r of apiPaths) {
   if (path.basename(url) === "") continue;
   sitemap.push(url);
 
-  const fn = await import(r).then(m => m.default); 
+  let hasError = false;
+
+  const fn = await import(r).then(m => m.default).catch(e => {
+    debug(e);
+    hasError = true;
+  }); 
+
+  if (hasError) continue;
+
   router.use(url, typeof fn === "function" ? fn : fn.routes());
 }
 

@@ -28,6 +28,7 @@ const debug = util.debuglog("debug:server-app");
 export const app = new Application({
   env: process.env.NODE_ENV || "production", // default value is production
   keys: [String(objectID()), String(objectID())], // keys for encryept
+  proxy: false,
   // ...
 
 });
