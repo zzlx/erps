@@ -24,7 +24,7 @@ export function renderHTML (appString, options = {}, initialState = {}) {
     <meta name="keywords" content="${opts.keywords}">
     <title>${opts.title}</title>
     <link rel="stylesheet" href="/statics/stylesheets/styles.css" />
-    ${opts.scripts.map(s => `    <script type="module" src="${s}"></script>`)}
+    ${opts.scripts.map(s => `    <script type="module" src="${s}"></script>`).join("")}
     <script nomodule src="/statics/es/noModule.js"></script>
   </head>
   <body>

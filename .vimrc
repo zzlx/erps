@@ -94,7 +94,7 @@ set shortmess=atI
 set title 
 
 " 状态栏
-set ruler
+set ruler " show the cursor position all the time
 set statusline=%F[:b%n][%{&ff}]%m%r%h%w%y\ %=\ %-8.(%l,%c%V%)\ %p%%
 set laststatus=2
 set nocursorline
@@ -104,7 +104,7 @@ set backupcopy=yes
 set viewdir=$HOME/.vim/view
 "set clipboard=umapamed
 set number
-set showcmd
+set showcmd " display incomplete commands
 set showmode
 "set cursorline   " highlight current line
 set mouse=a
@@ -137,13 +137,15 @@ set modeline
 set tags=tags
 
 " 默认缩进设置
-set expandtab " expand tab 
-set sw=2 
 set ts=2 
+set sw=2 
+set shiftround
 set softtabstop=2
 set noautoindent
 "set autoindent    " 自动缩进 set noautoindent 取消自动缩进
 "set smartindent   " 智能缩进
+set expandtab " expand tab 
+set smarttab
 
 " 查找搜索
 set showmatch

@@ -48,8 +48,16 @@ export class Application extends EventEmitter {
   callback () {
     const fn = compose(this.middlewares);
 
+    // 如果未配置error则配置系统默认的error处理程序
     if (!this.listenerCount('error')) {
-      this.on('error', (err, ctx) => { debug(err); });
+      this.on('error', (err, ctx) => { 
+        if (err) {
+          if (err.status === 404 && error.expose) {
+            if (ctx) ctx.body = error;
+          } 
+
+        }
+      });
     }
 
     return (stream, headers, flags) => {
