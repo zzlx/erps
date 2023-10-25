@@ -46,7 +46,7 @@ app.use(cors()); // 跨域访问
 app.use(postgresql()); // 应用数据库
 
 // 配置服务端路由
-const router = await import("./routes/index.mjs").then(m => m.router);
+const router = await import("../../routes/index.mjs").then(m => m.router);
 app.use(router.routes()); 
 
 // The last one of the middleware stack

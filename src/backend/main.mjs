@@ -32,9 +32,11 @@ const debug = util.debuglog("debug:main");
 const proc = { httpd: null };
 process.title = configs.processTitle;
 
+/*
 process.on("exit", code => {
   debug("%d---程序结束前经运行了%sms---", code, Math.ceil(process.uptime()*1000));
 });
+*/
 
 export default function main (argvs) {
   const paramMap = argvParser(argvs);

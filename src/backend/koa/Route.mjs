@@ -19,10 +19,12 @@ import assert from 'node:assert';
 import path from 'node:path';
 import util from 'node:util';
 import { sha1, regularPath } from '../utils/index.mjs';
+
 const debug = util.debuglog('debug:route');
 
 export class Route {
   constructor (path, methods, middleware, opts = {}) {
+    // 配置项
     this.opts = Object.assign({}, {
       name: `route_${sha1(path)}`,
       sensitive: false,
