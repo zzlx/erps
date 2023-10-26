@@ -2,7 +2,7 @@
 /**
  * *****************************************************************************
  * 
- * The Entry Point for ERP services
+ * The Entry Point for backend server
  *
  * 后端入口程序，用于管理和调度后台服务程序.
  *
@@ -10,9 +10,11 @@
  */
 
 // 加载主程序
-import("../src/backend/main.mjs").then(m => {
+import("./src/backend/main.mjs").then(m => {
   if (m && typeof m.default === "function") {
     const main = m.default;
     main(Array.prototype.slice.call(process.argv, 2)); // 执行主程序
   }
-}).catch(console.log);
+}).catch(err => {
+  console.log("加载主程序时出错, 错误信息:", err);
+});
