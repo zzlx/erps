@@ -16,21 +16,17 @@
 
 import util from "node:util";
 import { Application } from "./koa/Application.mjs";
-import { 
-  cors, error, logger, postgresql, xResponse,
-} from "./middlewares/index.mjs";
+import { cors, error, logger, xResponse } from "./middlewares/index.mjs";
+import { postgresql } from "./middlewares/index.mjs";
 import { objectID } from "./utils/objectID.mjs";
 
 const debug = util.debuglog("debug:server-app");
-
-// debug("Inatialize Service Application...");
 
 export const app = new Application({
   env: process.env.NODE_ENV || "production", // default value is production
   keys: [String(objectID()), String(objectID())], // keys for encryept
   proxy: false,
   // ...
-
 });
 
 // Error handler
