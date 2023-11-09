@@ -9,6 +9,9 @@
  * *****************************************************************************
  */
 
+// 设置进程名称
+process.title = "org.zzlx.erpd";
+
 // 加载主程序
 import("./src/backend/main.mjs").then(m => {
   if (m && typeof m.default === "function") {
