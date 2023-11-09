@@ -26,11 +26,9 @@ dt_files  = $(shell find ./ -name "*.d.mts")
 
 myprog : $(OBJS)gcc -o myprog $(OBJS)
 
-install_vimrc: .vimrc
-	@ln -sf ${_PWD}/.vimrc ~/.vimrc
-
 install: ;@echo "Installing ${NAME}....."; \
 	npm install
+	@ln -sf ${_PWD}/.vimrc ~/.vimrc
 
 test_eslint: $(mjs_files)
 	@eslint $?

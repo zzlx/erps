@@ -31,6 +31,8 @@ NetrwTreeListing*
 tags
 
 # Compiled files
+*.i
+*.s
 *.o
 *.so
 *.out
