@@ -99,7 +99,7 @@ _setup() {
 }
 
 
-_show_help_message() { 
+function _show_help_message() { 
   head -n 30 $_S_FILE
 }
 
@@ -1073,7 +1073,7 @@ _parse_argv() {
         $_BIN/starter.mjs --restart
         ;;
       --backup )
-        tar -a -cf ${2}_backup_$(date "+%Y%m%d%H%M%S").tar.gz $2
+        _backup
         ;;
 
       --setup )
@@ -1186,6 +1186,10 @@ _gencsr() {
 
 _genpublic() {
   openssl x509 -req -in localhost-csr.pem -signkey localhost-key.pem -out localhost-cert.pem
+}
+
+function _backup () {
+  tar -a -cf $2_backup_.`date +%Y-%m-%d.%H%M.bak`.tar.gz $2
 }
 
 _main() { 
