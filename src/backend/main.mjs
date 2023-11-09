@@ -30,7 +30,6 @@ import { CLEAR_PAGE } from "./constants.mjs";
 
 const debug = util.debuglog("debug:main");
 const proc = { httpd: null };
-process.title = configs.processTitle;
 
 /*
 process.on("exit", code => {

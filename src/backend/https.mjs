@@ -121,9 +121,9 @@ https.on("secureConnection", socket => {
 https.listen({ 
   ipv6Only: false, 
   exclusive: true,
-  host: configs.isSupportIPv6 ? "::" : "0.0.0.0",
+  host: configs.IPv6 ? "::" : "0.0.0.0",
   port: configs.port,
-}, () => {
+}, function () {
 
   if (process.channel && process.send) {
     process.send({ 
@@ -136,7 +136,7 @@ https.listen({
     // if (app.env === "development") console.clear();
     // 打印服务器启动后信息
     // print backend server running message
-    debug("https is running on port: %s", configs.port);
+    debug("Https is running on address:%j", this.address());
 
     // open service url
     // @TODO: 采用服务端推送更新，给在线客户端推送更新

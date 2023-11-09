@@ -18,6 +18,7 @@
 import assert from 'node:assert';
 import path from 'node:path';
 import util from 'node:util';
+
 import { sha1, regularPath } from '../utils/index.mjs';
 
 const debug = util.debuglog('debug:route');

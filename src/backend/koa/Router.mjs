@@ -2,7 +2,7 @@
  * *****************************************************************************
  * 
  * 服务端路由组件
- * =============
+ * ==============
  * 
  * # Example:
  *
@@ -26,6 +26,7 @@
 
 import path from "node:path";
 import util from "node:util";
+
 import { Route } from "./Route.mjs";
 import { compose } from "./compose.mjs";
 import { HTTP_STATUS } from "../constants.mjs";
@@ -47,15 +48,17 @@ export class Router {
       host: null,
     }, options);
 
+    // set methods
     this.methods = Array.isArray(this.opts.methods)
       ? this.opts.methods
       : typeof this.opts.methods === "string"
         ? String.prototype.split.call(this.opts.methods, ",")
         : [ "HEAD", "GET", "OPTIONS", "POST" ];
-    this.exclusive = Boolean(this.opts.exclusive); // 匹配唯一的路由
+
+    this.exclusive = Boolean(this.opts.exclusive); // 匹配唯一路由
     this.params = {}; // parameters
-    this.stack  = []; // route stacks
-    this.addMethods(); // add router methods, e.g. router.get/router.post
+    this.stack  = []; // route stack,
+    this.addMethods(); // add router methods,
   }
 }
 
