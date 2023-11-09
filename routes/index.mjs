@@ -85,11 +85,10 @@ docsRouter.get("Docs", "*", statics("docs", {
 
 router.use("/docs(/*.*)", docsRouter.routes());
 
-// 服务器端渲染
 const appPath = path.join(paths.APPS, "App.mjs");
-router.all("UI", [ "/homepage", "/homepage/*" ], ssr(appPath));
+router.all("UI", ["/", "/homepage", "/homepage/*"], ssr(appPath));
 
-// User
+// Test Route
 const testRouter = new Router();
 
 testRouter.get("user", "/users/:uid", (ctx, next) => {
