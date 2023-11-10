@@ -14,7 +14,7 @@
 import path from "node:path";
 import util from "node:util";
 import { Router } from "../src/backend/koa/Router.mjs";
-import { cors, ssr, statics } from "../src/backend/middlewares/index.mjs";
+import { cors, ssr, srs } from "../src/backend/middlewares/index.mjs";
 import { paths } from "../src/backend/settings/paths.mjs"; 
 import { readdir } from "../src/backend/utils/readdir.mjs";
 import { renderHTML } from "../src/backend/utils/renderHTML.mjs";
@@ -25,14 +25,14 @@ export const router = new Router({ }); // server router
 
 router.redirect("/home", "/"); // Redirect /test to /
 
-router.get("apps", "/statics/es/*.*", statics("apps", {
+router.get("apps", "/statics/es/*.*", srs("apps", {
   prefix: "/statics/es",
 }));
 
-router.get("public_html", "/*", statics("public_html"));
+router.get("public_html", "/*", srs("public_html"));
 
 if (process.env.NODE_ENV === "development") {
-  router.get("root", "/coding(/*.*)", statics(paths.ROOT, {
+  router.get("root", "/coding(/*.*)", srs(paths.ROOT, {
     prefix: "/coding",
   }));
 }
@@ -78,7 +78,7 @@ router.use("/apis", cors(), apis.routes()); // API跨域访问
 // Doc router
 const docsRouter = new Router({ });
 
-docsRouter.get("Docs", "*", statics("docs", { 
+docsRouter.get("Docs", "*", srs("docs", { 
   index: "README.md",
   prefix: "/docs(/*.*)", // 设置prefix后生效
 })); 

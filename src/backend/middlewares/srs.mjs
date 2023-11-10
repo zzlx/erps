@@ -1,15 +1,17 @@
 /**
  * *****************************************************************************
  *
- * Statics
+ * SRS 静态资源服务
  *
- * SRS(Static resource service 静态资源服务), 用于托管静态文件.
+ * SRS(Static resource service), 用于托管静态文件.
  *
  * ## 功能特性 
  *
  * * 支持内容协商: 静态资源压缩版本选择
  * * 支持服务缓存策略: ETag响应等
  * * 仅支持GET、HEAD两种请求方法
+ *
+ *
  *
  * @param {string} root, The root directory from which to serve static assets.
  * @param {object} options
@@ -22,25 +24,31 @@ import path from "node:path";
 import util from "node:util";
 import { send } from "../koa/send.mjs";
 
-const debug = util.debuglog("debug:server-statics");
+const debug = util.debuglog("debug:middleware-srs");
 
-export function statics (dir = "public_html", options = {}) {
+export function srs (dir = "public_html", options = {}) {
   const opts = Object.assign({
     dir: path.resolve(dir),
     prefix: "",
   }, options);
 
-  debug("Statics options: %j", opts);
+  debug("options: %j", opts);
 
-  return async function staticMiddleware (ctx, next) {
-    // 旁路规则:
-    // 1. 静态资源仅接受GET、HEAD请求方法
-    if (ctx.method !== "GET" && ctx.method !== "HEAD") return;
-    // 2. body非空时
-    if (ctx.body != null || (ctx.status && ctx.status != 404)) return; 
-    // 3. 前缀不匹配时
+  return async function srsMiddleware (ctx, next) {
+    // 旁路规则1: 
+    // 静态资源仅接受GET、HEAD请求方法
+    // if (ctx.method !== "GET" && ctx.method !== "HEAD") return;
+    
+    // 旁路规则2:
+    // body被设置后优先于静态资源,因此body非空时进行旁路
+    if (ctx.body != null || (ctx.status && ctx.status != 404)) return;
+
+    // 旁路规则3:
+    // 前缀不匹配时
     if (ctx.pathname.substr(0, opts.prefix.length) !== opts.prefix) return next();
-    // 4. 无后缀时
+
+    // 旁路规则4:
+    // 无后缀时,应能支持目录输出
     // if (path.extname(ctx.pathname) === "") return next();
     
     try {
@@ -49,6 +57,6 @@ export function statics (dir = "public_html", options = {}) {
       ctx.throw(err);
     }
 
-    await next(); //
+    await next();
   };
 }
