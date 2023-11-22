@@ -13,11 +13,11 @@
 
 import path from "node:path";
 import util from "node:util";
-import { Router } from "../src/backend/koa/Router.mjs";
-import { cors, ssr, srs } from "../src/backend/middlewares/index.mjs";
-import { paths } from "../src/backend/settings/paths.mjs"; 
-import { readdir } from "../src/backend/utils/readdir.mjs";
-import { renderHTML } from "../src/backend/utils/renderHTML.mjs";
+import { Router } from "../koa/Router.mjs";
+import { cors, ssr, srs } from "../middlewares/index.mjs";
+import { paths } from "../settings/paths.mjs"; 
+import { readdir } from "../utils/readdir.mjs";
+import { renderHTML } from "../utils/renderHTML.mjs";
 
 const debug = util.debuglog("debug:server-router");
 

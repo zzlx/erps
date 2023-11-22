@@ -16,7 +16,7 @@ const debug = util.debuglog("debug:server-respond");
 export function respond (ctx) {
   if (ctx.respond === false) return ctx.stream.end(); // allow bypassing respond
 
-  if (!ctx.state.get("innerest_middleware")) { 
+  if (ctx.app.env === "development" && !ctx.state.get("innerest_middleware")) { 
     debug("The innerest middleware was not arrived, with request path:%s.", ctx.pathname); 
   }
 

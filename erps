@@ -9,9 +9,6 @@
  * *****************************************************************************
  */
 
-// 设置进程名称
-process.title = "org.zzlx.erpd";
-
 // 加载主程序
 import("./src/backend/main.mjs").then(m => {
   if (m && typeof m.default === "function") {
@@ -19,5 +16,5 @@ import("./src/backend/main.mjs").then(m => {
     main(Array.prototype.slice.call(process.argv, 2)); // 执行主程序
   }
 }).catch(err => {
-  console.log("加载主程序时出错, 错误信息:", err);
+  console.log("主程序加载时出错,错误信息:", err);
 });

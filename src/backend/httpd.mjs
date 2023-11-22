@@ -22,7 +22,7 @@ import { capitalize, isMac } from "./utils/index.mjs";
 import { configs } from "./settings/configs.mjs";
 import { app } from "./app.mjs";
 
-const debug = util.debuglog("debug:https");
+const debug = util.debuglog("debug:httpd");
 
 const https = http2.createSecureServer({
   allowHTTP1: true,

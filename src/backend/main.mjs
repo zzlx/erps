@@ -20,6 +20,7 @@ import cp from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import util from "node:util";
+
 import { argvParser, debounceAlgorithm } from "./utils/index.mjs";
 import { paths } from "./settings/index.mjs";
 import { appinfo } from "./settings/index.mjs";
@@ -30,6 +31,7 @@ import { CLEAR_PAGE } from "./constants.mjs";
 
 const debug = util.debuglog("debug:main");
 const proc = { httpd: null };
+process.title = "org.zzlx.erps.main"; // 设置进程名称
 
 /*
 process.on("exit", code => {
@@ -197,7 +199,8 @@ function eslint (file) {
 
 function startHttpd () {
   const args = [
-    path.join(paths.SRC, "backend", "https.mjs"),
+    //path.resolve("./httpd.mjs"),
+    path.join(paths.SRC, "backend", "httpd.mjs"),
   ];
 
   const options = {
@@ -205,8 +208,10 @@ function startHttpd () {
     // 若设置为true，后台服务无法重启
     detached: false,
     stdio: [0, 1, 2, null],
+    argv0: "org.zzlx.erps.httpd", // set process.tile
   };
 
+  // 
   proc.httpd = cp.spawn(process.argv[0], args, options);
 
   // debug("Main process is running");
@@ -232,7 +237,7 @@ function restartHttpd () {
 }
 
 /**
- * 显示帮助信息
+ * 帮助信息
  */
 
 async function showHelp () {

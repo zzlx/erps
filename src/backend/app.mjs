@@ -42,16 +42,14 @@ app.use(cors()); // 跨域访问
 app.use(postgresql()); // 应用数据库
 
 // 配置服务端路由
-const router = await import("../../routes/index.mjs").then(m => m.router);
+const router = await import("./routes/index.mjs").then(m => m.router);
 app.use(router.routes()); 
 
 // The last one of the middleware stack
-app.use(async function (ctx) { 
+app.env === "development" && app.use(async function (ctx) { 
   // 用于标记中间件栈是否被完整的执行
   // 如果此中间件未被阻断,则设置状态为true
   ctx.state.set("innerest_middleware", true); 
-
-  if (ctx.app.env !== "development") return;
 
   // Test: 用于开发环境下测试请求被处理的情况
   // debug("当前访问页面地址:", ctx.pathname);
@@ -64,4 +62,5 @@ app.use(async function (ctx) {
   // debug(ctx.pathname);
   // debug(ctx.state);
   // debug(ctx.request);
+  // debug(process.title);
 });
